@@ -12,3 +12,9 @@ Thumbs.db
 
 # secrets – never commit keys
 .env
+.env.*
+*serviceAccount*.json
+firebase-debug.log
+
+# personal Claude Code settings (shared agents in .claude/agents/ stay committed)
+.claude/settings.local.json
