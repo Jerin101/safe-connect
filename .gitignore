@@ -1,0 +1,14 @@
+# raw working files from the data collectors (large, re-creatable)
+*_raw.json
+
+# Python
+__pycache__/
+*.pyc
+
+# editors / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# secrets – never commit keys
+.env
