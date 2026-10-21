@@ -2,7 +2,7 @@
 
 Team: **jerin101** (lead: backend, data, GitHub) · **tasmintoshi** (frontend, UI) · Deadline: 2 weeks · Budget: 0
 
-This file is the single source of truth. It becomes the project's `CLAUDE.md`, so every Claude agent follows it too.
+This file is the single source of truth for technology, data and workflow. The short rules for Claude and its agents are in `CLAUDE.md`, which points back here.
 
 ---
 
@@ -38,18 +38,19 @@ safeconnect/
 ├── js/
 │   ├── app.js              ← start-up, routing, settings
 │   ├── data.js             ← loads and caches JSON, search index
-│   ├── area.js             ← area picker + GPS lookup
+│   ├── location.js         ← GPS → upazila/union lookup (the area picker UI is P24)
 │   ├── contacts.js         ← cards, ordering, fallbacks
 │   ├── sos.js  journey.js  fakecall.js  siren.js
 │   ├── i18n.js + lang/bn.json, lang/en.json
 │   └── firebase.js         ← login, reports (Should)
 ├── data/                   ← national_hotlines.json, areas_bangladesh.json, contacts_*.json, manual_additions.json
 ├── tools/                  ← collectors, build, validate (Python)
-├── docs/                   ← DATA_POLICY.md, DATA_REPORT.md, FEATURES.md, BUILD_PLAN.md
+├── docs/                   ← BUILD_PLAN.md, FEATURES.md, PROJECT_PLAN.md, ISSUES.md, COVERAGE.md, DATA_REPORT.md, DATA_GAPS.md
 ├── .claude/agents/         ← 6 agents
 ├── .github/                ← workflows/validate.yml, workflows/pages.yml, issue + PR templates
-├── manifest.json  service-worker.js  CLAUDE.md  README.md  CONTRIBUTING.md
-└── .gitignore              ← *_raw.json, __pycache__/
+├── manifest.json  service-worker.js  preview.html (data test page)
+├── CLAUDE.md  README.md  CONTRIBUTING.md  LICENSE
+└── .gitignore              ← *_raw.json, __pycache__/, secret files
 ```
 
 ---
@@ -127,7 +128,24 @@ Website loads data/*.json → service worker caches it for offline use
 
 ## 5. Scenario check (data needed vs. data we have)
 
-### A. Cox's Bazar – a tourist loses a drone camera at Inani beach (or it's stolen)
+### A. Noakhali – at night a woman is attacked in a village ("Babunagar")
+
+Open SafeConnect → big **999** button → **Silent SOS** sends her location to family → the area page shows:
+
+| Order | Contact | In our data? |
+|---|---|---|
+| 1 | 999 | ✅ |
+| 2 | Police station OC / duty officer for her upazila | ✅ all 9 Noakhali upazilas have police station numbers |
+| 3 | **Village police of her ward** | ✅ for 76 of the 160 unions in both districts (337 village police in Noakhali) |
+| 4 | Ward member, chairman | ✅ 143 chairmen + 15 administrators across both districts |
+| 5 | 109 (violence against women and children), 1098 (if she is a child) | ✅ |
+| Later | Upazila women affairs officer, legal aid 16699, UNO | ✅ |
+
+**"Babunagar" doesn't exist in any official list** we can reach: the area list, union sites and OpenStreetMap (its "Babunagar" matches are all in Chattogram district). It's probably a village or para name, and villages aren't in the government list. So the site uses GPS or the union picker. Once we know its union, its chairman and village police are already in the data.
+
+The live demo (`PROJECT_PLAN.md` §6) uses Chowmuhani, Begumganj, where the union is known. This check uses a village name that is not in any official list, to test the fallback.
+
+### B. Cox's Bazar – a tourist loses a drone camera at Inani beach (or it's stolen)
 
 Open SafeConnect → **Use my location**. GPS gives Jaliapalong (Ukhia). Tourist mode turns on because the user is near Inani beach (`places`).
 
@@ -142,27 +160,12 @@ Open SafeConnect → **Use my location**. GPS gives Jaliapalong (Ukhia). Tourist
 
 The app's **"Report a lost/stolen item"** helper builds a GD-ready text: date, time, place, item, serial number, photos.
 
-### B. Noakhali – at night a woman is attacked in a village ("Babunagar")
-
-Open SafeConnect → big **999** button → **Silent SOS** sends her location to family → the area page shows:
-
-| Order | Contact | In our data? |
-|---|---|---|
-| 1 | 999 | ✅ |
-| 2 | Police station OC / duty officer for her upazila | ✅ all 9 Noakhali upazilas have police station numbers |
-| 3 | **Village police of her ward** | ✅ for 76 of 160 unions (337 in Noakhali) |
-| 4 | Ward member, chairman | ✅ 143 chairmen + 15 administrators across both districts |
-| 5 | 109 (violence against women and children), 1098 (if she is a child) | ✅ |
-| Later | Upazila women affairs officer, legal aid 16699, UNO | ✅ |
-
-**"Babunagar" doesn't exist in any official list** we can reach: the area list, union sites and OpenStreetMap (its "Babunagar" matches are all in Chattogram district). It's probably a village or para name, and villages aren't in the government list. So the site uses GPS or the union picker. Once we know its union, its chairman and village police are already in the data.
-
 ---
 
 ## 6. GitHub workflow (beginner-safe)
 
 1. **Issue** for every task and every data gap (labels: `frontend`, `backend`, `data`, `data-gap`, `docs`, `bug`).
-2. **Branch:** `feature/<issue>-short-name`, `data/<issue>-…`, `fix/<issue>-…`.
+2. **Branch:** `docs/<issue>-short-name`, `data/<issue>-…`, `feature/<issue>-…`, `fix/<issue>-…` (`<issue>` = the GitHub issue number).
 3. **Small commits:** one change per commit, message starting with a verb ("Add Ukhia village police records").
 4. **Pull request** with `Closes #<issue>`. The **other person reviews**. GitHub Actions must pass (validator).
 5. **Merge, delete the branch, pull `main`.**
