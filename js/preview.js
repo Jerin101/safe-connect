@@ -1,5 +1,6 @@
-// Test page logic for preview.html (P23). The real site (index.html, pages/) is built in P20-P36.
+// Test page logic for preview.html (P23, P26). The real site (index.html, pages/) is built in P20-P36.
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, search, norm } from './data.js';
+import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
 
 const T = {
   bn: {
@@ -21,6 +22,14 @@ const T = {
       administrator_not_elected: 'প্রশাসক', number_shared_by_several_records: 'অফিস নম্বর', needs_manual_check: 'আবার যাচাই দরকার' },
     foot1: 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া এবং ২২ অক্টোবর ২০২৬-এ আবার যাচাই করা। প্রতিটি কার্ডে উৎসের লিংক আছে।',
     foot2: 'SafeConnect প্রিভিউ · jerin101 ও tasmintoshi · বিপদে প্রথমে ৯৯৯।',
+    locate: 'আমার কাছের সাহায্য দেখুন', locating: 'আপনার অবস্থান খোঁজা হচ্ছে…', orChoose: 'অথবা নিচে নিজে এলাকা বাছাই করুন',
+    found: (name) => `আপনার এলাকা: ${name}। ভুল হলে নিচে বদলান।`, outside: 'আপনি নোয়াখালী বা কক্সবাজারের বাইরে আছেন। বিপদে ৯৯৯-এ কল করুন।',
+    denied: 'লোকেশনের অনুমতি নেই। ফোনের সেটিংসে লোকেশন চালু করুন, অথবা নিচে এলাকা বাছাই করুন।',
+    unavailable: 'লোকেশন পাওয়া যায়নি। খোলা জায়গায় গিয়ে আবার চেষ্টা করুন, অথবা নিচে এলাকা বাছাই করুন।',
+    timeout: 'লোকেশন পেতে দেরি হচ্ছে। আবার চাপুন, অথবা নিচে এলাকা বাছাই করুন।', unsupported: 'এই ব্রাউজারে লোকেশন নেই। নিচে এলাকা বাছাই করুন।',
+    myLoc: 'আমার অবস্থান', openMap: 'ম্যাপ', copyLoc: 'অবস্থান কপি', tell999: '৯৯৯-কে এই অবস্থান বলুন বা পরিবারকে পাঠান।',
+    testTitle: 'পরীক্ষার জন্য অবস্থান (আপনি সেখানে না থাকলেও):', simulated: 'পরীক্ষামূলক অবস্থান',
+    testNames: { chowmuhani: 'চৌমুহনী', inani: 'ইনানী সৈকত (জালিয়াপালং)', hatiya: 'হাতিয়া' },
   },
   en: {
     pilot: "Noakhali & Cox's Bazar", lang: 'বাংলা', sos: 'In danger, call 999 first: police, fire service, ambulance',
@@ -41,6 +50,14 @@ const T = {
       administrator_not_elected: 'Administrator', number_shared_by_several_records: 'Office number', needs_manual_check: 'Needs re-check' },
     foot1: 'Every number comes from an official *.gov.bd website and was re-checked on 22 October 2026. Each card links to its source.',
     foot2: 'SafeConnect preview · jerin101 & tasmintoshi · In danger, call 999 first.',
+    locate: 'Find help near me', locating: 'Finding your location…', orChoose: 'Or choose your area below',
+    found: (name) => `Your area: ${name}. If this is wrong, change it below.`, outside: "You're outside Noakhali and Cox's Bazar. In danger, call 999.",
+    denied: 'Location is not allowed. Turn on location in your phone settings, or choose your area below.',
+    unavailable: 'Could not get your location. Move to an open place and try again, or choose your area below.',
+    timeout: 'Location is taking too long. Tap again, or choose your area below.', unsupported: 'This browser has no location. Choose your area below.',
+    myLoc: 'My location', openMap: 'Map', copyLoc: 'Copy location', tell999: 'Tell 999 this location or send it to family.',
+    testTitle: "Test location (even if you're not there):", simulated: 'Test location',
+    testNames: { chowmuhani: 'Chowmuhani', inani: 'Inani beach (Jaliapalong)', hatiya: 'Hatiya' },
   },
 };
 const VISIBLE = { police: 6, tourist_police: 4, health: 4, administration: 4, fire: 3, local: 13, village_police: 12, helplines: 6 };
@@ -51,6 +68,7 @@ let lang = store.get('sc-lang') || 'bn';
 let data = null;
 let place = null;
 let activePlaceNote = '';
+let locations = null;
 
 const t = () => T[lang];
 const digits = (s) => (lang === 'bn' ? String(s).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[d]) : String(s));
@@ -66,6 +84,7 @@ function setStaticText() {
   $('lblSearch').textContent = s.search; $('q').placeholder = s.search;
   $('call999').textContent = digits('999'); $('call999').setAttribute('aria-label', `${s.call} 999`);
   $('foot1').textContent = s.foot1; $('foot2').textContent = s.foot2;
+  $('locateLabel').textContent = s.locate; $('orChoose').textContent = s.orChoose;
 }
 
 function fillSelect(sel, options, value) {
@@ -203,6 +222,76 @@ function choose(next) {
   render();
 }
 
+// ---- "Find help near me" (P26). Location is read only after a tap (CLAUDE.md rule 5),
+// and the lookup happens on the phone with data/locations.json (works offline).
+
+function showStatus(text, bad = false) {
+  const st = $('locateStatus');
+  st.textContent = text;
+  st.classList.toggle('bad', bad);
+}
+
+function showMyLocation(pos, simulated) {
+  const box = $('myLoc');
+  const coords = `${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)}`;
+  const link = mapsLink(pos);
+  const label = el('span', 'coords', `${simulated ? t().simulated : t().myLoc}: ${digits(coords)}`);
+  const map = el('a', 'btn', t().openMap); map.href = link; map.target = '_blank'; map.rel = 'noopener';
+  const copy = el('button', 'btn', t().copyLoc); copy.type = 'button';
+  copy.addEventListener('click', () => {
+    navigator.clipboard?.writeText(`${coords} ${link}`).then(() => { copy.textContent = t().copied; }, () => {});
+  });
+  box.replaceChildren(label, map, copy, el('span', 'where-line', t().tell999));
+  box.hidden = false;
+}
+
+function applyPosition(pos, simulated = false) {
+  showMyLocation(pos, simulated);
+  const found = locations && nearestPlace(locations, pos);
+  if (!found || !data.docs[found.district]) { showStatus(t().outside, true); return; }
+  const doc = data.docs[found.district];
+  const placeHere = found.area && doc.places.find((p) => norm(p.union_bn) === found.area.bn);
+  activePlaceNote = placeHere ? placeHere.how_to_report_bn : '';
+  const upz = upazilas(doc).find((u) => u.en === found.upazila);
+  const name = found.area ? found.area.bn : (lang === 'bn' && upz ? upz.bn : found.upazila);
+  showStatus(t().found(name));
+  choose({ district: found.district, upazila: found.upazila, area: found.area });
+}
+
+// Test locations for the preview page: official centre points from data/locations.json,
+// moved a few hundred metres so they act like a real GPS reading. No coordinates are typed in.
+function showTestLocations() {
+  if (!locations) return;
+  const box = $('testLocs');
+  const picks = [
+    ['chowmuhani', locations.municipalities.find((m) => norm(m.municipality_bn).includes(norm('চৌমুহনী')))],
+    ['inani', locations.unions.find((u) => u.union_en === 'Jaliapalong')],
+    ['hatiya', locations.unions.find((u) => u.district === 'Noakhali' && u.upazila_en === 'Hatiya')],
+  ].filter(([, p]) => p);
+  box.replaceChildren(el('span', 'label', t().testTitle));
+  for (const [key, p] of picks) {
+    const b = el('button', 'chip', t().testNames[key]); b.type = 'button';
+    b.addEventListener('click', () => applyPosition({ lat: p.lat + 0.004, lon: p.lon - 0.003 }, true));
+    box.append(b);
+  }
+  box.hidden = false;
+}
+
+async function locate() {
+  const btn = $('locateBtn');
+  btn.setAttribute('aria-busy', 'true');
+  showStatus(t().locating);
+  try {
+    applyPosition(await getPosition());
+  } catch (err) {
+    showStatus(t()[err.code] || t().unavailable, true);
+  } finally {
+    btn.removeAttribute('aria-busy');
+  }
+}
+
+$('locateBtn').addEventListener('click', locate);
+
 $('district').addEventListener('change', (e) => {
   activePlaceNote = '';
   const doc = data.docs[e.target.value];
@@ -215,7 +304,7 @@ $('area').addEventListener('change', (e) => {
   choose({ ...place, area: type ? { type, bn: rest.join('|') } : null });
 });
 $('q').addEventListener('input', () => { const q = $('q').value.trim(); if (q.length >= 2) renderSearch(q); else renderGroups(); });
-$('langBtn').addEventListener('click', () => { lang = lang === 'bn' ? 'en' : 'bn'; store.set('sc-lang', lang); render(); });
+$('langBtn').addEventListener('click', () => { lang = lang === 'bn' ? 'en' : 'bn'; store.set('sc-lang', lang); render(); showTestLocations(); });
 $('themeBtn').addEventListener('click', () => {
   const root = document.documentElement;
   const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -225,7 +314,7 @@ $('themeBtn').addEventListener('click', () => {
 setStaticText();
 $('status').textContent = t().loading;
 try {
-  data = await loadAll('data/');
+  [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
   const first = loadedDistricts()[0];
   if (!first) throw new Error('No district data could be loaded');
   let saved = null;
@@ -236,6 +325,7 @@ try {
     : { district: first.key, upazila: upazilas(data.docs[first.key])[0].en, area: null };
   place = validPlace(saved) ? saved : start;
   render();
+  showTestLocations();          // no automatic GPS on open: location only after a tap
   if (data.missing.length) $('status').textContent = `Could not load: ${data.missing.join(', ')}. Showing the rest.`;
 } catch (err) {
   $('status').textContent = `${err.message}. Please reload the page.`;
