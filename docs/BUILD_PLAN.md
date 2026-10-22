@@ -144,9 +144,11 @@ Open SafeConnect → big **999** button → **Silent SOS** sends her location to
 | 5 | 109 (violence against women and children), 1098 (if she is a child) | ✅ |
 | Later | Upazila women affairs officer, legal aid 16699, UNO | ✅ |
 
-**"Babunagar" doesn't exist in any official list** we can reach: the area list, union sites and OpenStreetMap (its "Babunagar" matches are all in Chattogram district). It's probably a village or para name, and villages aren't in the government list. So the site uses GPS or the union picker. Once we know its union, its chairman and village police are already in the data.
+**Babunagar (বাবুনগর) is an official village of Sharifpur union, Begumganj.** It is on the union's own village page ([sharifpurup.noakhali.gov.bd, village list](https://sharifpurup.noakhali.gov.bd/pages/static-pages/6990ef2935ce18e1c072be61), updated 7 Dec 2017), collected into `data/villages.json` (issue #36). Its market and post office is **Hasan Hat (হাসান হাট)**: a local name confirmed by a resident (jerin101) and kept in `data/aliases.json`. The union's [at-a-glance page](https://sharifpurup.noakhali.gov.bd/pages/static-pages/6990ef2935ce18e1c072be5f) lists 1 market and 4 post offices but gives no names.
 
-The live demo (`PROJECT_PLAN.md` §6) uses Chowmuhani, Begumganj, where the union is known. This check uses a village name that is not in any official list, to test the fallback.
+So typing "Babunagar", "বাবুনগর" or "Hasan Hat" opens Sharifpur union: the UP chairman and 15 more union representatives with numbers, and Begumganj police station (OC, duty officers). Sharifpur publishes no village police list, so step 3 falls back to the police station. If a village is still not found, the site uses GPS or the upazila buttons and always shows 999.
+
+The live demo (`PROJECT_PLAN.md` §6) uses Chowmuhani, Begumganj. This scenario checks that a village name finds its union.
 
 ### B. Cox's Bazar – a tourist loses a drone camera at Inani beach (or it's stolen)
 

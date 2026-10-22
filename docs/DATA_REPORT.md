@@ -90,7 +90,7 @@ District and union portals send an incomplete certificate chain. The scripts add
 2. **Some unions don't publish members' numbers at all** (111 union representatives). They're shown as "number not published" with the fallback chain.
 3. **84 of 160 unions have no village police list.**
 4. **Missing units:** Bhasanchar police station, the Inani Tourist Police zone (website offline), and the Inani police outpost number. RAB and BGB pages are empty. See `DATA_GAPS.md`.
-5. **Villages aren't in any government list.** We have 559 village names taken from representatives' addresses. "Babunagar" isn't among them, nor in OpenStreetMap for Noakhali.
+5. **Villages aren't in the national area list.** We have 1,250 official village names from the village pages of 82 union websites (`data/villages.json`, issue #36) and 559 names from representatives' addresses. 78 unions publish no usable village list; there the site uses GPS, the union name or the upazila buttons. Babunagar (বাবুনগর) is on Sharifpur union's official village list.
 6. **Police websites (`police.gov.bd`, `999.gov.bd`, `gd.police.gov.bd`) block connections from outside Bangladesh.** Check them from a laptop in Bangladesh.
 7. **Some official Bangla names are garbled** (e.g. "বৃধমিত্ম"). The `bangla-reviewer` agent should fix the display names.
 
