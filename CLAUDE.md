@@ -12,12 +12,14 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 ## Hard rules
 
 1. **Never invent, guess or "fill in" a phone number, name or office.** Every contact must come from an official `*.gov.bd` page (or `acc.org.bd`) and keep its `source_url`. If something is missing, say so and use the fallback chain in `docs/BUILD_PLAN.md` §4.
-2. **Zero budget.** No paid services, no paid APIs, no paid datasets. Free tiers only: GitHub Pages, GitHub Actions, Firebase Spark, OpenStreetMap Nominatim (at most 1 request per second, with credit).
+2. **Zero budget.** No paid services, no paid APIs, no paid datasets. Free tiers only: GitHub Pages, GitHub Actions, Firebase Spark (no Cloud Functions, no file storage), OpenStreetMap Nominatim only in the `tools/` scripts (at most 1 request per second, with credit).
 3. **No frameworks and no build step** for the website: plain HTML, CSS and JavaScript (ES modules). The Python tools use only the standard library.
 4. **Never turn off certificate checking** (`verify=False`, `-k`, etc.).
-5. **Privacy:** without login, nothing leaves the phone. Location is read only when the user taps SOS or "Use my location". Never log or upload personal data.
+5. **Privacy:** without login, nothing leaves the phone. Location is read only when the user taps SOS or "Find help near me", and the lookup happens on the phone. Never log or upload personal data. Volunteer applications are private, verification is hidden from users, and no home address is ever shown.
 6. **The humans commit.** Make small changes, explain them, and let the person review the diff and commit it themselves. Never push, merge or force-push.
-7. Every change belongs to a GitHub issue (planning ID `Pxx` in `docs/ISSUES.md`) and a branch: `docs/`, `data/`, `feature/` or `fix/` + issue number + short name.
+7. Every change belongs to a GitHub issue (planning ID `Pxx` in `docs/ISSUES.md`) and a branch: `docs/`, `data/`, `feature/` or `fix/` + **GitHub issue number** + short name.
+8. **Offline first is the top priority.** Everything in the offline list (`docs/BUILD_PLAN.md` §9) must work with no internet.
+9. **Safe testing:** use a test account, delete test data afterwards, never send a confirmation message to a real official (use a fake code), and never call a real emergency number to test.
 
 ## Code style
 
@@ -42,3 +44,6 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 ## Agents (`.claude/agents/`)
 
 `project-manager` · `developer` · `tester` · `source-researcher` · `data-checker` · `bangla-reviewer`. Use the right one for the job; they follow these rules too.
+
+- **tester:** PR reviews and the **release check** (GO / NO-GO) before every deploy and the showcase
+- **developer:** writing code · **data-checker:** every data PR · **source-researcher:** data gaps and volunteer confirmers · **bangla-reviewer:** any text people read · **project-manager:** the day's plan, issue numbers, deploy readiness
