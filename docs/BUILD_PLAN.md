@@ -13,15 +13,15 @@ This file is the single source of truth. It becomes the project's `CLAUDE.md`, s
 | Pages | HTML + CSS + plain JavaScript (ES modules), no framework, no build step | Easy to learn and to explain in a viva | Free |
 | Data | JSON files in `data/` | Simple, versioned in Git, works offline | Free |
 | Hosting | GitHub Pages (HTTPS) | Free; HTTPS is required for GPS, camera and offline mode | Free |
-| Offline app | `manifest.json` + `service-worker.js` (PWA) | Works with no internet after the first visit; installable on the home screen | Free |
+| Offline app (**top priority**) | `manifest.json` + `service-worker.js` (PWA) caching all pages and `data/` files | Works with no internet after the first visit; installable on the home screen. See §9 | Free |
 | Fonts | Hind Siliguri (Google Fonts), cached by the service worker | Bangla + English in one font | Free |
 | Calling | `tel:` links | One tap to call | Free |
 | SOS sharing | Web Share API, `sms:` links, `https://wa.me/?text=` | Works on Android and iPhone; SMS works without internet | Free |
-| Location | Browser Geolocation API; upazila/union lookup with OpenStreetMap Nominatim (online only, at most 1 request per second, credit "© OpenStreetMap contributors") | GPS works offline; the area name lookup needs internet, otherwise the manual picker is used | Free |
+| Location | Browser Geolocation API + `data/locations.json`: official BBS upazila boundaries (via OCHA HDX, CC BY-IGO, credited on the page) and union/town centre points | GPS and the upazila/union lookup both work **offline**; no request leaves the phone | Free |
 | Plate photo | `<input type="file" accept="image/*" capture="environment">`, then share | Safe Journey feature | Free |
 | Siren | Web Audio API (sound generated in code) | No audio files or licences needed | Free |
 | On-device storage | `localStorage` (settings, family contacts, saved areas) | Nothing sent to a server without login | Free |
-| Login (Should) | Firebase Authentication (Google + email) + Firestore, free Spark plan, loaded from Google's CDN | Synced contacts, wrong-number reports, admin page | Free (no card) |
+| Login + backend (Should) | Firebase Authentication (Google + email) + Firestore, free **Spark** plan, loaded from Google's CDN. No Cloud Functions, no file storage | Synced contacts, wrong-number reports, admin page, volunteer service. See §10 | Free (no card) |
 | Data tools (backend) | Python 3 standard library only: `tools/` | Collect → build → validate | Free |
 | Automation | GitHub Actions: run `validate_data.py` on every PR; deploy Pages on merge | Bad data cannot reach the site | Free (public repo) |
 | Editor | VS Code + Live Server + GitHub Pull Requests + Claude Code extensions | | Free / your Claude plan |
@@ -33,14 +33,14 @@ This file is the single source of truth. It becomes the project's `CLAUDE.md`, s
 ```
 safeconnect/
 ├── index.html              ← home: 999, SOS, search, area picker
-├── pages/                  ← sos.html, journey.html, fakecall.html, guides.html, area.html, account.html, admin.html
+├── pages/                  ← sos.html, journey.html, guides.html, area.html, account.html, admin.html, volunteer.html, confirm.html
 ├── css/                    ← base.css (tokens: dark/light), components.css
 ├── js/
 │   ├── app.js              ← start-up, routing, settings
 │   ├── data.js             ← loads and caches JSON, search index
 │   ├── area.js             ← area picker + GPS lookup
 │   ├── contacts.js         ← cards, ordering, fallbacks
-│   ├── sos.js  journey.js  fakecall.js  siren.js
+│   ├── sos.js  journey.js  siren.js
 │   ├── i18n.js + lang/bn.json, lang/en.json
 │   └── firebase.js         ← login, reports (Should)
 ├── data/                   ← national_hotlines.json, areas_bangladesh.json, contacts_*.json, manual_additions.json
@@ -79,6 +79,7 @@ Website loads data/*.json → service worker caches it for offline use
 | `areas_bangladesh.json` | 320 KB | When the area picker opens |
 | `contacts_noakhali.json` / `contacts_coxsbazar.json` | ~1 MB each | When that district is chosen |
 | `manual_additions.json` | small | With the district files |
+| `locations.json` | 36 KB | Cached for offline; used by "Find help near me" |
 
 ### Record fields (district files)
 
@@ -182,8 +183,65 @@ Open SafeConnect → big **999** button → **Silent SOS** sends her location to
 ## 8. Definition of done (showcase)
 
 - [ ] Both scenarios above can be demoed live on a phone, including with **airplane mode on** (offline mode + SMS)
-- [ ] Search, area picker, GPS, SOS, Safe Journey, siren, fake call, Bangla/English, dark/light all work
+- [ ] Search, area picker, "Find help near me", SOS, Safe Journey, siren, Bangla/English, dark/light all work (offline list in §9)
 - [ ] Every card shows its source and check date; unpublished numbers are labelled and a fallback is shown
 - [ ] The validator passes in GitHub Actions; the site is live on GitHub Pages
 - [ ] 40-record human spot-check done (`spot_check_40.csv`)
 - [ ] Both members have regular commits, PRs and reviews
+
+---
+
+## 9. Offline first (top priority)
+
+| Works with **no internet** (after the first visit) | Waits for internet |
+|---|---|
+| All contacts and search · Bangla/English · "Find help near me" (GPS + saved boundaries) · tap-to-call · SOS by SMS · siren · Safe Journey photo | Map links · WhatsApp · login sync, reports and the volunteer service |
+
+**"Find help near me" (P26), step by step:**
+1. One tap. If the user gave location permission before, it locates straight away.
+2. GPS position → which official upazila boundary contains it (`data/locations.json`, 18 upazilas).
+3. → the nearest union or town centre point **inside that upazila** (158 union points + 4 town points).
+4. Show the coordinates + a map link, so the user can tell 999 or family exactly where they are.
+5. If the union is unsure (near a border, or no point), show the **whole upazila** and let the user pick the union.
+
+Location is read only when the user taps (CLAUDE.md rule 5), and the lookup happens on the phone.
+
+## 10. Backend: Firebase Spark + volunteer service
+
+**Cost: 0.** The free **Spark plan has no Cloud Functions** (no server code) and we use **no file storage**. So:
+- **Firestore security rules** enforce everything that must be automatic.
+- **Admins** (jerin101, tasmintoshi) do everything else by hand from `pages/admin.html`.
+
+### Firestore collections
+
+| Collection | Who can read | Who can write |
+|---|---|---|
+| `admins` | admins | set up once by hand in the Firebase console |
+| `applications` | the applicant + admins | the applicant creates their own; admins update the status |
+| `confirmations` | anyone with the exact one-time code (get one document, never list) | admins create; the official answers once (rule below) |
+| `verifications` | **admins only** | admins only. Hidden from users |
+| `teams` | logged-in users | admins (create teams, set `leader_uid` after the UNO approves the leader) |
+| `volunteers` (public list) | everyone | created **only** by an admin or by that team's leader (rule below); the volunteer can switch "Show me" on/off |
+
+### What the security rules enforce
+- **One-time code** (`confirmations/{code}`, a long random code): the official can answer **once** (`answer` must still be empty), **before `expires_at`** (7 days after sending), and the update may change **only the `answer` field**.
+- **Team-leader approval:** a new `volunteers` document for a team may be created only if the approver is that team's **`leader_uid`** (or an admin).
+- **Report this volunteer:** any logged-in user may set **only** `paused: true` (never back to false); only an admin can un-pause.
+- Users can read and write only their own `applications`; nobody but admins can read `verifications`.
+
+### Verification flow (hidden from users)
+1. A logged-in user applies (name, phone, area, ward, skills, availability). They only see "being checked".
+2. The admin page picks the **confirmer automatically from our official data** (`data/contacts_*.json`), never from the applicant:
+   - village: ward member → UP chairman/administrator → UP secretary
+   - town: municipal executive officer → municipal administrator
+   - team leaders only: UNO
+3. **Weekly batch per union:** one message per official per week, listing that week's applicants.
+4. The admin confirms in one of three ways:
+   - **(a)** sends a one-tap link to `pages/confirm.html?c=<code>` via WhatsApp/SMS to the official's **published** number (Yes/No, no login, expires in 7 days)
+   - **(b)** a phone call with a short Bangla script
+   - **(c)** a প্রত্যয়নপত্র memo number + date, checked with the UP office
+5. **Team leaders:** approved by the UNO once. After that, new members of that team only need the team leader's confirmation inside the app, so officials are not disturbed again.
+6. Verification **expires after 1 year** or when the chairman changes. Any complaint pauses it.
+
+### What the public sees
+Only **approved** volunteers who switched on **"Show me"**, shown **after** the official contacts, with a "Report this volunteer" button. Name, team, area, skills, availability and phone: **never a home address**.
