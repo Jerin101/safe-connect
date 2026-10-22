@@ -173,12 +173,12 @@ Open SafeConnect → big **999** button → **Silent SOS** sends her location to
 
 | Agent | Job |
 |---|---|
-| `project-manager` | Reads issues, plans the day, keeps both people's work balanced |
-| `developer` | Writes code in small steps that follow this plan, and explains each change |
-| `tester` | Tests phone and desktop sizes, both languages and themes, offline mode, and the SOS and journey flows; reviews PRs |
-| `source-researcher` | Finds official pages for data gaps. Never invents numbers |
-| `data-checker` | Runs `validate_data.py`; finds stale, duplicate and missing records |
-| `bangla-reviewer` | Natural, short Bangla and English text; fixes garbled official names |
+| `project-manager` | Reads issues, plans the day, keeps both people's work balanced; gives the next issue number for branch names; asks for the release check before a deploy |
+| `developer` | Writes code in small steps that follow this plan, and explains each change; offline caching, Firebase security rules, volunteer privacy |
+| `tester` | Reviews PRs; tests phone and desktop sizes, both languages and themes, offline mode, SOS, journey and volunteer flows; **release check (GO / NO-GO)** before every deploy, always with a test account and a fake code |
+| `source-researcher` | Finds official pages for data gaps and for volunteer confirmers. Never invents numbers |
+| `data-checker` | Runs `validate_data.py`; finds stale, duplicate and missing records; checks the area list and `locations.json`; keeps volunteer data out of Git |
+| `bangla-reviewer` | Natural, short Bangla and English text; fixes garbled official names; checks offline messages and volunteer texts and scripts |
 
 ## 8. Definition of done (showcase)
 
