@@ -22,6 +22,7 @@ const T = {
       administrator_not_elected: 'প্রশাসক', number_shared_by_several_records: 'অফিস নম্বর', needs_manual_check: 'আবার যাচাই দরকার' },
     foot1: 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া এবং ২২ অক্টোবর ২০২৬-এ আবার যাচাই করা। প্রতিটি কার্ডে উৎসের লিংক আছে।',
     foot2: 'SafeConnect প্রিভিউ · jerin101 ও tasmintoshi · বিপদে প্রথমে ৯৯৯।',
+    foot3: 'ম্যাপ তথ্য: উপজেলার সীমানা ও ইউনিয়ন/পৌরসভার কেন্দ্রবিন্দু বাংলাদেশ পরিসংখ্যান ব্যুরো (BBS), OCHA HDX-এর মাধ্যমে (CC BY-IGO)। BBS-এর নাম না মিললে টুলগুলো OpenStreetMap-এর বিন্দু যোগ করতে পারে (© OpenStreetMap contributors, ODbL)।',
     locate: 'আমার কাছের সাহায্য দেখুন', locating: 'আপনার অবস্থান খোঁজা হচ্ছে…', orChoose: 'অথবা নিচে নিজে এলাকা বাছাই করুন',
     found: (name) => `আপনার এলাকা: ${name}। ভুল হলে নিচে বদলান।`, outside: 'আপনি নোয়াখালী বা কক্সবাজারের বাইরে আছেন। বিপদে ৯৯৯-এ কল করুন।',
     denied: 'লোকেশনের অনুমতি নেই। ফোনের সেটিংসে লোকেশন চালু করুন, অথবা নিচে এলাকা বাছাই করুন।',
@@ -50,6 +51,7 @@ const T = {
       administrator_not_elected: 'Administrator', number_shared_by_several_records: 'Office number', needs_manual_check: 'Needs re-check' },
     foot1: 'Every number comes from an official *.gov.bd website and was re-checked on 22 October 2026. Each card links to its source.',
     foot2: 'SafeConnect preview · jerin101 & tasmintoshi · In danger, call 999 first.',
+    foot3: 'Map data: upazila boundaries and union/town centre points from the Bangladesh Bureau of Statistics (BBS) via OCHA HDX (CC BY-IGO). Where BBS names do not match, the tools can add OpenStreetMap points (© OpenStreetMap contributors, ODbL).',
     locate: 'Find help near me', locating: 'Finding your location…', orChoose: 'Or choose your area below',
     found: (name) => `Your area: ${name}. If this is wrong, change it below.`, outside: "You're outside Noakhali and Cox's Bazar. In danger, call 999.",
     denied: 'Location is not allowed. Turn on location in your phone settings, or choose your area below.',
@@ -83,7 +85,7 @@ function setStaticText() {
   $('lblDistrict').textContent = s.district; $('lblUpazila').textContent = s.upazila; $('lblArea').textContent = s.area;
   $('lblSearch').textContent = s.search; $('q').placeholder = s.search;
   $('call999').textContent = digits('999'); $('call999').setAttribute('aria-label', `${s.call} 999`);
-  $('foot1').textContent = s.foot1; $('foot2').textContent = s.foot2;
+  $('foot1').textContent = s.foot1; $('foot2').textContent = s.foot2; $('foot3').textContent = s.foot3;
   $('locateLabel').textContent = s.locate; $('orChoose').textContent = s.orChoose;
 }
 

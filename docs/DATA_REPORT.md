@@ -16,6 +16,7 @@ No number was typed from memory or taken from news sites.
 | `contacts_noakhali.json` | 1,644 contacts (incl. municipalities) + 354 village→union/ward hints | ~1.7 MB |
 | `contacts_coxsbazar.json` | 1,301 contacts (incl. Cox's Bazar municipality) + 205 village→union/ward hints | ~1.3 MB |
 | `manual_additions.json` | Hand-entered official records (BCG Station Inani) + places (Inani beach) (P10, #26) | small |
+| `locations.json` | Offline "Find help near me" (P26): 18 upazila boundaries + 158 union and 4 town centre points (see "Map data" below) | 36 KB |
 | `verify_report.json` | Result of the last full source check (also re-run every Monday by the "Weekly source check" GitHub Action) | small |
 | `spot_check_40.csv` | 40 key contacts for a person to check by hand (P13, to do) | – |
 | `docs/DATA_GAPS.md` | Everything missing, ready to become GitHub issues | – |
@@ -66,6 +67,13 @@ Bangla text: the sources store some letters in two Unicode forms (e.g. "য়")
 | Officers (UNO, police, hospital, fire…) | `https://<office>.<district>.gov.bd/pages/officers` |
 | Village police, emergency contacts | Each union's "গ্রাম পুলিশ" and "জরুরি যোগাযোগ" pages (these show their own last-updated date) |
 | Inani police outpost, BCG Station Inani | Jaliapalong union portal pages (updated August 2026) |
+
+### Map data (credit)
+
+`data/locations.json` is used only to turn the phone's GPS position into an upazila and union, on the phone, without internet. It holds no phone numbers.
+- **Upazila boundaries and all 162 union/town centre points:** Bangladesh Bureau of Statistics (BBS) administrative boundaries v03, via OCHA HDX ("cod-ab-bgd"), licence **CC BY-IGO**.
+- **OpenStreetMap:** `tools/collect_locations.py` and `fill_locations.py` look up points with OpenStreetMap Nominatim (© OpenStreetMap contributors, licence **ODbL**; at most 1 request per second), and `build_locations.py` uses them only where a BBS name does not match. The current file uses none (all 162 points come from BBS); if a later build adds some, they are marked `"src": "osm"`.
+- 2 of the 160 unions have no centre point; there the site shows the whole upazila and lets the person pick the union.
 
 District and union portals send an incomplete certificate chain. The scripts add Sectigo's official intermediate certificate (copied from Mozilla's CCADB list) and **never turn certificate checking off**.
 
