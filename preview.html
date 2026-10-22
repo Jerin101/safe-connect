@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SafeConnect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: one "call sheet" column that reads top-down in the order to call; 999 stays pinned above it. */
+  :root {
+    --bg: #F3F4FA; --surface: #FFFFFF; --surface-2: #E9EBF6; --ink: #15142B; --muted: #585C78;
+    --line: #D7DAEA; --accent: #F2B705; --accent-ink: #1A1600; --alarm: #C3122F; --alarm-ink: #FFFFFF;
+    --warn: #8A5300; --warn-bg: #FFF1D6; --info: #2F4AA8; --chip: #E3E6F5;
+    --font-display: "Baloo Da 2", "Hind Siliguri", "Noto Sans Bengali", system-ui, sans-serif;
+    --font-body: "Hind Siliguri", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0C0B1E; --surface: #16153A; --surface-2: #1E1D48; --ink: #F0EFFF; --muted: #A4A6C6;
+      --line: #2B2A5A; --accent: #FFD23F; --accent-ink: #1A1600; --alarm: #FF3D5E; --alarm-ink: #FFFFFF;
+      --warn: #FFC266; --warn-bg: #3A2A10; --info: #9DB2FF; --chip: #23224F; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0C0B1E; --surface: #16153A; --surface-2: #1E1D48; --ink: #F0EFFF; --muted: #A4A6C6;
+    --line: #2B2A5A; --accent: #FFD23F; --accent-ink: #1A1600; --alarm: #FF3D5E; --alarm-ink: #FFFFFF;
+    --warn: #FFC266; --warn-bg: #3A2A10; --info: #9DB2FF; --chip: #23224F; color-scheme: dark;
+  }
+
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+  .wrap { max-width: 780px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  a { color: var(--info); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  button, select, input { font: inherit; color: inherit; }
+
+  /* pinned header + 999 bar */
+  .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+  .brand { background: var(--surface); border-bottom: 1px solid var(--line); }
+  .brand .wrap { display: flex; align-items: center; gap: 10px; padding-block: 10px; flex-wrap: wrap; }
+  .logo { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; letter-spacing: 0.01em; margin: 0; line-height: 1; }
+  .logo span { color: var(--accent); }
+  .pilot { color: var(--muted); font-size: 0.82rem; margin-right: auto; min-width: 0; }
+  @media (max-width: 460px) { .pilot { display: none; } .logo { margin-right: auto; } }
+  .toggle { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+  .sos { background: var(--alarm); color: var(--alarm-ink); }
+  .sos .wrap { display: flex; align-items: center; gap: 12px; padding-block: 8px; flex-wrap: wrap; }
+  .sos p { margin: 0; font-weight: 600; flex: 1 1 200px; min-width: 0; }
+  .sos .call999 { background: var(--alarm-ink); color: var(--alarm); font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; text-decoration: none; border-radius: 999px; padding: 4px 18px; }
+
+  main .wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-block: 20px 40px; }
+  .where > *, .pickers > * { min-width: 0; }
+  h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+  h1 { font-size: 1.7rem; }
+  h2 { font-size: 1.25rem; }
+  .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
+
+  .where { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; gap: 14px; }
+  .pickers { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .pickers label { display: grid; gap: 4px; font-size: 0.85rem; color: var(--muted); font-weight: 500; min-width: 0; }
+  select, input[type="search"] { width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 1rem; min-width: 0; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .chips .label { font-size: 0.85rem; color: var(--muted); margin-right: 2px; }
+  .chip { border: 1px solid var(--line); background: var(--chip); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 0.9rem; }
+  .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+
+  .place-note { border-left: 4px solid var(--accent); background: var(--surface-2); border-radius: 0 10px 10px 0; padding: 10px 14px; margin: 0; }
+  .status { color: var(--muted); margin: 0; }
+
+  .group { display: grid; gap: 10px; }
+  .group-head { display: flex; align-items: baseline; gap: 10px; }
+  .step { font-family: var(--font-display); font-weight: 800; color: var(--accent-ink); background: var(--accent); border-radius: 999px; min-width: 30px; height: 30px; display: inline-grid; place-items: center; font-size: 1rem; flex: none; }
+  .group-head .sub { color: var(--muted); font-size: 0.85rem; }
+  .note { margin: 0; font-size: 0.88rem; color: var(--warn); background: var(--warn-bg); border-radius: 10px; padding: 8px 12px; }
+  .cards { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+  .card h3 { margin: 0; font-size: 1.05rem; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+  .card .role { margin: 0; color: var(--ink); font-size: 0.92rem; overflow-wrap: anywhere; }
+  .card .where-line { margin: 0; color: var(--muted); font-size: 0.82rem; overflow-wrap: anywhere; }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge { font-size: 0.75rem; font-weight: 600; border-radius: 6px; padding: 1px 8px; background: var(--chip); color: var(--muted); }
+  .badge.warn { background: var(--warn-bg); color: var(--warn); }
+  .phones { display: grid; gap: 6px; }
+  .phone { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .num { font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; user-select: all; margin-right: auto; }
+  .btn { border-radius: 999px; padding: 5px 14px; font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); }
+  .btn.call { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .src { margin: 0; font-size: 0.78rem; color: var(--muted); }
+  .more { justify-self: start; }
+  .results { display: grid; gap: 26px; }
+  .search { display: grid; gap: 4px; }
+  footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+  footer .wrap { padding-block: 18px 28px; display: grid; gap: 6px; }
+  footer p { margin: 0; max-width: 65ch; }
+  @media (prefers-reduced-motion: no-preference) { .card { transition: border-color .15s; } .card:hover { border-color: var(--accent); } }
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand">
+    <div class="wrap">
+      <p class="logo">Safe<span>Connect</span></p>
+      <span class="pilot" id="pilot"></span>
+      <button class="toggle" id="langBtn" type="button"></button>
+      <button class="toggle" id="themeBtn" type="button" aria-label="Switch dark / light">◐</button>
+    </div>
+  </div>
+  <div class="sos">
+    <div class="wrap">
+      <p id="sosText"></p>
+      <a class="call999" id="call999" href="tel:999">999</a>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+    <section class="where" aria-labelledby="whereTitle">
+      <div>
+        <p class="eyebrow" id="whereEyebrow"></p>
+        <h1 id="whereTitle"></h1>
+      </div>
+      <div class="pickers">
+        <label><span id="lblDistrict"></span><select id="district"></select></label>
+        <label><span id="lblUpazila"></span><select id="upazila"></select></label>
+        <label><span id="lblArea"></span><select id="area"></select></label>
+      </div>
+      <div class="chips" id="chips"></div>
+      <label class="search"><span class="eyebrow" id="lblSearch"></span>
+        <input type="search" id="q" autocomplete="off">
+      </label>
+    </section>
+    <p class="status" id="status" aria-live="polite"></p>
+    <div id="results" class="results"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p id="foot1"></p>
+    <p id="foot2"></p>
+  </div>
+</footer>
+
+<script type="module" src="js/preview.js"></script>
+</body>
+</html>
