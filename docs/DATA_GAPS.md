@@ -127,7 +127,8 @@ Total: 111 people.
 
 - Online GD website `gd.police.gov.bd` (only reported by news so far)
 - District police sites `noakhali.police.gov.bd`, `coxsbazar.police.gov.bd` (OC/duty numbers, women & children help desks)
-- Which union "Babunagar" (project story) belongs to
+- ~~Which union "Babunagar" (project story) belongs to~~ Done: Sharifpur union, Begumganj (official village list; issue #36)
+- Village lists of the 78 unions that publish none (`unions_without_village_page` in `data/villages.json`)
 
 ## 8. Municipalities (পৌরসভা)
 

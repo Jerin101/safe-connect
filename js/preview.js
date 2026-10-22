@@ -9,9 +9,11 @@ const T = {
     call999: '৯৯৯-এ কল করুন', call999Sub: 'পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স · বিনা খরচে',
     locate: 'আমার কাছের সাহায্য', locateSub: 'আপনার এলাকার থানা, চেয়ারম্যান ও গ্রাম পুলিশের নম্বর · ইন্টারনেট ছাড়াও চলে',
     locating: 'আপনার অবস্থান খোঁজা হচ্ছে…', or: 'অথবা',
-    areaLabel: 'এলাকার নাম লিখুন', areaHint: 'গ্রাম, ইউনিয়ন, পৌরসভা বা উপজেলা — বাংলা বা ইংরেজিতে। যেমন: চৌমুহনী, Hatiya, ইনানী',
-    noMatch: 'এই নামের গ্রাম বা এলাকা সরকারি তালিকায় পাওয়া যায়নি। আপনার ইউনিয়ন বা উপজেলার নাম লিখুন, অথবা নিচের বোতাম চাপুন।',
-    village: 'গ্রাম', notHere: 'আপনার জায়গা তালিকায় নেই?', recent: (n) => `আগের এলাকা: ${n}`,
+    areaLabel: 'এলাকার নাম লিখুন', areaHint: 'গ্রাম, ইউনিয়ন, পৌরসভা বা উপজেলা — বাংলা বা ইংরেজিতে, যেকোনো বানানে। যেমন: চৌমুহনী, Hatiya, ইনানী',
+    noMatch: 'এই নামে কোনো জায়গা তালিকায় নেই। তবুও সাহায্য পাবেন:', didYouMean: 'কাছাকাছি নাম', noExact: 'ঠিক এই বানানে পাইনি। নিচের কোনোটি কি আপনার জায়গা?',
+    tellUs: 'আপনার জায়গার নাম তালিকায় না থাকলে আমাদের জানান, আমরা যোগ করব।', pickUpazila: 'আপনার উপজেলা বেছে নিন। থানা ও ইউএনও-র নম্বর সেখানেই পাবেন।',
+    call999: '৯৯৯-এ কল', kinds: { municipality: 'পৌরসভা', place: 'জায়গা', union: 'ইউনিয়ন', village: 'গ্রাম', upazila: 'উপজেলা', local: 'স্থানীয় নাম', 'market and post office': 'হাট ও ডাকঘর', market: 'হাট-বাজার', 'post office': 'ডাকঘর' },
+    recent: (n) => `আগের এলাকা: ${n}`,
     denied: 'লোকেশনের অনুমতি নেই। ফোনের সেটিংসে লোকেশন চালু করুন, অথবা নিচে এলাকার নাম লিখুন।',
     unavailable: 'লোকেশন পাওয়া যায়নি। খোলা জায়গায় গিয়ে আবার চাপুন, অথবা নিচে এলাকার নাম লিখুন।',
     timeout: 'লোকেশন পেতে দেরি হচ্ছে। আবার চাপুন, অথবা নিচে এলাকার নাম লিখুন।',
@@ -33,6 +35,7 @@ const T = {
       administrator_not_elected: 'প্রশাসক' },
     foot1: 'সব নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া। প্রতিটি নম্বরের নিচে উৎসের লিংক আছে। বিপদে প্রথমে ৯৯৯।',
     foot2: 'ম্যাপ তথ্য: উপজেলার সীমানা ও ইউনিয়ন/পৌরসভার কেন্দ্রবিন্দু বাংলাদেশ পরিসংখ্যান ব্যুরো (BBS), OCHA HDX-এর মাধ্যমে (CC BY-IGO)। BBS-এর নাম না মিললে টুলগুলো OpenStreetMap-এর বিন্দু যোগ করতে পারে (© OpenStreetMap contributors, ODbL)।',
+    testsLink: 'সার্চ টেস্ট (ডেভেলপারদের জন্য)',
   },
   en: {
     lang: 'বাংলা', hello: 'Need help?',
@@ -40,8 +43,10 @@ const T = {
     locate: 'Find help near me', locateSub: 'Numbers for your police station, chairman and village police · works without internet',
     locating: 'Finding your location…', or: 'or',
     areaLabel: 'Type your area', areaHint: 'Village, union, town or upazila, in Bangla or English. For example: Chowmuhani, হাতিয়া, Inani',
-    noMatch: "This village or area isn't in the official lists. Type your union or upazila, or tap the button below.",
-    village: 'village', notHere: 'Your place is not in the list?', recent: (n) => `Last area: ${n}`,
+    noMatch: 'This name is not in our list yet. You can still get help:', didYouMean: 'Similar names', noExact: 'Not found with this exact spelling. Is it one of these?',
+    tellUs: 'If your place is missing, tell us and we will add it.', pickUpazila: 'Pick your upazila. Its police station and UNO numbers are there.',
+    call999: 'Call 999', kinds: { municipality: 'town', place: 'place', union: 'union', village: 'village', upazila: 'upazila', local: 'local name', 'market and post office': 'market and post office', market: 'market', 'post office': 'post office' },
+    recent: (n) => `Last area: ${n}`,
     denied: 'Location is not allowed. Turn on location in your phone settings, or type your area below.',
     unavailable: 'Could not get your location. Move to an open place and tap again, or type your area below.',
     timeout: 'Location is taking too long. Tap again, or type your area below.',
@@ -63,6 +68,7 @@ const T = {
       administrator_not_elected: 'Administrator' },
     foot1: 'All numbers come from official *.gov.bd websites. Each number links to its source. In danger, call 999 first.',
     foot2: 'Map data: upazila boundaries and union/town centre points from the Bangladesh Bureau of Statistics (BBS) via OCHA HDX (CC BY-IGO). Where BBS names do not match, the tools can add OpenStreetMap points (© OpenStreetMap contributors, ODbL).',
+    testsLink: 'Search tests (for developers)',
   },
 };
 const NATIONAL_EVERYWHERE = ['national-emergency-999', 'women-children-violence-109', 'child-helpline-1098', 'health-call-centre-16263', 'fire-service-102', 'info-service-333'];
@@ -100,50 +106,60 @@ function placeSub(p) {
   return parts.join(', ');
 }
 
-/* ---------- area search (Bangla or English, villages too; see findAreas in data.js) ---------- */
-function suggestTitle(h) {
-  if (h.kind === 'upazila') return `${upazilaName(h.place.district, h.place.upazila)} (${t().wholeUpazila})`;
-  if (h.kind === 'village') return `${h.name_bn} (${t().village})`;
-  if (h.kind === 'place') return lang === 'en' && h.name_en ? h.name_en : h.name_bn;
-  return areaName(h.place.area) + (h.kind === 'town' ? ` (${t().town})` : '');
+/* ---------- area search: any spelling, Bangla or English, never a dead end (design; search code in data.js) ---------- */
+function itemLabel(h) {
+  const p = { ...h.place };
+  const named = h.named && (lang === 'bn' ? h.named.name_bn : h.named.name_en || h.named.name_bn);
+  if (named) p.label = named;
+  const kindWord = (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
+  let title;
+  if (h.kind === 'village') title = h.village;
+  else if (named) title = named;
+  else if (h.place.area) title = areaName(h.place.area);
+  else title = upazilaName(p.district, p.upazila);
+  if (h.kind === 'village') p.label = `${h.village} (${kindWord})`;
+  const where = (h.kind === 'village' || h.kind === 'local') && h.place.area ? `${areaName(h.place.area)}, ` : '';
+  const ward = h.ward ? ` · ${t().ward} ${digits(h.ward)}` : '';
+  return { p, title: `${title} (${kindWord})`, sub: where + placeSub(p) + ward };
 }
-function suggestSub(h) {
-  if (h.kind !== 'village') return placeSub(h.place);
-  const union = lang === 'en' && h.union_en ? h.union_en : h.union_bn;
-  return [union, h.ward ? `${t().ward} ${digits(h.ward)}` : '', placeSub(h.place)].filter(Boolean).join(' · ');
+function suggestButton(h) {
+  const li = el('li');
+  const b = el('button'); b.type = 'button';
+  const { p, title, sub } = itemLabel(h);
+  b.append(el('b', null, title), el('span', null, sub));
+  b.addEventListener('click', () => openArea(p, null));
+  li.append(b);
+  return li;
 }
 function renderSuggest() {
   const q = $('areaInput').value;
   const box = $('suggest');
   if (norm(q).length < 2) { box.hidden = true; return; }
-  const hits = findAreas(areaIndex, q);
-  if (!hits.length) {
-    // BUILD_PLAN §4 rule 2: an unknown village never blocks the person.
-    const li = el('li', 'none', t().noMatch);
-    const b = el('button', 'btn', t().locate); b.type = 'button';
-    b.addEventListener('click', locate);
-    li.append(el('br'), b);
-    box.replaceChildren(li);
-    box.hidden = false;
-    return;
+  const { hits, close } = findAreas(areaIndex, q);
+  if (hits.length) { box.replaceChildren(...hits.map(suggestButton)); box.hidden = false; return; }
+  // Never a dead end: similar names, then the upazila list, then GPS and 999.
+  const s = t();
+  const parts = [el('li', 'none', close.length ? s.noExact : s.noMatch)];
+  if (close.length) { parts.push(el('li', 'group', s.didYouMean)); close.forEach((h) => parts.push(suggestButton(h))); }
+  const ups = el('li', 'fallback-box');
+  ups.append(el('p', null, s.pickUpazila));
+  const chips = el('div', 'chips');
+  for (const d of DISTRICTS) {
+    const doc = data.docs[d.key]; if (!doc) continue;
+    for (const u of upazilas(doc)) {
+      const c = el('button', 'chip', lang === 'bn' ? u.bn : u.en); c.type = 'button';
+      c.addEventListener('click', () => openArea({ district: d.key, upazila: u.en, area: null }, null));
+      chips.append(c);
+    }
   }
-  box.replaceChildren(...hits.map((h) => {
-    const li = el('li');
-    const b = el('button'); b.type = 'button';
-    const p = { ...h.place };
-    if (h.kind === 'place') p.label = suggestTitle(h);
-    if (h.kind === 'village') p.label = `${h.name_bn} (${lang === 'en' && h.union_en ? h.union_en : h.union_bn})`;
-    b.append(el('b', null, suggestTitle(h)), el('span', null, suggestSub(h)));
-    b.addEventListener('click', () => openArea(p, null));
-    li.append(b);
-    return li;
-  }));
-  // Similar-sounding names (e.g. Hasanpur / Hosenpur) may be a different village: always offer GPS too.
-  const notHere = el('li', 'none', t().notHere);
-  const gps = el('button', 'btn', t().locate); gps.type = 'button';
-  gps.addEventListener('click', locate);
-  notHere.append(' ', gps);
-  box.append(notHere);
+  ups.append(chips);
+  const row = el('div', 'tools');
+  const gps = el('button', 'btn violet', s.locate); gps.type = 'button'; gps.addEventListener('click', locate);
+  const call = el('a', 'btn', s.call999); call.href = 'tel:999';
+  row.append(gps, call);
+  ups.append(row, el('p', 'privacy', s.tellUs));
+  parts.push(ups);
+  box.replaceChildren(...parts);
   box.hidden = false;
 }
 
@@ -352,7 +368,7 @@ function setText() {
   $('backBtn').textContent = s.back; $('changeBtn').textContent = s.change;
   $('shareTitle').textContent = s.shareTitle; $('shareText').textContent = s.shareText;
   $('firstTitle').textContent = s.first; $('moreTitle').textContent = s.more;
-  $('foot1').textContent = s.foot1; $('foot2').textContent = s.foot2;
+  $('foot1').textContent = s.foot1; $('foot2').textContent = s.foot2; $('testsLink').textContent = s.testsLink;
 }
 
 $('locateBtn').addEventListener('click', locate);
