@@ -1,6 +1,6 @@
 {
  "note": "Local names people use (towns, markets, post offices, landmarks) that are not in the official area or village lists. Each entry needs either an official source_url, or source 'local name, added by the team' with the team member who confirmed it. Never guess a union or town: if it is not confirmed, leave union_bn and municipality_bn null (the site then shows the whole upazila). Used only by the area search; no phone numbers here.",
- "fields": "id, name_bn, name_en, type, district, upazila_en, municipality_bn, union_bn, source, added_by, added_on",
+ "fields": "id, name_bn, name_en, type, district, upazila_en, municipality_bn, union_bn, source, source_note, source_url, added_by, added_on",
  "aliases": [
   {
    "id": "alias-maijdee",
@@ -12,6 +12,21 @@
    "municipality_bn": "নোয়াখালী পৌরসভা",
    "union_bn": null,
    "source": "local name, added by the team",
+   "added_by": "jerin101",
+   "added_on": "2026-10-22"
+  },
+  {
+   "id": "alias-hasan-hat",
+   "name_bn": "হাসান হাট",
+   "name_en": "Hasan Hat",
+   "type": "market and post office",
+   "district": "Noakhali",
+   "upazila_en": "Begumganj",
+   "municipality_bn": null,
+   "union_bn": "শরীফপুর ইউনিয়ন",
+   "source": "local name, confirmed by resident",
+   "source_note": "Hasan Hat is a market (হাট/বাজার) and a post office in Sharifpur union, Begumganj; it is the post office of Babunagar. Confirmed by jerin101 (resident). The official Sharifpur page lists 1 market (হাট-বাজার) and 4 post offices (ডাকঘর) but gives no names.",
+   "source_url": "https://sharifpurup.noakhali.gov.bd/pages/static-pages/6990ef2935ce18e1c072be5f",
    "added_by": "jerin101",
    "added_on": "2026-10-22"
   }
