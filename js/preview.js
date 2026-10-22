@@ -35,6 +35,7 @@ const T = {
       administrator_not_elected: 'প্রশাসক' },
     foot1: 'সব নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া। প্রতিটি নম্বরের নিচে উৎসের লিংক আছে। বিপদে প্রথমে ৯৯৯।',
     foot2: 'ম্যাপ তথ্য: উপজেলার সীমানা ও ইউনিয়ন/পৌরসভার কেন্দ্রবিন্দু বাংলাদেশ পরিসংখ্যান ব্যুরো (BBS), OCHA HDX-এর মাধ্যমে (CC BY-IGO)। BBS-এর নাম না মিললে টুলগুলো OpenStreetMap-এর বিন্দু যোগ করতে পারে (© OpenStreetMap contributors, ODbL)।',
+    testsLink: 'সার্চ টেস্ট (ডেভেলপারদের জন্য)',
   },
   en: {
     lang: 'বাংলা', hello: 'Need help?',
@@ -67,6 +68,7 @@ const T = {
       administrator_not_elected: 'Administrator' },
     foot1: 'All numbers come from official *.gov.bd websites. Each number links to its source. In danger, call 999 first.',
     foot2: 'Map data: upazila boundaries and union/town centre points from the Bangladesh Bureau of Statistics (BBS) via OCHA HDX (CC BY-IGO). Where BBS names do not match, the tools can add OpenStreetMap points (© OpenStreetMap contributors, ODbL).',
+    testsLink: 'Search tests (for developers)',
   },
 };
 const NATIONAL_EVERYWHERE = ['national-emergency-999', 'women-children-violence-109', 'child-helpline-1098', 'health-call-centre-16263', 'fire-service-102', 'info-service-333'];
@@ -366,7 +368,7 @@ function setText() {
   $('backBtn').textContent = s.back; $('changeBtn').textContent = s.change;
   $('shareTitle').textContent = s.shareTitle; $('shareText').textContent = s.shareText;
   $('firstTitle').textContent = s.first; $('moreTitle').textContent = s.more;
-  $('foot1').textContent = s.foot1; $('foot2').textContent = s.foot2;
+  $('foot1').textContent = s.foot1; $('foot2').textContent = s.foot2; $('testsLink').textContent = s.testsLink;
 }
 
 $('locateBtn').addEventListener('click', locate);
