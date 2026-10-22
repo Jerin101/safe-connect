@@ -32510,8 +32510,8 @@
    "office_domain": "chowfaldandi.coxsbazar.gov.bd",
    "retrieved_on": "2026-10-21",
    "status": "collected_from_official_page",
-   "name_bn": "১, ২, ৩",
-   "designation_bn": "খতিজা বেগম",
+   "name_bn": "খতিজা বেগম",
+   "designation_bn": null,
    "ward_no": "3",
    "phones": [
     "01866145457"
@@ -32522,7 +32522,8 @@
    "source_last_updated": "2018-02-25",
    "flags": [
     "older_union_page",
-    "source_older_than_2_years"
+    "source_older_than_2_years",
+    "designation_missing"
    ],
    "script_check": {
     "on": "2026-10-21",
@@ -32611,8 +32612,8 @@
    "office_domain": "chowfaldandi.coxsbazar.gov.bd",
    "retrieved_on": "2026-10-21",
    "status": "collected_from_official_page",
-   "name_bn": "৪, ৫, ৬",
-   "designation_bn": "ছখিনা বেগম",
+   "name_bn": "ছখিনা বেগম",
+   "designation_bn": null,
    "ward_no": "6",
    "phones": [
     "01830225148"
@@ -32623,7 +32624,8 @@
    "source_last_updated": "2018-02-25",
    "flags": [
     "older_union_page",
-    "source_older_than_2_years"
+    "source_older_than_2_years",
+    "designation_missing"
    ],
    "script_check": {
     "on": "2026-10-21",
@@ -32745,8 +32747,8 @@
    "office_domain": "chowfaldandi.coxsbazar.gov.bd",
    "retrieved_on": "2026-10-21",
    "status": "collected_from_official_page",
-   "name_bn": "৭, ৮, ৯",
-   "designation_bn": "সাবিনা ইয়াছমিন",
+   "name_bn": "সাবিনা ইয়াছমিন",
+   "designation_bn": null,
    "ward_no": "9",
    "phones": [
     "01819339041"
@@ -32757,7 +32759,8 @@
    "source_last_updated": "2018-02-25",
    "flags": [
     "older_union_page",
-    "source_older_than_2_years"
+    "source_older_than_2_years",
+    "designation_missing"
    ],
    "script_check": {
     "on": "2026-10-21",
@@ -39870,7 +39873,8 @@
    "source_last_updated": "2025-03-04",
    "flags": [
     "older_union_page",
-    "designation_missing"
+    "designation_missing",
+    "needs_manual_check"
    ],
    "script_check": {
     "on": "2026-10-21",
