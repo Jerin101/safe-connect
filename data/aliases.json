@@ -1,0 +1,19 @@
+{
+ "note": "Local names people use (towns, markets, post offices, landmarks) that are not in the official area or village lists. Each entry needs either an official source_url, or source 'local name, added by the team' with the team member who confirmed it. Never guess a union or town: if it is not confirmed, leave union_bn and municipality_bn null (the site then shows the whole upazila). Used only by the area search; no phone numbers here.",
+ "fields": "id, name_bn, name_en, type, district, upazila_en, municipality_bn, union_bn, source, added_by, added_on",
+ "aliases": [
+  {
+   "id": "alias-maijdee",
+   "name_bn": "মাইজদী",
+   "name_en": "Maijdee",
+   "type": "local name",
+   "district": "Noakhali",
+   "upazila_en": "Noakhali Sadar",
+   "municipality_bn": "নোয়াখালী পৌরসভা",
+   "union_bn": null,
+   "source": "local name, added by the team",
+   "added_by": "jerin101",
+   "added_on": "2026-10-22"
+  }
+ ]
+}
