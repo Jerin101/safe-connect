@@ -8,9 +8,12 @@ Output per district: contacts_<district>.json with
 FIELD NOTES
   status   collected_from_official_page until a person checks it, then verified
   flags    number_not_published, administrator_not_elected, number_shared_by_several_records,
-           designation_missing, source_older_than_2_years, older_union_page
+           designation_missing, source_older_than_2_years, older_union_page, needs_manual_check
+Every district file is finally cleaned by clean_contacts.py (issue #20).
 """
-import collections as C, datetime, hashlib, json, re, sys, unicodedata as U
+import collections as C, datetime, hashlib, json, os, re, sys, unicodedata as U
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from clean_contacts import clean_doc
 
 def load(path):
     with open(path, encoding="utf-8") as f:
@@ -127,10 +130,13 @@ for r in municipal:
 
 for dist, recs in out.items():
     vs = list({(v["village_bn"], v["union_bn"], v["ward_no"]): v for v in villages[dist]}.values())
+    doc = {"district": dist, "retrieved_on": raw["retrieved_on"],
+           "status_meaning": "collected_from_official_page = copied by script from the official *.gov.bd page in source_url; a human spot-check changes it to verified.",
+           "unions": union_index[dist], "municipalities": list(municipality_index[dist].values()),
+           "records": recs, "villages": vs}
+    cleaned = clean_doc(doc)
     with open(f"{OUT}/{FILES[dist]}", "w", encoding="utf-8") as f:
-        json.dump({"district": dist, "retrieved_on": raw["retrieved_on"],
-                   "status_meaning": "collected_from_official_page = copied by script from the official *.gov.bd page in source_url; a human spot-check changes it to verified.",
-                   "unions": union_index[dist], "municipalities": list(municipality_index[dist].values()),
-                   "records": recs, "villages": vs}, f, ensure_ascii=False, indent=1)
-    print(dist, len(recs), "records,", len(vs), "villages,", C.Counter(r["category"] for r in recs).most_common())
+        json.dump(doc, f, ensure_ascii=False, indent=1)
+    print(dist, len(doc["records"]), "records,", len(vs), "villages,", C.Counter(r["category"] for r in doc["records"]).most_common())
+    print("  cleaned:", dict(cleaned))
 print("dropped:", dict(dropped))
