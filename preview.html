@@ -321,6 +321,31 @@
 
   @media (prefers-reduced-motion: reduce) { details.cat > summary::after { transition: none; } }
 
+  /* about */
+  .about { display: grid; gap: 22px; padding-block: 8px; }
+  @media (min-width: 860px) { .about { grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: start; } }
+  .about h2 { font-size: clamp(1.45rem, 4vw, 1.9rem); }
+  .about .intro { display: grid; gap: 10px; }
+  .about .intro p { color: var(--muted); max-width: 46ch; }
+  .points { display: grid; gap: 0; border-top: 1px solid var(--glass-line); }
+  .point { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; padding-block: 16px; border-bottom: 1px solid var(--glass-line); }
+  .point .ic { grid-row: span 2; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--chip); color: var(--accent); }
+  .point .ic svg { width: 20px; height: 20px; }
+  .point b { font-weight: 700; }
+  .point span { color: var(--muted); font-size: 0.94rem; }
+
+  /* faq */
+  .faq { display: grid; gap: 14px; }
+  @media (min-width: 860px) { .faq { grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: start; } }
+  .faq h2 { font-size: clamp(1.45rem, 4vw, 1.9rem); }
+  .faq-list { border-top: 1px solid var(--glass-line); }
+  .faq-list details { border-bottom: 1px solid var(--glass-line); }
+  .faq-list summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 16px; padding-block: 16px; font-weight: 600; }
+  .faq-list summary::-webkit-details-marker { display: none; }
+  .faq-list summary::after { content: "+"; color: var(--accent); font-size: 1.3rem; line-height: 1; }
+  .faq-list details[open] summary::after { content: "−"; }
+  .faq-list p { color: var(--muted); padding-bottom: 16px; max-width: 60ch; }
+
   /* our additions: no inline styles, source line on call rows, simple footer (replaced by the full footer later) */
   .home-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; padding-bottom: 40px; }
   .quick { display: grid; gap: 14px; }
@@ -417,11 +442,21 @@
         <div class="places" id="places"></div>
       </section>
 
+      <section class="about" id="about" aria-labelledby="aboutTitle">
+        <div class="intro"><p class="eyebrow" id="aboutEyebrow"></p><h2 id="aboutTitle"></h2><p id="aboutText"></p></div>
+        <div class="points" id="points"></div>
+      </section>
+
       <section class="band glass" aria-labelledby="ctaTitle">
         <p class="eyebrow" id="ctaEyebrow"></p>
         <h2 id="ctaTitle"></h2>
         <p id="ctaText"></p>
         <button class="whitepill" id="ctaBtn" type="button"><span id="ctaBtnText"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></button>
+      </section>
+
+      <section class="faq" id="faq" aria-labelledby="faqTitle">
+        <div><p class="eyebrow" id="faqEyebrow"></p><h2 id="faqTitle"></h2></div>
+        <div class="faq-list" id="faqList"></div>
       </section>
 
     </div>

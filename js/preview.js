@@ -608,18 +608,65 @@ $('ctaBtn').addEventListener('click', () => { openSos(null); $('peopleBox').open
 
 
 const PAGE = {
-  bn: { nav: ['হোম', 'এলাকা খুঁজুন', 'প্রিয়জনকে লোকেশন'] },
-  en: { nav: ['Home', 'Find area', 'Send location'] },
+  bn: {
+    nav: ['হোম', 'এলাকা খুঁজুন', 'প্রিয়জনকে লোকেশন', 'আমাদের সম্পর্কে'],
+    about: { eyebrow: 'আমাদের সম্পর্কে', title: 'SafeConnect কী?',
+      text: 'বিপদের সময় কাকে ফোন করবেন, খুঁজতেই সময় চলে যায়। SafeConnect আপনার অবস্থান দেখে কাছের থানা, ইউনিয়ন পরিষদ, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর ঠিক ক্রমে দেখায়। এখন নোয়াখালী ও কক্সবাজারে, পরে সারা দেশে।',
+      points: [['check', 'শুধু সরকারি নম্বর', 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া, উৎসের লিংকসহ। প্রতি সপ্তাহে আবার যাচাই হয়।'],
+        ['signal', 'ইন্টারনেট ছাড়াও চলে', 'লোকেশন খোঁজা, নম্বর দেখা আর SMS পাঠানো দুর্বল নেটওয়ার্কেও কাজ করে।'],
+        ['lock', 'লগইন লাগে না', 'প্রিয়জনের নম্বর শুধু আপনার ফোনে থাকে। আমরা কোনো ব্যক্তিগত তথ্য সংগ্রহ করি না।']] },
+    faq: { eyebrow: 'প্রশ্ন ও উত্তর', title: 'যা জানতে চান',
+      items: [['source', 'নম্বরগুলো কোথা থেকে আসে?', 'জেলা, উপজেলা, ইউনিয়ন ও পৌরসভার সরকারি ওয়েবসাইট (*.gov.bd) থেকে। প্রতিটি নম্বরের নিচে উৎসের লিংক ও যাচাইয়ের তারিখ আছে।'],
+        ['wrong', 'কোনো নম্বর ভুল হলে কী করব?', 'নিচের "ভুল নম্বর জানান" লিংকে জানান। আমরা সরকারি উৎস মিলিয়ে ঠিক করি। জরুরি হলে আগে ৯৯৯-এ কল করুন।'],
+        ['offline', 'ইন্টারনেট না থাকলে কাজ করবে?', 'আংশিক। আপনার অবস্থান থেকে এলাকা খোঁজা ইন্টারনেট ছাড়াই হয়, আর SMS-এ ইন্টারনেট লাগে না। পুরো সাইট অফলাইনে চালানোর অংশ (অফলাইন অ্যাপ) এখন তৈরি হচ্ছে।'],
+        ['privacy', 'আমার তথ্য কোথায় যায়?', 'কোথাও না। প্রিয়জনের নম্বর ও শেষ দেখা এলাকা শুধু আপনার ফোনের ব্রাউজারে থাকে। লোকেশন যায় শুধু আপনি পাঠালে।'],
+        ['districts', 'অন্য জেলা কবে আসবে?', 'এখন নোয়াখালী ও কক্সবাজার। তথ্য যাচাই শেষ হলে ধাপে ধাপে বাকি জেলা আসবে। ৯৯৯, ১০৯, ৩৩৩-এর মতো জাতীয় নম্বর সারা দেশে কাজ করে।']] },
+  },
+  en: {
+    nav: ['Home', 'Find area', 'Send location', 'About'],
+    about: { eyebrow: 'About', title: 'What is SafeConnect?',
+      text: 'In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox\'s Bazar now, the whole country later.',
+      points: [['check', 'Official numbers only', 'Every number comes from an official *.gov.bd website, with its source link. All numbers are re-checked every week.'],
+        ['signal', 'Works without internet', 'Finding your location, seeing numbers and sending SMS work even on a weak network.'],
+        ['lock', 'No login', 'Your family\'s numbers stay on your phone. We collect no personal data.']] },
+    faq: { eyebrow: 'Questions', title: 'Good to know',
+      items: [['source', 'Where do the numbers come from?', 'From the official websites (*.gov.bd) of districts, upazilas, unions and municipalities. Each number shows its source link and check date.'],
+        ['wrong', 'What if a number is wrong?', 'Tell us with "Report a wrong number" below. We fix it against the official source. In an emergency, call 999 first.'],
+        ['offline', 'Does it work without internet?', 'Partly. Finding your area from your location works without internet, and SMS needs no internet. Making the whole site work offline (the offline app) is being built now.'],
+        ['privacy', 'Where does my data go?', 'Nowhere. Your family\'s numbers and last area stay in your phone\'s browser. Your location is sent only when you send it.'],
+        ['districts', 'When will other districts come?', 'Noakhali and Cox\'s Bazar now. More districts come step by step once their data is checked. National numbers like 999, 109 and 333 work everywhere.']] },
+  },
 };
 const P = () => PAGE[lang];
+const MORE_ICONS = {
+  signal: 'M2 9.5a15 15 0 0 1 20 0l-1.4 1.4a13 13 0 0 0-17.2 0L2 9.5Zm3.5 3.5a10 10 0 0 1 13 0l-1.4 1.4a8 8 0 0 0-10.2 0L5.5 13Zm3.5 3.5a5 5 0 0 1 6 0L12 19.5l-3-3Z',
+  lock: 'M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3Z',
+};
+function goTo(id) { goHome(); setTimeout(() => $(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30); }
 function findArea(district) { goHome(); $('distSel').value = district || ''; setTimeout(() => { $('areaInput').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('areaInput').focus({ preventScroll: true }); }, 30); renderSuggest(); }
+function openFaq(key) { goTo('faq'); const d = document.querySelector(`#faqList details[data-key="${key}"]`); if (d) d.open = true; }
 const textBtn = (label, fn) => { const b = el('button', null, label); b.type = 'button'; b.addEventListener('click', fn); return b; };
 
 function renderNav() {
-  const [home, area, send] = P().nav;
-  $('nav').replaceChildren(textBtn(home, goHome), textBtn(area, () => findArea('')), textBtn(send, () => openSos(null)));
+  const [home, area, send, about] = P().nav;
+  $('nav').replaceChildren(textBtn(home, goHome), textBtn(area, () => findArea('')), textBtn(send, () => openSos(null)), textBtn(about, () => goTo('about')));
 }
-function renderPage() { renderNav(); }
+function renderAbout() {
+  const a = P().about;
+  $('aboutEyebrow').textContent = a.eyebrow; $('aboutTitle').textContent = a.title; $('aboutText').textContent = a.text;
+  $('points').replaceChildren(...a.points.map(([ic, title, text]) => {
+    const d = el('div', 'point'); const i = el('span', 'ic'); i.append(svg(MORE_ICONS[ic] || ICONS[ic]));
+    d.append(i, el('b', null, title), el('span', null, text)); return d;
+  }));
+}
+function renderFaq() {
+  const f = P().faq;
+  $('faqEyebrow').textContent = f.eyebrow; $('faqTitle').textContent = f.title;
+  $('faqList').replaceChildren(...f.items.map(([key, q, a]) => {
+    const d = el('details'); d.dataset.key = key; d.append(el('summary', null, q), el('p', null, a)); return d;
+  }));
+}
+function renderPage() { renderNav(); renderAbout(); renderFaq(); }
 
 /* ---------- text ---------- */
 function setText() {
