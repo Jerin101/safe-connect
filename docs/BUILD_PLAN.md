@@ -92,9 +92,11 @@ Website loads data/*.json → service worker caches it for offline use
 | Flag | What the card shows |
 |---|---|
 | `number_not_published` | "নম্বর সরকারি সাইটে প্রকাশিত নেই" (number not published on the government site), plus the next contact in the fallback chain |
-| `source_older_than_2_years` / `older_union_page` | Small "may be outdated" label |
+| `source_older_than_2_years` / `older_union_page` | Small "may be outdated" label. `older_union_page` means the record comes from a union's older "emergency contacts" page, whatever that page's date is |
 | `administrator_not_elected` | "প্রশাসক" badge (the union is run by an appointed administrator) |
 | `number_shared_by_several_records` | Show it as an office number |
+| `designation_missing` | Nothing extra; the card shows the category (e.g. village police) instead of a job title |
+| `needs_manual_check` | A number on the official page was broken (a date, or too short) and was removed. Show the remaining numbers and the fallback chain; a person must re-check the source page |
 
 ---
 
