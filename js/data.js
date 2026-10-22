@@ -162,6 +162,107 @@ export function areaContacts(data, place) {
   return groups;
 }
 
+// ---------- Area search: Bangla or English, any common spelling ----------
+// Village names exist only in Bangla, and people spell places in many ways (হাসানপুর / হাছানপুর / Hasanpur).
+// So both the name and the typed text become a "sound key" made of the main consonants:
+// হাসানপুর -> hsnpr, Hasanpur -> hsnpr. Vowels are left out, similar letters count as one.
+
+const BN_SOUND = {
+  'ক': 'k', 'খ': 'k', 'গ': 'g', 'ঘ': 'g', 'ঙ': 'ng', 'চ': 'c', 'ছ': 'c', 'জ': 'j', 'ঝ': 'j', 'ঞ': 'n', 'ট': 't', 'ঠ': 't',
+  'ড': 'd', 'ঢ': 'd', 'ণ': 'n', 'ত': 't', 'থ': 't', 'দ': 'd', 'ধ': 'd', 'ন': 'n', 'প': 'p', 'ফ': 'f', 'ব': 'b', 'ভ': 'b',
+  'ম': 'm', 'য': 'j', 'র': 'r', 'ল': 'l', 'শ': 's', 'ষ': 's', 'স': 's', 'হ': 'h', 'ৎ': 't', 'ং': 'ng', 'ঋ': 'r', 'ৃ': 'r',
+};
+const collapse = (s) => s.replace(/(.)\1+/g, '$1');
+
+function bnSound(word, chho) {
+  const w = norm(word).replace(/[ডঢ]়/g, 'র').replace(/য়/g, '');   // ড় ঢ় -> r, য় -> (vowel)
+  let out = '';
+  for (const ch of w) out += ch === 'ছ' ? chho : (BN_SOUND[ch] || '');
+  return collapse(out);
+}
+
+function enSound(word) {
+  let s = word.toLowerCase().replace(/[^a-z]/g, '');
+  s = s.replace(/chh|ch/g, 'C').replace(/sh/g, 's').replace(/kh/g, 'k').replace(/gh/g, 'g').replace(/th/g, 't')
+    .replace(/dh/g, 'd').replace(/ph/g, 'f').replace(/bh/g, 'b').replace(/jh/g, 'j')
+    .replace(/x/g, 'ks').replace(/q/g, 'k').replace(/z/g, 'j').replace(/v/g, 'b').replace(/c/g, 'k').replace(/C/g, 'c')
+    .replace(/[aeiouwy]/g, '');
+  return collapse(s);
+}
+
+// All sound keys of a text (ছ is read as "ch" and as "s", because both spellings are used for the same names).
+export function soundKeys(text) {
+  const words = norm(text).split(/[\s,()\-–]+/).filter(Boolean);
+  const keys = new Set();
+  for (const chho of ['c', 's']) {
+    const parts = words.map((w) => (/[ঀ-৿]/.test(w) ? bnSound(w, chho) : enSound(w))).filter(Boolean);
+    if (parts.length) { keys.add(parts.join('')); parts.forEach((p) => keys.add(` ${p}`)); }   // " x" = one word
+  }
+  return [...keys];
+}
+
+// Ward texts, house names, and a direction word alone ("পূর্ব" = east) are not village names.
+const NOT_A_VILLAGE = new RegExp(`${norm('ওয়ার্ড|নং|বাড়ি|বাড়ী')}|^[\\s০-৯0-9]+$|^${norm('(পূর্ব|পশ্চিম|উত্তর|দক্ষিণ|দক্ষিন|মধ্য)')}$`);
+
+// Every searchable place in the loaded districts: upazilas, unions, towns, named places and villages.
+export function areaIndex(data) {
+  const items = [];
+  const push = (kind, place, nameBn, nameEn, extra = {}) => {
+    const text = norm(`${nameBn || ''} ${nameEn || ''}`).toLowerCase();
+    items.push({ kind, place, name_bn: norm(nameBn), name_en: nameEn || null, text, keys: soundKeys(`${nameBn || ''}`).concat(nameEn ? soundKeys(nameEn) : []), ...extra });
+  };
+  for (const d of DISTRICTS) {
+    const doc = data.docs[d.key];
+    if (!doc) continue;
+    const ups = upazilas(doc);
+    const upByBn = new Map(ups.map((u) => [norm(u.bn), u.en]));
+    for (const u of ups) {
+      push('upazila', { district: d.key, upazila: u.en, area: null }, u.bn, u.en);
+      for (const a of localAreas(doc, u.en)) {
+        push(a.type === 'municipality' ? 'town' : 'union', { district: d.key, upazila: u.en, area: a }, a.bn.split(/[,،]/)[0], a.en);
+      }
+    }
+    for (const p of doc.places || []) {
+      const upz = upByBn.get(norm(p.upazila_bn));
+      if (upz) push('place', { district: d.key, upazila: upz, area: { type: 'union', bn: norm(p.union_bn) }, placeId: p.id }, p.name_bn, p.name_en);
+    }
+    const seen = new Set();
+    for (const v of doc.villages || []) {
+      const name = norm(v.village_bn);
+      const upz = upByBn.get(norm(v.upazila_bn));
+      const id = `${name}|${norm(v.union_bn)}`;
+      if (!upz || NOT_A_VILLAGE.test(name) || seen.has(id)) continue;
+      seen.add(id);
+      const area = localAreas(doc, upz).find((a) => a.type === 'union' && a.bn === norm(v.union_bn)) || { type: 'union', bn: norm(v.union_bn), en: v.union_en };
+      push('village', { district: d.key, upazila: upz, area }, name, null, { ward: v.ward_no, union_bn: norm(v.union_bn), union_en: v.union_en });
+    }
+  }
+  return items;
+}
+
+const KIND_ORDER = { upazila: 0, town: 1, union: 2, place: 3, village: 4 };
+
+// Best matches for what the person typed, in Bangla or English. [] if nothing fits.
+export function findAreas(index, query, limit = 10) {
+  const q = norm(query).toLowerCase();
+  if (q.length < 2) return [];
+  const qKeys = soundKeys(q).filter((k) => !k.startsWith(' ') && k.length >= 2);   // 2 letters: exact match only
+  const longKeys = qKeys.filter((k) => k.length >= 3);                              // 3+ letters: also "starts with"
+  const scored = [];
+  for (const item of index) {
+    let score = null;
+    if (item.text.split(/\s+/).some((w) => w.startsWith(q))) score = 0;
+    else if (item.text.includes(q)) score = 1;
+    else if (qKeys.length) {
+      if (item.keys.some((k) => qKeys.includes(k.trim()))) score = 2;
+      else if (item.keys.some((k) => longKeys.some((qk) => k.trim().startsWith(qk)))) score = 3;
+    }
+    if (score !== null) scored.push({ item, score });
+  }
+  scored.sort((a, b) => a.score - b.score || KIND_ORDER[a.item.kind] - KIND_ORDER[b.item.kind]);
+  return scored.slice(0, limit).map((s) => s.item);
+}
+
 export function search(data, query, limit = 40) {
   const q = norm(toAsciiDigits(query)).toLowerCase();
   if (q.length < 2) return [];

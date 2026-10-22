@@ -1,6 +1,6 @@
 // Logic for preview.html (P23, P26): home with two big actions + area search, area page with a call-first list.
 // The real site (index.html, pages/) is built in P20-P36. Location is read only after a tap (CLAUDE.md rule 5).
-import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm } from './data.js';
+import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
 
 const T = {
@@ -9,8 +9,9 @@ const T = {
     call999: '৯৯৯-এ কল করুন', call999Sub: 'পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স · বিনা খরচে',
     locate: 'আমার কাছের সাহায্য', locateSub: 'আপনার এলাকার থানা, চেয়ারম্যান ও গ্রাম পুলিশের নম্বর · ইন্টারনেট ছাড়াও চলে',
     locating: 'আপনার অবস্থান খোঁজা হচ্ছে…', or: 'অথবা',
-    areaLabel: 'এলাকার নাম লিখুন', areaHint: 'ইউনিয়ন, পৌরসভা বা উপজেলা। যেমন: চৌমুহনী, হাতিয়া, ইনানী',
-    noMatch: 'এই নামে কিছু পাওয়া যায়নি। অন্য বানানে লিখুন।', recent: (n) => `আগের এলাকা: ${n}`,
+    areaLabel: 'এলাকার নাম লিখুন', areaHint: 'গ্রাম, ইউনিয়ন, পৌরসভা বা উপজেলা — বাংলা বা ইংরেজিতে। যেমন: চৌমুহনী, Hatiya, ইনানী',
+    noMatch: 'এই নামের গ্রাম বা এলাকা সরকারি তালিকায় পাওয়া যায়নি। আপনার ইউনিয়ন বা উপজেলার নাম লিখুন, অথবা নিচের বোতাম চাপুন।',
+    village: 'গ্রাম', notHere: 'আপনার জায়গা তালিকায় নেই?', recent: (n) => `আগের এলাকা: ${n}`,
     denied: 'লোকেশনের অনুমতি নেই। ফোনের সেটিংসে লোকেশন চালু করুন, অথবা নিচে এলাকার নাম লিখুন।',
     unavailable: 'লোকেশন পাওয়া যায়নি। খোলা জায়গায় গিয়ে আবার চাপুন, অথবা নিচে এলাকার নাম লিখুন।',
     timeout: 'লোকেশন পেতে দেরি হচ্ছে। আবার চাপুন, অথবা নিচে এলাকার নাম লিখুন।',
@@ -38,8 +39,9 @@ const T = {
     call999: 'Call 999', call999Sub: 'Police, fire service, ambulance · free',
     locate: 'Find help near me', locateSub: 'Numbers for your police station, chairman and village police · works without internet',
     locating: 'Finding your location…', or: 'or',
-    areaLabel: 'Type your area', areaHint: 'Union, town or upazila. For example: Chowmuhani, Hatiya, Inani',
-    noMatch: 'Nothing found with this name. Try another spelling.', recent: (n) => `Last area: ${n}`,
+    areaLabel: 'Type your area', areaHint: 'Village, union, town or upazila, in Bangla or English. For example: Chowmuhani, হাতিয়া, Inani',
+    noMatch: "This village or area isn't in the official lists. Type your union or upazila, or tap the button below.",
+    village: 'village', notHere: 'Your place is not in the list?', recent: (n) => `Last area: ${n}`,
     denied: 'Location is not allowed. Turn on location in your phone settings, or type your area below.',
     unavailable: 'Could not get your location. Move to an open place and tap again, or type your area below.',
     timeout: 'Location is taking too long. Tap again, or type your area below.',
@@ -98,53 +100,50 @@ function placeSub(p) {
   return parts.join(', ');
 }
 
-/* ---------- area search ---------- */
-function buildIndex() {
-  areaIndex = [];
-  for (const d of DISTRICTS) {
-    const doc = data.docs[d.key];
-    if (!doc) continue;
-    for (const u of upazilas(doc)) {
-      areaIndex.push({ place: { district: d.key, upazila: u.en, area: null }, words: norm(`${u.bn} ${u.en}`).toLowerCase() });
-      for (const a of localAreas(doc, u.en)) {
-        areaIndex.push({ place: { district: d.key, upazila: u.en, area: a }, words: norm(`${a.bn} ${a.en || ''}`).toLowerCase() });
-      }
-    }
-    for (const p of doc.places || []) {
-      const upz = upazilas(doc).find((u) => norm(u.bn) === norm(p.upazila_bn));
-      if (upz) areaIndex.push({ place: { district: d.key, upazila: upz.en, area: { type: 'union', bn: norm(p.union_bn) }, label: null, placeId: p.id },
-        words: norm(`${p.name_bn} ${p.name_en}`).toLowerCase(), named: p });
-    }
-  }
+/* ---------- area search (Bangla or English, villages too; see findAreas in data.js) ---------- */
+function suggestTitle(h) {
+  if (h.kind === 'upazila') return `${upazilaName(h.place.district, h.place.upazila)} (${t().wholeUpazila})`;
+  if (h.kind === 'village') return `${h.name_bn} (${t().village})`;
+  if (h.kind === 'place') return lang === 'en' && h.name_en ? h.name_en : h.name_bn;
+  return areaName(h.place.area) + (h.kind === 'town' ? ` (${t().town})` : '');
 }
-function findAreas(q) {
-  const s = norm(q).toLowerCase();
-  if (s.length < 2) return [];
-  const starts = [], contains = [];
-  for (const item of areaIndex) {
-    const w = item.words.split(/\s+/);
-    if (w.some((x) => x.startsWith(s))) starts.push(item);
-    else if (item.words.includes(s)) contains.push(item);
-  }
-  return [...starts, ...contains].slice(0, 8);
+function suggestSub(h) {
+  if (h.kind !== 'village') return placeSub(h.place);
+  const union = lang === 'en' && h.union_en ? h.union_en : h.union_bn;
+  return [union, h.ward ? `${t().ward} ${digits(h.ward)}` : '', placeSub(h.place)].filter(Boolean).join(' · ');
 }
 function renderSuggest() {
   const q = $('areaInput').value;
   const box = $('suggest');
-  const hits = findAreas(q);
   if (norm(q).length < 2) { box.hidden = true; return; }
-  if (!hits.length) { box.replaceChildren(el('li', 'none', t().noMatch)); box.hidden = false; return; }
+  const hits = findAreas(areaIndex, q);
+  if (!hits.length) {
+    // BUILD_PLAN §4 rule 2: an unknown village never blocks the person.
+    const li = el('li', 'none', t().noMatch);
+    const b = el('button', 'btn', t().locate); b.type = 'button';
+    b.addEventListener('click', locate);
+    li.append(el('br'), b);
+    box.replaceChildren(li);
+    box.hidden = false;
+    return;
+  }
   box.replaceChildren(...hits.map((h) => {
     const li = el('li');
     const b = el('button'); b.type = 'button';
     const p = { ...h.place };
-    if (h.named) p.label = lang === 'bn' ? h.named.name_bn : h.named.name_en;
-    b.append(el('b', null, h.place.area ? (p.label || areaName(h.place.area)) + (h.place.area.type === 'municipality' && lang === 'en' ? ` (${t().town})` : '') : `${upazilaName(p.district, p.upazila)} (${t().wholeUpazila})`),
-      el('span', null, placeSub(p)));
+    if (h.kind === 'place') p.label = suggestTitle(h);
+    if (h.kind === 'village') p.label = `${h.name_bn} (${lang === 'en' && h.union_en ? h.union_en : h.union_bn})`;
+    b.append(el('b', null, suggestTitle(h)), el('span', null, suggestSub(h)));
     b.addEventListener('click', () => openArea(p, null));
     li.append(b);
     return li;
   }));
+  // Similar-sounding names (e.g. Hasanpur / Hosenpur) may be a different village: always offer GPS too.
+  const notHere = el('li', 'none', t().notHere);
+  const gps = el('button', 'btn', t().locate); gps.type = 'button';
+  gps.addEventListener('click', locate);
+  notHere.append(' ', gps);
+  box.append(notHere);
   box.hidden = false;
 }
 
@@ -377,7 +376,7 @@ $('themeBtn').addEventListener('click', () => {
 setText();
 try {
   [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
-  buildIndex();
+  areaIndex = buildAreaIndex(data);
   renderRecent();
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);
