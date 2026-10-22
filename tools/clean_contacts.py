@@ -19,9 +19,9 @@ import collections as C, json, re, sys, unicodedata as U
 
 N = lambda s: " ".join(U.normalize("NFC", s or "").replace("‍", "").replace("‌", "").split())
 DIGITS = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
-ONLY_NUMBER = re.compile(r"[০-৯0-9 ]+")
-DATE = re.compile(r"(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])(19|20)\d\d")
-MOBILE = re.compile(r"01[3-9]\d{8}")
+ONLY_NUMBER = re.compile(r"[০-৯0-9 ,.()\-]+")                 # also ward lists like "১, ২, ৩"
+DATE = re.compile(r"(0[1-9]|[12][0-9]|3[01])(0[1-9]|1[0-2])(19|20)[0-9][0-9]")   # [0-9]: \d would accept Bangla digits
+MOBILE = re.compile(r"01[3-9][0-9]{8}")
 EMAIL = re.compile(r"[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}")
 GLUED_ID = re.compile(r"\s*[(\-–]\s*[০-৯0-9]{3,}\s*\)?$")
 REPEATED_SIGNS = re.compile(r"([া-ৌৗ])[া-ৌৗ]+")
@@ -51,7 +51,9 @@ def is_title(s):
 def phone_ok(p):
     if DATE.fullmatch(p):
         return False
-    return bool(MOBILE.fullmatch(p)) if p.startswith("01") else 9 <= len(p) <= 11
+    if p.startswith("01"):
+        return bool(MOBILE.fullmatch(p))
+    return bool(re.fullmatch(r"[0-9]{9,11}", p))
 
 
 def fix_names(r, report):
@@ -90,6 +92,9 @@ def fix_names(r, report):
     elif name and new_name != name:
         report["name tidied (ID number, vowel signs)"] += 1
     r["name_bn"], r["designation_bn"] = new_name, new_des
+    if not new_name and not new_des and "needs_manual_check" not in r["flags"]:
+        r["flags"].append("needs_manual_check")                    # nothing tells who this number belongs to
+        report["no name and no title (flagged)"] += 1
     if new_des and "designation_missing" in r["flags"]:
         r["flags"].remove("designation_missing")
     if not new_des and "designation_missing" not in r["flags"]:
