@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SafeConnect search tests</title>
+<style>
+  :root { --bg: #ffffff; --ink: #15142b; --muted: #585c78; --pass: #17794a; --fail: #c3122f; --pending: #8a5300; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0c0b1e; --ink: #f0efff; --muted: #a4a6c6; --pass: #5fd39a; --fail: #ff3d5e; --pending: #ffc266; } }
+  body { margin: 0; padding: 16px; background: var(--bg); color: var(--ink); font-family: system-ui, "Noto Sans Bengali", sans-serif; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--muted); vertical-align: top; }
+  .PASS { color: var(--pass); font-weight: 700; } .FAIL { color: var(--fail); font-weight: 700; } .PENDING { color: var(--pending); font-weight: 700; }
+  #summary { font-size: 1.2rem; font-weight: 700; }
+</style>
+</head>
+<body>
+<h1>Area search tests</h1>
+<p>Run the site with <code>python -m http.server 8000</code> in the project folder, then open <code>http://localhost:8000/tests/search-test.html</code>.</p>
+<p id="summary" aria-live="polite">Running…</p>
+<table>
+  <thead><tr><th scope="col">Result</th><th scope="col">Typed</th><th scope="col">Expected</th><th scope="col">Got (first results)</th></tr></thead>
+  <tbody id="rows"></tbody>
+</table>
+<script type="module" src="search-test.js"></script>
+</body>
+</html>

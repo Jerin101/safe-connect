@@ -23,9 +23,11 @@ const noManual = { records: [], places: [] };
 // A district file that fails to load is left out (listed in `missing`), so the
 // national hotlines and the other district still work.
 export async function loadAll(base = 'data/') {
-  const [national, manual, ...files] = await Promise.all([
+  const [national, manual, villages, aliases, ...files] = await Promise.all([
     getJSON(`${base}national_hotlines.json`),
     getJSON(`${base}manual_additions.json`).catch(() => noManual),
+    getJSON(`${base}villages.json`).catch(() => ({ unions: [] })),       // official village lists (optional)
+    getJSON(`${base}aliases.json`).catch(() => ({ aliases: [] })),       // local names added by the team (optional)
     ...DISTRICTS.map((d) => getJSON(base + d.file).catch(() => null)),
   ]);
   const docs = {};
@@ -40,7 +42,11 @@ export async function loadAll(base = 'data/') {
   });
   const nationalCards = national.records.map((r) => nationalCard(r, national.retrieved_on));
   for (const c of nationalCards) c._text = norm([c.name_bn, c.name_en, c.designation_bn, ...c.phones].join(' ')).toLowerCase();
-  return { national: nationalCards, docs, missing };
+  // villages.json lists the villages per union: [[village_bn, ward_no], ...] with one source page per union.
+  const officialVillages = (villages.unions || []).flatMap((u) => u.villages.map(([name, ward]) => ({
+    district: u.district, upazila_bn: u.upazila_bn, union_bn: u.union_bn, union_en: u.union_en,
+    village_bn: name, ward_no: ward, source_url: u.source_url })));
+  return { national: nationalCards, docs, missing, villages: officialVillages, aliases: aliases.aliases || [] };
 }
 
 function nationalCard(r, checkedOn) {
@@ -160,6 +166,164 @@ export function areaContacts(data, place) {
   // Last step of the fallback chain (BUILD_PLAN §4): 333 gives the numbers of officials and representatives.
   add('info333', nat('info-service-333'));
   return groups;
+}
+
+// ---------- Area search: any spelling, Bangla or English, never a dead end (issue #36) ----------
+// From the latest design. Sound key: Bangla and typed English both become a consonant skeleton, so
+// "hasanhat", "hason haat" and "হাসান হাট" all become "hsnht", and "Hasanpur" / "হাছানপুর" become "hsnpr".
+// A real match is the same text, or the same sound with 4+ letters. A close spelling is only a
+// "similar name": it must start with the same sound and match the whole name, never one word inside it
+// (so "maijdee" does not find "দক্ষিন চর মজিদ", and "babunagar" does not find "মনিনগর").
+
+const BN_LAT = { 'ক': 'k', 'খ': 'k', 'গ': 'g', 'ঘ': 'g', 'ঙ': 'ng', 'চ': 'c', 'ছ': 's', 'জ': 'j', 'ঝ': 'j', 'ঞ': 'n', 'ট': 't', 'ঠ': 't',
+  'ড': 'd', 'ঢ': 'd', 'ণ': 'n', 'ত': 't', 'থ': 't', 'দ': 'd', 'ধ': 'd', 'ন': 'n', 'প': 'p', 'ফ': 'f', 'ব': 'b', 'ভ': 'b', 'ম': 'm',
+  'য': 'j', 'র': 'r', 'ল': 'l', 'শ': 's', 'ষ': 's', 'স': 's', 'হ': 'h', 'ৎ': 't', 'ং': 'ng' };
+const BN_VOWEL = { 'া': 'a', 'ি': 'i', 'ী': 'i', 'ু': 'u', 'ূ': 'u', 'ে': 'e', 'ৈ': 'oi', 'ো': 'o', 'ৌ': 'ou',
+  'অ': 'o', 'আ': 'a', 'ই': 'i', 'ঈ': 'i', 'উ': 'u', 'ঊ': 'u', 'এ': 'e', 'ঐ': 'oi', 'ও': 'o', 'ঔ': 'ou' };
+// Words that only say what kind of place it is. Built with norm(), because the data stores য় in two parts.
+const GENERIC = new RegExp(`(${norm('ইউনিয়ন|পৌরসভা|পৌর|উপজেলা|জেলা|গ্রাম')}|\\bunion\\b|\\bup\\b|pourashava|paurashava|pourasava|`
+  + 'municipality|upazila|upozila|\\bzila\\b|\\bdistrict\\b|\\bgram\\b|\\bvillage\\b|\\btown\\b)', 'gi');
+
+// Bangla letters to plain Latin letters (য় is a vowel sound; ড় ঢ় sound like র; ক্ষ like ক).
+const bnToLatin = (w, withVowels) => w.replace(/য়/g, withVowels ? 'y' : '').replace(/[ডঢ]়/g, 'র').replace(/ক্ষ/g, 'ক')
+  .replace(/[ঀ-৿]/g, (ch) => BN_LAT[ch] ?? (withVowels ? BN_VOWEL[ch] ?? '' : ''));
+
+export function wordKey(w) {
+  const lead = /^[aeiouঅ-ঔ]/.test(w) ? '@' : '';   // a word that starts with a vowel keeps a marker: "inani", "ইনানী" -> "@n"
+  let s = bnToLatin(w, false);
+  s = s.replace(/c(?=[aou])/g, 'k');                          // English "cox": c before a/o/u sounds like k
+  s = s.replace(/ch/g, 'c').replace(/sh/g, 's').replace(/kh/g, 'k').replace(/gh/g, 'g').replace(/th/g, 't').replace(/dh/g, 'd')
+    .replace(/bh/g, 'b').replace(/ph/g, 'f').replace(/x/g, 'ks').replace(/z/g, 'j').replace(/q/g, 'k').replace(/v/g, 'b');
+  s = s.replace(/[^a-z]/g, '').replace(/[aeiouwy]/g, '');
+  return lead + s.replace(/(.)\1+/g, '$1');                   // "kks" -> "ks"
+}
+
+// "Cox's" -> "coxs": an apostrophe is not a word break.
+const keyWords = (text) => norm(text).toLowerCase().replace(/['’]/g, '').replace(GENERIC, ' ').split(/[\s,.\-–()]+/).filter(Boolean);
+
+export function soundKey(text) {
+  return keyWords(text).map(wordKey).join('').replace(/(.)\1+/g, '$1');   // "coxs bazar" and "কক্সবাজার" -> "ksbjr"
+}
+
+// The name with its vowels, only to put same-sounding names in order (হাসানপুর before হোসেনপুর for "hasanpur").
+function vowelForm(text) {
+  return keyWords(text).map((w) => bnToLatin(w, true).replace(/[^a-z]/g, '').replace(/(.)\1+/g, '$1')).join('');
+}
+
+export function editDistance(a, b) {
+  if (Math.abs(a.length - b.length) > 3) return 9;
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let diag = prev[0]; prev[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = prev[j];
+      prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
+      diag = tmp;
+    }
+  }
+  return prev[b.length];
+}
+
+// Ward texts, numbers, a bare direction word ("পূর্ব" = east) or a bare "গ্রাম" are not village names.
+const NOT_A_VILLAGE = new RegExp(`${norm('ওয়ার্ড|নং|বাড়ি|বাড়ী')}|[0-9০-৯]|^${norm('(পূর্ব|পশ্চিম|উত্তর|দক্ষিণ|দক্ষিন|মধ্য|গ্রাম)')}$`);
+
+// Every searchable place: upazilas, unions, towns, named places, local names (data/aliases.json) and villages
+// (official lists from data/villages.json first, then names from representatives' addresses).
+export function areaIndex(data) {
+  const items = [];
+  const add = (item, names) => {
+    names = names.filter(Boolean);
+    item.words = norm(names.join(' ')).toLowerCase();
+    const parts = names.flatMap((n) => [n, ...norm(n).split(/\s+/)]);
+    item.keys = [...new Set(parts.map(soundKey).filter((k) => k.length >= 2))];       // whole names and single words
+    item.fullKeys = [...new Set(names.map(soundKey).filter((k) => k.length >= 2))];   // whole names only
+    item.vowels = names.map(vowelForm);
+    items.push(item);
+  };
+  for (const d of DISTRICTS) {
+    const doc = data.docs[d.key];
+    if (!doc) continue;
+    const ups = upazilas(doc);
+    const upByBn = new Map(ups.map((u) => [norm(u.bn), u.en]));
+    const areaOf = (upz, type, bn) => localAreas(doc, upz).find((a) => a.type === type && a.bn === norm(bn));
+    for (const u of ups) {
+      add({ kind: 'upazila', place: { district: d.key, upazila: u.en, area: null } }, [u.bn, u.en]);
+      for (const a of localAreas(doc, u.en)) add({ kind: a.type, place: { district: d.key, upazila: u.en, area: a } }, [a.bn.split(/[,،]/)[0], a.en || '']);
+    }
+    for (const p of doc.places || []) {
+      const upz = upByBn.get(norm(p.upazila_bn));
+      if (upz) add({ kind: 'place', place: { district: d.key, upazila: upz, area: { type: 'union', bn: norm(p.union_bn) }, placeId: p.id }, named: p }, [p.name_bn, p.name_en]);
+    }
+    for (const a of (data.aliases || []).filter((x) => x.district === doc.district)) {
+      // A local name links to its union or town only when that was confirmed; otherwise to the whole upazila.
+      const area = (a.municipality_bn && areaOf(a.upazila_en, 'municipality', a.municipality_bn))
+        || (a.union_bn && areaOf(a.upazila_en, 'union', a.union_bn)) || null;
+      add({ kind: 'local', place: { district: d.key, upazila: a.upazila_en, area }, named: a }, [a.name_bn, a.name_en]);
+    }
+    const seen = new Set();
+    const official = (data.villages || []).filter((v) => v.district === doc.district);
+    for (const v of official.concat(doc.villages || [])) {
+      const name = norm(v.village_bn);
+      const upz = upByBn.get(norm(v.upazila_bn));
+      const area = upz && areaOf(upz, 'union', v.union_bn);
+      const id = `${name}|${norm(v.union_bn)}`;
+      if (!area || NOT_A_VILLAGE.test(name) || seen.has(id)) continue;
+      seen.add(id);
+      add({ kind: 'village', village: name, ward: v.ward_no || null, place: { district: d.key, upazila: upz, area } }, [name]);
+    }
+  }
+  return items;
+}
+
+// Lower score = better. 0-2 text match, 3 same sound, 4 sound starts the same: these are real matches.
+// 5+ is only a close spelling: shown under "Similar names", never as if it were the place.
+export function scoreItem(item, s, key) {
+  const w = item.words.split(/\s+/);
+  if (w.some((x) => x === s)) return 0;
+  if (w.some((x) => x.startsWith(s))) return 1;
+  if (item.words.includes(s)) return 2;
+  if (key.length < 2) return null;
+  let best = null;
+  const take = (sc) => { best = Math.min(best ?? 99, sc); };
+  const strong = key.replace('@', '').length >= 4;               // short names sound alike too easily
+  for (const k of item.keys) {
+    if (strong && k === key) take(3);
+    else if (strong && k.startsWith(key)) take(4);
+  }
+  for (const k of item.fullKeys) {                               // close spellings: whole name, same first sound
+    if (k[0] !== key[0]) continue;
+    if (k === key) take(5);
+    else if (key.length >= 3) {
+      const d = editDistance(key, k);
+      if (d <= Math.max(1, Math.floor(key.length / 3))) take(5 + d);
+    }
+  }
+  return best;
+}
+
+const KIND_ORDER = { municipality: 0, local: 1, place: 1, union: 2, village: 3, upazila: 4 };
+
+// { hits: real matches (best first), close: similar names } for what the person typed.
+export function findAreas(index, q, { district = '' } = {}) {
+  const s = norm(q).toLowerCase().trim();
+  if (s.length < 2) return { hits: [], close: [] };
+  const key = soundKey(s);
+  const typed = vowelForm(s);
+  const out = [];
+  for (const item of index) {
+    if (district && item.place.district !== district) continue;
+    const sc = scoreItem(item, s, key);
+    if (sc != null) out.push({ item, sc, near: Math.min(...item.vowels.map((v) => editDistance(typed, v))) });
+  }
+  out.sort((a, b) => a.sc - b.sc || a.near - b.near || (KIND_ORDER[a.item.kind] ?? 3) - (KIND_ORDER[b.item.kind] ?? 3));
+  const seen = new Set();
+  const uniq = out.filter(({ item }) => {
+    const k = `${item.kind}|${item.village || ''}|${item.place.district}|${item.place.upazila}|${item.place.area?.bn || ''}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  return { hits: uniq.filter((x) => x.sc <= 4).slice(0, 8).map((x) => x.item), close: uniq.filter((x) => x.sc > 4).slice(0, 3).map((x) => x.item) };
 }
 
 export function search(data, query, limit = 40) {

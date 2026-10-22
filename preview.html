@@ -2,140 +2,211 @@
 <html lang="bn">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SafeConnect</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap">
 <style>
-  /* Layout: one "call sheet" column that reads top-down in the order to call; 999 stays pinned above it. */
+  /* Layout: one narrow phone-first column. Home = two big actions + area search. Area = "call these first", then folded categories. */
   :root {
     --bg: #F3F4FA; --surface: #FFFFFF; --surface-2: #E9EBF6; --ink: #15142B; --muted: #585C78;
     --line: #D7DAEA; --accent: #F2B705; --accent-ink: #1A1600; --alarm: #C3122F; --alarm-ink: #FFFFFF;
-    --warn: #8A5300; --warn-bg: #FFF1D6; --info: #2F4AA8; --chip: #E3E6F5;
+    --warn: #8A5300; --warn-bg: #FFF1D6; --info: #2F4AA8; --ok: #17794A;
     --font-display: "Baloo Da 2", "Hind Siliguri", "Noto Sans Bengali", system-ui, sans-serif;
     --font-body: "Hind Siliguri", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
-    --radius: 14px;
+    --radius: 16px;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #0C0B1E; --surface: #16153A; --surface-2: #1E1D48; --ink: #F0EFFF; --muted: #A4A6C6;
-      --line: #2B2A5A; --accent: #FFD23F; --accent-ink: #1A1600; --alarm: #FF3D5E; --alarm-ink: #FFFFFF;
-      --warn: #FFC266; --warn-bg: #3A2A10; --info: #9DB2FF; --chip: #23224F; color-scheme: dark;
+      --line: #2B2A5A; --accent: #FFD23F; --accent-ink: #1A1600; --alarm: #E8213F; --alarm-ink: #FFFFFF;
+      --warn: #FFC266; --warn-bg: #3A2A10; --info: #9DB2FF; --ok: #5FD39A; color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --bg: #0C0B1E; --surface: #16153A; --surface-2: #1E1D48; --ink: #F0EFFF; --muted: #A4A6C6;
-    --line: #2B2A5A; --accent: #FFD23F; --accent-ink: #1A1600; --alarm: #FF3D5E; --alarm-ink: #FFFFFF;
-    --warn: #FFC266; --warn-bg: #3A2A10; --info: #9DB2FF; --chip: #23224F; color-scheme: dark;
+    --line: #2B2A5A; --accent: #FFD23F; --accent-ink: #1A1600; --alarm: #E8213F; --alarm-ink: #FFFFFF;
+    --warn: #FFC266; --warn-bg: #3A2A10; --info: #9DB2FF; --ok: #5FD39A; color-scheme: dark;
   }
 
+  *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.5; }
   body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
-  .wrap { max-width: 780px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .wrap { max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   a { color: var(--info); }
-  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
-  button, select, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--info); outline-offset: 2px; border-radius: 8px; }
+  button, input, select { font: inherit; color: inherit; }
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+  p { margin: 0; }
 
-  /* pinned header + 999 bar */
-  .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
-  .brand { background: var(--surface); border-bottom: 1px solid var(--line); }
-  .brand .wrap { display: flex; align-items: center; gap: 10px; padding-block: 10px; flex-wrap: wrap; }
-  .logo { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; letter-spacing: 0.01em; margin: 0; line-height: 1; }
+  /* header */
+  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+  header .wrap { display: flex; align-items: center; gap: 8px; padding-block: 10px; }
+  .logo { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; line-height: 1; margin-right: auto; background: none; border: 0; padding: 0; cursor: pointer; }
   .logo span { color: var(--accent); }
-  .pilot { color: var(--muted); font-size: 0.82rem; margin-right: auto; min-width: 0; }
-  @media (max-width: 460px) { .pilot { display: none; } .logo { margin-right: auto; } }
-  .toggle { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
-  .sos { background: var(--alarm); color: var(--alarm-ink); }
-  .sos .wrap { display: flex; align-items: center; gap: 12px; padding-block: 8px; flex-wrap: wrap; }
-  .sos p { margin: 0; font-weight: 600; flex: 1 1 200px; min-width: 0; }
-  .sos .call999 { background: var(--alarm-ink); color: var(--alarm); font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; text-decoration: none; border-radius: 999px; padding: 4px 18px; }
+  .pill { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
 
-  main .wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-block: 20px 40px; }
-  .where > *, .pickers > * { min-width: 0; }
-  h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
-  h1 { font-size: 1.7rem; }
-  h2 { font-size: 1.25rem; }
-  .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
+  main .wrap { display: grid; gap: 18px; padding-block: 20px 36px; }
+  main .wrap > * { min-width: 0; }
 
-  .where { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; gap: 14px; }
-  .pickers { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
-  .pickers label { display: grid; gap: 4px; font-size: 0.85rem; color: var(--muted); font-weight: 500; min-width: 0; }
-  select, input[type="search"] { width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 1rem; min-width: 0; }
-  .chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .chips .label { font-size: 0.85rem; color: var(--muted); margin-right: 2px; }
-  .chip { border: 1px solid var(--line); background: var(--chip); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 0.9rem; }
-  .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  /* home */
+  .hello { font-size: 1.75rem; }
+  .big { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 14px; width: 100%; text-align: left; border: 0; border-radius: var(--radius);
+    padding: 18px; cursor: pointer; text-decoration: none; }
+  .big svg { width: 34px; height: 34px; grid-row: span 2; }
+  .big strong { font-family: var(--font-display); font-weight: 800; font-size: 1.45rem; line-height: 1.1; }
+  .big small { font-size: 0.92rem; opacity: 0.9; }
+  .big.red { background: var(--alarm); color: var(--alarm-ink); }
+  .big.yellow { background: var(--accent); color: var(--accent-ink); }
+  .big[aria-busy="true"] { opacity: 0.7; cursor: progress; }
+  .msg { font-weight: 600; padding: 10px 14px; border-radius: 12px; background: var(--warn-bg); color: var(--warn); }
+  .msg.plain { background: var(--surface-2); color: var(--ink); font-weight: 500; }
+  .or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.9rem; }
+  .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
-  .place-note { border-left: 4px solid var(--accent); background: var(--surface-2); border-radius: 0 10px 10px 0; padding: 10px 14px; margin: 0; }
-  .status { color: var(--muted); margin: 0; }
+  .finder { display: grid; gap: 8px; position: relative; }
+  .finder label { font-weight: 600; }
+  .finder input { width: 100%; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 13px 14px; font-size: 1.05rem; }
+  .finder input:focus { border-color: var(--info); outline: none; }
+  .suggest { list-style: none; margin: 0; padding: 0; display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .suggest button { width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 11px 14px; cursor: pointer; display: grid; }
+  .suggest li:last-child button { border-bottom: 0; }
+  .suggest button:hover, .suggest button:focus-visible { background: var(--surface-2); }
+  .suggest b { font-weight: 600; }
+  .suggest span { color: var(--muted); font-size: 0.88rem; }
+  .suggest .none { padding: 11px 14px; }
+  .suggest .group { padding: 8px 14px 2px; font-size: 0.8rem; font-weight: 700; color: var(--info); }
+  .fallback-box { display: grid; gap: 10px; padding: 10px 14px 14px; border-top: 1px solid var(--line); }
+  .fallback-box p { font-size: 0.92rem; font-weight: 600; }
+  .fallback-box .privacy { font-weight: 400; color: var(--muted); font-size: 0.85rem; }
+  .suggest .fallback-box .chip { width: auto; display: inline-flex; font-size: 0.88rem; padding: 4px 12px; }
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; }
+  .suggest .fallback-box .btn { width: auto; display: inline-flex; padding: 8px 16px; }
+  .btn.violet { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  .hint { color: var(--muted); font-size: 0.9rem; }
+  .recent { justify-self: start; }
 
-  .group { display: grid; gap: 10px; }
-  .group-head { display: flex; align-items: baseline; gap: 10px; }
-  .step { font-family: var(--font-display); font-weight: 800; color: var(--accent-ink); background: var(--accent); border-radius: 999px; min-width: 30px; height: 30px; display: inline-grid; place-items: center; font-size: 1rem; flex: none; }
-  .group-head .sub { color: var(--muted); font-size: 0.85rem; }
-  .note { margin: 0; font-size: 0.88rem; color: var(--warn); background: var(--warn-bg); border-radius: 10px; padding: 8px 12px; }
-  .cards { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); }
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
-  .card h3 { margin: 0; font-size: 1.05rem; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
-  .card .role { margin: 0; color: var(--ink); font-size: 0.92rem; overflow-wrap: anywhere; }
-  .card .where-line { margin: 0; color: var(--muted); font-size: 0.82rem; overflow-wrap: anywhere; }
-  .badges { display: flex; gap: 6px; flex-wrap: wrap; }
-  .badge { font-size: 0.75rem; font-weight: 600; border-radius: 6px; padding: 1px 8px; background: var(--chip); color: var(--muted); }
-  .badge.warn { background: var(--warn-bg); color: var(--warn); }
-  .phones { display: grid; gap: 6px; }
-  .phone { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .num { font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; user-select: all; margin-right: auto; }
-  .btn { border-radius: 999px; padding: 5px 14px; font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); }
-  .btn.call { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-  .src { margin: 0; font-size: 0.78rem; color: var(--muted); }
-  .more { justify-self: start; }
-  .results { display: grid; gap: 26px; }
-  .search { display: grid; gap: 4px; }
+  .demo { display: grid; gap: 8px; border: 1px dashed var(--line); border-radius: 14px; padding: 12px 14px; }
+  .demo p { color: var(--muted); font-size: 0.88rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: 0.95rem; }
+
+  /* area */
+  .back { justify-self: start; background: none; border: 0; padding: 4px 0; color: var(--info); font-weight: 600; cursor: pointer; }
+  .here { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 4px; }
+  .here .label { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+  .here h1 { font-size: 1.6rem; }
+  .here .sub { color: var(--muted); }
+  .here-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .btn { border-radius: 999px; padding: 7px 16px; font-weight: 600; font-size: 0.92rem; cursor: pointer; text-decoration: none; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
+
+  .share { background: var(--surface-2); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 8px; }
+  .share h2 { font-size: 1.1rem; }
+  .share p { color: var(--muted); font-size: 0.9rem; }
+  .note { border-left: 4px solid var(--accent); background: var(--surface-2); border-radius: 0 12px 12px 0; padding: 10px 14px; }
+
+  .section-title { font-size: 1.25rem; }
+  .first { display: grid; gap: 10px; }
+  .first-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 12px 12px 16px; }
+  .first-row > div { min-width: 0; display: grid; }
+  .first-row .what { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
+  .first-row .who { color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
+  .first-row .src { color: var(--muted); font-size: 0.78rem; }
+  .call { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 12px; padding: 10px 14px; font-weight: 700; text-decoration: none; text-align: center; line-height: 1.15;
+    display: grid; font-variant-numeric: tabular-nums; min-width: 92px; }
+  .call small { font-weight: 600; font-size: 0.8rem; }
+  .call.red { background: var(--alarm); color: var(--alarm-ink); }
+
+  .more { display: grid; gap: 8px; }
+  details.cat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+  details.cat > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 13px 16px; font-weight: 600; }
+  details.cat > summary::-webkit-details-marker { display: none; }
+  details.cat > summary .count { margin-left: auto; color: var(--muted); font-weight: 500; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+  details.cat > summary::after { content: "›"; font-size: 1.4rem; line-height: 1; color: var(--muted); transition: transform .15s; }
+  details.cat[open] > summary::after { transform: rotate(90deg); }
+  .cat-body { display: grid; border-top: 1px solid var(--line); }
+  .cat-body .fallback { margin: 10px 16px 0; font-size: 0.88rem; color: var(--warn); }
+  .person { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .person:last-child { border-bottom: 0; }
+  .person > div { min-width: 0; display: grid; gap: 2px; }
+  .person .name { font-weight: 700; overflow-wrap: anywhere; }
+  .person .role { font-size: 0.9rem; color: var(--muted); overflow-wrap: anywhere; }
+  .person .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 0.75rem; font-weight: 600; border-radius: 6px; padding: 0 7px; background: var(--surface-2); color: var(--muted); }
+  .tag.warn { background: var(--warn-bg); color: var(--warn); }
+  .person .calls { display: grid; gap: 6px; justify-items: end; }
+  .person .call { min-width: 0; padding: 8px 12px; }
+  .person .src { grid-column: 1 / -1; font-size: 0.78rem; color: var(--muted); }
+  .showall { margin: 10px 16px 12px; justify-self: start; }
+  .none { padding: 12px 16px; color: var(--muted); font-size: 0.9rem; }
+
   footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
-  footer .wrap { padding-block: 18px 28px; display: grid; gap: 6px; }
-  footer p { margin: 0; max-width: 65ch; }
-  @media (prefers-reduced-motion: no-preference) { .card { transition: border-color .15s; } .card:hover { border-color: var(--accent); } }
+  footer .wrap { padding-block: 16px 28px; display: grid; gap: 6px; }
+  @media (prefers-reduced-motion: reduce) { details.cat > summary::after { transition: none; } }
 </style>
 </head>
 <body>
-<div class="top">
-  <div class="brand">
-    <div class="wrap">
-      <p class="logo">Safe<span>Connect</span></p>
-      <span class="pilot" id="pilot"></span>
-      <button class="toggle" id="langBtn" type="button"></button>
-      <button class="toggle" id="themeBtn" type="button" aria-label="Switch dark / light">◐</button>
-    </div>
+<header>
+  <div class="wrap">
+    <button class="logo" id="homeBtn" type="button" aria-label="SafeConnect home">Safe<span>Connect</span></button>
+    <button class="pill" id="langBtn" type="button">English</button>
+    <button class="pill" id="themeBtn" type="button" aria-label="Dark or light">◐</button>
   </div>
-  <div class="sos">
-    <div class="wrap">
-      <p id="sosText"></p>
-      <a class="call999" id="call999" href="tel:999">999</a>
-    </div>
-  </div>
-</div>
+</header>
 
 <main>
-  <div class="wrap">
-    <section class="where" aria-labelledby="whereTitle">
-      <div>
-        <p class="eyebrow" id="whereEyebrow"></p>
-        <h1 id="whereTitle"></h1>
-      </div>
-      <div class="pickers">
-        <label><span id="lblDistrict"></span><select id="district"></select></label>
-        <label><span id="lblUpazila"></span><select id="upazila"></select></label>
-        <label><span id="lblArea"></span><select id="area"></select></label>
-      </div>
-      <div class="chips" id="chips"></div>
-      <label class="search"><span class="eyebrow" id="lblSearch"></span>
-        <input type="search" id="q" autocomplete="off">
-      </label>
+  <!-- HOME -->
+  <div class="wrap" id="home">
+    <h1 class="hello" id="hello"></h1>
+    <a class="big red" id="call999" href="tel:999">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>
+      <strong id="call999Title"></strong><small id="call999Sub"></small>
+    </a>
+    <button class="big yellow" id="locateBtn" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
+      <strong id="locateTitle"></strong><small id="locateSub"></small>
+    </button>
+    <p class="msg" id="locMsg" role="status" hidden></p>
+    <div class="demo" id="demo" hidden>
+      <p id="demoText"></p>
+      <div class="chips" id="demoChips"></div>
+    </div>
+    <p class="or" id="orText"></p>
+    <div class="finder">
+      <label for="areaInput" id="areaLabel"></label>
+      <input id="areaInput" type="search" autocomplete="off" aria-describedby="areaHint" aria-controls="suggest">
+      <p class="hint" id="areaHint"></p>
+      <ul class="suggest" id="suggest" aria-live="polite" hidden></ul>
+      <button class="btn recent" id="recentBtn" type="button" hidden></button>
+    </div>
+  </div>
+
+  <!-- AREA -->
+  <div class="wrap" id="area" hidden>
+    <button class="back" id="backBtn" type="button"></button>
+    <section class="here" aria-labelledby="placeName">
+      <p class="label" id="youAreIn"></p>
+      <h1 id="placeName"></h1>
+      <p class="sub" id="placeSub"></p>
+      <div class="here-row"><button class="btn" id="changeBtn" type="button"></button></div>
     </section>
-    <p class="status" id="status" aria-live="polite"></p>
-    <div id="results" class="results"></div>
+    <section class="share" id="share" hidden aria-labelledby="shareTitle">
+      <h2 id="shareTitle"></h2>
+      <p id="shareText"></p>
+      <div class="chips" id="shareBtns"></div>
+    </section>
+    <p class="msg plain" id="outside" hidden></p>
+    <p class="note" id="placeNote" hidden></p>
+    <section class="first" aria-labelledby="firstTitle">
+      <h2 class="section-title" id="firstTitle"></h2>
+      <div class="first" id="firstList"></div>
+    </section>
+    <section class="more" aria-labelledby="moreTitle" id="moreSec">
+      <h2 class="section-title" id="moreTitle"></h2>
+      <div class="more" id="moreList"></div>
+    </section>
   </div>
 </main>
 
@@ -143,6 +214,7 @@
   <div class="wrap">
     <p id="foot1"></p>
     <p id="foot2"></p>
+    <p><a id="testsLink" href="tests/search-test.html"></a></p>
   </div>
 </footer>
 
