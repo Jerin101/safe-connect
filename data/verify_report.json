@@ -1,0 +1,18 @@
+{
+ "checked_on": "2026-10-22",
+ "removed": [],
+ "counts": {
+  "contacts_coxsbazar.json": {
+   "ok": 1299,
+   "name_text_differs": 2,
+   "removed": 0,
+   "page_unreachable_kept": 0
+  },
+  "contacts_noakhali.json": {
+   "ok": 1642,
+   "name_text_differs": 2,
+   "removed": 0,
+   "page_unreachable_kept": 0
+  }
+ }
+}
