@@ -1,0 +1,53 @@
+# Every Monday: re-check every phone number against its official source page.
+# It works on a copy of data/, so it never changes or commits anything.
+# If a number is no longer on its page, it opens an issue for a person to check (CLAUDE.md rule 6: humans commit).
+name: Weekly source check
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"          # Monday 03:00 UTC = 09:00 in Bangladesh
+  workflow_dispatch:             # "Run workflow" button on the Actions tab
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Re-check every source page (on a copy of data/)
+        run: |
+          cp -r data /tmp/check
+          python tools/verify_sources.py /tmp/check
+
+      - name: Write the summary and open an issue if numbers disappeared
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'EOF'
+          import json, os, subprocess
+          report = json.load(open("/tmp/check/verify_report.json", encoding="utf-8"))
+          lines = [f"Checked on {report['checked_on']}.", "", "| File | ok | name differs | removed | page unreachable |", "|---|---|---|---|---|"]
+          for name, c in report["counts"].items():
+              lines.append(f"| {name} | {c['ok']} | {c['name_text_differs']} | {c['removed']} | {c['page_unreachable_kept']} |")
+          lines += ["", "Unreachable pages are kept (some government sites block servers outside Bangladesh)."]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+              f.write("\n".join(lines) + "\n")
+          removed = report["removed"]
+          if removed:
+              body = "\n".join(lines + ["", f"**{len(removed)} records: a phone number is no longer on the official page.**",
+                                        "Open each page, check the number, then fix it with the tools in `tools/` or `data/manual_additions.json`.", ""]
+                               + [f"- [ ] `{r['file']}` · `{r['id']}` · {r['name_bn'] or '(no name)'} · {r['source_url']}" for r in removed])
+              with open("/tmp/issue.md", "w", encoding="utf-8") as f:
+                  f.write(body)
+              subprocess.run(["gh", "issue", "create", "--label", "data-gap",
+                              "--title", f"[data-gap] Weekly source check {report['checked_on']}: {len(removed)} numbers no longer on their page",
+                              "--body-file", "/tmp/issue.md"], check=True)
+          EOF
