@@ -1,0 +1,22 @@
+# Runs the data checker on every pull request and on every push to main.
+# A pull request with data errors shows a red X and should not be merged.
+name: Validate data
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check data files
+        run: python tools/validate_data.py data
