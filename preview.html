@@ -76,6 +76,15 @@
   .suggest button:hover, .suggest button:focus-visible { background: var(--surface-2); }
   .suggest b { font-weight: 600; }
   .suggest span { color: var(--muted); font-size: 0.88rem; }
+  .suggest .none { padding: 11px 14px; }
+  .suggest .group { padding: 8px 14px 2px; font-size: 0.8rem; font-weight: 700; color: var(--info); }
+  .fallback-box { display: grid; gap: 10px; padding: 10px 14px 14px; border-top: 1px solid var(--line); }
+  .fallback-box p { font-size: 0.92rem; font-weight: 600; }
+  .fallback-box .privacy { font-weight: 400; color: var(--muted); font-size: 0.85rem; }
+  .suggest .fallback-box .chip { width: auto; display: inline-flex; font-size: 0.88rem; padding: 4px 12px; }
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; }
+  .suggest .fallback-box .btn { width: auto; display: inline-flex; padding: 8px 16px; }
+  .btn.violet { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
   .hint { color: var(--muted); font-size: 0.9rem; }
   .recent { justify-self: start; }
 
@@ -169,7 +178,7 @@
       <label for="areaInput" id="areaLabel"></label>
       <input id="areaInput" type="search" autocomplete="off" aria-describedby="areaHint" aria-controls="suggest">
       <p class="hint" id="areaHint"></p>
-      <ul class="suggest" id="suggest" hidden></ul>
+      <ul class="suggest" id="suggest" aria-live="polite" hidden></ul>
       <button class="btn recent" id="recentBtn" type="button" hidden></button>
     </div>
   </div>
