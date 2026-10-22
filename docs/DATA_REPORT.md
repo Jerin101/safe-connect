@@ -16,6 +16,7 @@ No number was typed from memory or taken from news sites.
 | `contacts_noakhali.json` | 1,644 contacts (incl. municipalities) + 354 village→union/ward hints | ~1.7 MB |
 | `contacts_coxsbazar.json` | 1,301 contacts (incl. Cox's Bazar municipality) + 205 village→union/ward hints | ~1.3 MB |
 | `manual_additions.json` | Hand-entered official records (BCG Station Inani) + places (Inani beach) (P10, #26) | small |
+| `locations.json` | Offline "Find help near me" (P26): 18 upazila boundaries + 158 union and 4 town centre points (see "Map data" below) | 36 KB |
 | `verify_report.json` | Result of the last full source check (also re-run every Monday by the "Weekly source check" GitHub Action) | small |
 | `spot_check_40.csv` | 40 key contacts for a person to check by hand (P13, to do) | – |
 | `docs/DATA_GAPS.md` | Everything missing, ready to become GitHub issues | – |
@@ -67,6 +68,13 @@ Bangla text: the sources store some letters in two Unicode forms (e.g. "য়")
 | Village police, emergency contacts | Each union's "গ্রাম পুলিশ" and "জরুরি যোগাযোগ" pages (these show their own last-updated date) |
 | Inani police outpost, BCG Station Inani | Jaliapalong union portal pages (updated August 2026) |
 
+### Map data (credit)
+
+`data/locations.json` is used only to turn the phone's GPS position into an upazila and union, on the phone, without internet. It holds no phone numbers.
+- **Upazila boundaries and all 162 union/town centre points:** Bangladesh Bureau of Statistics (BBS) administrative boundaries v03, via OCHA HDX ("cod-ab-bgd"), licence **CC BY-IGO**.
+- **OpenStreetMap:** `tools/collect_locations.py` and `fill_locations.py` look up points with OpenStreetMap Nominatim (© OpenStreetMap contributors, licence **ODbL**; at most 1 request per second), and `build_locations.py` uses them only where a BBS name does not match. The current file uses none (all 162 points come from BBS); if a later build adds some, they are marked `"src": "osm"`.
+- 2 of the 160 unions have no centre point; there the site shows the whole upazila and lets the person pick the union.
+
 District and union portals send an incomplete certificate chain. The scripts add Sectigo's official intermediate certificate (copied from Mozilla's CCADB list) and **never turn certificate checking off**.
 
 ## Checks
@@ -82,7 +90,7 @@ District and union portals send an incomplete certificate chain. The scripts add
 2. **Some unions don't publish members' numbers at all** (111 union representatives). They're shown as "number not published" with the fallback chain.
 3. **84 of 160 unions have no village police list.**
 4. **Missing units:** Bhasanchar police station, the Inani Tourist Police zone (website offline), and the Inani police outpost number. RAB and BGB pages are empty. See `DATA_GAPS.md`.
-5. **Villages aren't in any government list.** We have 559 village names taken from representatives' addresses. "Babunagar" isn't among them, nor in OpenStreetMap for Noakhali.
+5. **Villages aren't in the national area list.** We have 1,250 official village names from the village pages of 82 union websites (`data/villages.json`, issue #36) and 559 names from representatives' addresses. 78 unions publish no usable village list; there the site uses GPS, the union name or the upazila buttons. Babunagar (বাবুনগর) is on Sharifpur union's official village list.
 6. **Police websites (`police.gov.bd`, `999.gov.bd`, `gd.police.gov.bd`) block connections from outside Bangladesh.** Check them from a laptop in Bangladesh.
 7. **Some official Bangla names are garbled** (e.g. "বৃধমিত্ম"). The `bangla-reviewer` agent should fix the display names.
 
