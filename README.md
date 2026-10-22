@@ -34,13 +34,14 @@ It also lets you send your **location to family in one tap**.
 ## Main features
 
 - Area picker for the whole country, with full data for Noakhali and Cox's Bazar
-- GPS "use my location", plus village search
+- One-tap "Find help near me" (GPS, works offline), plus village search
 - Contact cards with tap-to-call, the source link and the date each number was checked
 - A fallback chain, so a missing number never leaves you with an empty screen
 - SOS with location sharing (WhatsApp / SMS / share), Silent SOS, siren
-- Safe Journey (number-plate photo + route + "I arrived safely"), fake call
+- Safe Journey (number-plate photo + route + "I arrived safely")
 - Lost/stolen item GD helper, "how to report a crime" guides
-- Works offline (installable app), Bangla / English, dark / light theme
+- Works offline first (installable app), Bangla / English, dark / light theme
+- Verified volunteers in your union (logged-in users can apply)
 
 Full list: [`docs/FEATURES.md`](docs/FEATURES.md) · Technology and workflow: [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md)
 
