@@ -88,6 +88,8 @@ Website loads data/*.json → service worker caches it for offline use
 
 **Categories:** emergency, police, village_police, fire, health, women_children, legal, administration, local_representative, union_office, tourist_police, coast_river, disaster, social, ansar_vdp, anti_corruption, information.
 
+**Bangla text comparison:** the official sources store some letters in two Unicode forms that look the same (e.g. "য়" as one letter U+09DF or as য + ় U+09AF U+09BC; the same for ড়, ঢ়). All data files mix both. So code must **never compare Bangla text directly**: always compare `a.normalize("NFC") === b.normalize("NFC")` (JavaScript) or `unicodedata.normalize("NFC", s)` (Python), in search, area matching and place links.
+
 **Flags the UI must show:**
 
 | Flag | What the card shows |
@@ -150,7 +152,7 @@ The live demo (`PROJECT_PLAN.md` §6) uses Chowmuhani, Begumganj, where the unio
 
 ### B. Cox's Bazar – a tourist loses a drone camera at Inani beach (or it's stolen)
 
-Open SafeConnect → **Use my location**. GPS gives Jaliapalong (Ukhia). Tourist mode turns on because the user is near Inani beach (`places`).
+Open SafeConnect → **Find help near me**. GPS gives Jaliapalong (Ukhia). Tourist mode turns on because the user is near Inani beach (`places`).
 
 | Step | Contact / action | In our data? |
 |---|---|---|
