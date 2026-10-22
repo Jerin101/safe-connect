@@ -29,6 +29,12 @@ First push. Add `README.md`, `.gitignore`, `docs/PROJECT_PLAN.md`, `docs/BUILD_P
 ### [P04] Add contributing guide, issue/PR templates — J · docs · Day 2
 `CONTRIBUTING.md` (branch → commit → PR → review), `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md`.
 
+### [P40] Update plan: offline first, backend and volunteer service — J · docs · Day 3
+Update `PROJECT_PLAN.md`, `ISSUES.md`, `FEATURES.md`, `BUILD_PLAN.md` and the `README.md` feature list: offline first is the top priority (P34 → Day 8), offline P26, Firebase Spark backend (P17, P18), new volunteer service (P38, P39), remove P32.
+
+### [P41] Improve agent roles for offline-first and volunteers — J · docs · Day 3
+Update the 6 agents in `.claude/agents/` (no new agents). The `tester` gets a **release check**: it tests the live site like a real user and gives GO / NO-GO, using a test account only.
+
 ---
 
 ## Data and backend (jerin101)
@@ -69,11 +75,15 @@ Confirm `gd.police.gov.bd` from Bangladesh. Write short Bangla and English steps
 ### [P16] Bangla/English text files — J · backend · Day 9
 `js/lang/bn.json`, `js/lang/en.json`: every button and label, the 8 SOS message templates, the guide texts. Checked by the `bangla-reviewer` agent.
 
-### [P17] Firebase setup — J · backend · Day 11 · *Should*
-Free Spark project, Google + email login, Firestore with **security rules** (users can only read and write their own data; only the admin can approve reports). `js/firebase.js`.
+### [P17] Firebase setup: login + Firestore — J · backend · Day 11 · *Should*
+Free **Spark** project (no card), Google + email login, Firestore with **security rules** (users can only read and write their own data; only admins can approve). `js/firebase.js`. The site must work fully **without** login. See `BUILD_PLAN.md` §10.
 
 ### [P18] Report wrong number + admin page — J · backend · Day 12 · *Should*
 "Report / suggest a number" button (logged-in users) → Firestore. `pages/admin.html`: list reports, approve or reject with an official source.
+
+### [P38] Volunteer verification backend — J · backend · Days 12–13 · *Should*
+Firestore collections `applications`, `confirmations`, `verifications`, `volunteers`, `teams`, `admins` and their security rules (one-time code, team-leader approval, admin-only verification). In `pages/admin.html`: pick the confirmer **automatically from our official data**, build the weekly batch per union, send the one-tap link by WhatsApp/SMS, record phone-call and প্রত্যয়নপত্র (memo number + date) checks, expiry and pauses. See `BUILD_PLAN.md` §10.
+**Done when:** a **test** volunteer goes from application → confirmation (fake code) → approved → visible, and the test data is deleted.
 
 ### [P19] Deploy to GitHub Pages + release — J · backend · Day 13
 `.github/workflows/pages.yml`, test the live site on a phone, write release notes, tag `v1.0`.
@@ -84,8 +94,13 @@ Free Spark project, Google + email login, Firestore with **security rules** (use
 - build a search index (Bangla and English, including numbers)
 - `getAreaContacts(upazila, union)` returns contacts **in fallback-chain order**
 
-### [P26] Location module: GPS → upazila/union — J · backend · Day 8
-`js/location.js`: Geolocation → OpenStreetMap Nominatim reverse lookup (online, at most 1 request per second, with credit) → match to our upazila/union names. Fall back to the manual picker.
+### [P26] "Find help near me" (location, works offline) — J · backend · Day 8
+`js/location.js` + `data/locations.json` + `tools/collect_locations.py`, `fill_locations.py`, `build_locations.py`:
+- one-tap **"Find help near me"** button; after the tap it locates straight away (no extra prompt) if the user gave permission before. Never read location without a tap
+- **works offline:** GPS → the official BBS upazila boundaries (via OCHA HDX, CC BY-IGO) → the nearest union or town centre point inside that upazila (158 of 160 unions have a point)
+- shows the coordinates + a map link, to tell 999 or family
+- if the union is unsure, show the whole upazila and let the user pick the union
+- credit the boundary source on the page
 
 ---
 
@@ -98,7 +113,7 @@ Free Spark project, Google + email login, Firestore with **security rules** (use
 `css/base.css` with CSS variables; the theme follows the phone's setting and is remembered.
 
 ### [P22] Home screen — T · frontend · Day 4
-A 999 bar that is always visible, a big SOS button, a search box, the "Use my location" button, quick categories.
+A 999 bar that is always visible, a big SOS button, a search box, the "Find help near me" button (P26), quick categories.
 
 ### [P24] Area picker — T · frontend · Day 5
 Division → district → upazila → union **or municipality**, remembered on the phone. Uses `data.js`.
@@ -124,19 +139,29 @@ Silent SOS: a dark screen, no sound, minimum taps. Siren: Web Audio + a flashing
 ### [P31] Safe Journey — T · frontend · Day 11
 Number-plate photo + route + expected arrival → share to family; an "I arrived safely" button.
 
-### [P32] Fake incoming call — T · frontend · Day 11 · *Should*
+*(P32 Fake incoming call was removed in P40 to make room for offline first and the volunteer service.)*
 
-### [P33] Lost/stolen item GD helper — T · frontend · Day 12
+### [P33] Lost/stolen item GD helper — T · frontend · Day 11
 A form → a ready Bangla GD text to copy, plus where to file it (from places / police station data).
 
-### [P34] Offline app (PWA) — T · frontend · Day 12
-`manifest.json`, `service-worker.js`, caching of the pages and data; installable on the home screen.
+### [P34] Offline app (PWA) — T · frontend · Day 8 · **top priority**
+`manifest.json`, `service-worker.js`, caching of all pages and `data/` files; installable on the home screen.
+**Must work with no internet:** all contacts, search, Bangla/English, "Find help near me" (GPS + saved boundaries), tap-to-call, SOS by SMS, siren, Safe Journey photo. Only map links, WhatsApp and login sync wait for internet.
+**Done when:** every item above works in airplane mode on a real phone.
 
-### [P35] Login and account page — T · frontend · Day 13 · *Should*
+### [P35] Login and account page — T · frontend · Day 12 · *Should*
 Uses `js/firebase.js` (P17): synced family contacts, saved areas, favourites.
 
 ### [P36] Accessibility, large text, mobile polish — T · frontend · Day 13
 Contrast, keyboard use, screen-reader labels in Bangla, a large-text mode, testing at 360 px width.
+
+### [P39] Volunteer sign-up, teams, confirm.html and list — T · frontend · Days 12–13 · *Should*
+- `pages/volunteer.html` (logged-in users only): apply with name, phone, area (district → upazila → union/town), ward, skills, availability. Shows "your application is being checked", never **how** it is checked.
+- Teams: District → Upazila → Union/Town → Team → Volunteers; a team leader confirms new members of their team inside the app.
+- `pages/confirm.html`: the official's one-tap **Yes / No** page (no login, one-time code, expires in 7 days).
+- Volunteer list on the area page: only approved volunteers who switched on **"Show me"**, shown **after** the official contacts, with a "Report this volunteer" button. No home addresses.
+
+**Done when:** tested end to end with a **test account and a fake code**, and the test data is deleted.
 
 ---
 
@@ -150,4 +175,4 @@ Contrast, keyboard use, screen-reader labels in Bangla, a large-text mode, testi
 
 ---
 
-**Count:** jerin101 20 issues · tasmintoshi 16 issues · P37 shared · each person reviews every PR from the other.
+**Count:** jerin101 23 issues · tasmintoshi 16 issues · P37 shared · each person reviews every PR from the other.
