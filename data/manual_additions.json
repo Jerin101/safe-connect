@@ -1,0 +1,58 @@
+{
+ "note": "Records typed in by hand from official pages that the collectors do not read automatically. Each one has the exact source and a quote. A second person must check each record before its status changes to verified.",
+ "records": [
+  {
+   "id": "manual-bcg-inani",
+   "level": "union",
+   "category": "coast_river",
+   "district": "Cox's Bazar",
+   "upazila_en": "Ukhia",
+   "upazila_bn": "উখিয়া",
+   "union_en": "Jaliapalong",
+   "union_bn": "জালিয়াপালং ইউনিয়ন",
+   "municipality_bn": null,
+   "office_bn": "বাংলাদেশ কোস্ট গার্ড স্টেশন ইনানী",
+   "office_domain": "jaliapalongup.coxsbazar.gov.bd",
+   "name_bn": "বিসিজি স্টেশন ইনানী",
+   "designation_bn": "অফিসিয়াল মোবাইল নম্বর",
+   "ward_no": null,
+   "phones": [
+    "01769442310"
+   ],
+   "email": null,
+   "key_contact": true,
+   "source_url": "https://jaliapalongup.coxsbazar.gov.bd/pages/static-pages/%E0%A6%87%E0%A6%A8%E0%A6%BE%E0%A6%A8%E0%A7%80-%E0%A6%95%E0%A7%8B%E0%A6%B8%E0%A7%8D%E0%A6%9F-%E0%A6%97%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%A1-%E0%A6%B8%E0%A7%8D%E0%A6%9F%E0%A7%87%E0%A6%B6%E0%A6%A8-95lesv-6a76e277a06b9ead1c10d91c",
+   "source_last_updated": "2026-08-08",
+   "source_quote_bn": "বিসিজি স্টেশন ইনানীর অফিসিয়াল মোবাইল নম্বর হলো ০১৭৬৯৪৪২৩১০",
+   "retrieved_on": "2026-10-21",
+   "status": "collected_from_official_page",
+   "flags": [],
+   "script_check": {
+    "on": "2026-10-21",
+    "result": "ok"
+   }
+  }
+ ],
+ "places": [
+  {
+   "id": "place-inani-beach",
+   "name_bn": "ইনানী সমুদ্র সৈকত",
+   "name_en": "Inani Beach",
+   "district": "Cox's Bazar",
+   "upazila_bn": "উখিয়া",
+   "union_bn": "জালিয়াপালং ইউনিয়ন",
+   "responsible_police_bn": "ইনানী পুলিশ ফাঁড়ি (উখিয়া থানার অধীন, অফিসার ইনচার্জের তত্ত্বাবধানে)",
+   "police_station_upazila": "Ukhia",
+   "nearby_units_bn": [
+    "ইনানী পুলিশ ফাঁড়ি",
+    "বাংলাদেশ কোস্ট গার্ড স্টেশন ইনানী",
+    "ট্যুরিস্ট পুলিশ"
+   ],
+   "how_to_report_bn": "ফাঁড়ি সাধারণ ডায়েরি (GD) করতে সহায়তা করে; নিয়মিত মামলা বা এফআইআর উখিয়া থানায় করতে হয়।",
+   "source_url": "https://jaliapalongup.coxsbazar.gov.bd/pages/static-pages/%E0%A6%87%E0%A6%A8%E0%A6%BE%E0%A6%A8%E0%A7%80-%E0%A6%AA%E0%A7%81%E0%A6%B2%E0%A6%BF%E0%A6%B6-%E0%A6%AB%E0%A6%BE%E0%A7%9C%E0%A6%BF%E0%A6%81-eeh4x9-6a76e05d97bfb19c478c89f4",
+   "source_last_updated": "2026-08-08",
+   "source_quote_bn": "ভুক্তভোগীদের প্রাথমিক আইনি সেবা ও সাধারণ ডায়েরি (GD) করার ক্ষেত্রে সহায়তা করা (তবে ফাঁড়িতে সরাসরি কোনো নিয়মিত মামলা বা এফআইআর রুজু করা যায় না, আইনি প্রক্রিয়া সম্পন্ন করতে সেটি মূল উখিয়া থানায় পাঠানো হয়)",
+   "retrieved_on": "2026-10-21"
+  }
+ ]
+}
