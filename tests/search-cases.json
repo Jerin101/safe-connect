@@ -1,0 +1,46 @@
+{
+ "about": "Test words for the area search (issue #36). tests/search-test.html runs every case. To add a test, add one line below.",
+ "how": {
+  "first": "the first real result must have this kind and these names (union_bn = the union it belongs to)",
+  "first_contains": "the first real result's name must contain this text",
+  "not_anywhere": "this name must not appear in the results or in the similar names",
+  "not_first": "the first result must not be this place",
+  "no_match": "no real result (the page then shows the upazila buttons, GPS and 999)",
+  "no_similar": "no similar names either",
+  "pending": "the test waits for data the team still has to add; it is shown but not counted as failed",
+  "needs": "the test waits until this data exists (places = data/manual_additions.json from P10)"
+ },
+ "cases": [
+  {"q": "hasanpur", "expect": "Hasanpur village, Niazpur union first", "first": {"kind": "village", "name_bn": "হাসানপুর", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
+  {"q": "hason pur", "expect": "Hasanpur village, Niazpur union first", "first": {"kind": "village", "name_bn": "হাসানপুর", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
+  {"q": "হাসানপুর", "expect": "Hasanpur village, Niazpur union first", "first": {"kind": "village", "name_bn": "হাসানপুর", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
+  {"q": "হাছানপুর", "expect": "Hasanpur village, Niazpur union first", "first": {"kind": "village", "name_bn": "হাসানপুর", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
+
+  {"q": "hasanhat", "expect": "Hasan Hat first", "pending": "add Hasan Hat to data/aliases.json once its union is confirmed"},
+  {"q": "hasan hat", "expect": "Hasan Hat first", "pending": "add Hasan Hat to data/aliases.json once its union is confirmed"},
+  {"q": "hason haat", "expect": "Hasan Hat first", "pending": "add Hasan Hat to data/aliases.json once its union is confirmed"},
+  {"q": "হাসানহাট", "expect": "Hasan Hat first", "pending": "add Hasan Hat to data/aliases.json once its union is confirmed"},
+  {"q": "হাসান হাট", "expect": "Hasan Hat first", "pending": "add Hasan Hat to data/aliases.json once its union is confirmed"},
+  {"q": "hasanhat", "expect": "must NOT show Hasanpur first", "not_first": {"kind": "village", "name_bn": "হাসানপুর", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
+
+  {"q": "niazpur", "expect": "Niazpur union first", "first": {"kind": "union", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
+  {"q": "neaj pur", "expect": "Niazpur union first", "first": {"kind": "union", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
+  {"q": "newajpur", "expect": "Niazpur union first", "first": {"kind": "union", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
+  {"q": "নিয়াজপুর", "expect": "Niazpur union first", "first": {"kind": "union", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
+  {"q": "chowmuhani", "expect": "Chowmuhani town first", "first": {"kind": "municipality"}, "first_contains": "চৌমুহনী"},
+  {"q": "coxs bazar", "expect": "Cox's Bazar first", "first_contains": "কক্সবাজার"},
+  {"q": "cox's bazar", "expect": "Cox's Bazar first", "first_contains": "কক্সবাজার"},
+  {"q": "hatiya", "expect": "Hatiya upazila first", "first": {"kind": "upazila", "upazila": "Hatiya"}},
+  {"q": "inani", "expect": "Inani beach first", "first": {"kind": "place"}, "first_contains": "ইনানী", "needs": "places"},
+
+  {"q": "maijdee", "expect": "Maijdee -> Noakhali municipality first", "first": {"kind": "local", "name_bn": "মাইজদী", "town_bn": "নোয়াখালী পৌরসভা"}},
+  {"q": "মাইজদী", "expect": "Maijdee -> Noakhali municipality first", "first": {"kind": "local", "name_bn": "মাইজদী", "town_bn": "নোয়াখালী পৌরসভা"}},
+  {"q": "maijdee", "expect": "must NOT show দক্ষিন চর মজিদ", "not_anywhere": "দক্ষিন চর মজিদ"},
+
+  {"q": "babunagar", "expect": "Babunagar village, Sharifpur union first (official village list)", "first": {"kind": "village", "name_bn": "বাবুনগর", "union_bn": "শরীফপুর ইউনিয়ন"}},
+  {"q": "babunagar", "expect": "must NOT show মনিনগর", "not_anywhere": "মনিনগর"},
+
+  {"q": "blorptanq", "expect": "nonsense word -> 999 fallback", "no_match": true, "no_similar": true},
+  {"q": "qwzx", "expect": "nonsense word -> 999 fallback", "no_match": true, "no_similar": true}
+ ]
+}
