@@ -12,7 +12,7 @@ const T = {
     areaLabel: 'এলাকার নাম লিখুন', areaHint: 'গ্রাম, ইউনিয়ন, পৌরসভা বা উপজেলা — বাংলা বা ইংরেজিতে, যেকোনো বানানে। যেমন: চৌমুহনী, Hatiya, ইনানী',
     noMatch: 'এই নামে কোনো জায়গা তালিকায় নেই। তবুও সাহায্য পাবেন:', didYouMean: 'কাছাকাছি নাম', noExact: 'ঠিক এই বানানে পাইনি। নিচের কোনোটি কি আপনার জায়গা?',
     tellUs: 'আপনার জায়গার নাম তালিকায় না থাকলে আমাদের জানান, আমরা যোগ করব।', pickUpazila: 'আপনার উপজেলা বেছে নিন। থানা ও ইউএনও-র নম্বর সেখানেই পাবেন।',
-    call999: '৯৯৯-এ কল', kinds: { municipality: 'পৌরসভা', place: 'জায়গা', union: 'ইউনিয়ন', village: 'গ্রাম', upazila: 'উপজেলা', local: 'স্থানীয় নাম' },
+    call999: '৯৯৯-এ কল', kinds: { municipality: 'পৌরসভা', place: 'জায়গা', union: 'ইউনিয়ন', village: 'গ্রাম', upazila: 'উপজেলা', local: 'স্থানীয় নাম', 'market and post office': 'হাট ও ডাকঘর', market: 'হাট-বাজার', 'post office': 'ডাকঘর' },
     recent: (n) => `আগের এলাকা: ${n}`,
     denied: 'লোকেশনের অনুমতি নেই। ফোনের সেটিংসে লোকেশন চালু করুন, অথবা নিচে এলাকার নাম লিখুন।',
     unavailable: 'লোকেশন পাওয়া যায়নি। খোলা জায়গায় গিয়ে আবার চাপুন, অথবা নিচে এলাকার নাম লিখুন।',
@@ -45,7 +45,7 @@ const T = {
     areaLabel: 'Type your area', areaHint: 'Village, union, town or upazila, in Bangla or English. For example: Chowmuhani, হাতিয়া, Inani',
     noMatch: 'This name is not in our list yet. You can still get help:', didYouMean: 'Similar names', noExact: 'Not found with this exact spelling. Is it one of these?',
     tellUs: 'If your place is missing, tell us and we will add it.', pickUpazila: 'Pick your upazila. Its police station and UNO numbers are there.',
-    call999: 'Call 999', kinds: { municipality: 'town', place: 'place', union: 'union', village: 'village', upazila: 'upazila', local: 'local name' },
+    call999: 'Call 999', kinds: { municipality: 'town', place: 'place', union: 'union', village: 'village', upazila: 'upazila', local: 'local name', 'market and post office': 'market and post office', market: 'market', 'post office': 'post office' },
     recent: (n) => `Last area: ${n}`,
     denied: 'Location is not allowed. Turn on location in your phone settings, or type your area below.',
     unavailable: 'Could not get your location. Move to an open place and tap again, or type your area below.',
@@ -111,7 +111,7 @@ function itemLabel(h) {
   const p = { ...h.place };
   const named = h.named && (lang === 'bn' ? h.named.name_bn : h.named.name_en || h.named.name_bn);
   if (named) p.label = named;
-  const kindWord = t().kinds[h.kind] || '';
+  const kindWord = (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
   let title;
   if (h.kind === 'village') title = h.village;
   else if (named) title = named;
