@@ -1,0 +1,178 @@
+// SafeConnect data module: loads the data files and answers
+// "who should I call here?" in fallback-chain order (docs/BUILD_PLAN.md §4).
+
+export const DISTRICTS = [
+  { key: 'noakhali', file: 'contacts_noakhali.json', en: 'Noakhali', bn: 'নোয়াখালী' },
+  { key: 'coxsbazar', file: 'contacts_coxsbazar.json', en: "Cox's Bazar", bn: 'কক্সবাজার' },
+];
+
+// Government pages store some Bangla letters (e.g. য়) in two different ways.
+export const norm = (s) => (s || '').normalize('NFC').trim();
+const toAsciiDigits = (s) => s.replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+const wardNumber = (r) => parseInt(toAsciiDigits(r.ward_no || ''), 10) || 99;
+
+async function getJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Could not load ${url} (${res.status})`);
+  return res.json();
+}
+
+// Hand-entered records are optional: the site still works if the file is missing.
+const noManual = { records: [], places: [] };
+
+// A district file that fails to load is left out (listed in `missing`), so the
+// national hotlines and the other district still work.
+export async function loadAll(base = 'data/') {
+  const [national, manual, ...files] = await Promise.all([
+    getJSON(`${base}national_hotlines.json`),
+    getJSON(`${base}manual_additions.json`).catch(() => noManual),
+    ...DISTRICTS.map((d) => getJSON(base + d.file).catch(() => null)),
+  ]);
+  const docs = {};
+  const missing = [];
+  DISTRICTS.forEach((d, i) => {
+    const doc = files[i];
+    if (!doc) { missing.push(d.key); return; }
+    doc.records = doc.records.concat(manual.records.filter((r) => r.district === doc.district));
+    doc.places = (manual.places || []).filter((p) => p.district === doc.district);
+    for (const r of doc.records) r._text = searchText(r, d);
+    docs[d.key] = doc;
+  });
+  const nationalCards = national.records.map((r) => nationalCard(r, national.retrieved_on));
+  for (const c of nationalCards) c._text = norm([c.name_bn, c.name_en, c.designation_bn, ...c.phones].join(' ')).toLowerCase();
+  return { national: nationalCards, docs, missing };
+}
+
+function nationalCard(r, checkedOn) {
+  return {
+    id: r.id, kind: 'national', category: r.category, name_bn: r.name_bn, name_en: r.name_en,
+    designation_bn: r.summary_en, office_bn: '', phones: r.numbers, flags: [],
+    source_url: r.source_url, checked_on: checkedOn, toll_free: r.toll_free, hours: r.hours,
+  };
+}
+
+function searchText(r, district) {
+  return norm([r.name_bn, r.designation_bn, r.office_bn, r.union_bn, r.union_en, r.upazila_bn, r.upazila_en,
+    r.municipality_bn, district.en, district.bn, ...(r.phones || [])].join(' ')).toLowerCase();
+}
+
+export function upazilas(doc) {
+  const seen = new Map();
+  for (const u of doc.unions) seen.set(u.upazila_en, norm(u.upazila_bn));
+  for (const r of doc.records) if (r.upazila_en && !seen.has(r.upazila_en)) seen.set(r.upazila_en, norm(r.upazila_bn));
+  return [...seen].map(([en, bn]) => ({ en, bn })).sort((a, b) => a.en.localeCompare(b.en));
+}
+
+// Unions and municipalities (towns) inside one upazila.
+export function localAreas(doc, upazilaEn) {
+  const unions = doc.unions.filter((u) => u.upazila_en === upazilaEn)
+    .map((u) => ({ type: 'union', bn: norm(u.union_bn), en: u.union_en }));
+  const towns = doc.municipalities.filter((m) => m.upazila_en === upazilaEn)
+    .map((m) => ({ type: 'municipality', bn: norm(m.municipality_bn), en: null }));
+  return [...towns, ...unions.sort((a, b) => (a.en || '').localeCompare(b.en || ''))];
+}
+
+const has = (r, ...words) => words.some((w) => norm(r.designation_bn).includes(norm(w)));
+const withPhone = (r) => r.phones && r.phones.length > 0;
+
+// Upazila portals sometimes list the heads of other offices among their own officers
+// (e.g. Eidgaon lists its police station OC). Put those people in the right group.
+function categoryOf(r) {
+  if (r.category !== 'administration' || r.level !== 'upazila') return r.category;
+  if (has(r, 'ইনচার্জ') && r.phones.some((p) => p.startsWith('01320'))) return 'police';
+  if (has(r, 'স্বাস্থ্য', 'মেডিকেল')) return 'health';
+  if (has(r, 'মহিলা বিষয়ক')) return 'women_children';
+  if (has(r, 'প্রকল্প বাস্তবায়ন')) return 'disaster';
+  return 'administration';
+}
+
+// Lower rank = shown first.
+function policeRank(r, placeWord) {
+  if (placeWord && norm(r.designation_bn).includes(placeWord)) return 0;
+  if (has(r, 'ইনচার্জ')) return 1;
+  if (has(r, 'ডিউটি')) return 2;
+  if (has(r, 'ফাঁড়ি', 'ফাড়ি')) return 3;
+  if (has(r, 'পরিদর্শক', 'ইন্সপেক্টর')) return 4;
+  return 5;
+}
+
+function localRank(r) {
+  if (has(r, 'চেয়ারম্যান', 'প্রশাসক')) return 0;
+  if (has(r, 'মেম্বার', 'সদস্য')) return 1;
+  if (r.category === 'union_office') return 2;
+  return 3;
+}
+
+const keyFirst = (a, b) => (b.key_contact === true) - (a.key_contact === true);
+const phoneFirst = (a, b) => withPhone(b) - withPhone(a);
+
+/**
+ * Contacts for one place, grouped in the order a person in danger should call.
+ * place = { district, upazila, area: { type: 'union' | 'municipality', bn } | null }
+ */
+export function areaContacts(data, place) {
+  const doc = data.docs[place.district];
+  const R = doc.records;
+  const nat = (id) => data.national.filter((n) => n.id === id);
+  const inUpazila = (r) => r.upazila_en === place.upazila && r.level === 'upazila';
+  const district = (cat) => R.filter((r) => r.level === 'district' && r.category === cat && r.key_contact && withPhone(r));
+  const area = place.area;
+  const placeWord = area ? norm(area.bn).split(/[\s,]/)[0] : '';
+  const groups = [];
+  const add = (id, items, extra = {}) => { if (items.length) groups.push({ id, items, ...extra }); };
+
+  add('emergency', nat('national-emergency-999'));
+
+  const police = R.filter((r) => inUpazila(r) && categoryOf(r) === 'police' && withPhone(r))
+    .sort((a, b) => policeRank(a, placeWord) - policeRank(b, placeWord));
+  add('police', police.length ? police : district('police'), { fallback: !police.length });
+
+  if (place.district === 'coxsbazar') {
+    const tourist = R.filter((r) => r.category === 'tourist_police').sort(keyFirst);
+    add('tourist_police', [...nat('tourist-police-helpline'), ...tourist]);
+  }
+
+  if (area && area.type === 'union') {
+    const inUnion = R.filter((r) => r.level === 'union' && norm(r.union_bn) === area.bn);
+    const vp = inUnion.filter((r) => r.category === 'village_police').sort((a, b) => wardNumber(a) - wardNumber(b));
+    add('village_police', vp);
+    const local = inUnion.filter((r) => ['local_representative', 'union_office'].includes(r.category))
+      .sort((a, b) => phoneFirst(a, b) || localRank(a) - localRank(b) || wardNumber(a) - wardNumber(b));
+    add('local', local, { noNumbers: !local.some(withPhone) });
+    add('coast', inUnion.filter((r) => r.category === 'coast_river'));
+  }
+  if (area && area.type === 'municipality') {
+    add('town', R.filter((r) => r.level === 'municipality' && norm(r.municipality_bn) === area.bn).sort(keyFirst));
+  }
+
+  const upz = (cat) => R.filter((r) => inUpazila(r) && categoryOf(r) === cat && withPhone(r)).sort(keyFirst);
+  const admin = upz('administration');
+  add('administration', admin.length ? admin : district('administration'), { fallback: !admin.length });
+  const health = upz('health');
+  add('health', [...(health.length ? health : district('health')), ...nat('health-call-centre-16263')], { fallback: !health.length });
+  const fire = upz('fire');
+  add('fire', [...(fire.length ? fire : district('fire')), ...nat('fire-service-102')], { fallback: !fire.length });
+  add('women_children', [...upz('women_children'), ...nat('women-children-violence-109'), ...nat('child-helpline-1098')]);
+  add('disaster', [...upz('disaster'), ...nat('disaster-warning-1090'), ...nat('coast-guard-16111')]);
+
+  const shown = new Set(groups.flatMap((g) => g.items.map((i) => i.id)));
+  add('helplines', data.national.filter((n) => !shown.has(n.id) && n.id !== 'info-service-333'));
+  // Last step of the fallback chain (BUILD_PLAN §4): 333 gives the numbers of officials and representatives.
+  add('info333', nat('info-service-333'));
+  return groups;
+}
+
+export function search(data, query, limit = 40) {
+  const q = norm(toAsciiDigits(query)).toLowerCase();
+  if (q.length < 2) return [];
+  const words = q.split(/\s+/);
+  const match = (t) => words.every((w) => t.includes(w));
+  const out = data.national.filter((n) => match(n._text));
+  for (const doc of Object.values(data.docs)) {
+    for (const r of doc.records) {
+      if (withPhone(r) && match(r._text)) out.push(r);
+      if (out.length >= limit) return out;
+    }
+  }
+  return out;
+}
