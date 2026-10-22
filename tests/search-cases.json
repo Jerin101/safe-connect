@@ -16,11 +16,11 @@
   {"q": "হাসানপুর", "expect": "Hasanpur village, Niazpur union first", "first": {"kind": "village", "name_bn": "হাসানপুর", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
   {"q": "হাছানপুর", "expect": "Hasanpur village, Niazpur union first", "first": {"kind": "village", "name_bn": "হাসানপুর", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
 
-  {"q": "hasanhat", "expect": "Hasan Hat first", "pending": "add Hasan Hat to data/aliases.json once its union is confirmed"},
-  {"q": "hasan hat", "expect": "Hasan Hat first", "pending": "add Hasan Hat to data/aliases.json once its union is confirmed"},
-  {"q": "hason haat", "expect": "Hasan Hat first", "pending": "add Hasan Hat to data/aliases.json once its union is confirmed"},
-  {"q": "হাসানহাট", "expect": "Hasan Hat first", "pending": "add Hasan Hat to data/aliases.json once its union is confirmed"},
-  {"q": "হাসান হাট", "expect": "Hasan Hat first", "pending": "add Hasan Hat to data/aliases.json once its union is confirmed"},
+  {"q": "hasanhat", "expect": "Hasan Hat (market and post office), Sharifpur union first", "first": {"kind": "local", "name_bn": "হাসান হাট", "union_bn": "শরীফপুর ইউনিয়ন"}},
+  {"q": "hasan hat", "expect": "Hasan Hat (market and post office), Sharifpur union first", "first": {"kind": "local", "name_bn": "হাসান হাট", "union_bn": "শরীফপুর ইউনিয়ন"}},
+  {"q": "hason haat", "expect": "Hasan Hat (market and post office), Sharifpur union first", "first": {"kind": "local", "name_bn": "হাসান হাট", "union_bn": "শরীফপুর ইউনিয়ন"}},
+  {"q": "হাসানহাট", "expect": "Hasan Hat (market and post office), Sharifpur union first", "first": {"kind": "local", "name_bn": "হাসান হাট", "union_bn": "শরীফপুর ইউনিয়ন"}},
+  {"q": "হাসান হাট", "expect": "Hasan Hat (market and post office), Sharifpur union first", "first": {"kind": "local", "name_bn": "হাসান হাট", "union_bn": "শরীফপুর ইউনিয়ন"}},
   {"q": "hasanhat", "expect": "must NOT show Hasanpur first", "not_first": {"kind": "village", "name_bn": "হাসানপুর", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
 
   {"q": "niazpur", "expect": "Niazpur union first", "first": {"kind": "union", "union_bn": "নিয়াজপুর ইউনিয়ন"}},
