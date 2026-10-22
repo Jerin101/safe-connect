@@ -47,7 +47,7 @@ From **any location in Noakhali or Cox's Bazar** (a union, a town or municipalit
 ## 4. Git rules (both)
 
 1. Every change starts from a **GitHub Issue** ([`ISSUES.md`](ISSUES.md)). Each person creates their own issues; this counts as activity.
-2. **Branch per issue:** `docs/1-project-plan`, `data/5-national-hotlines`, `feature/22-home-screen`, `fix/40-card-overflow`.
+2. **Branch per issue**, named with the **GitHub issue number** (not the P-number, because issues and PRs share one number list): `docs/5-contributing`, `data/6-national-hotlines`, `feature/22-home-screen`, `fix/40-card-overflow`.
 3. **Small commits** with clear messages that start with a verb: `Add Ukhia police station records`.
 4. **Pull request** with `Closes #N` → **the other person reviews** → the automatic check passes → merge → delete the branch.
 5. Tasmin works in **her own Windows user account** and is signed in to Git and GitHub as **tasmintoshi**, so every commit shows her name.

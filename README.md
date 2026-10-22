@@ -14,6 +14,7 @@ When something goes wrong (an attack, a theft, an accident, a fire or a flood), 
 It also lets you send your **location to family in one tap**.
 
 > Pilot districts: **Noakhali** and **Cox's Bazar** · Budget: **0** · Data: **official `*.gov.bd` sources only**
+
 ## Roadmap
 
 - **Phase 1 (now):** Noakhali and Cox's Bazar: full data, every union and municipality
@@ -28,7 +29,7 @@ It also lets you send your **location to family in one tap**.
 
 | Member | GitHub | Role |
 |---|---|---|
-| Jerin | [@jerin101](https://github.com/jerin101) | : data, backend tools, Firebase, GitHub |
+| Jerin | [@jerin101](https://github.com/jerin101) | Lead: data, backend tools, Firebase, GitHub |
 | Tasmin | [@tasmintoshi](https://github.com/tasmintoshi) | Frontend: UI, design, features in the browser |
 
 ## Main features
@@ -55,4 +56,4 @@ Every number comes from an official Bangladesh government website, and the exact
 
 ## License
 
-MIT
+MIT. See [`LICENSE`](LICENSE).

@@ -8,7 +8,7 @@ Two people build SafeConnect: **jerin101** (lead: data and backend) and **tasmin
 2. **Branch from the latest `main`.**
    - In VS Code: bottom-left branch name → `main` → Source Control `⋯` → **Pull**.
    - Then: bottom-left → **+ Create new branch**.
-   - Names: `docs/<n>-short-name`, `data/<n>-…`, `feature/<n>-…`, `fix/<n>-…`
+   - Names: `docs/<n>-short-name`, `data/<n>-…`, `feature/<n>-…`, `fix/<n>-…`, where `<n>` is the **GitHub issue number** (not the P-number).
 3. **Small commits.** One idea per commit. The message starts with a verb: `Add Ukhia police station records`, `Fix card overflow on small phones`.
 4. **Publish the branch**, then open a **pull request**:
    - title = the issue title
