@@ -346,13 +346,34 @@
   .faq-list details[open] summary::after { content: "−"; }
   .faq-list p { color: var(--muted); padding-bottom: 16px; max-width: 60ch; }
 
-  /* our additions: no inline styles, source line on call rows, simple footer (replaced by the full footer later) */
+  /* footer */
+  footer { background: var(--foot-bg); color: var(--foot-ink); position: relative; overflow: hidden; isolation: isolate; margin-top: 30px; }
+  footer .mark { position: absolute; right: -60px; bottom: -80px; width: 380px; height: 380px; z-index: -1; opacity: 0.12; color: #8D6BFF; }
+  footer .wrap { padding-block: 48px 28px; display: grid; gap: 34px; }
+  .foot-grid { display: grid; gap: 30px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 900px) { .foot-grid { grid-template-columns: 1.4fr 1fr 1fr 1fr 1.4fr; } }
+  .foot-brand { grid-column: 1 / -1; display: grid; gap: 12px; align-content: start; }
+  @media (min-width: 900px) { .foot-brand { grid-column: auto; } }
+  .foot-brand .logo { color: var(--foot-ink); font-size: 1.35rem; }
+  .foot-brand p { font-size: 1.05rem; line-height: 1.5; max-width: 26ch; }
+  .foot-brand small { color: var(--foot-muted); font-size: 0.86rem; }
+  .foot-col { display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .foot-col h3 { font-size: 0.98rem; font-weight: 700; margin-bottom: 4px; }
+  .foot-col button, .foot-col a { justify-self: start; background: none; border: 0; padding: 0; color: var(--foot-muted); font-size: 0.95rem; cursor: pointer; text-decoration: none; text-align: left; }
+  .foot-col button:hover, .foot-col a:hover { color: var(--foot-ink); }
+  .foot-help { grid-column: 1 / -1; }
+  @media (min-width: 900px) { .foot-help { grid-column: auto; } }
+  .foot-help p { color: var(--foot-muted); font-size: 0.95rem; max-width: 34ch; }
+  .foot-help a { color: var(--foot-ink); }
+  .foot-bottom { border-top: 1px solid var(--foot-line); padding-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 22px; justify-content: space-between; color: var(--foot-muted); font-size: 0.82rem; }
+  .foot-bottom nav { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .foot-bottom a, .foot-bottom button { color: var(--foot-muted); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: none; font-size: 0.82rem; }
+  .credit { flex-basis: 100%; font-size: 0.78rem; opacity: 0.85; }
+  /* our additions: no inline styles, source line on call rows */
   .home-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; padding-bottom: 40px; }
   .quick { display: grid; gap: 14px; }
   .people-body { padding: 8px 16px 16px; gap: 10px; }
   .first-row .src { color: var(--muted); font-size: 0.78rem; }
-  footer.simple { border-top: 1px solid var(--glass-line); color: var(--muted); font-size: 0.85rem; margin-top: 30px; }
-  footer.simple .wrap { padding-block: 18px 28px; display: grid; gap: 6px; }
 </style>
 </head>
 <body>
@@ -532,11 +553,11 @@
   </div>
 </main>
 
-<footer class="simple">
+<footer>
+  <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 2c6.6 0 12 5.2 12 11.7C28 22.5 16 30 16 30S4 22.5 4 13.7C4 7.2 9.4 2 16 2Zm0 7a4.6 4.6 0 1 0 0 9.2A4.6 4.6 0 0 0 16 9Z"/></svg>
   <div class="wrap">
-    <p id="foot1"></p>
-    <p id="foot2"></p>
-    <p><a id="testsLink" href="tests/search-test.html"></a></p>
+    <div class="foot-grid" id="footGrid"></div>
+    <div class="foot-bottom" id="footBottom"></div>
   </div>
 </footer>
 

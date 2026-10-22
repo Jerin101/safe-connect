@@ -607,6 +607,10 @@ function renderPlaces() {
 $('ctaBtn').addEventListener('click', () => { openSos(null); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); });
 
 
+const SITE = {
+  repo: 'https://github.com/Jerin101/safe-connect',
+  report: 'https://github.com/Jerin101/safe-connect/issues/new?labels=data-gap&title=Wrong%20number',
+};
 const PAGE = {
   bn: {
     nav: ['হোম', 'এলাকা খুঁজুন', 'প্রিয়জনকে লোকেশন', 'আমাদের সম্পর্কে'],
@@ -621,6 +625,13 @@ const PAGE = {
         ['offline', 'ইন্টারনেট না থাকলে কাজ করবে?', 'আংশিক। আপনার অবস্থান থেকে এলাকা খোঁজা ইন্টারনেট ছাড়াই হয়, আর SMS-এ ইন্টারনেট লাগে না। পুরো সাইট অফলাইনে চালানোর অংশ (অফলাইন অ্যাপ) এখন তৈরি হচ্ছে।'],
         ['privacy', 'আমার তথ্য কোথায় যায়?', 'কোথাও না। প্রিয়জনের নম্বর ও শেষ দেখা এলাকা শুধু আপনার ফোনের ব্রাউজারে থাকে। লোকেশন যায় শুধু আপনি পাঠালে।'],
         ['districts', 'অন্য জেলা কবে আসবে?', 'এখন নোয়াখালী ও কক্সবাজার। তথ্য যাচাই শেষ হলে ধাপে ধাপে বাকি জেলা আসবে। ৯৯৯, ১০৯, ৩৩৩-এর মতো জাতীয় নম্বর সারা দেশে কাজ করে।']] },
+    foot: { tagline: 'আপনার এলাকার সরকারি জরুরি নম্বর। লগইন ছাড়া। লোকেশন খুঁজতে ইন্টারনেট লাগে না।', small: 'নোয়াখালী ও কক্সবাজার দিয়ে শুরু।',
+      services: ['সেবা', ['৯৯৯-এ কল', 'প্রিয়জনকে লোকেশন', 'কাছের সাহায্য', 'এলাকা খুঁজুন']],
+      areas: ['এলাকা', ['নোয়াখালী', 'কক্সবাজার', 'চৌমুহনী', 'ইনানী সৈকত']],
+      info: ['তথ্য', ['আমাদের সম্পর্কে', 'প্রশ্ন ও উত্তর', 'ভুল নম্বর জানান', 'উৎস ও যাচাই']],
+      helpTitle: 'সাহায্য দরকার?', helpText: 'সরকারি কোনো সেবার তথ্য জানতে ৩৩৩-এ কল করুন। এই প্রকল্প নিয়ে কিছু বলতে চাইলে GitHub-এ লিখুন।',
+      copy: '© ২০২৬ SafeConnect · jerin101 ও tasmintoshi', bottom: ['প্রাইভেসি', 'উৎস', 'GitHub', 'সার্চ টেস্ট'],
+      credit: 'নম্বর: সরকারি *.gov.bd ওয়েবসাইট। ম্যাপ: উপজেলার সীমানা ও ইউনিয়ন/পৌরসভার কেন্দ্রবিন্দু বাংলাদেশ পরিসংখ্যান ব্যুরো (BBS), OCHA HDX-এর মাধ্যমে (CC BY-IGO)। BBS-এর নাম না মিললে টুলগুলো OpenStreetMap-এর বিন্দু যোগ করতে পারে (© OpenStreetMap contributors, ODbL)।' },
   },
   en: {
     nav: ['Home', 'Find area', 'Send location', 'About'],
@@ -635,6 +646,13 @@ const PAGE = {
         ['offline', 'Does it work without internet?', 'Partly. Finding your area from your location works without internet, and SMS needs no internet. Making the whole site work offline (the offline app) is being built now.'],
         ['privacy', 'Where does my data go?', 'Nowhere. Your family\'s numbers and last area stay in your phone\'s browser. Your location is sent only when you send it.'],
         ['districts', 'When will other districts come?', 'Noakhali and Cox\'s Bazar now. More districts come step by step once their data is checked. National numbers like 999, 109 and 333 work everywhere.']] },
+    foot: { tagline: 'Official emergency numbers for your area. No login. Finding your location needs no internet.', small: "Starting with Noakhali and Cox's Bazar.",
+      services: ['Services', ['Call 999', 'Send location', 'Help near me', 'Find area']],
+      areas: ['Areas', ['Noakhali', "Cox's Bazar", 'Chowmuhani', 'Inani beach']],
+      info: ['Information', ['About', 'Questions', 'Report a wrong number', 'Sources and checks']],
+      helpTitle: 'Need a little help?', helpText: 'For information about any government service, call 333. To tell us about this project, write on GitHub.',
+      copy: '© 2026 SafeConnect · jerin101 & tasmintoshi', bottom: ['Privacy', 'Sources', 'GitHub', 'Search tests'],
+      credit: 'Numbers: official *.gov.bd websites. Map: upazila boundaries and union/town centre points from the Bangladesh Bureau of Statistics (BBS) via OCHA HDX (CC BY-IGO). Where BBS names do not match, the tools can add OpenStreetMap points (© OpenStreetMap contributors, ODbL).' },
   },
 };
 const P = () => PAGE[lang];
@@ -645,7 +663,9 @@ const MORE_ICONS = {
 function goTo(id) { goHome(); setTimeout(() => $(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30); }
 function findArea(district) { goHome(); $('distSel').value = district || ''; setTimeout(() => { $('areaInput').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('areaInput').focus({ preventScroll: true }); }, 30); renderSuggest(); }
 function openFaq(key) { goTo('faq'); const d = document.querySelector(`#faqList details[data-key="${key}"]`); if (d) d.open = true; }
+function openQuick(key) { const q = quickPlaces().find(([k]) => k === key); if (!q) return; const [, , item] = q; const p = { ...item.place }; if (item.named) p.label = lang === 'bn' ? item.named.name_bn : item.named.name_en; openArea(p, null); }
 const textBtn = (label, fn) => { const b = el('button', null, label); b.type = 'button'; b.addEventListener('click', fn); return b; };
+const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a; };
 
 function renderNav() {
   const [home, area, send, about] = P().nav;
@@ -666,7 +686,27 @@ function renderFaq() {
     const d = el('details'); d.dataset.key = key; d.append(el('summary', null, q), el('p', null, a)); return d;
   }));
 }
-function renderPage() { renderNav(); renderAbout(); renderFaq(); }
+function renderFooter() {
+  const f = P().foot;
+  const brand = el('div', 'foot-brand');
+  const logo = $('homeBtn').cloneNode(true); logo.removeAttribute('id'); logo.addEventListener('click', () => { goHome(); window.scrollTo(0, 0); });
+  brand.append(logo, el('p', null, f.tagline), el('small', null, f.small));
+  const col = (title, items) => { const c = el('div', 'foot-col'); c.append(el('h3', null, title), ...items); return c; };
+  const [sT, s] = f.services, [aT, a] = f.areas, [iT, i] = f.info;
+  const call = el('a', null, s[0]); call.href = 'tel:999';
+  const help = el('div', 'foot-col foot-help');
+  help.append(el('h3', null, f.helpTitle), el('p', null, f.helpText), extLink('github.com/Jerin101/safe-connect', SITE.repo));
+  $('footGrid').replaceChildren(brand,
+    col(sT, [call, textBtn(s[1], () => openSos(null)), textBtn(s[2], () => { goHome(); locate(); }), textBtn(s[3], () => findArea(''))]),
+    col(aT, [textBtn(a[0], () => findArea('noakhali')), textBtn(a[1], () => findArea('coxsbazar')), textBtn(a[2], () => openQuick('chowmuhani')), textBtn(a[3], () => openQuick('inani'))]),
+    col(iT, [textBtn(i[0], () => goTo('about')), textBtn(i[1], () => goTo('faq')), extLink(i[2], SITE.report), textBtn(i[3], () => openFaq('source'))]),
+    help);
+  const nav = el('nav'); nav.setAttribute('aria-label', 'Footer');
+  const tests = el('a', null, f.bottom[3]); tests.href = 'tests/search-test.html';
+  nav.append(textBtn(f.bottom[0], () => openFaq('privacy')), textBtn(f.bottom[1], () => openFaq('source')), extLink(f.bottom[2], SITE.repo), tests);
+  $('footBottom').replaceChildren(el('span', null, f.copy), nav, el('p', 'credit', f.credit));
+}
+function renderPage() { renderNav(); renderAbout(); renderFaq(); renderFooter(); }
 
 /* ---------- text ---------- */
 function setText() {
@@ -693,7 +733,6 @@ function setText() {
   $('smsHint').textContent = s.smsHint; $('peopleTitle').textContent = s.people;
   $('lblName').textContent = s.name; $('lblRel').textContent = s.rel; $('lblPhone').textContent = s.phone; $('saveBtn').textContent = s.save;
   $('privacy').textContent = s.privacy;
-  $('foot1').textContent = s.foot1; $('foot2').textContent = s.credit; $('testsLink').textContent = s.testsLink;
   renderHomeSos();
   renderPage();
 }
