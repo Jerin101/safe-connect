@@ -935,3 +935,7 @@ try {
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);
 }
+
+// Offline app (P34): save the site on this phone after the first visit, so it opens with no internet.
+// Registered after the data is loaded, so it does not slow down the first view.
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
