@@ -216,6 +216,11 @@ function callLink(num, label, red = false) {
   a.append(el('small', null, label), document.createTextNode(digits(num)));
   return a;
 }
+// Warning badges from the record's flags (CLAUDE.md data rules); the same on every row that shows a number.
+function flagTags(r, tags = el('div', 'tags')) {
+  for (const f of r.flags || []) if (t().flags[f]) tags.append(el('span', 'tag warn', t().flags[f]));
+  return tags;
+}
 function personRow(r) {
   const row = el('div', 'person');
   const info = el('div');
@@ -225,7 +230,7 @@ function personRow(r) {
   if (role && r.kind !== 'national') info.append(el('span', 'role', role));
   const tags = el('div', 'tags');
   if (r.ward_no) tags.append(el('span', 'tag', `${t().ward} ${digits(r.ward_no)}`));
-  for (const f of r.flags || []) if (t().flags[f]) tags.append(el('span', 'tag warn', t().flags[f]));
+  flagTags(r, tags);
   if (tags.children.length) info.append(tags);
   row.append(info);
   const calls = el('div', 'calls');
@@ -245,6 +250,8 @@ function firstRow(what, r, red = false) {
   info.append(el('span', 'what', what));
   const who = r.kind === 'national' ? (lang === 'en' ? r.name_en : r.name_bn) : [r.name_bn, r.designation_bn].filter(Boolean).join(', ');
   info.append(el('span', 'who', who));
+  const tags = flagTags(r);
+  if (tags.children.length) info.append(tags);
   if (r.source_url) {                     // every number shows its source and check date (CLAUDE.md data rules)
     const src = el('span', 'src');
     const a = el('a', null, `${t().source} ↗`); a.href = r.source_url; a.target = '_blank'; a.rel = 'noopener';
