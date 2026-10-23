@@ -241,49 +241,42 @@
 
   main > .wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-block: 16px 40px; }
   main > .wrap > * { min-width: 0; }
-  .section-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .section-head h2 { font-size: clamp(1.45rem, 4vw, 1.9rem); font-weight: 700; }
-  .section-head p { color: var(--muted); max-width: 40ch; font-size: 0.95rem; }
 
-  /* stats */
-  .stats { border-radius: var(--r); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; padding: 6px; box-shadow: var(--shadow); }
-  @media (min-width: 760px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  .stat { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: center; padding: 14px; }
-  .stat .ic { grid-row: span 2; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--accent); }
-  .stat .ic svg { width: 20px; height: 20px; }
-  .stat b { font-family: var(--font); font-size: 1.25rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-  .stat span { color: var(--muted); font-size: 0.85rem; line-height: 1.25; }
-
-  /* quick places */
-  .places { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  @media (min-width: 760px) { .places { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  .place { position: relative; border: 1px solid var(--line); border-radius: var(--r); aspect-ratio: 1.15; max-width: 100%; overflow: hidden; cursor: pointer;
-    padding: 0; text-align: left; color: #fff; box-shadow: var(--shadow); }
-  .place .art { position: absolute; inset: 0; }
-  .place .label { position: absolute; left: 10px; bottom: 10px; right: 10px; display: grid; gap: 2px; }
-  .place .label b { justify-self: start; background: rgba(15, 10, 40, 0.55); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 999px; padding: 3px 12px; font-weight: 600; font-size: 0.95rem; }
-  .place .label small { padding-left: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.85); text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
-  .place .corner { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: rgba(15, 10, 40, 0.45); border: 1px solid rgba(255,255,255,0.25); }
-  .place .corner svg { width: 14px; height: 14px; }
-  .art.town { background: radial-gradient(60% 40% at 50% 100%, rgba(255, 190, 110, 0.9), transparent 70%),
-      repeating-linear-gradient(90deg, transparent 0 14px, rgba(255, 220, 140, 0.5) 14px 16px, transparent 16px 30px), linear-gradient(180deg, #2a1d6b, #6a3aa8 60%, #f39a7c); }
+  .art.town { background: radial-gradient(60% 40% at 50% 100%, rgba(255, 190, 110, 0.9), transparent 70%), repeating-linear-gradient(90deg, transparent 0 14px, rgba(255, 220, 140, 0.5) 14px 16px, transparent 16px 30px), linear-gradient(180deg, #2a1d6b, #6a3aa8 60%, #f39a7c); }
   .art.beach { background: radial-gradient(30% 22% at 70% 28%, #fff4c9, #ffb36b 60%, transparent 62%), linear-gradient(180deg, #ff9f8a 0%, #c86fb4 38%, #3c6fd1 58%, #2a4fa6 70%, #f2d3a0 72%, #e8c08a 100%); }
   .art.island { background: radial-gradient(70% 30% at 40% 70%, #2e7a64, transparent 70%), linear-gradient(180deg, #19285e, #3c4fa8 45%, #7ec7c9 62%, #1d5a73 64%, #123a52 100%); }
-  .art.city { background: radial-gradient(45% 30% at 30% 30%, rgba(160, 120, 255, 0.8), transparent 70%),
-      repeating-linear-gradient(90deg, #22184f 0 18px, #2c1f66 18px 26px), linear-gradient(180deg, #0f0b2b, #3b2378); }
+  .art.city { background: radial-gradient(45% 30% at 30% 30%, rgba(160, 120, 255, 0.8), transparent 70%), repeating-linear-gradient(90deg, #22184f 0 18px, #2c1f66 18px 26px), linear-gradient(180deg, #0f0b2b, #3b2378); }
 
-  /* save-your-people band */
-  .band { position: relative; overflow: hidden; border-radius: var(--r); padding: 26px 22px; display: grid; gap: 10px; box-shadow: var(--shadow); isolation: isolate; }
-  .band::before { content: ""; position: absolute; inset: 0; z-index: -1;
-    background: radial-gradient(40% 70% at 95% 100%, color-mix(in srgb, var(--sky-4) 70%, transparent), transparent 70%),
-      radial-gradient(40% 60% at 70% 0%, color-mix(in srgb, var(--violet-1) 45%, transparent), transparent 70%); }
-  .band .eyebrow { color: var(--accent); }
-  .band h2 { font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 700; max-width: 22ch; }
-  .band p { color: var(--muted); max-width: 46ch; }
-  .whitepill { justify-self: start; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 11px 20px; background: var(--surface); color: var(--ink);
-    font-weight: 700; cursor: pointer; text-decoration: none; box-shadow: var(--shadow); }
-  .whitepill svg { width: 16px; height: 16px; }
+  /* known places (product-grid style) */
+  .places { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 900px) { .places { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .place { position: relative; border: 1px solid var(--line); border-radius: var(--r); aspect-ratio: 1.1; max-width: 100%; overflow: hidden; cursor: pointer; padding: 0; text-align: left; color: #fff; box-shadow: var(--shadow); }
+  .place .art { position: absolute; inset: 0; }
+  .place .label { position: absolute; left: 10px; bottom: 10px; right: 10px; display: grid; gap: 2px; }
+  .place .label b { justify-self: start; background: rgba(15, 10, 40, 0.6); border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; padding: 3px 12px; font-weight: 600; font-size: 0.95rem; }
+  .place .label small { padding-left: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.9); text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+  .place .corner { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: rgba(15, 10, 40, 0.5); border: 1px solid rgba(255,255,255,0.25); }
+  .place .corner svg { width: 14px; height: 14px; }
+
+  /* stats strip */
+  .stats { border-radius: var(--r); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 6px; margin-top: 22px; }
+  @media (min-width: 760px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .stat { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: center; padding: 12px; }
+  .stat .ic { grid-row: span 2; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--accent); }
+  .stat .ic svg { width: 19px; height: 19px; }
+  .stat b { font-size: 1.2rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 0.84rem; line-height: 1.25; }
+
+  /* two side-by-side cards */
+  .duo { display: grid; gap: 16px; }
+  @media (min-width: 760px) { .duo { grid-template-columns: 1fr 1fr; } }
+  .duo-card { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; border-radius: var(--r); padding: 22px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+  .duo-card > div { display: grid; gap: 8px; min-width: 0; }
+  .duo-card h3 { font-size: 1.12rem; }
+  .duo-card p { color: var(--muted); font-size: 0.95rem; }
+  .duo-card .badge-ic { width: 76px; height: 76px; border-radius: 22px; display: grid; place-items: center; color: var(--on-color); }
+  .duo-card .badge-ic svg { width: 36px; height: 36px; }
+  @media (max-width: 400px) { .duo-card { padding: 18px; gap: 12px; } .duo-card .badge-ic { width: 52px; height: 52px; border-radius: 16px; } .duo-card .badge-ic svg { width: 26px; height: 26px; } }
 
   /* inner pages */
   .page-top { display: grid; gap: 10px; padding-top: 18px; }
@@ -370,27 +363,45 @@
   @media (prefers-reduced-motion: reduce) { details.cat > summary::after { transition: none; } }
 
   /* about */
-  .about { display: grid; gap: 22px; padding-block: 8px; }
+  .about { display: grid; gap: 22px; }
   @media (min-width: 860px) { .about { grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: start; } }
-  .about h2 { font-size: clamp(1.45rem, 4vw, 1.9rem); }
+  .about h2 { font-size: clamp(1.4rem, 3.6vw, 1.85rem); }
   .about .intro { display: grid; gap: 10px; }
   .about .intro p { color: var(--muted); max-width: 46ch; }
-  .points { display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .points { display: grid; border-top: 1px solid var(--line); }
   .point { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; padding-block: 16px; border-bottom: 1px solid var(--line); }
   .point .ic { grid-row: span 2; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); color: var(--accent); }
   .point .ic svg { width: 20px; height: 20px; }
-  .point b { font-weight: 700; }
   .point span { color: var(--muted); font-size: 0.94rem; }
+
+  /* how can we help */
+  .help-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 760px; margin: 0 auto; }
+  @media (min-width: 640px) { .help-row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .help-item { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 12px 6px; border-radius: 12px; background: none; border: 0; cursor: pointer; color: var(--ink); font-weight: 600; text-decoration: none; }
+  .help-item:hover { background: var(--surface); }
+  .help-item .circle { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); }
+  .help-item .circle svg { width: 24px; height: 24px; }
+
+  /* feature band */
+  .feature { position: relative; overflow: hidden; isolation: isolate; padding-block: 56px; }
+  .feature .scene { position: absolute; inset: 0; z-index: -1; }
+  .feature .hills { bottom: 20%; }
+  .feature-box { max-width: 460px; border-radius: 22px; padding: 26px; display: grid; gap: 14px; background: color-mix(in srgb, var(--surface) 82%, transparent); border: 1px solid var(--line); box-shadow: var(--shadow); }
+  .feature-box h2 { font-size: clamp(1.3rem, 3.4vw, 1.7rem); }
+  .ticks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .ticks li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
+  .ticks li::before { content: "✓"; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--ok); color: #fff; font-size: 0.8rem; font-weight: 800; margin-top: 2px; }
+  .ticks li.soon::before { content: "…"; background: var(--muted); }
 
   /* faq */
   .faq { display: grid; gap: 14px; }
   @media (min-width: 860px) { .faq { grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: start; } }
-  .faq h2 { font-size: clamp(1.45rem, 4vw, 1.9rem); }
+  .faq h2 { font-size: clamp(1.4rem, 3.6vw, 1.85rem); }
   .faq-list { border-top: 1px solid var(--line); }
   .faq-list details { border-bottom: 1px solid var(--line); }
   .faq-list summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 16px; padding-block: 16px; font-weight: 600; }
   .faq-list summary::-webkit-details-marker { display: none; }
-  .faq-list summary::after { content: "+"; color: var(--accent); font-size: 1.3rem; line-height: 1; }
+  .faq-list summary::after { content: "+"; color: var(--link); font-size: 1.3rem; line-height: 1; }
   .faq-list details[open] summary::after { content: "−"; }
   .faq-list p { color: var(--muted); padding-bottom: 16px; max-width: 60ch; }
 
@@ -418,8 +429,6 @@
   .foot-bottom a, .foot-bottom button { color: var(--foot-muted); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: none; font-size: 0.82rem; }
   .credit { flex-basis: 100%; font-size: 0.78rem; opacity: 0.85; }
   /* our additions: no inline styles, source line on call rows */
-  .home-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; padding-bottom: 40px; }
-  .quick { display: grid; gap: 14px; }
   .people-body { padding: 8px 16px 16px; gap: 10px; }
   .first-row .src { color: var(--muted); font-size: 0.78rem; }
 </style>
@@ -529,36 +538,51 @@
       </div>
     </section>
 
-    <div class="wrap home-body">
-
-      <div class="stats glass" id="stats"></div>
-
-      <section class="quick" aria-labelledby="quickTitle">
-        <div class="section-head">
-          <div><p class="eyebrow" id="quickEyebrow"></p><h2 id="quickTitle"></h2></div>
-          <p id="quickText"></p>
-        </div>
+    <section class="section tint" aria-labelledby="quickTitle">
+      <div class="wrap">
+        <div class="section-title"><p class="eyebrow" id="quickEyebrow" hidden></p><h2 id="quickTitle"></h2><p id="quickText"></p></div>
         <div class="places" id="places"></div>
-      </section>
+        <div class="stats glass" id="stats"></div>
+      </div>
+    </section>
 
-      <section class="about" id="about" aria-labelledby="aboutTitle">
+    <section class="section" aria-label="Prepare">
+      <div class="wrap duo" id="duoCards"></div>
+    </section>
+
+    <section class="section tint" id="about" aria-labelledby="aboutTitle">
+      <div class="wrap about">
         <div class="intro"><p class="eyebrow" id="aboutEyebrow"></p><h2 id="aboutTitle"></h2><p id="aboutText"></p></div>
         <div class="points" id="points"></div>
-      </section>
+      </div>
+    </section>
 
-      <section class="band glass" aria-labelledby="ctaTitle">
-        <p class="eyebrow" id="ctaEyebrow"></p>
-        <h2 id="ctaTitle"></h2>
-        <p id="ctaText"></p>
-        <button class="whitepill" id="ctaBtn" type="button"><span id="ctaBtnText"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></button>
-      </section>
+    <section class="section" aria-labelledby="helpTitle">
+      <div class="wrap">
+        <div class="section-title"><h2 id="helpTitle"></h2></div>
+        <div class="help-row" id="helpRow"></div>
+      </div>
+    </section>
 
-      <section class="faq" id="faq" aria-labelledby="faqTitle">
+    <section class="feature" aria-labelledby="netTitle">
+      <div class="scene" aria-hidden="true">
+        <div class="stars"></div><div class="orb"></div>
+        <svg class="hills" viewBox="0 0 1200 200" preserveAspectRatio="none">
+          <path class="h1" d="M0 120 C150 60 260 90 380 70 C520 45 600 110 760 80 C900 55 1010 30 1200 75 L1200 200 L0 200 Z"/>
+          <path class="h2" d="M0 160 C180 120 300 150 460 130 C640 108 760 160 920 140 C1040 125 1120 120 1200 130 L1200 200 L0 200 Z"/>
+        </svg>
+      </div>
+      <div class="wrap">
+        <div class="feature-box"><h2 id="netTitle"></h2><ul class="ticks" id="netList"></ul></div>
+      </div>
+    </section>
+
+    <section class="section tint" id="faq" aria-labelledby="faqTitle">
+      <div class="wrap faq">
         <div><p class="eyebrow" id="faqEyebrow"></p><h2 id="faqTitle"></h2></div>
         <div class="faq-list" id="faqList"></div>
-      </section>
-
-    </div>
+      </div>
+    </section>
   </div>
 
   <!-- AREA -->
