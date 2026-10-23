@@ -3,122 +3,16 @@
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
 
-const T = {
-  bn: {
-    lang: 'EN', hello1: 'বিপদে আছেন?', hello2: 'শান্ত থাকুন। আপনার এলাকার সরকারি নম্বর এখানেই আছে।',
-    eyebrow: 'নোয়াখালী ও কক্সবাজারের সরকারি নম্বর', h999: '৯৯৯',
-    lead: 'আপনার ইউনিয়নের থানা, চেয়ারম্যান, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর। সব সরকারি ওয়েবসাইট থেকে নেওয়া, প্রতি সপ্তাহে উৎস আবার মিলিয়ে দেখা হয়।',
-    distAll: 'সব জেলা',
-    stats: ['সরকারি নম্বর', 'ইউনিয়ন ও পৌরসভা', 'উপজেলা', 'যাচাই করা হয়েছে'],
-    quickEyebrow: 'দ্রুত যান', quickTitle: 'পরিচিত জায়গা', quickText: 'এক চাপে সেই এলাকার থানা ও জরুরি নম্বর দেখুন।',
-    places: { chowmuhani: ['চৌমুহনী', 'বেগমগঞ্জ, নোয়াখালী'], inani: ['ইনানী সৈকত', 'উখিয়া, কক্সবাজার'], hatiya: ['হাতিয়া', 'দ্বীপ উপজেলা, নোয়াখালী'], coxtown: ['কক্সবাজার শহর', 'পৌরসভা'] },
-    call999: '৯৯৯-এ কল করুন', call999Sub: 'পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স · বিনা খরচে',
-    locate: 'আমার কাছের সাহায্য', locateSub: 'আপনার এলাকার থানা, চেয়ারম্যান ও গ্রাম পুলিশের নম্বর · ইন্টারনেট ছাড়াও চলে',
-    locating: 'আপনার অবস্থান খোঁজা হচ্ছে…', or: 'অথবা',
-    areaLabel: 'এলাকার নাম লিখুন', areaHint: 'গ্রাম, ইউনিয়ন, পৌরসভা বা উপজেলা, বাংলা বা ইংরেজিতে, যেকোনো বানানে। যেমন: চৌমুহনী, Hatiya, ইনানী',
-    noMatch: 'এই নামে কোনো জায়গা তালিকায় নেই। তবুও সাহায্য পাবেন:', didYouMean: 'কাছাকাছি নাম', noExact: 'ঠিক এই বানানে পাইনি। নিচের কোনোটি কি আপনার জায়গা?', tellUs: 'আপনার জায়গার নাম তালিকায় না থাকলে নিচের "ভুল নম্বর জানান" দিয়ে জানান (GitHub অ্যাকাউন্ট লাগবে)।',
-    pickUpazila: 'আপনার উপজেলা বেছে নিন। থানা ও ইউএনও-র নম্বর সেখানেই পাবেন।',
-    kinds: { municipality: 'পৌরসভা', place: 'জায়গা', union: 'ইউনিয়ন', village: 'গ্রাম', upazila: 'উপজেলা', local: 'স্থানীয় নাম',
-      'market and post office': 'হাট ও ডাকঘর', market: 'হাট-বাজার', 'post office': 'ডাকঘর' }, recent: (n) => `আগের এলাকা: ${n}`,
-    denied: 'লোকেশনের অনুমতি নেই। ফোনের সেটিংসে লোকেশন চালু করুন, অথবা নিচে এলাকার নাম লিখুন।',
-    unavailable: 'লোকেশন পাওয়া যায়নি। খোলা জায়গায় গিয়ে আবার চাপুন, অথবা নিচে এলাকার নাম লিখুন।',
-    timeout: 'লোকেশন পেতে দেরি হচ্ছে। আবার চাপুন, অথবা নিচে এলাকার নাম লিখুন।',
-    unsupported: 'এই ব্রাউজারে লোকেশন নেই। নিচে এলাকার নাম লিখুন।',
-    demo: 'পরীক্ষা (ডেমো): ধরে নিন আপনি এখানে আছেন। আসল ব্যবহারে এই অংশ থাকবে না।',
-    back: '← শুরুতে ফিরুন', youAreIn: 'আপনি আছেন', change: 'এলাকা বদলান', town: 'পৌরসভা', wholeUpazila: 'পুরো উপজেলা',
-    shareTitle: 'পরিবারকে আপনার অবস্থান পাঠান', shareText: 'একটি চাপেই ম্যাপ লিংকসহ বার্তা যাবে। ৯৯৯-কেও এই অবস্থান বলতে পারেন।',
-    shareMsg: (link) => `আমি বিপদে আছি। আমার অবস্থান: ${link}`, copy: 'কপি', copied: 'কপি হয়েছে', map: 'ম্যাপ',
-    outsideTitle: 'আপনার অবস্থান', outside: 'আপনি নোয়াখালী বা কক্সবাজারের বাইরে আছেন। SafeConnect এখন শুধু এই দুই জেলার স্থানীয় নম্বর দেখায়। নিচের জাতীয় নম্বরগুলো সারা দেশে কাজ করে।',
-    firstCalm: 'ওপর থেকে নিচে কল করুন। প্রথম নম্বরে কেউ না ধরলে পরেরটিতে কল করুন।', first: 'আগে এদের কল করুন', more: 'আরও সাহায্য', showAll: (n) => `সবাইকে দেখুন (${n})`,
-    call: 'কল', ward: 'ওয়ার্ড', source: 'সরকারি উৎস', checked: 'যাচাই',
-    what: { emergency: 'জরুরি সেবা', police: 'পুলিশ', local: 'ইউনিয়ন পরিষদ', town: 'পৌরসভা', administration: 'উপজেলা নির্বাহী অফিসার', tourist_police: 'ট্যুরিস্ট পুলিশ' },
-    groups: { police: 'পুলিশ', tourist_police: 'ট্যুরিস্ট পুলিশ', village_police: 'গ্রাম পুলিশ (ওয়ার্ড অনুযায়ী)', local: 'চেয়ারম্যান ও মেম্বার', town: 'পৌরসভা',
-      coast: 'উপকূল ও নৌপথ', administration: 'উপজেলা প্রশাসন (ইউএনও)', health: 'হাসপাতাল ও স্বাস্থ্য', fire: 'ফায়ার সার্ভিস', women_children: 'নারী ও শিশু সহায়তা',
-      disaster: 'দুর্যোগ', helplines: 'জাতীয় হেল্পলাইন', info333: 'তথ্য ও সেবা (৩৩৩)' },
-    fallback: 'এই উপজেলার নম্বর প্রকাশিত নেই, তাই জেলার নম্বর দেখানো হচ্ছে।',
-    noNumbers: 'এই ইউনিয়নের প্রতিনিধিদের নম্বর সরকারি সাইটে নেই। থানা বা ইউএনও-কে কল করুন।',
-    flags: { number_not_published: 'নম্বর প্রকাশিত নেই', source_older_than_2_years: 'পুরোনো তথ্য হতে পারে', needs_manual_check: 'যাচাই বাকি',
-      administrator_not_elected: 'প্রশাসক' },
-    credit: 'ম্যাপ তথ্য: উপজেলার সীমানা ও ইউনিয়ন/পৌরসভার কেন্দ্রবিন্দু বাংলাদেশ পরিসংখ্যান ব্যুরো (BBS), OCHA HDX-এর মাধ্যমে (CC BY-IGO)। BBS-এর নাম না মিললে টুলগুলো OpenStreetMap-এর বিন্দু যোগ করতে পারে (© OpenStreetMap contributors, ODbL)।',
-    testsLink: 'সার্চ টেস্ট (ডেভেলপারদের জন্য)',
-    foot1: 'সব নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া। প্রতিটি নম্বরের নিচে উৎসের লিংক আছে। বিপদে প্রথমে ৯৯৯।',
-    sosBtn: 'প্রিয়জনকে লোকেশন পাঠান', sosBtnSubNone: 'লগইন লাগবে না · একবার একটি নম্বর সেভ করুন', sosBtnSub: 'এক চাপে পাঠান · SMS-এ ইন্টারনেট লাগে না',
-    sosTitle: 'প্রিয়জনকে লোকেশন পাঠান', sit: 'কী হয়েছে?', loc: 'আপনার অবস্থান', send: 'কাকে পাঠাবেন?', msgT: 'বার্তা (চাইলে বদলান)',
-    sits: { danger: ['বিপদে আছি', 'আমি বিপদে আছি, এখনই সাহায্য দরকার।'], followed: ['কেউ পিছু নিয়েছে', 'কেউ আমার পিছু নিয়েছে, আমি ভয় পাচ্ছি।'],
-      accident: ['দুর্ঘটনা', 'আমার দুর্ঘটনা হয়েছে।'], sick: ['অসুস্থ', 'আমি অসুস্থ, সাহায্য দরকার।'], lost: ['পথ হারিয়েছি', 'আমি পথ হারিয়েছি।'] },
-    urgent: 'জরুরি!', area: (n) => `আমার এলাকা: ${n}।`, mapLine: (l) => `ম্যাপ: ${l}`, noLoc: 'আমার লোকেশন পাওয়া যায়নি, এখনই আমাকে ফোন করো।',
-    timeLine: (x) => `সময়: ${x}`, sign: '(SafeConnect থেকে পাঠানো)',
-    offline: 'ইন্টারনেট নেই। নম্বর, এলাকা খোঁজা আর SMS এখনো কাজ করবে।',
-    locIdle: 'লোকেশন এখনো নেওয়া হয়নি। পাঠাতে চাইলে নিচের বোতাম চাপুন।', locBtn: 'আমার লোকেশন নিন',
-    gettingLoc: 'লোকেশন নেওয়া হচ্ছে…', gotLoc: (n, m) => `${n}${m ? ` (প্রায় ${m} মিটার)` : ''}`, outsideLoc: 'আপনার লোকেশন পাওয়া গেছে (ম্যাপ লিংক বার্তায় আছে)',
-    noLocYet: 'লোকেশন ছাড়াই পাঠাতে পারেন। বার্তায় ফোন করতে বলা আছে।',
-    sosDenied: 'লোকেশনের অনুমতি নেই (ফোনের সেটিংসে চালু করুন)।', sosNoLoc: 'লোকেশন পাওয়া যায়নি।',
-    sms: 'SMS পাঠান', smsAll: (n) => `সবাইকে SMS (${n} জন)`, wa: 'WhatsApp', other: 'অন্য অ্যাপে', copyMsg: 'বার্তা কপি', call: 'কল',
-    smsNoNet: 'ইন্টারনেট লাগে না',
-    smsHint: 'SMS-এ ইন্টারনেট লাগে না। পাঠানোর বোতাম চাপলে ফোনের মেসেজ অ্যাপ খুলবে, সেখানে Send চাপুন।',
-    people: 'আমার প্রিয়জন', addTitle: 'নতুন নম্বর যোগ করুন', name: 'নাম', rel: 'সম্পর্ক (যেমন: মা)', phone: 'মোবাইল নম্বর', save: 'সেভ করুন', remove: 'মুছুন',
-    noPeople: 'এখনো কোনো নম্বর সেভ করা নেই। নিচে মা, বাবা বা কাছের কারো নম্বর সেভ করুন। পরে এক চাপেই পাঠাতে পারবেন।',
-    badPhone: 'সঠিক মোবাইল নম্বর দিন, যেমন ০১XXXXXXXXX।', needName: 'নাম লিখুন।', maxPeople: 'সর্বোচ্চ ৩ জন সেভ করা যায়।',
-    privacy: 'নম্বরগুলো শুধু আপনার এই ফোনে সেভ থাকে। কোথাও পাঠানো হয় না, লগইনও লাগে না।', sendFamily: 'প্রিয়জনকে পাঠান',
-  },
-  en: {
-    lang: 'বাং', hello1: 'Need help?', hello2: 'Stay calm. The official numbers for your area are right here.',
-    eyebrow: "Official numbers for Noakhali & Cox's Bazar", h999: '999',
-    lead: 'Police station, chairman, village police and hospital numbers for your union. All from official government websites; the sources are re-checked every week.',
-    distAll: 'All districts',
-    stats: ['official numbers', 'unions and towns', 'upazilas', 'last checked'],
-    quickEyebrow: 'Quick go', quickTitle: 'Known places', quickText: "One tap shows that area's police and emergency numbers.",
-    places: { chowmuhani: ['Chowmuhani', 'Begumganj, Noakhali'], inani: ['Inani beach', "Ukhia, Cox's Bazar"], hatiya: ['Hatiya', 'Island upazila, Noakhali'], coxtown: ["Cox's Bazar town", 'Municipality'] },
-    call999: 'Call 999', call999Sub: 'Police, fire service, ambulance · free',
-    locate: 'Find help near me', locateSub: 'Numbers for your police station, chairman and village police · works without internet',
-    locating: 'Finding your location…', or: 'or',
-    areaLabel: 'Type your area', areaHint: 'Village, union, town or upazila, in Bangla or English, any spelling. For example: Chowmuhani, হাতিয়া, Inani',
-    noMatch: 'This name is not in our list yet. You can still get help:', didYouMean: 'Similar names', noExact: 'Not found with this exact spelling. Is it one of these?', tellUs: 'If your place is missing, tell us with "Report a wrong number" below (needs a GitHub account).',
-    pickUpazila: 'Pick your upazila. Its police station and UNO numbers are there.',
-    kinds: { municipality: 'town', place: 'place', union: 'union', village: 'village', upazila: 'upazila', local: 'local name',
-      'market and post office': 'market and post office', market: 'market', 'post office': 'post office' }, recent: (n) => `Last area: ${n}`,
-    denied: 'Location is not allowed. Turn on location in your phone settings, or type your area below.',
-    unavailable: 'Could not get your location. Move to an open place and tap again, or type your area below.',
-    timeout: 'Location is taking too long. Tap again, or type your area below.',
-    unsupported: 'This browser has no location. Type your area below.',
-    demo: 'Test (demo): pretend you are here. Real users will not see this part.',
-    back: '← Back to start', youAreIn: 'You are in', change: 'Change area', town: 'town', wholeUpazila: 'whole upazila',
-    shareTitle: 'Send your location to family', shareText: 'One tap sends a message with a map link. You can also tell 999 this location.',
-    shareMsg: (link) => `I am in danger. My location: ${link}`, copy: 'Copy', copied: 'Copied', map: 'Map',
-    outsideTitle: 'Your location', outside: "You are outside Noakhali and Cox's Bazar. SafeConnect shows local numbers only for these two districts for now. The national numbers below work everywhere.",
-    firstCalm: 'Call from top to bottom. If one does not answer, try the next.', first: 'Call these first', more: 'More help', showAll: (n) => `Show all (${n})`,
-    call: 'Call', ward: 'Ward', source: 'Official source', checked: 'Checked',
-    what: { emergency: 'Emergency', police: 'Police station', local: 'Union council', town: 'Municipality', administration: 'Upazila officer (UNO)', tourist_police: 'Tourist Police' },
-    groups: { police: 'Police', tourist_police: 'Tourist Police', village_police: 'Village police (by ward)', local: 'Chairman and members', town: 'Municipality',
-      coast: 'Coast and river', administration: 'Upazila administration (UNO)', health: 'Hospital and health', fire: 'Fire service', women_children: 'Women and children',
-      disaster: 'Disaster', helplines: 'National helplines', info333: 'Information and services (333)' },
-    fallback: 'No number is published for this upazila, so district numbers are shown.',
-    noNumbers: "This union's representatives have no published numbers. Call the police station or the UNO.",
-    flags: { number_not_published: 'Number not published', source_older_than_2_years: 'May be outdated', needs_manual_check: 'Not checked yet',
-      administrator_not_elected: 'Administrator' },
-    credit: 'Map data: upazila boundaries and union/town centre points from the Bangladesh Bureau of Statistics (BBS) via OCHA HDX (CC BY-IGO). Where BBS names do not match, the tools can add OpenStreetMap points (© OpenStreetMap contributors, ODbL).',
-    testsLink: 'Search tests (for developers)',
-    foot1: 'All numbers come from official *.gov.bd websites. Each number links to its source. In danger, call 999 first.',
-    sosBtn: 'Send my location to family', sosBtnSubNone: 'No login · save one number once', sosBtnSub: 'One tap · SMS works without internet',
-    sosTitle: 'Send my location to family', sit: 'What happened?', loc: 'Your location', send: 'Send to', msgT: 'Message (you can change it)',
-    sits: { danger: ['In danger', 'I am in danger and need help now.'], followed: ['Being followed', 'Someone is following me and I am scared.'],
-      accident: ['Accident', 'I had an accident.'], sick: ['Feeling ill', 'I am ill and need help.'], lost: ['Lost', 'I am lost.'] },
-    urgent: 'URGENT!', area: (n) => `My area: ${n}.`, mapLine: (l) => `Map: ${l}`, noLoc: 'I could not get my location. Call me now.',
-    timeLine: (x) => `Time: ${x}`, sign: '(sent from SafeConnect)',
-    offline: 'No internet. Numbers, area search and SMS still work.',
-    locIdle: 'Location not taken yet. To send it, tap the button below.', locBtn: 'Get my location',
-    gettingLoc: 'Getting your location…', gotLoc: (n, m) => `${n}${m ? ` (about ${m} m)` : ''}`, outsideLoc: 'Location found (the map link is in the message)',
-    noLocYet: 'You can send without a location. The message asks them to call you.',
-    sosDenied: 'Location is not allowed (turn it on in phone settings).', sosNoLoc: 'Could not get your location.',
-    sms: 'Send SMS', smsAll: (n) => `SMS everyone (${n})`, wa: 'WhatsApp', other: 'Other app', copyMsg: 'Copy message', call: 'Call',
-    smsNoNet: 'no internet needed',
-    smsHint: 'SMS needs no internet. The button opens your messages app; tap Send there.',
-    people: 'My people', addTitle: 'Add a number', name: 'Name', rel: 'Relation (e.g. mother)', phone: 'Mobile number', save: 'Save', remove: 'Remove',
-    noPeople: 'No number saved yet. Save your mother, father or a close friend below. Next time it is one tap.',
-    badPhone: 'Enter a valid mobile number, like 01XXXXXXXXX.', needName: 'Enter a name.', maxPeople: 'You can save up to 3 people.',
-    privacy: 'These numbers are saved only on this phone. They are never sent anywhere, and no login is needed.', sendFamily: 'Send to family',
-  },
+// Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
+// messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
+const loadLang = async (code) => {
+  const res = await fetch(`js/lang/${code}.json`);
+  if (!res.ok) throw new Error(`Could not load js/lang/${code}.json (${res.status})`);
+  return res.json();
 };
+const LANG = {};
+[LANG.bn, LANG.en] = await Promise.all([loadLang('bn'), loadLang('en')]);
+const fill = (text, values) => text.replace(/\{(\w+)\}/g, (all, key) => (key in values ? values[key] : all));
 const NATIONAL_EVERYWHERE = ['national-emergency-999', 'women-children-violence-109', 'child-helpline-1098', 'health-call-centre-16263', 'fire-service-102', 'info-service-333'];
 const VISIBLE = 6;
 
@@ -126,7 +20,7 @@ const $ = (id) => document.getElementById(id);
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
 let lang = store.get('sc-lang') || 'bn';
 let data = null, locations = null, current = null, areaIndex = [];
-const t = () => T[lang];
+const t = () => LANG[lang].ui;
 const digits = (s) => (lang === 'bn' ? String(s).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[d]) : String(s));
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const withPhone = (r) => r.phones && r.phones.length > 0;
@@ -283,9 +177,9 @@ function renderArea() {
   $('share').hidden = !current.pos;
   if (current.pos) {
     const link = mapsLink(current.pos);
-    const msg = t().shareMsg(link);
-    const wa = el('a', 'btn', 'WhatsApp'); wa.href = `https://wa.me/?text=${encodeURIComponent(msg)}`; wa.target = '_blank'; wa.rel = 'noopener';
-    const sms = el('a', 'btn', 'SMS'); sms.href = `sms:?&body=${encodeURIComponent(msg)}`;
+    const msg = fill(t().shareMsg, { link });
+    const wa = el('a', 'btn', t().wa); wa.href = `https://wa.me/?text=${encodeURIComponent(msg)}`; wa.target = '_blank'; wa.rel = 'noopener';
+    const sms = el('a', 'btn', t().smsShort); sms.href = `sms:?&body=${encodeURIComponent(msg)}`;
     const map = el('a', 'btn', t().map); map.href = link; map.target = '_blank'; map.rel = 'noopener';
     const copy = el('button', 'btn', t().copy); copy.type = 'button';
     copy.addEventListener('click', () => navigator.clipboard?.writeText(msg).then(() => { copy.textContent = t().copied; }, () => {}));
@@ -329,7 +223,7 @@ function renderArea() {
     const sorted = [...items].sort((a, b) => withPhone(b) - withPhone(a));
     sorted.forEach((r, i) => { const row = personRow(r); if (i >= VISIBLE) row.hidden = true; body.append(row); });
     if (sorted.length > VISIBLE) {
-      const b = el('button', 'btn showall', t().showAll(digits(sorted.length))); b.type = 'button';
+      const b = el('button', 'btn showall', fill(t().showAll, { n: digits(sorted.length) })); b.type = 'button';
       b.addEventListener('click', () => { body.querySelectorAll('.person[hidden]').forEach((x) => { x.hidden = false; }); b.remove(); });
       body.append(b);
     }
@@ -363,7 +257,7 @@ function renderRecent() {
   try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
   const b = $('recentBtn');
   if (!last || !data.docs[last.district]) { b.hidden = true; return; }
-  b.textContent = t().recent(placeTitle(last));
+  b.textContent = fill(t().recent, { n: placeTitle(last) });
   b.onclick = () => openArea(last, null);
   b.hidden = false;
 }
@@ -387,10 +281,10 @@ function applyPosition(pos) { lastFix = { pos, at: Date.now() }; openArea(resolv
 function demoPicks() {
   if (!locations) return [];
   const picks = [
-    [locations.municipalities.find((m) => m.municipality_bn.includes('চৌমুহনী')), { bn: 'চৌমুহনী', en: 'Chowmuhani' }],
-    [locations.unions.find((u) => u.union_en === 'Jaliapalong'), { bn: 'ইনানী সৈকত', en: 'Inani beach' }],
-    [locations.unions.find((u) => u.district === 'Noakhali' && u.upazila_en === 'Hatiya'), { bn: 'হাতিয়া', en: 'Hatiya' }],
-    [{ lat: 23.8103, lon: 90.4125 }, { bn: 'ঢাকা (জেলার বাইরে)', en: 'Dhaka (outside)' }],
+    [locations.municipalities.find((m) => m.municipality_bn.includes('চৌমুহনী')), 'chowmuhani'],
+    [locations.unions.find((u) => u.union_en === 'Jaliapalong'), 'inani'],
+    [locations.unions.find((u) => u.district === 'Noakhali' && u.upazila_en === 'Hatiya'), 'hatiya'],
+    [{ lat: 23.8103, lon: 90.4125 }, 'dhaka'],
   ].filter(([p]) => p);
   return picks;
 }
@@ -398,7 +292,7 @@ function fillDemo(box, textEl, chipsEl, onPick) {
   if (!locations) return;
   textEl.textContent = t().demo;
   chipsEl.replaceChildren(...demoPicks().map(([p, name]) => {
-    const b = el('button', 'chip', name[lang]); b.type = 'button';
+    const b = el('button', 'chip', t().demoPlaces[name]); b.type = 'button';
     b.addEventListener('click', () => onPick({ lat: p.lat + 0.004, lon: p.lon - 0.003, accuracy: 20 }));
     return b;
   }));
@@ -448,10 +342,10 @@ function renderHomeSos() {
 function sosMessage() {
   const s = t();
   const lines = [`${s.urgent} ${s.sits[sos.situation][1]}`];
-  if (sos.place && !sos.place.outside) lines.push(s.area(`${placeTitle(sos.place)}, ${placeSub(sos.place)}`));
-  lines.push(sos.pos ? s.mapLine(mapsLink(sos.pos)) : s.noLoc);
+  if (sos.place && !sos.place.outside) lines.push(fill(s.area, { n: `${placeTitle(sos.place)}, ${placeSub(sos.place)}` }));
+  lines.push(sos.pos ? fill(s.mapLine, { l: mapsLink(sos.pos) }) : s.noLoc);
   const time = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', { hour: 'numeric', minute: '2-digit' }).format(new Date());
-  lines.push(`${s.timeLine(time)} ${s.sign}`);
+  lines.push(`${fill(s.timeLine, { x: time })} ${s.sign}`);
   return lines.join('\n');
 }
 function refreshMessage() { if (!sos.edited) $('sosMsg').value = sosMessage(); renderSend(); }
@@ -475,7 +369,8 @@ function renderLoc() {
   else if (sos.pos && sos.place && !sos.place.outside) {
     line.classList.add('ok');
     const acc = sos.pos.accuracy ? digits(Math.round(sos.pos.accuracy)) : '';
-    line.textContent = t().gotLoc(`${placeTitle(sos.place)}, ${placeSub(sos.place)}`, acc);
+    const place = `${placeTitle(sos.place)}, ${placeSub(sos.place)}`;
+    line.textContent = acc ? fill(t().gotLocAcc, { place, m: acc }) : fill(t().gotLoc, { place });
   } else if (sos.pos) { line.classList.add('ok'); line.textContent = t().outsideLoc; }
   else { line.classList.add('bad'); line.textContent = `${sos.error === 'denied' ? t().sosDenied : t().sosNoLoc} ${t().noLocYet}`; }
 }
@@ -512,7 +407,7 @@ function renderSend() {
   const tools = $('sendTools');
   tools.replaceChildren();
   if (people.length > 1) {
-    const all = el('a', 'btn', t().smsAll(digits(people.length)));
+    const all = el('a', 'btn', fill(t().smsAll, { n: digits(people.length) }));
     all.href = `sms:${people.map((p) => p.phone).join(',')}?&body=${encodeURIComponent(body())}`;
     tools.append(all);
   }
@@ -633,97 +528,7 @@ const SITE = {
   repo: 'https://github.com/Jerin101/safe-connect',
   report: 'https://github.com/Jerin101/safe-connect/issues/new?labels=data-gap&title=Wrong%20number',
 };
-const PAGE = {
-  bn: {
-    greet: { morning: 'শুভ সকাল', noon: 'শুভ দুপুর', evening: 'শুভ সন্ধ্যা', night: 'রাতেও ৯৯৯ চালু থাকে, বিনা খরচে।' },
-    greetTail: 'সাহায্য দরকার হলে নম্বর নিচেই আছে।',
-    trust: ['শুধু সরকারি নম্বর', 'লগইন লাগে না', 'বিনা খরচে ব্যবহার', 'বাংলা ও English'],
-    welcomeTitle: 'স্বাগতম! প্রথমবার এসেছেন? তিনটি কথা জেনে রাখুন:',
-    welcomeSteps: ['বিপদে সবার আগে ৯৯৯-এ কল করুন।', '"আমার কাছের সাহায্য" চাপলে আপনার এলাকার থানা আর চেয়ারম্যানের নম্বর আসবে।', 'প্রিয়জনের নম্বর এখনই সেভ করে রাখুন, বিপদে সহজেই লোকেশন পাঠাতে পারবেন।'],
-    welcomeOk: 'বুঝেছি', welcomeSave: 'নম্বর সেভ করুন',
-    icons: { 'national-emergency-999': 'জরুরি সেবা', 'fire-service-102': 'ফায়ার সার্ভিস', 'health-call-centre-16263': 'স্বাস্থ্য বাতায়ন',
-      'women-children-violence-109': 'নারী ও শিশু', 'child-helpline-1098': 'শিশু সহায়তা', 'tourist-police-helpline': 'ট্যুরিস্ট পুলিশ', 'info-service-333': 'তথ্য সেবা', 'disaster-warning-1090': 'দুর্যোগের আগাম বার্তা' },
-    iconSend: 'লোকেশন পাঠান', iconSendSub: 'প্রিয়জনকে', iconNear: 'কাছের সাহায্য', iconNearSub: 'থানা ও চেয়ারম্যান',
-    iconSrc: 'এই নম্বরগুলোর সরকারি উৎস ও যাচাইয়ের তারিখ',
-    findTitle: 'আপনার এলাকা কোথায়?', findText: 'গ্রাম, ইউনিয়ন, পৌরসভা বা উপজেলার নাম লিখুন, বাংলা বা ইংরেজিতে, যেকোনো বানানে।',
-    guideTitle: 'কী হয়েছে?', guideText: 'পরিস্থিতি বেছে নিন। কাকে ফোন করবেন, আমরা দেখিয়ে দেব।',
-    guides: [
-      ['night', 'রাতে বা পথে বিপদে', 'আগে ৯৯৯-এ কল করুন। তারপর প্রিয়জনকে আপনার লোকেশন পাঠান।', 'লোকেশন পাঠান', 'sos'],
-      ['lost', 'কিছু হারিয়েছে বা চুরি হয়েছে', 'কাছের থানায় সাধারণ ডায়েরি (জিডি) করুন। আপনার এলাকার থানার নম্বর এখানে পাবেন।', 'থানার নম্বর খুঁজুন', 'find'],
-      ['storm', 'ঝড়, বন্যা বা আগুন', (n) => (n ? `ফায়ার সার্ভিস ${n.fire}, দুর্যোগের আগাম বার্তা ${n.warn}। আপনার উপজেলার নম্বরও দেখুন।` : 'ফায়ার সার্ভিস, দুর্যোগ ও আপনার উপজেলার নম্বর দেখুন।'), 'আমার কাছের সাহায্য', 'locate']],
-    duo: [
-      ['send', 'প্রিয়জনের নম্বর সেভ করুন', 'বিপদে নম্বর খোঁজার সময় থাকে না। একবার সেভ করলে সহজেই লোকেশন পাঠাতে পারবেন। লগইন লাগে না।', 'নম্বর সেভ করুন'],
-      ['flag', 'ভুল নম্বর পেয়েছেন?', 'জানান (GitHub অ্যাকাউন্ট লাগবে)। আমরা সরকারি উৎস মিলিয়ে দেখব, ভুল হলে ঠিক করব।', 'ভুল নম্বর জানান']],
-    helpTitle: 'কীভাবে সাহায্য করতে পারি?', help: ['প্রশ্ন ও উত্তর', 'তথ্যের উৎস', 'প্রাইভেসি', 'ভুল নম্বর জানান'],
-    netTitle: 'দুর্বল নেটওয়ার্কের জন্য তৈরি',
-    net: [['ok', 'লোকেশন দিয়ে এলাকা খুঁজতে ইন্টারনেট লাগে না'], ['ok', 'SMS-এ প্রিয়জনকে লোকেশন পাঠাতে ইন্টারনেট লাগে না'],
-      ['ok', 'সব নম্বর সরকারি ওয়েবসাইট থেকে, উৎসের লিংকসহ'], ['ok', 'একবার খোলার পর ইন্টারনেট ছাড়াও চলে; ফোনে ইনস্টলও করা যায়']],
-    nav: { home: 'হোম', numbers: 'জরুরি নম্বর', area: 'এলাকা খুঁজুন', send: 'প্রিয়জনকে লোকেশন', guide: 'কী হয়েছে?', about: 'আমাদের সম্পর্কে', faq: 'প্রশ্ন ও উত্তর' },
-    about: { eyebrow: 'আমাদের সম্পর্কে', title: 'SafeConnect কী?',
-      text: 'বিপদের সময় কাকে ফোন করবেন, খুঁজতেই সময় চলে যায়। SafeConnect আপনার অবস্থান দেখে কাছের থানা, ইউনিয়ন পরিষদ, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর ঠিক ক্রমে দেখায়। এখন নোয়াখালী ও কক্সবাজারে, পরে সারা দেশে।',
-      points: [['check', 'শুধু সরকারি নম্বর', 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া, উৎসের লিংকসহ। প্রতি সপ্তাহে উৎস আবার মিলিয়ে দেখা হয়।'],
-        ['signal', 'দুর্বল নেটওয়ার্কের জন্য তৈরি', 'একবার খোলার পর নম্বর দেখা, এলাকা খোঁজা, "আমার কাছের সাহায্য" আর SMS-এ লোকেশন পাঠানো ইন্টারনেট ছাড়াও চলে।'],
-        ['lock', 'লগইন লাগে না', 'প্রিয়জনের নম্বর শুধু আপনার ফোনে থাকে। আমরা কোনো ব্যক্তিগত তথ্য সংগ্রহ করি না।']] },
-    faq: { eyebrow: 'প্রশ্ন ও উত্তর', title: 'যা জানতে চান',
-      items: [['source', 'নম্বরগুলো কোথা থেকে আসে?', 'জেলা, উপজেলা, ইউনিয়ন ও পৌরসভার সরকারি ওয়েবসাইট (*.gov.bd) থেকে। প্রতিটি নম্বরের নিচে উৎসের লিংক ও যাচাইয়ের তারিখ আছে।'],
-        ['wrong', 'কোনো নম্বর ভুল হলে কী করব?', 'নিচের "ভুল নম্বর জানান" লিংকে জানান। আমরা সরকারি উৎস মিলিয়ে ঠিক করি। জরুরি হলে আগে ৯৯৯-এ কল করুন।'],
-        ['offline', 'ইন্টারনেট না থাকলে কাজ করবে?', 'হ্যাঁ। ইন্টারনেট থাকা অবস্থায় একবার সাইটটি খুললেই সব নম্বর, এলাকা খোঁজা, "আমার কাছের সাহায্য" আর SMS ইন্টারনেট ছাড়াও চলে। শুধু WhatsApp, ম্যাপ, উৎসের লিংক আর ভুল নম্বর জানাতে ইন্টারনেট লাগে। কল আর SMS-এর জন্য মোবাইল নেটওয়ার্ক লাগবে।'],
-        ['privacy', 'আমার তথ্য কোথায় যায়?', 'কোথাও না। প্রিয়জনের নম্বর ও শেষ দেখা এলাকা শুধু আপনার ফোনের ব্রাউজারে থাকে। লোকেশন যায় শুধু আপনি পাঠালে।'],
-        ['districts', 'অন্য জেলা কবে আসবে?', 'এখন নোয়াখালী ও কক্সবাজার। তথ্য যাচাই শেষ হলে ধাপে ধাপে বাকি জেলা আসবে। ৯৯৯, ১০৯, ৩৩৩-এর মতো জাতীয় নম্বর সারা দেশে কাজ করে।']] },
-    foot: { tagline: 'আপনার এলাকার সরকারি জরুরি নম্বর। লগইন ছাড়া, ইন্টারনেট ছাড়াও।', small: 'নোয়াখালী ও কক্সবাজার দিয়ে শুরু।',
-      services: ['সেবা', ['৯৯৯-এ কল', 'প্রিয়জনকে লোকেশন', 'কাছের সাহায্য', 'এলাকা খুঁজুন']],
-      areas: ['এলাকা', ['নোয়াখালী', 'কক্সবাজার', 'চৌমুহনী', 'ইনানী সৈকত']],
-      info: ['তথ্য', ['আমাদের সম্পর্কে', 'প্রশ্ন ও উত্তর', 'ভুল নম্বর জানান', 'উৎস ও যাচাই']],
-      helpTitle: 'সাহায্য দরকার?', helpText: 'সরকারি কোনো সেবার তথ্য জানতে ৩৩৩-এ কল করুন। এই প্রকল্প নিয়ে কিছু বলতে চাইলে GitHub-এ লিখুন।',
-      copy: '© ২০২৬ SafeConnect · jerin101 ও tasmintoshi', bottom: ['প্রাইভেসি', 'উৎস', 'GitHub', 'সার্চ টেস্ট'],
-      credit: 'নম্বর: সরকারি *.gov.bd ওয়েবসাইট। ম্যাপ: উপজেলার সীমানা ও ইউনিয়ন/পৌরসভার কেন্দ্রবিন্দু বাংলাদেশ পরিসংখ্যান ব্যুরো (BBS), OCHA HDX-এর মাধ্যমে (CC BY-IGO)। BBS-এর নাম না মিললে টুলগুলো OpenStreetMap-এর বিন্দু যোগ করতে পারে (© OpenStreetMap contributors, ODbL)।' },
-  },
-  en: {
-    greet: { morning: 'Good morning', noon: 'Good afternoon', evening: 'Good evening', night: '999 works all night too, and it is free.' },
-    greetTail: 'If you need help, the numbers are right below.',
-    trust: ['Official numbers only', 'No login', 'Free to use', 'বাংলা & English'],
-    welcomeTitle: 'Welcome! First time here? Three things to know:',
-    welcomeSteps: ['In danger, call 999 first.', 'Tap "Find help near me" to see the numbers of your police station and chairman.', "Save your family's numbers now, so you can send your location quickly."],
-    welcomeOk: 'Got it', welcomeSave: 'Save numbers',
-    icons: { 'national-emergency-999': 'Emergency', 'fire-service-102': 'Fire service', 'health-call-centre-16263': 'Health line',
-      'women-children-violence-109': 'Women & children', 'child-helpline-1098': 'Child helpline', 'tourist-police-helpline': 'Tourist Police', 'info-service-333': 'Info service', 'disaster-warning-1090': 'Disaster warning' },
-    iconSend: 'Send location', iconSendSub: 'to family', iconNear: 'Help near me', iconNearSub: 'police station & chairman',
-    iconSrc: 'Official source and check date of these numbers',
-    findTitle: 'Which area are you in?', findText: 'Type your village, union, town or upazila, in Bangla or English, any spelling.',
-    guideTitle: 'What happened?', guideText: 'Pick your situation and we will show you who to call.',
-    guides: [
-      ['night', 'In danger at night or on the road', 'Call 999 first. Then send your location to your family.', 'Send location', 'sos'],
-      ['lost', 'Something lost or stolen', 'File a General Diary (GD) at the nearest police station. Find your police station number here.', 'Find police station number', 'find'],
-      ['storm', 'Storm, flood or fire', (n) => (n ? `Fire service ${n.fire}, disaster warning ${n.warn}. See your upazila numbers too.` : 'See the fire service, disaster and upazila numbers.'), 'Find help near me', 'locate']],
-    duo: [
-      ['send', "Save your family's numbers", 'In an emergency there is no time to look for numbers. Save them once and you can send your location quickly. No login.', 'Save numbers'],
-      ['flag', 'Found a wrong number?', 'Tell us (needs a GitHub account). We check it against the official source and fix it if it is wrong.', 'Report a wrong number']],
-    helpTitle: 'How can we help?', help: ['Questions', 'Sources', 'Privacy', 'Report a wrong number'],
-    netTitle: 'Made for weak networks',
-    net: [['ok', 'Finding your area from your location needs no internet'], ['ok', 'Sending your location by SMS needs no internet'],
-      ['ok', 'Every number from an official website, with a link to its source'], ['ok', 'After one visit, it works without internet; you can also install it on your phone']],
-    nav: { home: 'Home', numbers: 'Emergency numbers', area: 'Find area', send: 'Send location', guide: 'What happened?', about: 'About', faq: 'Questions' },
-    about: { eyebrow: 'About', title: 'What is SafeConnect?',
-      text: 'In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox\'s Bazar now, the whole country later.',
-      points: [['check', 'Official numbers only', 'Every number comes from an official *.gov.bd website, with its source link. The sources are re-checked every week.'],
-        ['signal', 'Made for weak networks', 'After one visit, the numbers, area search, "Find help near me" and sending your location by SMS work without internet.'],
-        ['lock', 'No login', 'Your family\'s numbers stay on your phone. We collect no personal data.']] },
-    faq: { eyebrow: 'Questions', title: 'Good to know',
-      items: [['source', 'Where do the numbers come from?', 'From the official websites (*.gov.bd) of districts, upazilas, unions and municipalities. Each number shows its source link and check date.'],
-        ['wrong', 'What if a number is wrong?', 'Tell us with "Report a wrong number" below. We fix it against the official source. In an emergency, call 999 first.'],
-        ['offline', 'Does it work without internet?', 'Yes. Open the site once with internet; after that all numbers, area search, "Find help near me" and SMS work without internet. Only WhatsApp, maps, source links and reporting a wrong number need internet. Calls and SMS still need mobile signal.'],
-        ['privacy', 'Where does my data go?', 'Nowhere. Your family\'s numbers and last area stay in your phone\'s browser. Your location is sent only when you send it.'],
-        ['districts', 'When will other districts come?', 'Noakhali and Cox\'s Bazar now. More districts come step by step once their data is checked. National numbers like 999, 109 and 333 work everywhere.']] },
-    foot: { tagline: 'Official emergency numbers for your area. No login; works without internet too.', small: "Starting with Noakhali and Cox's Bazar.",
-      services: ['Services', ['Call 999', 'Send location', 'Find help near me', 'Find area']],
-      areas: ['Areas', ['Noakhali', "Cox's Bazar", 'Chowmuhani', 'Inani beach']],
-      info: ['Information', ['About', 'Questions', 'Report a wrong number', 'Sources and checks']],
-      helpTitle: 'Need a little help?', helpText: 'For information about any government service, call 333. To tell us about this project, write on GitHub.',
-      copy: '© 2026 SafeConnect · jerin101 & tasmintoshi', bottom: ['Privacy', 'Sources', 'GitHub', 'Search tests'],
-      credit: 'Numbers: official *.gov.bd websites. Map: upazila boundaries and union/town centre points from the Bangladesh Bureau of Statistics (BBS) via OCHA HDX (CC BY-IGO). Where BBS names do not match, the tools can add OpenStreetMap points (© OpenStreetMap contributors, ODbL).' },
-  },
-};
-const P = () => PAGE[lang];
+const P = () => LANG[lang].page;
 const MORE_ICONS = {
   signal: 'M2 9.5a15 15 0 0 1 20 0l-1.4 1.4a13 13 0 0 0-17.2 0L2 9.5Zm3.5 3.5a10 10 0 0 1 13 0l-1.4 1.4a8 8 0 0 0-10.2 0L5.5 13Zm3.5 3.5a5 5 0 0 1 6 0L12 19.5l-3-3Z',
   lock: 'M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3Z',
@@ -846,7 +651,7 @@ function renderGuides() {
   $('guideCards').replaceChildren(...P().guides.map(([art, title, text, btn, act]) => {
     const c = el('article', 'card');
     const body = el('div', 'body');
-    body.append(el('h3', null, title), el('p', null, typeof text === 'function' ? text(n) : text), primaryBtn(btn, actions[act]));
+    body.append(el('h3', null, title), el('p', null, text.includes('{fire}') ? (n ? fill(text, n) : P().guideStormNoNumbers) : text), primaryBtn(btn, actions[act]));
     c.append(el('div', `art ${art}`), body);
     return c;
   }));
