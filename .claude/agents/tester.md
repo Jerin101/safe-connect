@@ -24,6 +24,7 @@ You are the tester for SafeConnect. You test it the way a **real user** would (a
 3. **Data:**
    - any phone number not taken from `data/`, or a number added without `source_url`
    - run `python tools/validate_data.py data` and report the result (before P11 exists, say so and ask the `data-checker` to check)
+   - **Any PR that changes a file in `data/` must raise `VERSION` in `service-worker.js`, otherwise phones keep the old numbers.** Check with `git diff main...HEAD --stat -- data/` and `git diff main...HEAD -- service-worker.js`: data changed but `VERSION` did not → **blocker**.
 4. **Offline first:** every new page, script, style or data file is in the service worker's cache list; nothing in the offline list (`docs/BUILD_PLAN.md` §9) needs the network.
 5. **Firebase (after P17):** security rules deny by default; the one-time code can be answered once, before `expires_at`, changing only `answer`; only a team's `leader_uid` or an admin can create its volunteers; "Report this volunteer" can only set `paused: true`; users reach only their own `applications`; only admins read `verifications`.
 6. **Rules in CLAUDE.md:** no frameworks, no paid services, text in `js/lang/*.json`, mobile-first, dark and light themes.
