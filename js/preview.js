@@ -48,6 +48,7 @@ const T = {
       accident: ['দুর্ঘটনা', 'আমার দুর্ঘটনা হয়েছে।'], sick: ['অসুস্থ', 'আমি অসুস্থ, সাহায্য দরকার।'], lost: ['পথ হারিয়েছি', 'আমি পথ হারিয়েছি।'] },
     urgent: 'জরুরি!', area: (n) => `আমার এলাকা: ${n}।`, mapLine: (l) => `ম্যাপ: ${l}`, noLoc: 'আমার লোকেশন পাওয়া যায়নি, এখনই আমাকে ফোন করো।',
     timeLine: (x) => `সময়: ${x}`, sign: '(SafeConnect থেকে পাঠানো)',
+    locIdle: 'লোকেশন এখনো নেওয়া হয়নি। পাঠাতে চাইলে নিচের বোতাম চাপুন।', locBtn: 'আমার লোকেশন নিন',
     gettingLoc: 'লোকেশন নেওয়া হচ্ছে…', gotLoc: (n, m) => `${n}${m ? ` (প্রায় ${m} মিটার)` : ''}`, outsideLoc: 'আপনার লোকেশন পাওয়া গেছে (ম্যাপ লিংক বার্তায় আছে)',
     noLocYet: 'লোকেশন ছাড়াই পাঠাতে পারেন। বার্তায় ফোন করতে বলা আছে।',
     sosDenied: 'লোকেশনের অনুমতি নেই (ফোনের সেটিংসে চালু করুন)।', sosNoLoc: 'লোকেশন পাওয়া যায়নি।',
@@ -55,7 +56,7 @@ const T = {
     smsHint: 'SMS-এ ইন্টারনেট লাগে না। পাঠানোর বোতাম চাপলে ফোনের মেসেজ অ্যাপ খুলবে, সেখানে Send চাপুন।',
     people: 'আমার প্রিয়জন', addTitle: 'নতুন নম্বর যোগ করুন', name: 'নাম', rel: 'সম্পর্ক (যেমন: মা)', phone: 'মোবাইল নম্বর', save: 'সেভ করুন', remove: 'মুছুন',
     noPeople: 'এখনো কোনো নম্বর সেভ করা নেই। নিচে মা, বাবা বা কাছের কারো নম্বর সেভ করুন। পরে এক চাপেই পাঠাতে পারবেন।',
-    badPhone: 'সঠিক মোবাইল নম্বর দিন, যেমন ০১৭১২৩৪৫৬৭৮।', needName: 'নাম লিখুন।', maxPeople: 'সর্বোচ্চ ৩ জন সেভ করা যায়।',
+    badPhone: 'সঠিক মোবাইল নম্বর দিন, যেমন ০১XXXXXXXXX।', needName: 'নাম লিখুন।', maxPeople: 'সর্বোচ্চ ৩ জন সেভ করা যায়।',
     privacy: 'নম্বরগুলো শুধু আপনার এই ফোনে সেভ থাকে। কোথাও পাঠানো হয় না, লগইনও লাগে না।', sendFamily: 'প্রিয়জনকে পাঠান',
   },
   en: {
@@ -102,6 +103,7 @@ const T = {
       accident: ['Accident', 'I had an accident.'], sick: ['Feeling ill', 'I am ill and need help.'], lost: ['Lost', 'I am lost.'] },
     urgent: 'URGENT!', area: (n) => `My area: ${n}.`, mapLine: (l) => `Map: ${l}`, noLoc: 'I could not get my location. Call me now.',
     timeLine: (x) => `Time: ${x}`, sign: '(sent from SafeConnect)',
+    locIdle: 'Location not taken yet. To send it, tap the button below.', locBtn: 'Get my location',
     gettingLoc: 'Getting your location…', gotLoc: (n, m) => `${n}${m ? ` (about ${m} m)` : ''}`, outsideLoc: 'Location found (the map link is in the message)',
     noLocYet: 'You can send without a location. The message asks them to call you.',
     sosDenied: 'Location is not allowed (turn it on in phone settings).', sosNoLoc: 'Could not get your location.',
@@ -109,7 +111,7 @@ const T = {
     smsHint: 'SMS needs no internet. The button opens your messages app; tap Send there.',
     people: 'My people', addTitle: 'Add a number', name: 'Name', rel: 'Relation (e.g. mother)', phone: 'Mobile number', save: 'Save', remove: 'Remove',
     noPeople: 'No number saved yet. Save your mother, father or a close friend below. Next time it is one tap.',
-    badPhone: 'Enter a valid mobile number, like 01712345678.', needName: 'Enter a name.', maxPeople: 'You can save up to 3 people.',
+    badPhone: 'Enter a valid mobile number, like 01XXXXXXXXX.', needName: 'Enter a name.', maxPeople: 'You can save up to 3 people.',
     privacy: 'These numbers are saved only on this phone. They are never sent anywhere, and no login is needed.', sendFamily: 'Send to family',
   },
 };
@@ -214,6 +216,11 @@ function callLink(num, label, red = false) {
   a.append(el('small', null, label), document.createTextNode(digits(num)));
   return a;
 }
+// Warning badges from the record's flags (CLAUDE.md data rules); the same on every row that shows a number.
+function flagTags(r, tags = el('div', 'tags')) {
+  for (const f of r.flags || []) if (t().flags[f]) tags.append(el('span', 'tag warn', t().flags[f]));
+  return tags;
+}
 function personRow(r) {
   const row = el('div', 'person');
   const info = el('div');
@@ -223,7 +230,7 @@ function personRow(r) {
   if (role && r.kind !== 'national') info.append(el('span', 'role', role));
   const tags = el('div', 'tags');
   if (r.ward_no) tags.append(el('span', 'tag', `${t().ward} ${digits(r.ward_no)}`));
-  for (const f of r.flags || []) if (t().flags[f]) tags.append(el('span', 'tag warn', t().flags[f]));
+  flagTags(r, tags);
   if (tags.children.length) info.append(tags);
   row.append(info);
   const calls = el('div', 'calls');
@@ -243,6 +250,8 @@ function firstRow(what, r, red = false) {
   info.append(el('span', 'what', what));
   const who = r.kind === 'national' ? (lang === 'en' ? r.name_en : r.name_bn) : [r.name_bn, r.designation_bn].filter(Boolean).join(', ');
   info.append(el('span', 'who', who));
+  const tags = flagTags(r);
+  if (tags.children.length) info.append(tags);
   if (r.source_url) {                     // every number shows its source and check date (CLAUDE.md data rules)
     const src = el('span', 'src');
     const a = el('a', null, `${t().source} ↗`); a.href = r.source_url; a.target = '_blank'; a.rel = 'noopener';
@@ -454,7 +463,11 @@ function renderSituations() {
 function renderLoc() {
   const line = $('sosLoc');
   line.className = 'locline';
-  if (sos.state === 'getting') line.textContent = t().gettingLoc;
+  const btn = $('sosLocBtn');
+  btn.textContent = t().locBtn;
+  btn.hidden = !(sos.state === 'idle' || sos.state === 'failed');
+  if (sos.state === 'idle') line.textContent = t().locIdle;
+  else if (sos.state === 'getting') line.textContent = t().gettingLoc;
   else if (sos.pos && sos.place && !sos.place.outside) {
     line.classList.add('ok');
     const acc = sos.pos.accuracy ? digits(Math.round(sos.pos.accuracy)) : '';
@@ -521,12 +534,20 @@ function renderPeople() {
   }));
   $('addForm').hidden = people.length >= 3;
 }
-async function openSos(pos) {
-  sos = { situation: sos.situation || 'danger', pos: null, place: null, state: 'getting', edited: false, error: null };
+// askLocation = false: open the page without asking for location (e.g. only to save family numbers).
+// Location is then read only when the person taps "Get my location" (CLAUDE.md rule 5).
+async function openSos(pos, askLocation = true) {
+  sos = { situation: sos.situation || 'danger', pos: null, place: null, state: 'idle', edited: false, error: null };
   renderSituations(); renderPeople();
   showView('sos');
   const fresh = pos || (lastFix && Date.now() - lastFix.at < 120000 ? lastFix.pos : null);
   if (fresh) { setSosPos(fresh); return; }
+  if (askLocation) { requestSosLocation(); return; }
+  renderLoc(); refreshMessage();
+}
+async function requestSosLocation() {
+  sos.state = 'getting'; sos.error = null;
+  $('sosDemo').hidden = true;
   renderLoc(); refreshMessage();
   try { setSosPos(await getPosition()); }
   catch (err) {
@@ -535,6 +556,7 @@ async function openSos(pos) {
     fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos);
   }
 }
+$('sosLocBtn').addEventListener('click', requestSosLocation);
 $('sosBtn').addEventListener('click', () => openSos(null));
 $('sosBack').addEventListener('click', goHome);
 $('sosMsg').addEventListener('input', () => { sos.edited = true; renderSend(); });
@@ -600,7 +622,7 @@ function renderPlaces() {
     return b;
   }));
 }
-function saveNumbers() { openSos(null); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
+function saveNumbers() { openSos(null, false); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
 
 
 const SITE = {
