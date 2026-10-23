@@ -29,4 +29,6 @@ Check:
    - the applicant's "being checked" message: friendly, and it must **not** say how verification works or who confirms
    - "Report this volunteer": neutral, not accusing
 
+10. **Design guide:** for every PR that changes a page, button or text, check the new sentences against `docs/DESIGN.md` §2 (voice: warm, calm, reliable; no slogans; no promises we can't keep) and §6 ("Read every new sentence aloud: is it short, calm, true?").
+
 Give a list: the file and key, the current text, your suggested text, and why. Don't edit files.

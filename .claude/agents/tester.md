@@ -28,6 +28,7 @@ You are the tester for SafeConnect. You test it the way a **real user** would (a
 5. **Firebase (after P17):** security rules deny by default; the one-time code can be answered once, before `expires_at`, changing only `answer`; only a team's `leader_uid` or an admin can create its volunteers; "Report this volunteer" can only set `paused: true`; users reach only their own `applications`; only admins read `verifications`.
 6. **Rules in CLAUDE.md:** no frameworks, no paid services, text in `js/lang/*.json`, mobile-first, dark and light themes.
 7. **Accessibility:** labels on buttons and inputs, contrast, keyboard use, `lang` attribute.
+8. **Design (every PR that changes a page, button or text):** go through `docs/DESIGN.md` §6 point by point and report each one; also check §5 ("Must always be true"). Compare with `design/portal.html`.
 
 ## 2. Feature checklist
 - [ ] Works at 360 px phone width and on desktop

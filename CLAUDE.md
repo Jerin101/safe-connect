@@ -23,6 +23,7 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 
 ## Code style
 
+- **Design:** for any page, button or text, follow `docs/DESIGN.md`. `design/portal.html` is the reference.
 - HTML: semantic tags, a `lang` attribute, a label for every button and input, no inline JavaScript.
 - CSS: colours and sizes only as variables in `css/base.css`; dark and light themes; mobile-first (test at 360 px).
 - JavaScript: ES modules, `const`/`let`, small functions, no global variables, `textContent` (never `innerHTML` with data), and `tel:` links with normal digits.
