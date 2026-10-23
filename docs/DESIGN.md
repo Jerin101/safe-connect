@@ -1,6 +1,6 @@
 # SafeConnect – Design guide
 
-Follow this for every screen, button and sentence on the site. Reference page: `design/portal.html`.
+Follow this for every screen, button and sentence on the site. Reference page: `design/portal-v2.html` (the earlier `design/portal.html` is kept only as history).
 If a change breaks a rule here, fix the change, not the rule. To change a rule, open an issue first.
 
 ## 1. Who it is for
@@ -34,17 +34,26 @@ Never block the screen with a welcome, pop-up or loading splash: 999 must be one
 
 No carousels, no auto-sliding, no autoplay video, no flashing (except the siren page, P30).
 
-## 4. Look
-- Colours: violet dusk. Night = deep indigo with a dusk banner (stars, arch, orb, hills). Day = warm white with a dawn banner.
-  Red only for 999 and danger, amber for "help near me" and calls, violet for family/location and main buttons, green only for "done / works".
-- Every colour is a CSS variable in `:root`, with night values in both dark-mode blocks. No colour written directly in a component.
-- Fonts: Manrope (English) + Noto Sans Bengali (Bangla). No letter-spacing on Bangla text.
-- Sizes: body 16–17 px, buttons at least 44 px tall, phone numbers large and in Bangla digits on screen (`tel:` links keep 0–9).
-- Cards: white/indigo surface, 14 px corners, soft shadow. One look for all cards.
-- Not allowed: another company's logo, colours, photos or text (we are not Grameenphone or any brand).
+## 4. Look (classy, calm, ours: `docs/SYSTEM_DESIGN.md` §7)
+- **Background:** warm white by day, near-black by night. Thin 1 px borders; soft shadows only on parts that float (cards over the banner, menus).
+- **One accent colour: violet**, for main buttons, links, focus rings and small accent eyebrows ("● জরুরি সাহায্য").
+  - **Red only for 999 and danger.**
+  - **Amber only for warnings** (e.g. "পুরোনো তথ্য হতে পারে", the offline notice).
+  - **Green only for "done"** (e.g. a tick, "ঠিক করা হয়েছে").
+  - No other colours for decoration.
+- **Icons:** single-colour line icons in quiet tiles. No rainbow icon circles.
+- **Every colour is a CSS variable** in `:root`, with night values in both dark-mode blocks. No colour written directly in a component.
+- **Fonts:** Manrope (English) + Noto Sans Bengali (Bangla), self-hosted (#50). No letter-spacing on Bangla text.
+  Headlines can be two-tone: a bright first line and a softer second line ("বিপদে আছেন? / সরকারি নম্বর, এক জায়গায়।").
+- **Sizes:** body 16–17 px, buttons at least 44 px tall, phone numbers large and in Bangla digits on screen (`tel:` links keep 0–9).
+- **Cards and corners:** one look for all cards. 12 px corners on small parts, slightly rounder cards, as in the reference page.
+- **One signature element: the "signal ring"** (a soft location ping) on the home banner and the sign-in page. Nothing else animates.
+- **Motion:** turn all motion off when the phone asks for less motion (`prefers-reduced-motion: reduce`).
+- Not allowed: another company's logo, colours, photos or text (we are not Grameenphone or any brand); bookings, prices, stock photos, heavy 3D/WebGL, slogans.
 
 ## 5. Must always be true
 - 999 visible on every page; nothing covers it.
+- Every service works without signing in; sign-in pages always show 999 and send location first.
 - A search never ends empty: similar names → upazila buttons → "Find help near me" + 999.
 - Every number shows its official source link and check date.
 - Location is read only after the person taps; family numbers stay on the phone.
