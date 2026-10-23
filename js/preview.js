@@ -620,7 +620,11 @@ const PAGE = {
     welcomeTitle: 'স্বাগতম! প্রথমবার এসেছেন? তিনটি কথা জেনে রাখুন:',
     welcomeSteps: ['বিপদে সবার আগে ৯৯৯-এ কল করুন।', '"আমার কাছের সাহায্য" চাপলে আপনার এলাকার থানা আর চেয়ারম্যানের নম্বর আসবে।', 'প্রিয়জনের নম্বর এখনই সেভ করে রাখুন, বিপদে এক চাপে লোকেশন যাবে।'],
     welcomeOk: 'বুঝেছি', welcomeSave: 'নম্বর সেভ করুন',
-    nav: { home: 'হোম', area: 'এলাকা খুঁজুন', send: 'প্রিয়জনকে লোকেশন', about: 'আমাদের সম্পর্কে', faq: 'প্রশ্ন ও উত্তর' },
+    icons: { 'national-emergency-999': 'জরুরি সেবা', 'fire-service-102': 'ফায়ার সার্ভিস', 'health-call-centre-16263': 'স্বাস্থ্য বাতায়ন',
+      'women-children-violence-109': 'নারী ও শিশু', 'child-helpline-1098': 'শিশু সহায়তা', 'tourist-police-helpline': 'ট্যুরিস্ট পুলিশ', 'info-service-333': 'তথ্য সেবা' },
+    iconSend: 'লোকেশন পাঠান', iconSendSub: 'প্রিয়জনকে', iconNear: 'কাছের সাহায্য', iconNearSub: 'থানা ও চেয়ারম্যান',
+    iconSrc: 'এই নম্বরগুলোর সরকারি উৎস ও যাচাইয়ের তারিখ',
+    nav: { home: 'হোম', numbers: 'জরুরি নম্বর', area: 'এলাকা খুঁজুন', send: 'প্রিয়জনকে লোকেশন', about: 'আমাদের সম্পর্কে', faq: 'প্রশ্ন ও উত্তর' },
     about: { eyebrow: 'আমাদের সম্পর্কে', title: 'SafeConnect কী?',
       text: 'বিপদের সময় কাকে ফোন করবেন, খুঁজতেই সময় চলে যায়। SafeConnect আপনার অবস্থান দেখে কাছের থানা, ইউনিয়ন পরিষদ, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর ঠিক ক্রমে দেখায়। এখন নোয়াখালী ও কক্সবাজারে, পরে সারা দেশে।',
       points: [['check', 'শুধু সরকারি নম্বর', 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া, উৎসের লিংকসহ। প্রতি সপ্তাহে আবার যাচাই হয়।'],
@@ -647,7 +651,11 @@ const PAGE = {
     welcomeTitle: 'Welcome! First time here? Three things to know:',
     welcomeSteps: ['In danger, call 999 first.', 'Tap "Find help near me" to see your police station and chairman.', "Save your family's numbers now, so your location goes to them in one tap."],
     welcomeOk: 'Got it', welcomeSave: 'Save numbers',
-    nav: { home: 'Home', area: 'Find area', send: 'Send location', about: 'About', faq: 'Questions' },
+    icons: { 'national-emergency-999': 'Emergency', 'fire-service-102': 'Fire service', 'health-call-centre-16263': 'Health line',
+      'women-children-violence-109': 'Women & children', 'child-helpline-1098': 'Child helpline', 'tourist-police-helpline': 'Tourist Police', 'info-service-333': 'Info service' },
+    iconSend: 'Send location', iconSendSub: 'to family', iconNear: 'Help near me', iconNearSub: 'police & chairman',
+    iconSrc: 'Official source and check date of these numbers',
+    nav: { home: 'Home', numbers: 'Emergency numbers', area: 'Find area', send: 'Send location', about: 'About', faq: 'Questions' },
     about: { eyebrow: 'About', title: 'What is SafeConnect?',
       text: 'In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox\'s Bazar now, the whole country later.',
       points: [['check', 'Official numbers only', 'Every number comes from an official *.gov.bd website, with its source link. All numbers are re-checked every week.'],
@@ -683,6 +691,7 @@ const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.hr
 // Second header row: one button per home section, in page order (DESIGN.md §3).
 const NAV = [
   ['home', () => { goHome(); window.scrollTo(0, 0); }],
+  ['numbers', () => goTo('iconRow')],
   ['area', () => findArea('')],
   ['send', () => openSos(null)],
   ['about', () => goTo('about')],
@@ -726,6 +735,51 @@ function renderFooter() {
   nav.append(textBtn(f.bottom[0], () => openFaq('privacy')), textBtn(f.bottom[1], () => openFaq('source')), extLink(f.bottom[2], SITE.repo), tests);
   $('footBottom').replaceChildren(el('span', null, f.copy), nav, el('p', 'credit', f.credit));
 }
+const GP_ICONS = {
+  phone: 'M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z',
+  fire: 'M13.5 2s1 3.5-1.5 6.5c-1.6 1.9-4 3.4-4 6.6A6 6 0 0 0 20 15c0-3-1.4-4.6-2.6-6-.4 1.6-1.3 2.6-2.4 3 .9-3.6-.2-7.4-1.5-10Z',
+  health: 'M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z',
+  woman: 'M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm-1 10h2a5 5 0 0 1 5 5v1h-3v4h-6v-4H6v-1a5 5 0 0 1 5-5Z',
+  child: 'M12 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm-4 8h8l-1 6h-2v4h-2v-4H9l-1-6Z',
+  bag: 'M9 3h6a1 1 0 0 1 1 1v2h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3V4a1 1 0 0 1 1-1Zm1 3h4V5h-4v1Z',
+  info: 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm-1 8v7h2v-7h-2Zm0-4v2h2V6h-2Z',
+  send: 'M2.5 11.2 20.6 3.4c.8-.34 1.6.46 1.26 1.26L14.1 22.8c-.37.86-1.62.78-1.87-.12l-1.9-6.98-6.98-1.9c-.9-.25-.98-1.5-.12-1.87Zm8.7 3.2 1.3 4.8 5.5-12.8-6.8 8Zm-1.2-1.2 8-6.8-12.8 5.5 4.8 1.3Z',
+  pin: 'M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z',
+  flag: 'M5 3h2v18H5V3Zm3 1h11l-2.5 4L19 12H8V4Z',
+  question: 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm-1 14v2h2v-2h-2Zm1-10a4 4 0 0 0-4 4h2a2 2 0 1 1 3 1.7c-1.2.7-2 1.6-2 3.3h2c0-1 .4-1.4 1.2-1.9A4 4 0 0 0 12 6Z',
+  db: 'M12 2c4.4 0 8 1.3 8 3v14c0 1.7-3.6 3-8 3s-8-1.3-8-3V5c0-1.7 3.6-3 8-3Zm6 6.2C16.5 9 14.4 9.5 12 9.5S7.5 9 6 8.2V11c0 .6 2.4 1.6 6 1.6s6-1 6-1.6V8.2Zm0 6c-1.5.8-3.6 1.3-6 1.3s-4.5-.5-6-1.3V17c0 .6 2.4 1.6 6 1.6s6-1 6-1.6v-2.8Z',
+  lock: 'M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3Z',
+  arrow: 'M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z',
+};
+const ICON_ROW = [['national-emergency-999', 'phone', 'c-red'], ['fire-service-102', 'fire', 'c-orange'], ['health-call-centre-16263', 'health', 'c-green'],
+  ['women-children-violence-109', 'woman', 'c-pink'], ['child-helpline-1098', 'child', 'c-blue'], ['tourist-police-helpline', 'bag', 'c-teal'], ['info-service-333', 'info', 'c-slate']];
+function iconCircle(path, cls) { const c = el('span', `circle ${cls}`); c.append(svg(path)); return c; }
+// Round icon row: national numbers from data/national_hotlines.json (tap = call), plus "send location" and "help near me".
+// Under it, the official source and check date of each number (DESIGN.md §5).
+function renderIconRow() {
+  const items = [], shown = [];
+  if (data) {
+    for (const [id, ic, cls] of ICON_ROW) {
+      const n = data.national.find((x) => x.id === id);
+      if (!n || !withPhone(n)) continue;
+      const a = el('a', 'icon-item'); a.href = `tel:${n.phones[0]}`;
+      a.append(iconCircle(GP_ICONS[ic], cls), el('b', null, P().icons[id]), el('small', null, digits(n.phones[0])));
+      items.push(a); shown.push(n);
+    }
+  }
+  const act = (label, sub, ic, cls, fn) => { const b = el('button', 'icon-item'); b.type = 'button'; b.append(iconCircle(GP_ICONS[ic], cls), el('b', null, label), el('small', null, sub)); b.addEventListener('click', fn); return b; };
+  items.splice(1, 0, act(P().iconSend, P().iconSendSub, 'send', 'c-violet', () => openSos(null)), act(P().iconNear, P().iconNearSub, 'pin', 'c-amber', () => locate()));
+  $('iconRow').replaceChildren(...items);
+  $('iconSrc').hidden = !shown.length;
+  $('iconSrcTitle').textContent = P().iconSrc;
+  $('iconSrcList').replaceChildren(...shown.map((n) => {
+    const line = el('p', 'src');
+    const a = el('a', null, `${t().source} ↗`); a.href = n.source_url; a.target = '_blank'; a.rel = 'noopener';
+    line.append(`${P().icons[n.id]} (${digits(n.phones[0])}): `, a, ` · ${t().checked} ${fmtDate(n.checked_on)}`);
+    return line;
+  }));
+}
+
 // Warm opening (DESIGN.md §2): greeting by time of day, trust ticks, a one-time welcome that never covers 999.
 function renderWarm() {
   const h = new Date().getHours();
@@ -747,7 +801,7 @@ function renderWarm() {
   const title = el('h2', null, P().welcomeTitle); title.id = 'welcomeTitle';
   w.replaceChildren(title, ol, row);
 }
-function renderPage() { renderWarm(); renderNav(); renderAbout(); renderFaq(); renderFooter(); }
+function renderPage() { renderWarm(); renderIconRow(); renderNav(); renderAbout(); renderFaq(); renderFooter(); }
 
 /* ---------- text ---------- */
 function setText() {
@@ -802,7 +856,7 @@ setText();
 try {
   [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
   areaIndex = buildAreaIndex(data);
-  renderRecent(); renderStats(); renderPlaces();
+  renderRecent(); renderStats(); renderPlaces(); renderIconRow();
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);
 }
