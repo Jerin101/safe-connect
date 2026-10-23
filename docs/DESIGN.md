@@ -19,7 +19,7 @@ many not used to websites. Every screen must work for them on the first try.
 | Use the person's words: থানা, চেয়ারম্যান, গ্রাম পুলিশ, ইউএনও | Technical words: database, GPS coordinates, API |
 
 Warm touches that are allowed: a time-of-day greeting ("শুভ সকাল!"; at night "রাতেও ৯৯৯ খোলা থাকে, ২৪ ঘণ্টা, বিনা খরচে"),
-a one-time welcome for first visitors (3 short steps, closes with "বুঝেছি"), trust badges (শুধু সরকারি নম্বর · লগইন লাগে না · বিনা খরচে · বাংলা ও English).
+a one-time welcome for first visitors (3 short steps, closes with "বুঝেছি"), trust badges (শুধু সরকারি নম্বর · লগইন লাগে না · বিনা খরচে ব্যবহার · বাংলা ও English).
 Never block the screen with a welcome, pop-up or loading splash: 999 must be one tap away from the first second.
 
 ## 3. Page order (portal layout)
