@@ -53,7 +53,26 @@ From **any location in Noakhali or Cox's Bazar** (a union, a town or municipalit
 5. Tasmin works in **her own Windows user account** and is signed in to Git and GitHub as **tasmintoshi**, so every commit shows her name.
 6. Never push straight to `main` (branch protection blocks it).
 
-## 5. Day-by-day schedule
+## 5. Schedule v2: the last 11 days
+
+From `docs/SYSTEM_DESIGN.md` §9 (who leads: `docs/ROLES.md` §5). Each day = one or two issues, small commits, a PR reviewed by the other person.
+If a day slips, move the next day's work. Don't skip tests.
+
+| v2 Day | Work | Issues | Lead | Showable result |
+|---|---|---|---|---|
+| 1 | Merge open PRs; offline test on a real phone; **design tokens v2** (`DESIGN.md` §4) on the existing pages | open PRs, P21 (v2) | J + T | The preview in the new look, works offline |
+| 2 | **Firebase project, Auth, Firestore, rules + emulator tests** | P17 | J | Sign-in works; rules tests pass |
+| 3 | **Sign-in page with three options** + "তিন ভূমিকা, এক লক্ষ্য" home section · **workspace shell** (sidebar, top bar with 999) + user dashboard | P45, P35 | T (or J) | Sign in, see your dashboard, sign out |
+| 4 | **Report a wrong number** (3 steps) + my reports + admin reports | P18 | J | A test report goes from user to admin |
+| 5 | **Admin dashboard, users and roles, audit log** (batched writes) | P44 | J | A role change shows up in the audit log |
+| 6 | **Volunteer backend:** applications, confirmations, verifications + rules tests | P38 | J | Rules tests for volunteers pass |
+| 7 | **Volunteer application** (4 steps), volunteer workspace, `confirm` page | P39 | T (or J) | A test application with a fake code |
+| 8 | Volunteer list on area pages, teams + team-leader confirmation | P39 | T (or J) | A test volunteer shows after the official contacts |
+| 9 | P13 spot-check of 40 numbers, #52 Action versions, fixes from the real-phone test of the new look | P13, #52 | J | |
+| 10 | **Full test on real phones** (all roles, offline, night/day), fixes | P37 | J + T | |
+| 11 | Demo script, release notes, tag `v1.0` | P37 | J + T | **Showcase ready** |
+
+### 5a. First plan (days 1–14, mostly done)
 
 | Day | jerin101 | tasmintoshi | Showable result |
 |---|---|---|---|
@@ -72,7 +91,7 @@ From **any location in Noakhali or Cox's Bazar** (a union, a town or municipalit
 | 13 | Finish P38 · P19 GitHub Pages deploy · release notes | Finish P39 · P36 accessibility + polish | Site live on GitHub Pages |
 | 14 | **P37 both:** test both scenarios on real phones, fix bugs, demo script, tag `v1.0` | same | **Showcase ready** |
 
-If time runs short, cut in this order: P35 → P38 + P39 (volunteers) → P18 → P17 → P33. **Never cut offline (P34, P26).** Everything else is needed for the demo. (P32 fake call was removed in P40 to make room.)
+If time runs short, cut in this order (`docs/ROLES.md` §5): teams and team-leader confirmation → weekly batch messages → volunteer public list → volunteer workspace. **Always keep P17, P35, P18, P44** (sign-in, user workspace, real wrong-number reports, admin with audit log). **Never cut offline (P34, P26).** (P32 fake call was removed in P40 to make room.)
 
 ## 6. Showcase demo (5 minutes)
 
