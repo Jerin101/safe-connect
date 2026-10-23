@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap">
 <style>
-  /* Layout: a dusk landscape hero (sky, glowing arch, gems, hills, water) holding the three emergency actions,
-     a glass search pill riding its lower edge, then stats, quick places and a "save your people" band.
-     Night = violet dusk with stars; day = lavender-peach dawn with a sun. */
+  /* Portal layout from design/portal.html (rules: docs/DESIGN.md): two-row header, banner, round icon row,
+     search band, situation cards, known places, side cards, about, help icons, weak-network band, FAQ, column footer.
+     Night = deep indigo with a dusk banner; day = warm white with a dawn banner. */
   :root {
     --bg: #FFFAF6; --band: #FBF0F4; --surface: #FFFFFF; --surface-2: #F7F1FA; --line: rgba(90, 60, 180, 0.15);
     --ink: #1C1442; --muted: #574E7E; --accent: #6B3FE0; --accent-ink: #FFFFFF; --link: #5A2FD6;
@@ -19,6 +19,7 @@
     --stars: 0; --orb-1: #FFF8E1; --orb-2: #FFB86B;
     --red-1: #F2385E; --red-2: #C0123A; --amber-1: #FFC94D; --amber-2: #FF8F3F; --amber-ink: #2A1500;
     --violet-1: #8457FF; --violet-2: #5427D6; --on-color: #FFFFFF;
+    --orange-1: #FF9B5C; --orange-2: #E8542E; --green-1: #3FC98A; --green-2: #14895A; --pink-1: #FF7AB8; --pink-2: #C8327E; --blue-1: #6FA8FF; --blue-2: #2E5BD6; --teal-1: #4FD6D0; --teal-2: #13858F; --slate-1: #9AA3C7; --slate-2: #59618A;
     --warn: #8A4B00; --warn-bg: #FFEBD2; --ok: #12804C;
     --shadow: 0 6px 24px rgba(80, 50, 160, 0.10);
     --foot-bg: #F2EEFA; --foot-ink: #1C1442; --foot-muted: #574E7E; --foot-line: rgba(90, 60, 180, 0.15);
@@ -81,7 +82,7 @@
   .logo svg { width: 28px; height: 28px; flex: none; }
   .top-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
   .hpill { border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2); padding: 6px 12px; font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
-  .h999 { background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: #fff; border-color: transparent; font-weight: 800; }
+  .h999 { background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: var(--on-color); border-color: transparent; font-weight: 800; }
   .h999 svg { width: 15px; height: 15px; }
   .round { width: 36px; height: 36px; padding: 0; justify-content: center; }
   .round svg { width: 17px; height: 17px; }
@@ -134,7 +135,7 @@
     background: linear-gradient(140deg, var(--amber-1), var(--amber-2)); color: var(--amber-ink); }
   .trust { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 0.88rem; font-weight: 600; }
   .trust li { display: inline-flex; align-items: center; gap: 6px; }
-  .trust li::before { content: "✓"; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--ok); color: #fff; font-size: 0.7rem; font-weight: 800; }
+  .trust li::before { content: "✓"; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--ok); color: var(--on-color); font-size: 0.7rem; font-weight: 800; }
   .welcome { display: grid; gap: 10px; border-radius: var(--r); padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); border-left: 4px solid var(--amber-1); }
   .welcome h2 { font-size: 1.08rem; }
   .welcome ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; color: var(--muted); font-size: 0.94rem; }
@@ -175,14 +176,14 @@
   .icon-item b { font-size: 0.86rem; font-weight: 600; line-height: 1.3; }
   .icon-item small { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
   .c-red { background: linear-gradient(140deg, var(--red-1), var(--red-2)); }
-  .c-orange { background: linear-gradient(140deg, #FF9B5C, #E8542E); }
-  .c-green { background: linear-gradient(140deg, #3FC98A, #14895A); }
-  .c-pink { background: linear-gradient(140deg, #FF7AB8, #C8327E); }
-  .c-blue { background: linear-gradient(140deg, #6FA8FF, #2E5BD6); }
-  .c-teal { background: linear-gradient(140deg, #4FD6D0, #13858F); }
+  .c-orange { background: linear-gradient(140deg, var(--orange-1), var(--orange-2)); }
+  .c-green { background: linear-gradient(140deg, var(--green-1), var(--green-2)); }
+  .c-pink { background: linear-gradient(140deg, var(--pink-1), var(--pink-2)); }
+  .c-blue { background: linear-gradient(140deg, var(--blue-1), var(--blue-2)); }
+  .c-teal { background: linear-gradient(140deg, var(--teal-1), var(--teal-2)); }
   .c-violet { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); }
   .c-amber { background: linear-gradient(140deg, var(--amber-1), var(--amber-2)); color: var(--amber-ink); }
-  .c-slate { background: linear-gradient(140deg, #9AA3C7, #59618A); }
+  .c-slate { background: linear-gradient(140deg, var(--slate-1), var(--slate-2)); }
 
   .icon-src { margin-top: 10px; }
   .icon-src .cat-body { padding: 6px 16px 12px; gap: 4px; }
@@ -248,7 +249,7 @@
   /* known places (product-grid style) */
   .places { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   @media (min-width: 900px) { .places { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  .place { position: relative; border: 1px solid var(--line); border-radius: var(--r); aspect-ratio: 1.1; max-width: 100%; overflow: hidden; cursor: pointer; padding: 0; text-align: left; color: #fff; box-shadow: var(--shadow); }
+  .place { position: relative; border: 1px solid var(--line); border-radius: var(--r); aspect-ratio: 1.1; max-width: 100%; overflow: hidden; cursor: pointer; padding: 0; text-align: left; color: var(--on-color); box-shadow: var(--shadow); }
   .place .art { position: absolute; inset: 0; }
   .place .label { position: absolute; left: 10px; bottom: 10px; right: 10px; display: grid; gap: 2px; }
   .place .label b { justify-self: start; background: rgba(15, 10, 40, 0.6); border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; padding: 3px 12px; font-weight: 600; font-size: 0.95rem; }
@@ -383,7 +384,7 @@
   .feature-box h2 { font-size: clamp(1.3rem, 3.4vw, 1.7rem); }
   .ticks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
   .ticks li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
-  .ticks li::before { content: "✓"; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--ok); color: #fff; font-size: 0.8rem; font-weight: 800; margin-top: 2px; }
+  .ticks li::before { content: "✓"; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--ok); color: var(--on-color); font-size: 0.8rem; font-weight: 800; margin-top: 2px; }
   .ticks li.soon::before { content: "…"; background: var(--muted); }
 
   /* faq */

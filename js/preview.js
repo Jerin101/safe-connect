@@ -1,4 +1,4 @@
-// Logic for preview.html: the team's design (issue #38). The real site (index.html, pages/) is built in P20-P36.
+// Logic for preview.html: the portal design (issues #38, #42; rules in docs/DESIGN.md). The real site (index.html, pages/) is built in P20-P36.
 // Location is read only after a tap (CLAUDE.md rule 5). The area search lives in data.js (issue #36).
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
