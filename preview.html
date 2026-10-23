@@ -330,6 +330,7 @@
   .locline { font-weight: 600; display: flex; gap: 8px; align-items: baseline; }
   .locline::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; transform: translateY(-1px); }
   .locline.ok::before { background: var(--ok); }
+  .locbtn { justify-self: start; }
   .locline.bad { color: var(--warn); } .locline.bad::before { background: var(--warn); }
   textarea, .form input { width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 1rem; }
   textarea { resize: vertical; line-height: 1.45; }
@@ -619,6 +620,7 @@
     <section class="panel glass" aria-labelledby="locTitle">
       <h2 id="locTitle"></h2>
       <p class="locline" id="sosLoc" role="status"></p>
+      <button class="btn violet locbtn" id="sosLocBtn" type="button" hidden></button>
       <div class="demo" id="sosDemo" hidden><p id="sosDemoText"></p><div class="chips" id="sosDemoChips"></div></div>
     </section>
     <section class="panel glass" aria-labelledby="sendTitle">

@@ -48,6 +48,7 @@ const T = {
       accident: ['দুর্ঘটনা', 'আমার দুর্ঘটনা হয়েছে।'], sick: ['অসুস্থ', 'আমি অসুস্থ, সাহায্য দরকার।'], lost: ['পথ হারিয়েছি', 'আমি পথ হারিয়েছি।'] },
     urgent: 'জরুরি!', area: (n) => `আমার এলাকা: ${n}।`, mapLine: (l) => `ম্যাপ: ${l}`, noLoc: 'আমার লোকেশন পাওয়া যায়নি, এখনই আমাকে ফোন করো।',
     timeLine: (x) => `সময়: ${x}`, sign: '(SafeConnect থেকে পাঠানো)',
+    locIdle: 'লোকেশন এখনো নেওয়া হয়নি। পাঠাতে চাইলে নিচের বোতাম চাপুন।', locBtn: 'আমার লোকেশন নিন',
     gettingLoc: 'লোকেশন নেওয়া হচ্ছে…', gotLoc: (n, m) => `${n}${m ? ` (প্রায় ${m} মিটার)` : ''}`, outsideLoc: 'আপনার লোকেশন পাওয়া গেছে (ম্যাপ লিংক বার্তায় আছে)',
     noLocYet: 'লোকেশন ছাড়াই পাঠাতে পারেন। বার্তায় ফোন করতে বলা আছে।',
     sosDenied: 'লোকেশনের অনুমতি নেই (ফোনের সেটিংসে চালু করুন)।', sosNoLoc: 'লোকেশন পাওয়া যায়নি।',
@@ -102,6 +103,7 @@ const T = {
       accident: ['Accident', 'I had an accident.'], sick: ['Feeling ill', 'I am ill and need help.'], lost: ['Lost', 'I am lost.'] },
     urgent: 'URGENT!', area: (n) => `My area: ${n}.`, mapLine: (l) => `Map: ${l}`, noLoc: 'I could not get my location. Call me now.',
     timeLine: (x) => `Time: ${x}`, sign: '(sent from SafeConnect)',
+    locIdle: 'Location not taken yet. To send it, tap the button below.', locBtn: 'Get my location',
     gettingLoc: 'Getting your location…', gotLoc: (n, m) => `${n}${m ? ` (about ${m} m)` : ''}`, outsideLoc: 'Location found (the map link is in the message)',
     noLocYet: 'You can send without a location. The message asks them to call you.',
     sosDenied: 'Location is not allowed (turn it on in phone settings).', sosNoLoc: 'Could not get your location.',
@@ -454,7 +456,11 @@ function renderSituations() {
 function renderLoc() {
   const line = $('sosLoc');
   line.className = 'locline';
-  if (sos.state === 'getting') line.textContent = t().gettingLoc;
+  const btn = $('sosLocBtn');
+  btn.textContent = t().locBtn;
+  btn.hidden = !(sos.state === 'idle' || sos.state === 'failed');
+  if (sos.state === 'idle') line.textContent = t().locIdle;
+  else if (sos.state === 'getting') line.textContent = t().gettingLoc;
   else if (sos.pos && sos.place && !sos.place.outside) {
     line.classList.add('ok');
     const acc = sos.pos.accuracy ? digits(Math.round(sos.pos.accuracy)) : '';
@@ -521,12 +527,20 @@ function renderPeople() {
   }));
   $('addForm').hidden = people.length >= 3;
 }
-async function openSos(pos) {
-  sos = { situation: sos.situation || 'danger', pos: null, place: null, state: 'getting', edited: false, error: null };
+// askLocation = false: open the page without asking for location (e.g. only to save family numbers).
+// Location is then read only when the person taps "Get my location" (CLAUDE.md rule 5).
+async function openSos(pos, askLocation = true) {
+  sos = { situation: sos.situation || 'danger', pos: null, place: null, state: 'idle', edited: false, error: null };
   renderSituations(); renderPeople();
   showView('sos');
   const fresh = pos || (lastFix && Date.now() - lastFix.at < 120000 ? lastFix.pos : null);
   if (fresh) { setSosPos(fresh); return; }
+  if (askLocation) { requestSosLocation(); return; }
+  renderLoc(); refreshMessage();
+}
+async function requestSosLocation() {
+  sos.state = 'getting'; sos.error = null;
+  $('sosDemo').hidden = true;
   renderLoc(); refreshMessage();
   try { setSosPos(await getPosition()); }
   catch (err) {
@@ -535,6 +549,7 @@ async function openSos(pos) {
     fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos);
   }
 }
+$('sosLocBtn').addEventListener('click', requestSosLocation);
 $('sosBtn').addEventListener('click', () => openSos(null));
 $('sosBack').addEventListener('click', goHome);
 $('sosMsg').addEventListener('input', () => { sos.edited = true; renderSend(); });
@@ -600,7 +615,7 @@ function renderPlaces() {
     return b;
   }));
 }
-function saveNumbers() { openSos(null); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
+function saveNumbers() { openSos(null, false); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
 
 
 const SITE = {
