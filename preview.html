@@ -224,6 +224,21 @@
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: 0.95rem; color: var(--ink); }
   .chip[aria-pressed="true"] { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); border-color: transparent; font-weight: 600; }
+  /* ---------- cards ---------- */
+  .grid-3 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: grid; grid-template-rows: auto 1fr; box-shadow: var(--shadow); min-width: 0; }
+  .card .art { aspect-ratio: 2.2; max-width: 100%; position: relative; }
+  .card .body { padding: 16px 18px 18px; display: grid; gap: 8px; align-content: start; }
+  .card h3 { font-size: 1.1rem; }
+  .card p { color: var(--muted); font-size: 0.95rem; }
+  .card .btn-primary { margin-top: 6px; }
+  .btn-primary { justify-self: start; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 10px; padding: 10px 18px; font-weight: 700; cursor: pointer; text-decoration: none;
+    background: var(--accent); color: var(--accent-ink); }
+  .btn-primary svg { width: 16px; height: 16px; }
+  .art.night { background: radial-gradient(30% 40% at 75% 30%, #fff6d8, #f7c56b 45%, transparent 47%), linear-gradient(180deg, #1a1244, #4b2c8a 60%, #2a1b55 61%, #1a1240); }
+  .art.lost { background: radial-gradient(28% 50% at 30% 55%, rgba(255,255,255,0.85), transparent 52%), repeating-linear-gradient(45deg, #6a3aa8 0 14px, #7b4bc0 14px 28px); }
+  .art.storm { background: linear-gradient(160deg, transparent 48%, #ffd66b 49%, #ffd66b 51%, transparent 52%), linear-gradient(180deg, #2b3a7a, #5866b8 55%, #3d7fb8 56%, #234d7a); }
+
   main > .wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-block: 16px 40px; }
   main > .wrap > * { min-width: 0; }
   .section-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
@@ -504,6 +519,13 @@
           <path class="pin" d="M150 20c19 0 34 15 34 33 0 25-34 61-34 61s-34-36-34-61c0-18 15-33 34-33Zm0 20a13 13 0 1 0 0 26 13 13 0 0 0 0-26Z"/>
           <circle class="pin2" cx="70" cy="140" r="9"/>
         </svg>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="guideTitle">
+      <div class="wrap">
+        <div class="section-title"><h2 id="guideTitle"></h2><p id="guideText"></p></div>
+        <div class="grid-3" id="guideCards"></div>
       </div>
     </section>
 

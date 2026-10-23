@@ -621,11 +621,16 @@ const PAGE = {
     welcomeSteps: ['বিপদে সবার আগে ৯৯৯-এ কল করুন।', '"আমার কাছের সাহায্য" চাপলে আপনার এলাকার থানা আর চেয়ারম্যানের নম্বর আসবে।', 'প্রিয়জনের নম্বর এখনই সেভ করে রাখুন, বিপদে এক চাপে লোকেশন যাবে।'],
     welcomeOk: 'বুঝেছি', welcomeSave: 'নম্বর সেভ করুন',
     icons: { 'national-emergency-999': 'জরুরি সেবা', 'fire-service-102': 'ফায়ার সার্ভিস', 'health-call-centre-16263': 'স্বাস্থ্য বাতায়ন',
-      'women-children-violence-109': 'নারী ও শিশু', 'child-helpline-1098': 'শিশু সহায়তা', 'tourist-police-helpline': 'ট্যুরিস্ট পুলিশ', 'info-service-333': 'তথ্য সেবা' },
+      'women-children-violence-109': 'নারী ও শিশু', 'child-helpline-1098': 'শিশু সহায়তা', 'tourist-police-helpline': 'ট্যুরিস্ট পুলিশ', 'info-service-333': 'তথ্য সেবা', 'disaster-warning-1090': 'দুর্যোগের আগাম বার্তা' },
     iconSend: 'লোকেশন পাঠান', iconSendSub: 'প্রিয়জনকে', iconNear: 'কাছের সাহায্য', iconNearSub: 'থানা ও চেয়ারম্যান',
     iconSrc: 'এই নম্বরগুলোর সরকারি উৎস ও যাচাইয়ের তারিখ',
     findTitle: 'আপনার এলাকা কোথায়?', findText: 'গ্রাম, ইউনিয়ন বা উপজেলার নাম লিখুন, বাংলা বা ইংরেজিতে, যেকোনো বানানে। আমরা খুঁজে দেব।',
-    nav: { home: 'হোম', numbers: 'জরুরি নম্বর', area: 'এলাকা খুঁজুন', send: 'প্রিয়জনকে লোকেশন', about: 'আমাদের সম্পর্কে', faq: 'প্রশ্ন ও উত্তর' },
+    guideTitle: 'কী হয়েছে?', guideText: 'পরিস্থিতি বেছে নিন। কাকে ফোন করবেন, আমরা দেখিয়ে দেব।',
+    guides: [
+      ['night', 'রাতে বা পথে বিপদে', 'আগে ৯৯৯-এ কল করুন। তারপর এক চাপে প্রিয়জনকে আপনার লোকেশন পাঠান।', 'লোকেশন পাঠান', 'sos'],
+      ['lost', 'কিছু হারিয়েছে বা চুরি হয়েছে', 'নিকটস্থ থানায় সাধারণ ডায়েরি (জিডি) করুন। আপনার এলাকার থানার নম্বর এখানে পাবেন।', 'থানার নম্বর খুঁজুন', 'find'],
+      ['storm', 'ঝড়, বন্যা বা আগুন', (n) => (n ? `ফায়ার সার্ভিস ${n.fire}, দুর্যোগের আগাম বার্তা ${n.warn}। আপনার উপজেলার নম্বরও দেখুন।` : 'ফায়ার সার্ভিস ও দুর্যোগের নম্বর দেখুন, আপনার উপজেলার নম্বরও।'), 'আমার কাছের সাহায্য', 'locate']],
+    nav: { home: 'হোম', numbers: 'জরুরি নম্বর', area: 'এলাকা খুঁজুন', send: 'প্রিয়জনকে লোকেশন', guide: 'পরিস্থিতি অনুযায়ী', about: 'আমাদের সম্পর্কে', faq: 'প্রশ্ন ও উত্তর' },
     about: { eyebrow: 'আমাদের সম্পর্কে', title: 'SafeConnect কী?',
       text: 'বিপদের সময় কাকে ফোন করবেন, খুঁজতেই সময় চলে যায়। SafeConnect আপনার অবস্থান দেখে কাছের থানা, ইউনিয়ন পরিষদ, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর ঠিক ক্রমে দেখায়। এখন নোয়াখালী ও কক্সবাজারে, পরে সারা দেশে।',
       points: [['check', 'শুধু সরকারি নম্বর', 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া, উৎসের লিংকসহ। প্রতি সপ্তাহে আবার যাচাই হয়।'],
@@ -653,11 +658,16 @@ const PAGE = {
     welcomeSteps: ['In danger, call 999 first.', 'Tap "Find help near me" to see your police station and chairman.', "Save your family's numbers now, so your location goes to them in one tap."],
     welcomeOk: 'Got it', welcomeSave: 'Save numbers',
     icons: { 'national-emergency-999': 'Emergency', 'fire-service-102': 'Fire service', 'health-call-centre-16263': 'Health line',
-      'women-children-violence-109': 'Women & children', 'child-helpline-1098': 'Child helpline', 'tourist-police-helpline': 'Tourist Police', 'info-service-333': 'Info service' },
+      'women-children-violence-109': 'Women & children', 'child-helpline-1098': 'Child helpline', 'tourist-police-helpline': 'Tourist Police', 'info-service-333': 'Info service', 'disaster-warning-1090': 'Disaster warning' },
     iconSend: 'Send location', iconSendSub: 'to family', iconNear: 'Help near me', iconNearSub: 'police & chairman',
     iconSrc: 'Official source and check date of these numbers',
     findTitle: 'Where are you?', findText: 'Type your village, union or upazila, in Bangla or English, any spelling. We will find it.',
-    nav: { home: 'Home', numbers: 'Emergency numbers', area: 'Find area', send: 'Send location', about: 'About', faq: 'Questions' },
+    guideTitle: 'What happened?', guideText: 'Pick your situation and we will show you who to call.',
+    guides: [
+      ['night', 'In danger at night or on the road', 'Call 999 first. Then send your location to your family in one tap.', 'Send location', 'sos'],
+      ['lost', 'Something lost or stolen', 'File a General Diary (GD) at the nearest police station. Find your police station number here.', 'Find police station', 'find'],
+      ['storm', 'Storm, flood or fire', (n) => (n ? `Fire service ${n.fire}, disaster warning ${n.warn}. See your upazila numbers too.` : 'See the fire service and disaster numbers, and your upazila numbers.'), 'Help near me', 'locate']],
+    nav: { home: 'Home', numbers: 'Emergency numbers', area: 'Find area', send: 'Send location', guide: 'By situation', about: 'About', faq: 'Questions' },
     about: { eyebrow: 'About', title: 'What is SafeConnect?',
       text: 'In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox\'s Bazar now, the whole country later.',
       points: [['check', 'Official numbers only', 'Every number comes from an official *.gov.bd website, with its source link. All numbers are re-checked every week.'],
@@ -696,6 +706,7 @@ const NAV = [
   ['numbers', () => goTo('iconRow')],
   ['area', () => findArea('')],
   ['send', () => openSos(null)],
+  ['guide', () => goTo('guideCards')],
   ['about', () => goTo('about')],
   ['faq', () => goTo('faq')],
 ];
@@ -755,6 +766,8 @@ const GP_ICONS = {
 };
 const ICON_ROW = [['national-emergency-999', 'phone', 'c-red'], ['fire-service-102', 'fire', 'c-orange'], ['health-call-centre-16263', 'health', 'c-green'],
   ['women-children-violence-109', 'woman', 'c-pink'], ['child-helpline-1098', 'child', 'c-blue'], ['tourist-police-helpline', 'bag', 'c-teal'], ['info-service-333', 'info', 'c-slate']];
+// Numbers that appear inside card text (situation cards); listed with their sources too.
+const TEXT_NUMBERS = ['disaster-warning-1090'];
 function iconCircle(path, cls) { const c = el('span', `circle ${cls}`); c.append(svg(path)); return c; }
 // Round icon row: national numbers from data/national_hotlines.json (tap = call), plus "send location" and "help near me".
 // Under it, the official source and check date of each number (DESIGN.md §5).
@@ -768,6 +781,7 @@ function renderIconRow() {
       a.append(iconCircle(GP_ICONS[ic], cls), el('b', null, P().icons[id]), el('small', null, digits(n.phones[0])));
       items.push(a); shown.push(n);
     }
+    for (const id of TEXT_NUMBERS) { const n = data.national.find((x) => x.id === id); if (n && withPhone(n)) shown.push(n); }
   }
   const act = (label, sub, ic, cls, fn) => { const b = el('button', 'icon-item'); b.type = 'button'; b.append(iconCircle(GP_ICONS[ic], cls), el('b', null, label), el('small', null, sub)); b.addEventListener('click', fn); return b; };
   items.splice(1, 0, act(P().iconSend, P().iconSendSub, 'send', 'c-violet', () => openSos(null)), act(P().iconNear, P().iconNearSub, 'pin', 'c-amber', () => locate()));
@@ -779,6 +793,27 @@ function renderIconRow() {
     const a = el('a', null, `${t().source} ↗`); a.href = n.source_url; a.target = '_blank'; a.rel = 'noopener';
     line.append(`${P().icons[n.id]} (${digits(n.phones[0])}): `, a, ` · ${t().checked} ${fmtDate(n.checked_on)}`);
     return line;
+  }));
+}
+
+function primaryBtn(label, fn, href) {
+  const b = el(href ? 'a' : 'button', 'btn-primary');
+  if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else { b.type = 'button'; b.addEventListener('click', fn); }
+  b.append(document.createTextNode(label), svg(GP_ICONS.arrow));
+  return b;
+}
+// "What happened?" cards. Numbers in the text come from data/national_hotlines.json, never typed in (CLAUDE.md rule 1).
+function renderGuides() {
+  $('guideTitle').textContent = P().guideTitle; $('guideText').textContent = P().guideText;
+  const num = (id) => data?.national.find((x) => x.id === id)?.phones?.[0];
+  const n = num('fire-service-102') && num('disaster-warning-1090') ? { fire: digits(num('fire-service-102')), warn: digits(num('disaster-warning-1090')) } : null;
+  const actions = { sos: () => openSos(null), find: () => findArea(''), locate: () => { goHome(); window.scrollTo(0, 0); locate(); } };
+  $('guideCards').replaceChildren(...P().guides.map(([art, title, text, btn, act]) => {
+    const c = el('article', 'card');
+    const body = el('div', 'body');
+    body.append(el('h3', null, title), el('p', null, typeof text === 'function' ? text(n) : text), primaryBtn(btn, actions[act]));
+    c.append(el('div', `art ${art}`), body);
+    return c;
   }));
 }
 
@@ -804,7 +839,7 @@ function renderWarm() {
   w.replaceChildren(title, ol, row);
 }
 function renderPage() {
-  renderWarm(); renderIconRow(); renderNav(); renderAbout(); renderFaq(); renderFooter();
+  renderWarm(); renderIconRow(); renderGuides(); renderNav(); renderAbout(); renderFaq(); renderFooter();
   $('findTitle').textContent = P().findTitle; $('findText').textContent = P().findText;
 }
 
@@ -861,7 +896,7 @@ setText();
 try {
   [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
   areaIndex = buildAreaIndex(data);
-  renderRecent(); renderStats(); renderPlaces(); renderIconRow();
+  renderRecent(); renderStats(); renderPlaces(); renderIconRow(); renderGuides();
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);
 }
