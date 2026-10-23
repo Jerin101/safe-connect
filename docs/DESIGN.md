@@ -1,0 +1,57 @@
+# SafeConnect – Design guide
+
+Follow this for every screen, button and sentence on the site. Reference page: `design/portal.html`.
+If a change breaks a rule here, fix the change, not the rule. To change a rule, open an issue first.
+
+## 1. Who it is for
+People in Noakhali and Cox's Bazar, often in a hurry or afraid, often on a cheap phone with a weak network,
+many not used to websites. Every screen must work for them on the first try.
+
+## 2. Voice: warm, calm, reliable
+| Do | Don't |
+|---|---|
+| Short, plain sentences: "আগে ৯৯৯-এ কল করুন।" | Long or formal sentences |
+| Calm and kind: "শান্ত থাকুন। আপনার এলাকার সরকারি নম্বর এখানেই আছে।" | Slogans or drama ("বিপদে সাহায্য!", "জীবন বাঁচান!") |
+| Tell people what to do next | Blame, scare or lecture |
+| Facts we can prove: "সরকারি ওয়েবসাইট থেকে, প্রতি সপ্তাহে যাচাই" | Promises we can't keep ("সবসময় কাজ করে", "১০০% সঠিক") |
+| Say honestly when something isn't ready: "শীঘ্রই" | Claim a feature works before it does (offline!) |
+| Bangla first; English is the same meaning, not a word-by-word copy | Mixed Banglish in one sentence |
+| Use the person's words: থানা, চেয়ারম্যান, গ্রাম পুলিশ, ইউএনও | Technical words: database, GPS coordinates, API |
+
+Warm touches that are allowed: a time-of-day greeting ("শুভ সকাল!"; at night "রাতেও ৯৯৯ খোলা থাকে, ২৪ ঘণ্টা, বিনা খরচে"),
+a one-time welcome for first visitors (3 short steps, closes with "বুঝেছি"), trust badges (শুধু সরকারি নম্বর · লগইন লাগে না · বিনা খরচে · বাংলা ও English).
+Never block the screen with a welcome, pop-up or loading splash: 999 must be one tap away from the first second.
+
+## 3. Page order (portal layout)
+1. Two-row header: logo · **999 button (always visible, every page)** · EN/বাং · night/day. Second row: menu (scrolls sideways on phones).
+2. Banner: greeting · "বিপদে আছেন?" · calm line · the 3 big actions: **999** (red), **প্রিয়জনকে লোকেশন পাঠান** (violet), **আমার কাছের সাহায্য** (amber). Visible without scrolling on a 360 px phone.
+3. Round icon row: national numbers from `data/national_hotlines.json` (tap = call), plus "লোকেশন পাঠান" and "কাছের সাহায্য".
+4. Search band: "আপনার এলাকা কোথায়?" + one search box (any spelling, Bangla or English).
+5. Situation cards: "কী হয়েছে?" (night danger, lost/stolen → GD, storm/flood/fire).
+6. Known places + numbers strip.
+7. Two side cards: save family numbers · report a wrong number.
+8. About (3 points) · How can we help (4 round icons) · weak-network band · FAQ · column footer.
+
+No carousels, no auto-sliding, no autoplay video, no flashing (except the siren page, P30).
+
+## 4. Look
+- Colours: violet dusk. Night = deep indigo with a dusk banner (stars, arch, orb, hills). Day = warm white with a dawn banner.
+  Red only for 999 and danger, amber for "help near me" and calls, violet for family/location and main buttons, green only for "done / works".
+- Every colour is a CSS variable in `:root`, with night values in both dark-mode blocks. No colour written directly in a component.
+- Fonts: Manrope (English) + Noto Sans Bengali (Bangla). No letter-spacing on Bangla text.
+- Sizes: body 16–17 px, buttons at least 44 px tall, phone numbers large and in Bangla digits on screen (`tel:` links keep 0–9).
+- Cards: white/indigo surface, 14 px corners, soft shadow. One look for all cards.
+- Not allowed: another company's logo, colours, photos or text (we are not Grameenphone or any brand).
+
+## 5. Must always be true
+- 999 visible on every page; nothing covers it.
+- A search never ends empty: similar names → upazila buttons → "Find help near me" + 999.
+- Every number shows its official source link and check date.
+- Location is read only after the person taps; family numbers stay on the phone.
+- Works at 360 px width, in night and day, in Bangla and English, with keyboard and screen reader.
+
+## 6. Check before every PR that changes the page
+- [ ] Read every new sentence aloud: is it short, calm, true?
+- [ ] bangla-reviewer agent checked the Bangla
+- [ ] 360 px phone, night and day, Bangla and English
+- [ ] `tests/search-test.html` says 0 failed
