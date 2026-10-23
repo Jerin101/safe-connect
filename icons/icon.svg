@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- SafeConnect app icon: the logo pin on the night background (rounded square). -->
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B58CFF"/><stop offset="1" stop-color="#FF8F6B"/></linearGradient></defs>
+  <rect width="512" height="512" rx="112" fill="#1B1546"/>
+  <g transform="translate(96 88) scale(10)">
+    <path fill="url(#g)" d="M16 2c6.6 0 12 5.2 12 11.7C28 22.5 16 30 16 30S4 22.5 4 13.7C4 7.2 9.4 2 16 2Z"/>
+    <circle cx="16" cy="13.5" r="4.6" fill="#fff"/>
+  </g>
+</svg>
