@@ -5,9 +5,9 @@ import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.j
 
 const T = {
   bn: {
-    lang: 'EN', hello1: 'বিপদে আছেন?', hello2: 'আপনার এলাকার সরকারি নম্বর এক জায়গায়',
+    lang: 'EN', hello1: 'বিপদে আছেন?', hello2: 'শান্ত থাকুন। আপনার এলাকার সরকারি নম্বর এখানেই আছে।',
     eyebrow: 'নোয়াখালী ও কক্সবাজারের সরকারি নম্বর', h999: '৯৯৯',
-    lead: 'প্রতিটি ইউনিয়নের থানা, চেয়ারম্যান, গ্রাম পুলিশ ও হাসপাতালের নম্বর, সব সরকারি ওয়েবসাইট থেকে নেওয়া।',
+    lead: 'প্রতিটি ইউনিয়নের থানা, চেয়ারম্যান, গ্রাম পুলিশ ও হাসপাতালের নম্বর। সব সরকারি ওয়েবসাইট থেকে নেওয়া, প্রতি সপ্তাহে যাচাই করা।',
     distAll: 'সব জেলা',
     stats: ['সরকারি নম্বর', 'ইউনিয়ন ও পৌরসভা', 'উপজেলা', 'যাচাই করা হয়েছে'],
     quickEyebrow: 'দ্রুত যান', quickTitle: 'পরিচিত জায়গা', quickText: 'এক চাপে সেই এলাকার থানা ও জরুরি নম্বর দেখুন।',
@@ -61,9 +61,9 @@ const T = {
     privacy: 'নম্বরগুলো শুধু আপনার এই ফোনে সেভ থাকে। কোথাও পাঠানো হয় না, লগইনও লাগে না।', sendFamily: 'প্রিয়জনকে পাঠান',
   },
   en: {
-    lang: 'বাং', hello1: 'Need help?', hello2: 'Official numbers for your area, in one place',
+    lang: 'বাং', hello1: 'Need help?', hello2: 'Stay calm. The official numbers for your area are right here.',
     eyebrow: "Official numbers for Noakhali & Cox's Bazar", h999: '999',
-    lead: 'Police station, chairman, village police and hospital numbers for every union, all taken from official government websites.',
+    lead: 'Police station, chairman, village police and hospital numbers for every union. All from official government websites, checked every week.',
     distAll: 'All districts',
     stats: ['official numbers', 'unions and towns', 'upazilas', 'last checked'],
     quickEyebrow: 'Quick go', quickTitle: 'Known places', quickText: "One tap shows that area's police and emergency numbers.",
@@ -604,7 +604,8 @@ function renderPlaces() {
     return b;
   }));
 }
-$('ctaBtn').addEventListener('click', () => { openSos(null); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); });
+function saveNumbers() { openSos(null); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
+$('ctaBtn').addEventListener('click', saveNumbers);
 
 
 const SITE = {
@@ -613,6 +614,12 @@ const SITE = {
 };
 const PAGE = {
   bn: {
+    greet: { morning: 'শুভ সকাল', noon: 'শুভ দুপুর', evening: 'শুভ সন্ধ্যা', night: 'রাতেও ৯৯৯ খোলা থাকে, ২৪ ঘণ্টা, বিনা খরচে' },
+    greetTail: 'সাহায্য দরকার হলে আমরা পাশে আছি',
+    trust: ['শুধু সরকারি নম্বর', 'লগইন লাগে না', 'বিনা খরচে', 'বাংলা ও English'],
+    welcomeTitle: 'স্বাগতম! প্রথমবার এসেছেন? তিনটি কথা জেনে রাখুন:',
+    welcomeSteps: ['বিপদে সবার আগে ৯৯৯-এ কল করুন।', '"আমার কাছের সাহায্য" চাপলে আপনার এলাকার থানা আর চেয়ারম্যানের নম্বর আসবে।', 'প্রিয়জনের নম্বর এখনই সেভ করে রাখুন, বিপদে এক চাপে লোকেশন যাবে।'],
+    welcomeOk: 'বুঝেছি', welcomeSave: 'নম্বর সেভ করুন',
     nav: { home: 'হোম', area: 'এলাকা খুঁজুন', send: 'প্রিয়জনকে লোকেশন', about: 'আমাদের সম্পর্কে', faq: 'প্রশ্ন ও উত্তর' },
     about: { eyebrow: 'আমাদের সম্পর্কে', title: 'SafeConnect কী?',
       text: 'বিপদের সময় কাকে ফোন করবেন, খুঁজতেই সময় চলে যায়। SafeConnect আপনার অবস্থান দেখে কাছের থানা, ইউনিয়ন পরিষদ, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর ঠিক ক্রমে দেখায়। এখন নোয়াখালী ও কক্সবাজারে, পরে সারা দেশে।',
@@ -634,6 +641,12 @@ const PAGE = {
       credit: 'নম্বর: সরকারি *.gov.bd ওয়েবসাইট। ম্যাপ: উপজেলার সীমানা ও ইউনিয়ন/পৌরসভার কেন্দ্রবিন্দু বাংলাদেশ পরিসংখ্যান ব্যুরো (BBS), OCHA HDX-এর মাধ্যমে (CC BY-IGO)। BBS-এর নাম না মিললে টুলগুলো OpenStreetMap-এর বিন্দু যোগ করতে পারে (© OpenStreetMap contributors, ODbL)।' },
   },
   en: {
+    greet: { morning: 'Good morning', noon: 'Good afternoon', evening: 'Good evening', night: '999 is open all night, 24 hours, free' },
+    greetTail: 'We are here if you need help',
+    trust: ['Official numbers only', 'No login', 'Free', 'বাংলা & English'],
+    welcomeTitle: 'Welcome! First time here? Three things to know:',
+    welcomeSteps: ['In danger, call 999 first.', 'Tap "Find help near me" to see your police station and chairman.', "Save your family's numbers now, so your location goes to them in one tap."],
+    welcomeOk: 'Got it', welcomeSave: 'Save numbers',
     nav: { home: 'Home', area: 'Find area', send: 'Send location', about: 'About', faq: 'Questions' },
     about: { eyebrow: 'About', title: 'What is SafeConnect?',
       text: 'In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox\'s Bazar now, the whole country later.',
@@ -713,7 +726,28 @@ function renderFooter() {
   nav.append(textBtn(f.bottom[0], () => openFaq('privacy')), textBtn(f.bottom[1], () => openFaq('source')), extLink(f.bottom[2], SITE.repo), tests);
   $('footBottom').replaceChildren(el('span', null, f.copy), nav, el('p', 'credit', f.credit));
 }
-function renderPage() { renderNav(); renderAbout(); renderFaq(); renderFooter(); }
+// Warm opening (DESIGN.md §2): greeting by time of day, trust ticks, a one-time welcome that never covers 999.
+function renderWarm() {
+  const h = new Date().getHours();
+  const part = h >= 21 || h < 5 ? 'night' : h < 12 ? 'morning' : h < 17 ? 'noon' : 'evening';
+  const dot = el('span', 'dot', part === 'night' ? '☾' : '☀');
+  dot.setAttribute('aria-hidden', 'true');
+  $('greet').replaceChildren(dot, document.createTextNode(part === 'night' ? P().greet.night : `${P().greet[part]}! ${P().greetTail}`));
+  $('trust').replaceChildren(...P().trust.map((x) => el('li', null, x)));
+  const w = $('welcome');
+  w.hidden = store.get('sc-welcomed') === '1';
+  if (w.hidden) return;
+  const close = () => { store.set('sc-welcomed', '1'); w.hidden = true; };
+  const ok = el('button', 'btn', P().welcomeOk); ok.type = 'button';
+  ok.addEventListener('click', close);
+  const save = el('button', 'btn violet', P().welcomeSave); save.type = 'button';
+  save.addEventListener('click', () => { close(); saveNumbers(); });
+  const ol = el('ol'); P().welcomeSteps.forEach((x) => ol.append(el('li', null, x)));
+  const row = el('div', 'row'); row.append(save, ok);
+  const title = el('h2', null, P().welcomeTitle); title.id = 'welcomeTitle';
+  w.replaceChildren(title, ol, row);
+}
+function renderPage() { renderWarm(); renderNav(); renderAbout(); renderFaq(); renderFooter(); }
 
 /* ---------- text ---------- */
 function setText() {
