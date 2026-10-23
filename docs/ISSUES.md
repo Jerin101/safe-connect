@@ -144,7 +144,8 @@ Number-plate photo + route + expected arrival → share to family; an "I arrived
 ### [P33] Lost/stolen item GD helper — T · frontend · Day 11
 A form → a ready Bangla GD text to copy, plus where to file it (from places / police station data).
 
-### [P34] Offline app (PWA) — T · frontend · Day 8 · **top priority**
+### [P34] Offline app (PWA) — J · frontend · Day 8 · **top priority**
+**Owner change:** planned for tasmintoshi, moved to Jerin101 on 2026-10-23 because Tasmin was not working on it; Tasmin reviews (GitHub #53).
 `manifest.json`, `service-worker.js`, caching of all pages and `data/` files; installable on the home screen.
 **Must work with no internet:** all contacts, search, Bangla/English, "Find help near me" (GPS + saved boundaries), tap-to-call, SOS by SMS, siren, Safe Journey photo. Only map links, WhatsApp and login sync wait for internet.
 **Done when:** every item above works in airplane mode on a real phone.

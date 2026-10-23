@@ -64,7 +64,7 @@ From **any location in Noakhali or Cox's Bazar** (a union, a town or municipalit
 | 5 | P08 Noakhali data · P09 Cox's Bazar data | P24 area picker | |
 | 6 | P10 manual additions + places · P23 `data.js` (load, cache, search) | P25 area page + contact cards + fallback chain | |
 | 7 | P11 validator + GitHub Action · **review** | Finish P25 · **review** | **Checkpoint:** search + area page work with real data |
-| 8 | P12 verify + coverage tools · P26 "Find help near me" (`location.js`, works offline) | P28 Bangla/English + Bangla digits · **P34 offline app (PWA)** | **Offline:** the app opens and finds your upazila in airplane mode |
+| 8 | P12 verify + coverage tools · P26 "Find help near me" (`location.js`, works offline) | P28 Bangla/English + Bangla digits · **P34 offline app (PWA)**, moved to J (#53) | **Offline:** the app opens and finds your upazila in airplane mode |
 | 9 | P16 Bangla/English texts (UI + SOS messages + guides) | P29 SOS + family contacts | |
 | 10 | P13 spot-check 40 records · P14 police data gaps | P30 Silent SOS + siren · P27 village search + places | |
 | 11 | P15 GD / crime-report guide content · P17 Firebase setup (login + Firestore) | P31 Safe Journey · P33 GD helper | |
