@@ -9,11 +9,11 @@ Visual rules: `docs/DESIGN.md` (updated in §7 below). Reference page: `design/p
 ## 1. Principles
 1. **Help first, account second.** 999, "আমার কাছের সাহায্য", search, area pages and SMS work signed out and offline. Sign-in never stands in front of help.
 2. **Three sign-in options, one safe system.** The sign-in page offers user · volunteer · admin. The role stored in Firestore decides what opens, and security rules enforce it. Hiding a button is never the protection.
-7. **Bangla and English everywhere**, including every workspace page. Night and day for every page.
-3. **Official data only.** Every number comes from a `*.gov.bd` page with its source. People can *report* problems, but only reviewed changes through `tools/` and a PR change the data.
-4. **Nothing private leaves the phone unless the person chooses.** Family numbers stay on the phone; syncing them to the account is optional.
-5. **Every admin action is recorded.** The audit log is append-only.
-6. **Free and realistic.** No paid services, no server code (Firebase Spark has no Cloud Functions). Rules plus small admin screens do the work.
+3. **Bangla and English everywhere**, including every workspace page. Night and day for every page.
+4. **Official data only.** Every number comes from a `*.gov.bd` page with its source. People can *report* problems, but only reviewed changes through `tools/` and a PR change the data.
+5. **Nothing private leaves the phone unless the person chooses.** Family numbers stay on the phone; syncing them to the account is optional.
+6. **Every admin action is recorded.** The audit log is append-only.
+7. **Free and realistic.** No paid services, no server code (Firebase Spark has no Cloud Functions). Rules plus small admin screens do the work.
 
 ## 2. Architecture
 ```
@@ -107,7 +107,7 @@ Ideas taken from a role-based reference app; the identity stays SafeConnect.
 - **Typography:**
   - two-tone headlines, a bright first line and a softer second line: "বিপদে আছেন? / সরকারি নম্বর, এক জায়গায়।"
   - small accent eyebrows ("● জরুরি সাহায্য")
-  - Manrope + Noto Sans Bengali, self-hosted
+  - Manrope + Noto Sans Bengali, self-hosted (#50). design/portal-v2.html loads Google Fonts only because it is a stand-alone reference page; real pages never do.
 - **One signature element:** a soft "signal ring" (a location ping), used on the home banner and the sign-in page. Nothing else animates, and motion is off when the phone asks for less motion.
 - **Layout:**
   - the public page keeps the portal order (banner with 3 actions, national numbers, search, situations, places, family/report cards, three roles, about, help, weak network, FAQ, footer)
@@ -139,7 +139,7 @@ Ideas taken from a role-based reference app; the identity stays SafeConnect.
 | 6 | **P38:** applications, confirmations, verifications + rules tests |
 | 7 | **P39:** volunteer application (4 steps), volunteer workspace, `confirm` page |
 | 8 | Volunteer list on area pages, teams + team-leader confirmation |
-| 9 | P16 texts into `js/lang`, P13 spot-check of 40 numbers, #52 Action versions |
+| 9 | P13 spot-check of 40 numbers, #52 Action versions, fixes from the real-phone test of the new look |
 | 10 | **P37:** full test on real phones (all roles, offline, night/day), fixes |
 | 11 | Demo script, release notes, tag `v1.0` |
 
