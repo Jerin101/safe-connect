@@ -56,7 +56,7 @@ const T = {
     smsHint: 'SMS-এ ইন্টারনেট লাগে না। পাঠানোর বোতাম চাপলে ফোনের মেসেজ অ্যাপ খুলবে, সেখানে Send চাপুন।',
     people: 'আমার প্রিয়জন', addTitle: 'নতুন নম্বর যোগ করুন', name: 'নাম', rel: 'সম্পর্ক (যেমন: মা)', phone: 'মোবাইল নম্বর', save: 'সেভ করুন', remove: 'মুছুন',
     noPeople: 'এখনো কোনো নম্বর সেভ করা নেই। নিচে মা, বাবা বা কাছের কারো নম্বর সেভ করুন। পরে এক চাপেই পাঠাতে পারবেন।',
-    badPhone: 'সঠিক মোবাইল নম্বর দিন, যেমন ০১৭১২৩৪৫৬৭৮।', needName: 'নাম লিখুন।', maxPeople: 'সর্বোচ্চ ৩ জন সেভ করা যায়।',
+    badPhone: 'সঠিক মোবাইল নম্বর দিন, যেমন ০১XXXXXXXXX।', needName: 'নাম লিখুন।', maxPeople: 'সর্বোচ্চ ৩ জন সেভ করা যায়।',
     privacy: 'নম্বরগুলো শুধু আপনার এই ফোনে সেভ থাকে। কোথাও পাঠানো হয় না, লগইনও লাগে না।', sendFamily: 'প্রিয়জনকে পাঠান',
   },
   en: {
@@ -111,7 +111,7 @@ const T = {
     smsHint: 'SMS needs no internet. The button opens your messages app; tap Send there.',
     people: 'My people', addTitle: 'Add a number', name: 'Name', rel: 'Relation (e.g. mother)', phone: 'Mobile number', save: 'Save', remove: 'Remove',
     noPeople: 'No number saved yet. Save your mother, father or a close friend below. Next time it is one tap.',
-    badPhone: 'Enter a valid mobile number, like 01712345678.', needName: 'Enter a name.', maxPeople: 'You can save up to 3 people.',
+    badPhone: 'Enter a valid mobile number, like 01XXXXXXXXX.', needName: 'Enter a name.', maxPeople: 'You can save up to 3 people.',
     privacy: 'These numbers are saved only on this phone. They are never sent anywhere, and no login is needed.', sendFamily: 'Send to family',
   },
 };
