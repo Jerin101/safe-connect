@@ -1,24 +1,22 @@
-// Logic for preview.html: the team's design (issue #38). The real site (index.html, pages/) is built in P20-P36.
+// Logic for preview.html: the portal design (issues #38, #42; rules in docs/DESIGN.md). The real site (index.html, pages/) is built in P20-P36.
 // Location is read only after a tap (CLAUDE.md rule 5). The area search lives in data.js (issue #36).
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
 
 const T = {
   bn: {
-    lang: 'EN', hello1: 'বিপদে আছেন?', hello2: 'আপনার এলাকার সরকারি নম্বর এক জায়গায়',
-    eyebrow: 'নোয়াখালী · কক্সবাজার · লোকেশন খুঁজতে ইন্টারনেট লাগে না', h999: '৯৯৯',
-    lead: 'প্রতিটি ইউনিয়নের থানা, চেয়ারম্যান, গ্রাম পুলিশ ও হাসপাতালের নম্বর, সব সরকারি ওয়েবসাইট থেকে নেওয়া।',
+    lang: 'EN', hello1: 'বিপদে আছেন?', hello2: 'শান্ত থাকুন। আপনার এলাকার সরকারি নম্বর এখানেই আছে।',
+    eyebrow: 'নোয়াখালী ও কক্সবাজারের সরকারি নম্বর', h999: '৯৯৯',
+    lead: 'আপনার ইউনিয়নের থানা, চেয়ারম্যান, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর। সব সরকারি ওয়েবসাইট থেকে নেওয়া, প্রতি সপ্তাহে উৎস আবার মিলিয়ে দেখা হয়।',
     distAll: 'সব জেলা',
     stats: ['সরকারি নম্বর', 'ইউনিয়ন ও পৌরসভা', 'উপজেলা', 'যাচাই করা হয়েছে'],
     quickEyebrow: 'দ্রুত যান', quickTitle: 'পরিচিত জায়গা', quickText: 'এক চাপে সেই এলাকার থানা ও জরুরি নম্বর দেখুন।',
     places: { chowmuhani: ['চৌমুহনী', 'বেগমগঞ্জ, নোয়াখালী'], inani: ['ইনানী সৈকত', 'উখিয়া, কক্সবাজার'], hatiya: ['হাতিয়া', 'দ্বীপ উপজেলা, নোয়াখালী'], coxtown: ['কক্সবাজার শহর', 'পৌরসভা'] },
-    ctaEyebrow: 'আগে থেকে প্রস্তুত থাকুন', ctaTitle: 'প্রিয়জনের নম্বর এখনই সেভ করে রাখুন',
-    ctaText: 'বিপদের সময় নম্বর খোঁজার সময় থাকে না। একবার সেভ করলে এক চাপেই আপনার অবস্থান তাদের কাছে যাবে। লগইন লাগে না।', ctaBtn: 'নম্বর সেভ করুন',
     call999: '৯৯৯-এ কল করুন', call999Sub: 'পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স · বিনা খরচে',
-    locate: 'আমার কাছের সাহায্য', locateSub: 'আপনার এলাকার থানা, চেয়ারম্যান ও গ্রাম পুলিশের নম্বর · ইন্টারনেট ছাড়াও চলে',
+    locate: 'আমার কাছের সাহায্য', locateSub: 'আপনার এলাকার থানা, চেয়ারম্যান ও গ্রাম পুলিশের নম্বর · পাতা খোলা থাকলে ইন্টারনেট ছাড়াও চলে',
     locating: 'আপনার অবস্থান খোঁজা হচ্ছে…', or: 'অথবা',
     areaLabel: 'এলাকার নাম লিখুন', areaHint: 'গ্রাম, ইউনিয়ন, পৌরসভা বা উপজেলা, বাংলা বা ইংরেজিতে, যেকোনো বানানে। যেমন: চৌমুহনী, Hatiya, ইনানী',
-    noMatch: 'এই নামে কোনো জায়গা তালিকায় নেই। তবুও সাহায্য পাবেন:', didYouMean: 'কাছাকাছি নাম', noExact: 'ঠিক এই বানানে পাইনি। নিচের কোনোটি কি আপনার জায়গা?', tellUs: 'আপনার জায়গার নাম তালিকায় না থাকলে নিচের "ভুল নম্বর জানান" দিয়ে জানান, আমরা যোগ করব।',
+    noMatch: 'এই নামে কোনো জায়গা তালিকায় নেই। তবুও সাহায্য পাবেন:', didYouMean: 'কাছাকাছি নাম', noExact: 'ঠিক এই বানানে পাইনি। নিচের কোনোটি কি আপনার জায়গা?', tellUs: 'আপনার জায়গার নাম তালিকায় না থাকলে নিচের "ভুল নম্বর জানান" দিয়ে জানান (GitHub অ্যাকাউন্ট লাগবে)।',
     pickUpazila: 'আপনার উপজেলা বেছে নিন। থানা ও ইউএনও-র নম্বর সেখানেই পাবেন।',
     kinds: { municipality: 'পৌরসভা', place: 'জায়গা', union: 'ইউনিয়ন', village: 'গ্রাম', upazila: 'উপজেলা', local: 'স্থানীয় নাম',
       'market and post office': 'হাট ও ডাকঘর', market: 'হাট-বাজার', 'post office': 'ডাকঘর' }, recent: (n) => `আগের এলাকা: ${n}`,
@@ -31,7 +29,7 @@ const T = {
     shareTitle: 'পরিবারকে আপনার অবস্থান পাঠান', shareText: 'একটি চাপেই ম্যাপ লিংকসহ বার্তা যাবে। ৯৯৯-কেও এই অবস্থান বলতে পারেন।',
     shareMsg: (link) => `আমি বিপদে আছি। আমার অবস্থান: ${link}`, copy: 'কপি', copied: 'কপি হয়েছে', map: 'ম্যাপ',
     outsideTitle: 'আপনার অবস্থান', outside: 'আপনি নোয়াখালী বা কক্সবাজারের বাইরে আছেন। SafeConnect এখন শুধু এই দুই জেলার স্থানীয় নম্বর দেখায়। নিচের জাতীয় নম্বরগুলো সারা দেশে কাজ করে।',
-    first: 'আগে এদের কল করুন', more: 'আরও সাহায্য', showAll: (n) => `সবাইকে দেখুন (${n})`,
+    firstCalm: 'ওপর থেকে নিচে কল করুন। প্রথম নম্বরে কেউ না ধরলে পরেরটিতে কল করুন।', first: 'আগে এদের কল করুন', more: 'আরও সাহায্য', showAll: (n) => `সবাইকে দেখুন (${n})`,
     call: 'কল', ward: 'ওয়ার্ড', source: 'সরকারি উৎস', checked: 'যাচাই',
     what: { emergency: 'জরুরি সেবা', police: 'পুলিশ', local: 'ইউনিয়ন পরিষদ', town: 'পৌরসভা', administration: 'উপজেলা নির্বাহী অফিসার', tourist_police: 'ট্যুরিস্ট পুলিশ' },
     groups: { police: 'পুলিশ', tourist_police: 'ট্যুরিস্ট পুলিশ', village_police: 'গ্রাম পুলিশ (ওয়ার্ড অনুযায়ী)', local: 'চেয়ারম্যান ও মেম্বার', town: 'পৌরসভা',
@@ -61,20 +59,18 @@ const T = {
     privacy: 'নম্বরগুলো শুধু আপনার এই ফোনে সেভ থাকে। কোথাও পাঠানো হয় না, লগইনও লাগে না।', sendFamily: 'প্রিয়জনকে পাঠান',
   },
   en: {
-    lang: 'বাং', hello1: 'Need help?', hello2: 'Official numbers for your area, in one place',
-    eyebrow: "Noakhali · Cox's Bazar · finding your location needs no internet", h999: '999',
-    lead: 'Police station, chairman, village police and hospital numbers for every union, all taken from official government websites.',
+    lang: 'বাং', hello1: 'Need help?', hello2: 'Stay calm. The official numbers for your area are right here.',
+    eyebrow: "Official numbers for Noakhali & Cox's Bazar", h999: '999',
+    lead: 'Police station, chairman, village police and hospital numbers for your union. All from official government websites; the sources are re-checked every week.',
     distAll: 'All districts',
     stats: ['official numbers', 'unions and towns', 'upazilas', 'last checked'],
     quickEyebrow: 'Quick go', quickTitle: 'Known places', quickText: "One tap shows that area's police and emergency numbers.",
     places: { chowmuhani: ['Chowmuhani', 'Begumganj, Noakhali'], inani: ['Inani beach', "Ukhia, Cox's Bazar"], hatiya: ['Hatiya', 'Island upazila, Noakhali'], coxtown: ["Cox's Bazar town", 'Municipality'] },
-    ctaEyebrow: 'Be ready before you need it', ctaTitle: 'Save your family\'s numbers now',
-    ctaText: 'In an emergency there is no time to look for numbers. Save them once and your location reaches them in one tap. No login.', ctaBtn: 'Save numbers',
     call999: 'Call 999', call999Sub: 'Police, fire service, ambulance · free',
-    locate: 'Find help near me', locateSub: 'Numbers for your police station, chairman and village police · works without internet',
+    locate: 'Find help near me', locateSub: 'Numbers for your police station, chairman and village police · works offline once the page is open',
     locating: 'Finding your location…', or: 'or',
     areaLabel: 'Type your area', areaHint: 'Village, union, town or upazila, in Bangla or English, any spelling. For example: Chowmuhani, হাতিয়া, Inani',
-    noMatch: 'This name is not in our list yet. You can still get help:', didYouMean: 'Similar names', noExact: 'Not found with this exact spelling. Is it one of these?', tellUs: 'If your place is missing, tell us with "Report a wrong number" below and we will add it.',
+    noMatch: 'This name is not in our list yet. You can still get help:', didYouMean: 'Similar names', noExact: 'Not found with this exact spelling. Is it one of these?', tellUs: 'If your place is missing, tell us with "Report a wrong number" below (needs a GitHub account).',
     pickUpazila: 'Pick your upazila. Its police station and UNO numbers are there.',
     kinds: { municipality: 'town', place: 'place', union: 'union', village: 'village', upazila: 'upazila', local: 'local name',
       'market and post office': 'market and post office', market: 'market', 'post office': 'post office' }, recent: (n) => `Last area: ${n}`,
@@ -87,7 +83,7 @@ const T = {
     shareTitle: 'Send your location to family', shareText: 'One tap sends a message with a map link. You can also tell 999 this location.',
     shareMsg: (link) => `I am in danger. My location: ${link}`, copy: 'Copy', copied: 'Copied', map: 'Map',
     outsideTitle: 'Your location', outside: "You are outside Noakhali and Cox's Bazar. SafeConnect shows local numbers only for these two districts for now. The national numbers below work everywhere.",
-    first: 'Call these first', more: 'More help', showAll: (n) => `Show all (${n})`,
+    firstCalm: 'Call from top to bottom. If one does not answer, try the next.', first: 'Call these first', more: 'More help', showAll: (n) => `Show all (${n})`,
     call: 'Call', ward: 'Ward', source: 'Official source', checked: 'Checked',
     what: { emergency: 'Emergency', police: 'Police station', local: 'Union council', town: 'Municipality', administration: 'Upazila officer (UNO)', tourist_police: 'Tourist Police' },
     groups: { police: 'Police', tourist_police: 'Tourist Police', village_police: 'Village police (by ward)', local: 'Chairman and members', town: 'Municipality',
@@ -604,7 +600,7 @@ function renderPlaces() {
     return b;
   }));
 }
-$('ctaBtn').addEventListener('click', () => { openSos(null); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); });
+function saveNumbers() { openSos(null); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
 
 
 const SITE = {
@@ -613,19 +609,42 @@ const SITE = {
 };
 const PAGE = {
   bn: {
-    nav: ['হোম', 'এলাকা খুঁজুন', 'প্রিয়জনকে লোকেশন', 'আমাদের সম্পর্কে'],
+    greet: { morning: 'শুভ সকাল', noon: 'শুভ দুপুর', evening: 'শুভ সন্ধ্যা', night: 'রাতেও ৯৯৯ চালু থাকে, বিনা খরচে।' },
+    greetTail: 'সাহায্য দরকার হলে নম্বর নিচেই আছে।',
+    trust: ['শুধু সরকারি নম্বর', 'লগইন লাগে না', 'বিনা খরচে ব্যবহার', 'বাংলা ও English'],
+    welcomeTitle: 'স্বাগতম! প্রথমবার এসেছেন? তিনটি কথা জেনে রাখুন:',
+    welcomeSteps: ['বিপদে সবার আগে ৯৯৯-এ কল করুন।', '"আমার কাছের সাহায্য" চাপলে আপনার এলাকার থানা আর চেয়ারম্যানের নম্বর আসবে।', 'প্রিয়জনের নম্বর এখনই সেভ করে রাখুন, বিপদে সহজেই লোকেশন পাঠাতে পারবেন।'],
+    welcomeOk: 'বুঝেছি', welcomeSave: 'নম্বর সেভ করুন',
+    icons: { 'national-emergency-999': 'জরুরি সেবা', 'fire-service-102': 'ফায়ার সার্ভিস', 'health-call-centre-16263': 'স্বাস্থ্য বাতায়ন',
+      'women-children-violence-109': 'নারী ও শিশু', 'child-helpline-1098': 'শিশু সহায়তা', 'tourist-police-helpline': 'ট্যুরিস্ট পুলিশ', 'info-service-333': 'তথ্য সেবা', 'disaster-warning-1090': 'দুর্যোগের আগাম বার্তা' },
+    iconSend: 'লোকেশন পাঠান', iconSendSub: 'প্রিয়জনকে', iconNear: 'কাছের সাহায্য', iconNearSub: 'থানা ও চেয়ারম্যান',
+    iconSrc: 'এই নম্বরগুলোর সরকারি উৎস ও যাচাইয়ের তারিখ',
+    findTitle: 'আপনার এলাকা কোথায়?', findText: 'গ্রাম, ইউনিয়ন, পৌরসভা বা উপজেলার নাম লিখুন, বাংলা বা ইংরেজিতে, যেকোনো বানানে।',
+    guideTitle: 'কী হয়েছে?', guideText: 'পরিস্থিতি বেছে নিন। কাকে ফোন করবেন, আমরা দেখিয়ে দেব।',
+    guides: [
+      ['night', 'রাতে বা পথে বিপদে', 'আগে ৯৯৯-এ কল করুন। তারপর প্রিয়জনকে আপনার লোকেশন পাঠান।', 'লোকেশন পাঠান', 'sos'],
+      ['lost', 'কিছু হারিয়েছে বা চুরি হয়েছে', 'কাছের থানায় সাধারণ ডায়েরি (জিডি) করুন। আপনার এলাকার থানার নম্বর এখানে পাবেন।', 'থানার নম্বর খুঁজুন', 'find'],
+      ['storm', 'ঝড়, বন্যা বা আগুন', (n) => (n ? `ফায়ার সার্ভিস ${n.fire}, দুর্যোগের আগাম বার্তা ${n.warn}। আপনার উপজেলার নম্বরও দেখুন।` : 'ফায়ার সার্ভিস, দুর্যোগ ও আপনার উপজেলার নম্বর দেখুন।'), 'আমার কাছের সাহায্য', 'locate']],
+    duo: [
+      ['send', 'প্রিয়জনের নম্বর সেভ করুন', 'বিপদে নম্বর খোঁজার সময় থাকে না। একবার সেভ করলে সহজেই লোকেশন পাঠাতে পারবেন। লগইন লাগে না।', 'নম্বর সেভ করুন'],
+      ['flag', 'ভুল নম্বর পেয়েছেন?', 'জানান (GitHub অ্যাকাউন্ট লাগবে)। আমরা সরকারি উৎস মিলিয়ে দেখব, ভুল হলে ঠিক করব।', 'ভুল নম্বর জানান']],
+    helpTitle: 'কীভাবে সাহায্য করতে পারি?', help: ['প্রশ্ন ও উত্তর', 'তথ্যের উৎস', 'প্রাইভেসি', 'ভুল নম্বর জানান'],
+    netTitle: 'দুর্বল নেটওয়ার্কের জন্য তৈরি',
+    net: [['ok', 'পাতা খোলা থাকলে লোকেশন দিয়ে এলাকা খুঁজতে ইন্টারনেট লাগে না'], ['ok', 'SMS-এ প্রিয়জনকে লোকেশন পাঠাতে ইন্টারনেট লাগে না'],
+      ['ok', 'সব নম্বর সরকারি ওয়েবসাইট থেকে, উৎসের লিংকসহ'], ['soon', 'ফোনে ইনস্টল করে পুরো অফলাইনে চালানো: শীঘ্রই']],
+    nav: { home: 'হোম', numbers: 'জরুরি নম্বর', area: 'এলাকা খুঁজুন', send: 'প্রিয়জনকে লোকেশন', guide: 'কী হয়েছে?', about: 'আমাদের সম্পর্কে', faq: 'প্রশ্ন ও উত্তর' },
     about: { eyebrow: 'আমাদের সম্পর্কে', title: 'SafeConnect কী?',
       text: 'বিপদের সময় কাকে ফোন করবেন, খুঁজতেই সময় চলে যায়। SafeConnect আপনার অবস্থান দেখে কাছের থানা, ইউনিয়ন পরিষদ, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর ঠিক ক্রমে দেখায়। এখন নোয়াখালী ও কক্সবাজারে, পরে সারা দেশে।',
-      points: [['check', 'শুধু সরকারি নম্বর', 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া, উৎসের লিংকসহ। প্রতি সপ্তাহে আবার যাচাই হয়।'],
-        ['signal', 'ইন্টারনেট ছাড়াও চলে', 'লোকেশন খোঁজা, নম্বর দেখা আর SMS পাঠানো দুর্বল নেটওয়ার্কেও কাজ করে।'],
+      points: [['check', 'শুধু সরকারি নম্বর', 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া, উৎসের লিংকসহ। প্রতি সপ্তাহে উৎস আবার মিলিয়ে দেখা হয়।'],
+        ['signal', 'দুর্বল নেটওয়ার্কের জন্য তৈরি', 'পাতা খোলা থাকলে লোকেশন দিয়ে এলাকা খোঁজা যায় আর SMS-এ লোকেশন পাঠানো যায়, ইন্টারনেট ছাড়াই। পুরো অফলাইন অ্যাপ তৈরি হচ্ছে।'],
         ['lock', 'লগইন লাগে না', 'প্রিয়জনের নম্বর শুধু আপনার ফোনে থাকে। আমরা কোনো ব্যক্তিগত তথ্য সংগ্রহ করি না।']] },
     faq: { eyebrow: 'প্রশ্ন ও উত্তর', title: 'যা জানতে চান',
       items: [['source', 'নম্বরগুলো কোথা থেকে আসে?', 'জেলা, উপজেলা, ইউনিয়ন ও পৌরসভার সরকারি ওয়েবসাইট (*.gov.bd) থেকে। প্রতিটি নম্বরের নিচে উৎসের লিংক ও যাচাইয়ের তারিখ আছে।'],
         ['wrong', 'কোনো নম্বর ভুল হলে কী করব?', 'নিচের "ভুল নম্বর জানান" লিংকে জানান। আমরা সরকারি উৎস মিলিয়ে ঠিক করি। জরুরি হলে আগে ৯৯৯-এ কল করুন।'],
-        ['offline', 'ইন্টারনেট না থাকলে কাজ করবে?', 'আংশিক। আপনার অবস্থান থেকে এলাকা খোঁজা ইন্টারনেট ছাড়াই হয়, আর SMS-এ ইন্টারনেট লাগে না। পুরো সাইট অফলাইনে চালানোর অংশ (অফলাইন অ্যাপ) এখন তৈরি হচ্ছে।'],
+        ['offline', 'ইন্টারনেট না থাকলে কাজ করবে?', 'আংশিক। পাতাটি আগে থেকে খোলা থাকলে লোকেশন দিয়ে এলাকা খোঁজা আর SMS পাঠানো ইন্টারনেট ছাড়াই হয়। পুরো সাইট অফলাইনে চালানোর সুবিধা তৈরি হচ্ছে।'],
         ['privacy', 'আমার তথ্য কোথায় যায়?', 'কোথাও না। প্রিয়জনের নম্বর ও শেষ দেখা এলাকা শুধু আপনার ফোনের ব্রাউজারে থাকে। লোকেশন যায় শুধু আপনি পাঠালে।'],
         ['districts', 'অন্য জেলা কবে আসবে?', 'এখন নোয়াখালী ও কক্সবাজার। তথ্য যাচাই শেষ হলে ধাপে ধাপে বাকি জেলা আসবে। ৯৯৯, ১০৯, ৩৩৩-এর মতো জাতীয় নম্বর সারা দেশে কাজ করে।']] },
-    foot: { tagline: 'আপনার এলাকার সরকারি জরুরি নম্বর। লগইন ছাড়া। লোকেশন খুঁজতে ইন্টারনেট লাগে না।', small: 'নোয়াখালী ও কক্সবাজার দিয়ে শুরু।',
+    foot: { tagline: 'আপনার এলাকার সরকারি জরুরি নম্বর। লগইন ছাড়া।', small: 'নোয়াখালী ও কক্সবাজার দিয়ে শুরু।',
       services: ['সেবা', ['৯৯৯-এ কল', 'প্রিয়জনকে লোকেশন', 'কাছের সাহায্য', 'এলাকা খুঁজুন']],
       areas: ['এলাকা', ['নোয়াখালী', 'কক্সবাজার', 'চৌমুহনী', 'ইনানী সৈকত']],
       info: ['তথ্য', ['আমাদের সম্পর্কে', 'প্রশ্ন ও উত্তর', 'ভুল নম্বর জানান', 'উৎস ও যাচাই']],
@@ -634,20 +653,43 @@ const PAGE = {
       credit: 'নম্বর: সরকারি *.gov.bd ওয়েবসাইট। ম্যাপ: উপজেলার সীমানা ও ইউনিয়ন/পৌরসভার কেন্দ্রবিন্দু বাংলাদেশ পরিসংখ্যান ব্যুরো (BBS), OCHA HDX-এর মাধ্যমে (CC BY-IGO)। BBS-এর নাম না মিললে টুলগুলো OpenStreetMap-এর বিন্দু যোগ করতে পারে (© OpenStreetMap contributors, ODbL)।' },
   },
   en: {
-    nav: ['Home', 'Find area', 'Send location', 'About'],
+    greet: { morning: 'Good morning', noon: 'Good afternoon', evening: 'Good evening', night: '999 works all night too, and it is free.' },
+    greetTail: 'If you need help, the numbers are right below.',
+    trust: ['Official numbers only', 'No login', 'Free to use', 'বাংলা & English'],
+    welcomeTitle: 'Welcome! First time here? Three things to know:',
+    welcomeSteps: ['In danger, call 999 first.', 'Tap "Find help near me" to see the numbers of your police station and chairman.', "Save your family's numbers now, so you can send your location quickly."],
+    welcomeOk: 'Got it', welcomeSave: 'Save numbers',
+    icons: { 'national-emergency-999': 'Emergency', 'fire-service-102': 'Fire service', 'health-call-centre-16263': 'Health line',
+      'women-children-violence-109': 'Women & children', 'child-helpline-1098': 'Child helpline', 'tourist-police-helpline': 'Tourist Police', 'info-service-333': 'Info service', 'disaster-warning-1090': 'Disaster warning' },
+    iconSend: 'Send location', iconSendSub: 'to family', iconNear: 'Help near me', iconNearSub: 'police station & chairman',
+    iconSrc: 'Official source and check date of these numbers',
+    findTitle: 'Which area are you in?', findText: 'Type your village, union, town or upazila, in Bangla or English, any spelling.',
+    guideTitle: 'What happened?', guideText: 'Pick your situation and we will show you who to call.',
+    guides: [
+      ['night', 'In danger at night or on the road', 'Call 999 first. Then send your location to your family.', 'Send location', 'sos'],
+      ['lost', 'Something lost or stolen', 'File a General Diary (GD) at the nearest police station. Find your police station number here.', 'Find police station number', 'find'],
+      ['storm', 'Storm, flood or fire', (n) => (n ? `Fire service ${n.fire}, disaster warning ${n.warn}. See your upazila numbers too.` : 'See the fire service, disaster and upazila numbers.'), 'Find help near me', 'locate']],
+    duo: [
+      ['send', "Save your family's numbers", 'In an emergency there is no time to look for numbers. Save them once and you can send your location quickly. No login.', 'Save numbers'],
+      ['flag', 'Found a wrong number?', 'Tell us (needs a GitHub account). We check it against the official source and fix it if it is wrong.', 'Report a wrong number']],
+    helpTitle: 'How can we help?', help: ['Questions', 'Sources', 'Privacy', 'Report a wrong number'],
+    netTitle: 'Made for weak networks',
+    net: [['ok', 'Once the page is open, finding your area from your location needs no internet'], ['ok', 'Sending your location by SMS needs no internet'],
+      ['ok', 'Every number from an official website, with its source'], ['soon', 'Install on your phone and use fully offline: coming soon']],
+    nav: { home: 'Home', numbers: 'Emergency numbers', area: 'Find area', send: 'Send location', guide: 'What happened?', about: 'About', faq: 'Questions' },
     about: { eyebrow: 'About', title: 'What is SafeConnect?',
       text: 'In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox\'s Bazar now, the whole country later.',
-      points: [['check', 'Official numbers only', 'Every number comes from an official *.gov.bd website, with its source link. All numbers are re-checked every week.'],
-        ['signal', 'Works without internet', 'Finding your location, seeing numbers and sending SMS work even on a weak network.'],
+      points: [['check', 'Official numbers only', 'Every number comes from an official *.gov.bd website, with its source link. The sources are re-checked every week.'],
+        ['signal', 'Made for weak networks', 'Once the page is open, you can find your area from your location and send it by SMS, with no internet. A full offline app is being built.'],
         ['lock', 'No login', 'Your family\'s numbers stay on your phone. We collect no personal data.']] },
     faq: { eyebrow: 'Questions', title: 'Good to know',
       items: [['source', 'Where do the numbers come from?', 'From the official websites (*.gov.bd) of districts, upazilas, unions and municipalities. Each number shows its source link and check date.'],
         ['wrong', 'What if a number is wrong?', 'Tell us with "Report a wrong number" below. We fix it against the official source. In an emergency, call 999 first.'],
-        ['offline', 'Does it work without internet?', 'Partly. Finding your area from your location works without internet, and SMS needs no internet. Making the whole site work offline (the offline app) is being built now.'],
+        ['offline', 'Does it work without internet?', 'Partly. If the page is already open, finding your area from your location and sending SMS work without internet. Full offline use is being built.'],
         ['privacy', 'Where does my data go?', 'Nowhere. Your family\'s numbers and last area stay in your phone\'s browser. Your location is sent only when you send it.'],
         ['districts', 'When will other districts come?', 'Noakhali and Cox\'s Bazar now. More districts come step by step once their data is checked. National numbers like 999, 109 and 333 work everywhere.']] },
-    foot: { tagline: 'Official emergency numbers for your area. No login. Finding your location needs no internet.', small: "Starting with Noakhali and Cox's Bazar.",
-      services: ['Services', ['Call 999', 'Send location', 'Help near me', 'Find area']],
+    foot: { tagline: 'Official emergency numbers for your area. No login.', small: "Starting with Noakhali and Cox's Bazar.",
+      services: ['Services', ['Call 999', 'Send location', 'Find help near me', 'Find area']],
       areas: ['Areas', ['Noakhali', "Cox's Bazar", 'Chowmuhani', 'Inani beach']],
       info: ['Information', ['About', 'Questions', 'Report a wrong number', 'Sources and checks']],
       helpTitle: 'Need a little help?', helpText: 'For information about any government service, call 333. To tell us about this project, write on GitHub.',
@@ -667,9 +709,18 @@ function openQuick(key) { const q = quickPlaces().find(([k]) => k === key); if (
 const textBtn = (label, fn) => { const b = el('button', null, label); b.type = 'button'; b.addEventListener('click', fn); return b; };
 const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a; };
 
+// Second header row: one button per home section, in page order (DESIGN.md §3).
+const NAV = [
+  ['home', () => { goHome(); window.scrollTo(0, 0); }],
+  ['numbers', () => goTo('iconRow')],
+  ['area', () => findArea('')],
+  ['send', () => openSos(null)],
+  ['guide', () => goTo('guideCards')],
+  ['about', () => goTo('about')],
+  ['faq', () => goTo('faq')],
+];
 function renderNav() {
-  const [home, area, send, about] = P().nav;
-  $('nav').replaceChildren(textBtn(home, goHome), textBtn(area, () => findArea('')), textBtn(send, () => openSos(null)), textBtn(about, () => goTo('about')));
+  $('nav').replaceChildren(...NAV.map(([key, fn]) => textBtn(P().nav[key], fn)));
 }
 function renderAbout() {
   const a = P().about;
@@ -706,7 +757,127 @@ function renderFooter() {
   nav.append(textBtn(f.bottom[0], () => openFaq('privacy')), textBtn(f.bottom[1], () => openFaq('source')), extLink(f.bottom[2], SITE.repo), tests);
   $('footBottom').replaceChildren(el('span', null, f.copy), nav, el('p', 'credit', f.credit));
 }
-function renderPage() { renderNav(); renderAbout(); renderFaq(); renderFooter(); }
+const GP_ICONS = {
+  phone: 'M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z',
+  fire: 'M13.5 2s1 3.5-1.5 6.5c-1.6 1.9-4 3.4-4 6.6A6 6 0 0 0 20 15c0-3-1.4-4.6-2.6-6-.4 1.6-1.3 2.6-2.4 3 .9-3.6-.2-7.4-1.5-10Z',
+  health: 'M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z',
+  woman: 'M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm-1 10h2a5 5 0 0 1 5 5v1h-3v4h-6v-4H6v-1a5 5 0 0 1 5-5Z',
+  child: 'M12 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm-4 8h8l-1 6h-2v4h-2v-4H9l-1-6Z',
+  bag: 'M9 3h6a1 1 0 0 1 1 1v2h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3V4a1 1 0 0 1 1-1Zm1 3h4V5h-4v1Z',
+  info: 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm-1 8v7h2v-7h-2Zm0-4v2h2V6h-2Z',
+  send: 'M2.5 11.2 20.6 3.4c.8-.34 1.6.46 1.26 1.26L14.1 22.8c-.37.86-1.62.78-1.87-.12l-1.9-6.98-6.98-1.9c-.9-.25-.98-1.5-.12-1.87Zm8.7 3.2 1.3 4.8 5.5-12.8-6.8 8Zm-1.2-1.2 8-6.8-12.8 5.5 4.8 1.3Z',
+  pin: 'M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z',
+  flag: 'M5 3h2v18H5V3Zm3 1h11l-2.5 4L19 12H8V4Z',
+  question: 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm-1 14v2h2v-2h-2Zm1-10a4 4 0 0 0-4 4h2a2 2 0 1 1 3 1.7c-1.2.7-2 1.6-2 3.3h2c0-1 .4-1.4 1.2-1.9A4 4 0 0 0 12 6Z',
+  db: 'M12 2c4.4 0 8 1.3 8 3v14c0 1.7-3.6 3-8 3s-8-1.3-8-3V5c0-1.7 3.6-3 8-3Zm6 6.2C16.5 9 14.4 9.5 12 9.5S7.5 9 6 8.2V11c0 .6 2.4 1.6 6 1.6s6-1 6-1.6V8.2Zm0 6c-1.5.8-3.6 1.3-6 1.3s-4.5-.5-6-1.3V17c0 .6 2.4 1.6 6 1.6s6-1 6-1.6v-2.8Z',
+  lock: 'M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3Z',
+  arrow: 'M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z',
+};
+const ICON_ROW = [['national-emergency-999', 'phone', 'c-red'], ['fire-service-102', 'fire', 'c-orange'], ['health-call-centre-16263', 'health', 'c-green'],
+  ['women-children-violence-109', 'woman', 'c-pink'], ['child-helpline-1098', 'child', 'c-blue'], ['tourist-police-helpline', 'bag', 'c-teal'], ['info-service-333', 'info', 'c-slate']];
+// Numbers that appear inside card text (situation cards); listed with their sources too.
+const TEXT_NUMBERS = ['disaster-warning-1090'];
+function iconCircle(path, cls) { const c = el('span', `circle ${cls}`); c.append(svg(path)); return c; }
+// Round icon row: national numbers from data/national_hotlines.json (tap = call), plus "send location" and "help near me".
+// Under it, the official source and check date of each number (DESIGN.md §5).
+function renderIconRow() {
+  const items = [], shown = [];
+  if (data) {
+    for (const [id, ic, cls] of ICON_ROW) {
+      const n = data.national.find((x) => x.id === id);
+      if (!n || !withPhone(n)) continue;
+      const a = el('a', 'icon-item'); a.href = `tel:${n.phones[0]}`;
+      a.append(iconCircle(GP_ICONS[ic], cls), el('b', null, P().icons[id]), el('small', null, digits(n.phones[0])));
+      items.push(a); shown.push(n);
+    }
+    for (const id of TEXT_NUMBERS) { const n = data.national.find((x) => x.id === id); if (n && withPhone(n)) shown.push(n); }
+  }
+  const act = (label, sub, ic, cls, fn) => { const b = el('button', 'icon-item'); b.type = 'button'; b.append(iconCircle(GP_ICONS[ic], cls), el('b', null, label), el('small', null, sub)); b.addEventListener('click', fn); return b; };
+  items.splice(1, 0, act(P().iconSend, P().iconSendSub, 'send', 'c-violet', () => openSos(null)), act(P().iconNear, P().iconNearSub, 'pin', 'c-amber', () => locate()));
+  $('iconRow').replaceChildren(...items);
+  $('iconSrc').hidden = !shown.length;
+  $('iconSrcTitle').textContent = P().iconSrc;
+  $('iconSrcList').replaceChildren(...shown.map((n) => {
+    const line = el('p', 'src');
+    const a = el('a', null, `${t().source} ↗`); a.href = n.source_url; a.target = '_blank'; a.rel = 'noopener';
+    line.append(`${P().icons[n.id]} (${digits(n.phones[0])}): `, a, ` · ${t().checked} ${fmtDate(n.checked_on)}`);
+    return line;
+  }));
+}
+
+function primaryBtn(label, fn, href) {
+  const b = el(href ? 'a' : 'button', 'btn-primary');
+  if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else { b.type = 'button'; b.addEventListener('click', fn); }
+  b.append(document.createTextNode(label), svg(GP_ICONS.arrow));
+  return b;
+}
+// "What happened?" cards. Numbers in the text come from data/national_hotlines.json, never typed in (CLAUDE.md rule 1).
+function renderGuides() {
+  $('guideTitle').textContent = P().guideTitle; $('guideText').textContent = P().guideText;
+  const num = (id) => data?.national.find((x) => x.id === id)?.phones?.[0];
+  const n = num('fire-service-102') && num('disaster-warning-1090') ? { fire: digits(num('fire-service-102')), warn: digits(num('disaster-warning-1090')) } : null;
+  const actions = { sos: () => openSos(null), find: () => findArea(''), locate: () => { goHome(); window.scrollTo(0, 0); locate(); } };
+  $('guideCards').replaceChildren(...P().guides.map(([art, title, text, btn, act]) => {
+    const c = el('article', 'card');
+    const body = el('div', 'body');
+    body.append(el('h3', null, title), el('p', null, typeof text === 'function' ? text(n) : text), primaryBtn(btn, actions[act]));
+    c.append(el('div', `art ${art}`), body);
+    return c;
+  }));
+}
+
+// Two side cards: save family numbers · report a wrong number.
+function renderDuo() {
+  const [[ic1, t1, p1, b1], [ic2, t2, p2, b2]] = P().duo;
+  const card = (ic, cls, title, text, btn) => {
+    const c = el('div', 'duo-card'); const d = el('div');
+    d.append(el('h3', null, title), el('p', null, text), btn);
+    const badge = el('span', `badge-ic ${cls}`); badge.append(svg(GP_ICONS[ic]));
+    c.append(d, badge); return c;
+  };
+  $('duoCards').replaceChildren(card(ic1, 'c-violet', t1, p1, primaryBtn(b1, saveNumbers)), card(ic2, 'c-amber', t2, p2, primaryBtn(b2, null, SITE.report)));
+}
+function renderHelp() {
+  $('helpTitle').textContent = P().helpTitle;
+  const [q, src, priv, rep] = P().help;
+  const item = (label, ic, fn, href) => {
+    const b = el(href ? 'a' : 'button', 'help-item');
+    if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else { b.type = 'button'; b.addEventListener('click', fn); }
+    const c = el('span', 'circle'); c.append(svg(GP_ICONS[ic])); b.append(c, el('span', null, label)); return b;
+  };
+  $('helpRow').replaceChildren(item(q, 'question', () => goTo('faq')), item(src, 'db', () => openFaq('source')), item(priv, 'lock', () => openFaq('privacy')), item(rep, 'flag', null, SITE.report));
+}
+// Weak-network band: only what works today gets a tick; the rest says "coming soon" (DESIGN.md §2).
+function renderNet() {
+  $('netTitle').textContent = P().netTitle;
+  $('netList').replaceChildren(...P().net.map(([k, text]) => el('li', k === 'soon' ? 'soon' : null, text)));
+}
+
+// Warm opening (DESIGN.md §2): greeting by time of day, trust ticks, a one-time welcome that never covers 999.
+function renderWarm() {
+  const h = new Date().getHours();
+  const part = h >= 21 || h < 5 ? 'night' : h < 12 ? 'morning' : h < 17 ? 'noon' : 'evening';
+  const dot = el('span', 'dot', part === 'night' ? '☾' : '☀');
+  dot.setAttribute('aria-hidden', 'true');
+  $('greet').replaceChildren(dot, document.createTextNode(part === 'night' ? P().greet.night : `${P().greet[part]}! ${P().greetTail}`));
+  $('trust').replaceChildren(...P().trust.map((x) => el('li', null, x)));
+  const w = $('welcome');
+  w.hidden = store.get('sc-welcomed') === '1';
+  if (w.hidden) return;
+  const close = () => { store.set('sc-welcomed', '1'); w.hidden = true; };
+  const ok = el('button', 'btn', P().welcomeOk); ok.type = 'button';
+  ok.addEventListener('click', close);
+  const save = el('button', 'btn violet', P().welcomeSave); save.type = 'button';
+  save.addEventListener('click', () => { close(); saveNumbers(); });
+  const ol = el('ol'); P().welcomeSteps.forEach((x) => ol.append(el('li', null, x)));
+  const row = el('div', 'row'); row.append(save, ok);
+  const title = el('h2', null, P().welcomeTitle); title.id = 'welcomeTitle';
+  w.replaceChildren(title, ol, row);
+}
+function renderPage() {
+  renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderNav(); renderAbout(); renderFaq(); renderFooter();
+  $('findTitle').textContent = P().findTitle; $('findText').textContent = P().findText;
+}
 
 /* ---------- text ---------- */
 function setText() {
@@ -716,7 +887,6 @@ function setText() {
   $('hello1').textContent = s.hello1; $('hello2').textContent = s.hello2;
   $('eyebrow').textContent = s.eyebrow; $('lead').textContent = s.lead; $('h999Text').textContent = s.h999;
   $('quickEyebrow').textContent = s.quickEyebrow; $('quickTitle').textContent = s.quickTitle; $('quickText').textContent = s.quickText;
-  $('ctaEyebrow').textContent = s.ctaEyebrow; $('ctaTitle').textContent = s.ctaTitle; $('ctaText').textContent = s.ctaText; $('ctaBtnText').textContent = s.ctaBtn;
   const dv = $('distSel').value;
   $('distSel').replaceChildren(...[['', s.distAll], ...DISTRICTS.map((d) => [d.key, lang === 'bn' ? d.bn : d.en])].map(([v, l]) => { const o = el('option', null, l); o.value = v; return o; }));
   $('distSel').value = dv;
@@ -726,7 +896,7 @@ function setText() {
   $('areaLabel').textContent = s.areaLabel; $('areaHint').textContent = s.areaHint; $('areaInput').placeholder = s.areaLabel; $('areaInput').setAttribute('aria-label', s.areaLabel);
   $('backBtn').textContent = s.back; $('changeBtn').textContent = s.change;
   $('shareTitle').textContent = s.shareTitle; $('shareText').textContent = s.shareText;
-  $('firstTitle').textContent = s.first; $('moreTitle').textContent = s.more;
+  $('firstTitle').textContent = s.first; $('firstCalm').textContent = s.firstCalm; $('moreTitle').textContent = s.more;
   $('sosBtnTitle').textContent = s.sosBtn;
   $('sosBack').textContent = s.back; $('sosTitle').textContent = s.sosTitle;
   $('sitTitle').textContent = s.sit; $('locTitle').textContent = s.loc; $('sendTitle').textContent = s.send; $('msgTitle').textContent = s.msgT;
@@ -761,7 +931,7 @@ setText();
 try {
   [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
   areaIndex = buildAreaIndex(data);
-  renderRecent(); renderStats(); renderPlaces();
+  renderRecent(); renderStats(); renderPlaces(); renderIconRow(); renderGuides();
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);
 }

@@ -1,0 +1,1637 @@
+<meta charset="utf-8">
+<title>SafeConnect</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: a familiar telecom-portal order (two-row header, banner, round icon row, search band, card grids,
+     help icons, feature band, column footer) in SafeConnect's own violet-dusk colours.
+     Night = deep indigo with a dusk banner; day = lavender-white with a dawn banner. */
+  :root {
+    --bg: #FFFAF6; --band: #FBF0F4; --surface: #FFFFFF; --surface-2: #F7F1FA; --line: rgba(90, 60, 180, 0.15);
+    --ink: #1C1442; --muted: #574E7E; --accent: #6B3FE0; --accent-ink: #FFFFFF; --link: #5A2FD6;
+    --title-2: #6B3FE0; --title-3: #C0408C;
+    --sky-1: #DCD0FF; --sky-2: #F0E0FF; --sky-3: #FFDCE6; --sky-4: #FFCFA8; --hill-1: #CDB8F5; --hill-2: #B194EC; --water: #E7DCFF;
+    --stars: 0; --orb-1: #FFF8E1; --orb-2: #FFB86B;
+    --red-1: #F2385E; --red-2: #C0123A; --amber-1: #FFC94D; --amber-2: #FF8F3F; --amber-ink: #2A1500;
+    --violet-1: #8457FF; --violet-2: #5427D6; --on-color: #FFFFFF;
+    --warn: #8A4B00; --warn-bg: #FFEBD2; --ok: #12804C;
+    --shadow: 0 6px 24px rgba(80, 50, 160, 0.10);
+    --foot-bg: #F2EEFA; --foot-ink: #1C1442; --foot-muted: #574E7E; --foot-line: rgba(90, 60, 180, 0.15);
+    --font: "Manrope", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --r: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0D0A24; --band: #140F36; --surface: #1B1546; --surface-2: #241C56; --line: rgba(255, 255, 255, 0.12);
+      --ink: #F4F0FF; --muted: #BDB3E0; --accent: #9D72FF; --accent-ink: #FFFFFF; --link: #C7A9FF;
+      --title-2: #D9BCFF; --title-3: #A98BFF;
+      --sky-1: #160F3A; --sky-2: #34206C; --sky-3: #84489C; --sky-4: #F09A78; --hill-1: #2B1C58; --hill-2: #1B1240; --water: #1B1446;
+      --stars: 1; --orb-1: #F3EEFF; --orb-2: #8D6BFF;
+      --red-1: #FF4D6D; --red-2: #D61F45; --amber-1: #FFCB5C; --amber-2: #FF9548;
+      --violet-1: #9D72FF; --violet-2: #6435F0;
+      --warn: #FFC98A; --warn-bg: rgba(255, 170, 80, 0.14); --ok: #6EE7A8;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --foot-bg: #0A0820; --foot-ink: #F3EFFF; --foot-muted: #A9A0CC; --foot-line: rgba(255, 255, 255, 0.10);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0D0A24; --band: #140F36; --surface: #1B1546; --surface-2: #241C56; --line: rgba(255, 255, 255, 0.12);
+    --ink: #F4F0FF; --muted: #BDB3E0; --accent: #9D72FF; --accent-ink: #FFFFFF; --link: #C7A9FF;
+    --title-2: #D9BCFF; --title-3: #A98BFF;
+    --sky-1: #160F3A; --sky-2: #34206C; --sky-3: #84489C; --sky-4: #F09A78; --hill-1: #2B1C58; --hill-2: #1B1240; --water: #1B1446;
+    --stars: 1; --orb-1: #F3EEFF; --orb-2: #8D6BFF;
+    --red-1: #FF4D6D; --red-2: #D61F45; --amber-1: #FFCB5C; --amber-2: #FF9548;
+    --violet-1: #9D72FF; --violet-2: #6435F0;
+    --warn: #FFC98A; --warn-bg: rgba(255, 170, 80, 0.14); --ok: #6EE7A8;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --foot-bg: #0A0820; --foot-ink: #F3EFFF; --foot-muted: #A9A0CC; --foot-line: rgba(255, 255, 255, 0.10);
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16.5px; line-height: 1.65; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  a { color: var(--link); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  h1, h2, h3 { margin: 0; line-height: 1.25; font-weight: 700; text-wrap: balance; }
+  p { margin: 0; }
+  .grad { background: linear-gradient(100deg, var(--title-2), var(--title-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .glass { background: var(--surface); border: 1px solid var(--line); }
+  .eyebrow { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+  .section { padding-block: 44px; }
+  .section.tint { background: var(--band); }
+  .section-title { text-align: center; display: grid; gap: 6px; margin-bottom: 26px; }
+  .section-title h2 { font-size: clamp(1.4rem, 3.6vw, 1.85rem); }
+  .section-title p { color: var(--muted); max-width: 56ch; margin: 0 auto; }
+
+  /* ---------- header: two rows ---------- */
+  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .topbar-in { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding-block: 8px; }
+  .where { font-size: 0.85rem; color: var(--muted); font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .logo { display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; cursor: pointer; font-weight: 800; font-size: 1.2rem; color: var(--ink); justify-self: center; }
+  .logo svg { width: 28px; height: 28px; flex: none; }
+  .top-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+  .hpill { border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2); padding: 6px 12px; font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
+  .h999 { background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: #fff; border-color: transparent; font-weight: 800; }
+  .h999 svg { width: 15px; height: 15px; }
+  .round { width: 36px; height: 36px; padding: 0; justify-content: center; }
+  .round svg { width: 17px; height: 17px; }
+  @media (max-width: 560px) { .topbar-in { grid-template-columns: auto 1fr; } .where { display: none; } .logo { justify-self: start; font-size: 1.05rem; } .hpill { padding: 6px 10px; } }
+  .mainnav { border-top: 1px solid var(--line); }
+  .nav { display: flex; gap: 4px; justify-content: center; overflow-x: auto; scrollbar-width: none; padding-block: 4px; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav button { flex: none; background: none; border: 0; border-radius: 999px; padding: 7px 14px; color: var(--ink); font-weight: 600; font-size: 0.92rem; cursor: pointer; white-space: nowrap; }
+  .nav button:hover { background: var(--surface-2); color: var(--link); }
+  @media (max-width: 760px) { .nav { justify-content: flex-start; } }
+
+  /* ---------- banner ---------- */
+  .hero { padding-block: 22px 30px; background: linear-gradient(180deg, var(--band), var(--bg)); }
+  .hero-grid { display: grid; gap: 22px; align-items: center; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.05fr 0.95fr; } }
+  .hero-text { display: grid; gap: 14px; min-width: 0; }
+  .hero h1 { font-size: clamp(1.9rem, 5.4vw, 3rem); line-height: 1.2; }
+  .hero h1 .grad { display: block; font-size: 0.52em; margin-top: 6px; line-height: 1.4; font-weight: 600; }
+  .lead { color: var(--muted); max-width: 50ch; }
+  .hero-art { position: relative; overflow: hidden; border-radius: 22px; aspect-ratio: 1.3; max-width: 100%; box-shadow: var(--shadow); isolation: isolate; }
+  @media (max-width: 899px) { .hero-art { display: none; } }
+  .scene { position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 38%, var(--sky-3) 60%, var(--sky-4) 72%, var(--water) 72.5%, var(--water) 100%); }
+  .stars { position: absolute; inset: 0 0 35% 0; opacity: var(--stars);
+    background-image: radial-gradient(1.5px 1.5px at 12% 18%, #fff 60%, transparent), radial-gradient(1px 1px at 22% 40%, #fff 60%, transparent),
+      radial-gradient(1.5px 1.5px at 35% 12%, #fff 60%, transparent), radial-gradient(1px 1px at 48% 30%, #fff 60%, transparent),
+      radial-gradient(2px 2px at 63% 9%, #fff 60%, transparent), radial-gradient(1px 1px at 72% 34%, #fff 60%, transparent),
+      radial-gradient(1.5px 1.5px at 84% 16%, #fff 60%, transparent), radial-gradient(1px 1px at 93% 42%, #fff 60%, transparent); }
+  .orb { position: absolute; width: 22%; aspect-ratio: 1; right: 12%; top: 46%; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--orb-1), var(--orb-2) 70%); box-shadow: 0 0 70px 16px color-mix(in srgb, var(--orb-2) 55%, transparent); }
+  .arch { position: absolute; left: 30%; top: 12%; width: 40%; aspect-ratio: 0.82; border-radius: 999px 999px 0 0; border: 14px solid transparent; border-bottom: 0;
+    background: linear-gradient(160deg, rgba(255,255,255,0.95), var(--violet-1) 45%, var(--sky-4) 85%) border-box;
+    -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+    filter: drop-shadow(0 0 16px color-mix(in srgb, var(--violet-1) 70%, transparent)); }
+  .gem { position: absolute; width: 30px; height: 30px; border-radius: 8px; transform: rotate(var(--rot, 18deg));
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), var(--c, #8ee6ff) 45%, rgba(0,0,0,0.25)); box-shadow: 0 0 20px var(--c, #8ee6ff), inset 0 0 8px rgba(255,255,255,0.6); }
+  .g1 { --c: #7FE3FF; left: 18%; top: 20%; --rot: 24deg; } .g2 { --c: #B58CFF; left: 44%; top: 30%; width: 42px; height: 42px; --rot: -14deg; }
+  .g3 { --c: #FFC75A; right: 12%; top: 18%; width: 26px; height: 26px; --rot: 40deg; } .g4 { --c: #FF8FD1; left: 26%; top: 52%; width: 20px; height: 20px; }
+  .hills { position: absolute; left: 0; right: 0; bottom: 27%; width: 100%; height: 22%; }
+  .hills .h1 { fill: var(--hill-1); } .hills .h2 { fill: var(--hill-2); }
+  @media (prefers-reduced-motion: no-preference) {
+    .gem { animation: float 7s ease-in-out infinite; } .g2 { animation-duration: 9s; } .g3 { animation-duration: 6s; animation-delay: -2s; }
+    @keyframes float { 50% { translate: 0 -8px; } }
+  }
+
+  /* warm opening */
+  .greet { display: inline-flex; align-items: center; gap: 8px; justify-self: start; font-weight: 600; font-size: 0.92rem; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px 5px 8px; box-shadow: var(--shadow); }
+  .greet .dot { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem;
+    background: linear-gradient(140deg, var(--amber-1), var(--amber-2)); color: var(--amber-ink); }
+  .trust { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 0.88rem; font-weight: 600; }
+  .trust li { display: inline-flex; align-items: center; gap: 6px; }
+  .trust li::before { content: "✓"; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--ok); color: #fff; font-size: 0.7rem; font-weight: 800; }
+  .welcome { display: grid; gap: 10px; border-radius: var(--r); padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); border-left: 4px solid var(--amber-1); }
+  .welcome h2 { font-size: 1.08rem; }
+  .welcome ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; color: var(--muted); font-size: 0.94rem; }
+  .welcome .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .calm { color: var(--muted); font-size: 0.92rem; margin-top: -4px; }
+
+  /* the three big actions */
+  .actions { display: grid; gap: 10px; }
+  .act { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; text-align: left; width: 100%;
+    border-radius: var(--r); padding: 12px 14px; cursor: pointer; text-decoration: none; color: var(--ink); box-shadow: var(--shadow); }
+  .act > span:nth-child(2) { display: grid; min-width: 0; }
+  .act strong { font-weight: 700; font-size: 1.1rem; line-height: 1.3; }
+  .act small { color: var(--muted); font-size: 0.86rem; line-height: 1.45; }
+  .tile { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; color: var(--on-color); }
+  .tile svg { width: 26px; height: 26px; }
+  .arrow { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); }
+  .arrow svg { width: 16px; height: 16px; }
+  .act.red { border-color: color-mix(in srgb, var(--red-1) 50%, transparent); }
+  .act.red strong { color: var(--red-1); }
+  .act.red .tile { background: linear-gradient(140deg, var(--red-1), var(--red-2)); }
+  .act.violet .tile { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); }
+  .act.amber .tile { background: linear-gradient(140deg, var(--amber-1), var(--amber-2)); color: var(--amber-ink); }
+  .act[aria-busy="true"] { opacity: 0.7; cursor: progress; }
+  .who-list { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+  .who-list span { background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 0 10px; font-size: 0.8rem; font-weight: 600; color: var(--ink); }
+
+  /* ---------- round icon row ---------- */
+  .icons { padding-block: 22px; background: var(--surface); border-block: 1px solid var(--line); }
+  .icon-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(96px, 1fr); gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: 4px; }
+  .icon-item { scroll-snap-align: start; display: grid; justify-items: center; gap: 6px; text-align: center; padding: 8px 4px; border-radius: 12px; text-decoration: none; color: var(--ink);
+    background: none; border: 0; cursor: pointer; }
+  .icon-item:hover { background: var(--surface-2); }
+  .icon-item .circle { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; color: var(--on-color); box-shadow: var(--shadow); }
+  .icon-item .circle svg { width: 26px; height: 26px; }
+  .icon-item b { font-size: 0.86rem; font-weight: 600; line-height: 1.3; }
+  .icon-item small { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .c-red { background: linear-gradient(140deg, var(--red-1), var(--red-2)); }
+  .c-orange { background: linear-gradient(140deg, #FF9B5C, #E8542E); }
+  .c-green { background: linear-gradient(140deg, #3FC98A, #14895A); }
+  .c-pink { background: linear-gradient(140deg, #FF7AB8, #C8327E); }
+  .c-blue { background: linear-gradient(140deg, #6FA8FF, #2E5BD6); }
+  .c-teal { background: linear-gradient(140deg, #4FD6D0, #13858F); }
+  .c-violet { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); }
+  .c-amber { background: linear-gradient(140deg, var(--amber-1), var(--amber-2)); color: var(--amber-ink); }
+  .c-slate { background: linear-gradient(140deg, #9AA3C7, #59618A); }
+
+  /* ---------- search band ---------- */
+  .search-band { display: grid; gap: 22px; align-items: center; }
+  @media (min-width: 900px) { .search-band { grid-template-columns: 1.3fr 0.7fr; } }
+  .search-band h2 { font-size: clamp(1.35rem, 3.6vw, 1.8rem); }
+  .search-band .intro { display: grid; gap: 6px; margin-bottom: 14px; }
+  .search-band .intro p { color: var(--muted); }
+  .find-art { display: none; justify-self: center; width: min(240px, 100%); max-width: 100%; }
+  @media (min-width: 900px) { .find-art { display: block; } }
+  .find-art .pin { fill: var(--accent); } .find-art .pin2 { fill: var(--red-1); } .find-art .map { fill: var(--surface); stroke: var(--line); stroke-width: 2; } .find-art .road { stroke: var(--sky-3); stroke-width: 6; fill: none; }
+  .finder { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .searchbar { display: flex; align-items: center; gap: 8px; border-radius: 12px; padding: 6px; background: var(--surface); border: 2px solid var(--line); box-shadow: var(--shadow); }
+  .searchbar:focus-within { border-color: var(--accent); }
+  .searchbar svg { width: 20px; height: 20px; flex: none; color: var(--muted); margin-left: 8px; }
+  .searchbar input { flex: 1; min-width: 0; border: 0; background: none; padding: 10px 0; font-size: 1.05rem; outline: none; }
+  .searchbar select { border: 0; border-radius: 9px; background: var(--accent); color: var(--accent-ink); padding: 10px 12px; font-weight: 700; font-size: 0.92rem; max-width: 44%; cursor: pointer; }
+  .hint { color: var(--muted); font-size: 0.9rem; }
+  .suggest { list-style: none; margin: 0; padding: 6px; display: grid; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+  .suggest button { width: 100%; text-align: left; background: none; border: 0; border-radius: 10px; padding: 10px 12px; cursor: pointer; display: grid; color: var(--ink); }
+  .suggest button:hover, .suggest button:focus-visible { background: var(--surface-2); }
+  .suggest b { font-weight: 600; } .suggest span { color: var(--muted); font-size: 0.88rem; }
+  .none { padding: 10px 12px; color: var(--muted); font-size: 0.92rem; }
+  .suggest .group { padding: 8px 12px 2px; font-size: 0.8rem; font-weight: 700; color: var(--link); }
+  .fallback-box { display: grid; gap: 10px; padding: 10px 12px 12px; border-top: 1px solid var(--line); margin-top: 4px; }
+  .fallback-box p { font-size: 0.92rem; font-weight: 600; }
+  .suggest .fallback-box .chip, .suggest .fallback-box .btn { width: auto; display: inline-flex; border-radius: 999px; }
+  .suggest .fallback-box .chip { font-size: 0.88rem; padding: 4px 12px; background: var(--surface-2); }
+  .suggest .fallback-box .btn { padding: 8px 16px; }
+  .suggest .fallback-box .btn.violet { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); }
+  .recent { justify-self: start; }
+  .msg { font-weight: 600; padding: 12px 16px; border-radius: 12px; background: var(--warn-bg); color: var(--warn); }
+  .msg.plain { background: var(--surface); color: var(--ink); font-weight: 500; border: 1px solid var(--line); }
+  .demo { display: grid; gap: 8px; border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; background: var(--surface-2); }
+  .demo p { color: var(--muted); font-size: 0.88rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: 0.95rem; color: var(--ink); }
+  .chip[aria-pressed="true"] { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); border-color: transparent; font-weight: 600; }
+  .home-msgs { display: grid; gap: 12px; margin-top: 14px; }
+  .home-msgs:empty { display: none; }
+
+  /* ---------- cards ---------- */
+  .grid-3 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: grid; grid-template-rows: auto 1fr; box-shadow: var(--shadow); min-width: 0; }
+  .card .art { aspect-ratio: 2.2; max-width: 100%; position: relative; }
+  .card .body { padding: 16px 18px 18px; display: grid; gap: 8px; align-content: start; }
+  .card h3 { font-size: 1.1rem; }
+  .card p { color: var(--muted); font-size: 0.95rem; }
+  .card .btn-primary { margin-top: 6px; }
+  .btn-primary { justify-self: start; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 10px; padding: 10px 18px; font-weight: 700; cursor: pointer; text-decoration: none;
+    background: var(--accent); color: var(--accent-ink); }
+  .btn-primary svg { width: 16px; height: 16px; }
+  .art.night { background: radial-gradient(30% 40% at 75% 30%, #fff6d8, #f7c56b 45%, transparent 47%), linear-gradient(180deg, #1a1244, #4b2c8a 60%, #2a1b55 61%, #1a1240); }
+  .art.lost { background: radial-gradient(28% 50% at 30% 55%, rgba(255,255,255,0.85), transparent 52%), repeating-linear-gradient(45deg, #6a3aa8 0 14px, #7b4bc0 14px 28px); }
+  .art.storm { background: linear-gradient(160deg, transparent 48%, #ffd66b 49%, #ffd66b 51%, transparent 52%), linear-gradient(180deg, #2b3a7a, #5866b8 55%, #3d7fb8 56%, #234d7a); }
+  .art.town { background: radial-gradient(60% 40% at 50% 100%, rgba(255, 190, 110, 0.9), transparent 70%), repeating-linear-gradient(90deg, transparent 0 14px, rgba(255, 220, 140, 0.5) 14px 16px, transparent 16px 30px), linear-gradient(180deg, #2a1d6b, #6a3aa8 60%, #f39a7c); }
+  .art.beach { background: radial-gradient(30% 22% at 70% 28%, #fff4c9, #ffb36b 60%, transparent 62%), linear-gradient(180deg, #ff9f8a 0%, #c86fb4 38%, #3c6fd1 58%, #2a4fa6 70%, #f2d3a0 72%, #e8c08a 100%); }
+  .art.island { background: radial-gradient(70% 30% at 40% 70%, #2e7a64, transparent 70%), linear-gradient(180deg, #19285e, #3c4fa8 45%, #7ec7c9 62%, #1d5a73 64%, #123a52 100%); }
+  .art.city { background: radial-gradient(45% 30% at 30% 30%, rgba(160, 120, 255, 0.8), transparent 70%), repeating-linear-gradient(90deg, #22184f 0 18px, #2c1f66 18px 26px), linear-gradient(180deg, #0f0b2b, #3b2378); }
+
+  /* known places (product-grid style) */
+  .places { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 900px) { .places { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .place { position: relative; border: 1px solid var(--line); border-radius: var(--r); aspect-ratio: 1.1; max-width: 100%; overflow: hidden; cursor: pointer; padding: 0; text-align: left; color: #fff; box-shadow: var(--shadow); }
+  .place .art { position: absolute; inset: 0; }
+  .place .label { position: absolute; left: 10px; bottom: 10px; right: 10px; display: grid; gap: 2px; }
+  .place .label b { justify-self: start; background: rgba(15, 10, 40, 0.6); border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; padding: 3px 12px; font-weight: 600; font-size: 0.95rem; }
+  .place .label small { padding-left: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.9); text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+  .place .corner { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: rgba(15, 10, 40, 0.5); border: 1px solid rgba(255,255,255,0.25); }
+  .place .corner svg { width: 14px; height: 14px; }
+
+  /* stats strip */
+  .stats { border-radius: var(--r); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 6px; margin-top: 22px; }
+  @media (min-width: 760px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .stat { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: center; padding: 12px; }
+  .stat .ic { grid-row: span 2; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--accent); }
+  .stat .ic svg { width: 19px; height: 19px; }
+  .stat b { font-size: 1.2rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 0.84rem; line-height: 1.25; }
+
+  /* two side-by-side cards */
+  .duo { display: grid; gap: 16px; }
+  @media (min-width: 760px) { .duo { grid-template-columns: 1fr 1fr; } }
+  .duo-card { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; border-radius: var(--r); padding: 22px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+  .duo-card > div { display: grid; gap: 8px; min-width: 0; }
+  .duo-card h3 { font-size: 1.12rem; }
+  .duo-card p { color: var(--muted); font-size: 0.95rem; }
+  .duo-card .badge-ic { width: 76px; height: 76px; border-radius: 22px; display: grid; place-items: center; color: var(--on-color); }
+  .duo-card .badge-ic svg { width: 36px; height: 36px; }
+
+  /* about */
+  .about { display: grid; gap: 22px; }
+  @media (min-width: 860px) { .about { grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: start; } }
+  .about h2 { font-size: clamp(1.4rem, 3.6vw, 1.85rem); }
+  .about .intro { display: grid; gap: 10px; }
+  .about .intro p { color: var(--muted); max-width: 46ch; }
+  .points { display: grid; border-top: 1px solid var(--line); }
+  .point { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; padding-block: 16px; border-bottom: 1px solid var(--line); }
+  .point .ic { grid-row: span 2; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); color: var(--accent); }
+  .point .ic svg { width: 20px; height: 20px; }
+  .point span { color: var(--muted); font-size: 0.94rem; }
+
+  /* how can we help */
+  .help-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 760px; margin: 0 auto; }
+  @media (min-width: 640px) { .help-row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .help-item { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 12px 6px; border-radius: 12px; background: none; border: 0; cursor: pointer; color: var(--ink); font-weight: 600; text-decoration: none; }
+  .help-item:hover { background: var(--surface); }
+  .help-item .circle { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); }
+  .help-item .circle svg { width: 24px; height: 24px; }
+
+  /* feature band */
+  .feature { position: relative; overflow: hidden; isolation: isolate; padding-block: 56px; }
+  .feature .scene { position: absolute; inset: 0; z-index: -1; }
+  .feature .hills { bottom: 20%; }
+  .feature-box { max-width: 460px; border-radius: 22px; padding: 26px; display: grid; gap: 14px; background: color-mix(in srgb, var(--surface) 82%, transparent); border: 1px solid var(--line); box-shadow: var(--shadow); }
+  .feature-box h2 { font-size: clamp(1.3rem, 3.4vw, 1.7rem); }
+  .ticks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .ticks li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
+  .ticks li::before { content: "✓"; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--ok); color: #fff; font-size: 0.8rem; font-weight: 800; margin-top: 2px; }
+  .ticks li.soon::before { content: "…"; background: var(--muted); }
+
+  /* faq */
+  .faq { display: grid; gap: 14px; }
+  @media (min-width: 860px) { .faq { grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: start; } }
+  .faq h2 { font-size: clamp(1.4rem, 3.6vw, 1.85rem); }
+  .faq-list { border-top: 1px solid var(--line); }
+  .faq-list details { border-bottom: 1px solid var(--line); }
+  .faq-list summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 16px; padding-block: 16px; font-weight: 600; }
+  .faq-list summary::-webkit-details-marker { display: none; }
+  .faq-list summary::after { content: "+"; color: var(--link); font-size: 1.3rem; line-height: 1; }
+  .faq-list details[open] summary::after { content: "−"; }
+  .faq-list p { color: var(--muted); padding-bottom: 16px; max-width: 60ch; }
+
+  /* ---------- inner pages ---------- */
+  main > .wrap.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; padding-block: 20px 40px; max-width: 860px; }
+  .page-top { display: grid; gap: 10px; }
+  .back { justify-self: start; display: inline-flex; gap: 6px; align-items: center; border-radius: 999px; padding: 6px 14px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink); font-weight: 600; cursor: pointer; }
+  .page-title { font-size: clamp(1.5rem, 5vw, 2rem); }
+  .here { border-radius: var(--r); padding: 18px; display: grid; gap: 4px; box-shadow: var(--shadow); }
+  .here .label { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+  .here h1 { font-size: clamp(1.45rem, 5vw, 1.95rem); }
+  .here .sub { color: var(--muted); }
+  .here-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .btn { border-radius: 999px; padding: 7px 16px; font-weight: 600; font-size: 0.92rem; cursor: pointer; text-decoration: none; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
+  .btn.violet { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); border-color: transparent; }
+  .share { border-radius: var(--r); padding: 16px 18px; display: grid; gap: 8px; }
+  .share h2 { font-size: 1.12rem; }
+  .share p { color: var(--muted); font-size: 0.9rem; }
+  .note { border-left: 4px solid var(--amber-1); background: var(--surface); border-radius: 0 12px 12px 0; padding: 10px 14px; }
+  .first { display: grid; gap: 10px; }
+  .first > h2, .more > h2 { font-size: 1.22rem; }
+  .first-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; border-radius: var(--r); padding: 12px 12px 12px 16px; }
+  .first-row > div { min-width: 0; display: grid; }
+  .first-row .what { font-weight: 700; font-size: 1.06rem; line-height: 1.3; }
+  .first-row .who { color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
+  .call { background: linear-gradient(140deg, var(--amber-1), var(--amber-2)); color: var(--amber-ink); border: 0; border-radius: 12px; padding: 10px 14px; font-weight: 700; text-decoration: none;
+    text-align: center; line-height: 1.15; display: grid; font-variant-numeric: tabular-nums; min-width: 96px; }
+  .call small { font-weight: 600; font-size: 0.78rem; }
+  .call.red { background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: var(--on-color); }
+  .more { display: grid; gap: 10px; }
+  details.cat { border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
+  details.cat > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 14px 16px; font-weight: 600; }
+  details.cat > summary::-webkit-details-marker { display: none; }
+  details.cat > summary .count { margin-left: auto; color: var(--muted); font-weight: 500; font-size: 0.9rem; font-variant-numeric: tabular-nums; background: var(--surface-2); border-radius: 999px; padding: 0 10px; }
+  details.cat > summary::after { content: "›"; font-size: 1.4rem; line-height: 1; color: var(--muted); transition: transform .15s; }
+  details.cat[open] > summary::after { transform: rotate(90deg); }
+  .cat-body { display: grid; border-top: 1px solid var(--line); }
+  .cat-body .fallback { margin: 10px 16px 0; font-size: 0.88rem; color: var(--warn); }
+  .person { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .person:last-child { border-bottom: 0; }
+  .person > div { min-width: 0; display: grid; gap: 2px; }
+  .person .name { font-weight: 700; overflow-wrap: anywhere; }
+  .person .role { font-size: 0.9rem; color: var(--muted); overflow-wrap: anywhere; }
+  .person .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 0.75rem; font-weight: 600; border-radius: 6px; padding: 0 7px; background: var(--surface-2); color: var(--muted); }
+  .tag.warn { background: var(--warn-bg); color: var(--warn); }
+  .person .calls { display: grid; gap: 6px; justify-items: end; }
+  .person .call { min-width: 0; padding: 8px 12px; }
+  .person .src { grid-column: 1 / -1; font-size: 0.78rem; color: var(--muted); }
+  .showall { margin: 10px 16px 12px; justify-self: start; }
+  .panel { border-radius: var(--r); padding: 16px 18px; display: grid; gap: 10px; }
+  .panel > * { min-width: 0; }
+  .panel h2 { font-size: 1.12rem; }
+  .locline { font-weight: 600; display: flex; gap: 8px; align-items: baseline; }
+  .locline::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; transform: translateY(-1px); }
+  .locline.ok::before { background: var(--ok); }
+  .locline.bad { color: var(--warn); } .locline.bad::before { background: var(--warn); }
+  textarea, .form input { width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 1rem; }
+  textarea { resize: vertical; line-height: 1.45; }
+  .contact { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; padding-block: 10px; border-bottom: 1px solid var(--line); }
+  .contact:last-of-type { border-bottom: 0; }
+  .contact > div { min-width: 0; display: grid; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); display: grid; place-items: center; font-weight: 800; font-size: 1.1rem; }
+  .contact .num { color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+  .send-row { grid-column: 1 / -1; display: grid; gap: 8px; }
+  .send-row .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .send { display: grid; place-items: center; text-align: center; border-radius: 12px; padding: 12px; font-weight: 700; text-decoration: none; border: 0; cursor: pointer;
+    background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); line-height: 1.2; }
+  .send-row > .send { padding-block: 14px; font-size: 1.1rem; }
+  .send.alt { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+  .send small { font-weight: 500; font-size: 0.78rem; opacity: 0.9; }
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; }
+  .form { display: grid; gap: 8px; }
+  .form .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+  .form label { display: grid; gap: 4px; font-size: 0.88rem; font-weight: 600; min-width: 0; }
+  .err { color: var(--red-1); font-size: 0.9rem; font-weight: 600; }
+  .saved { display: flex; align-items: center; gap: 10px; padding-block: 8px; border-bottom: 1px solid var(--line); }
+  .saved span { margin-right: auto; min-width: 0; overflow-wrap: anywhere; }
+  .linkbtn { background: none; border: 0; padding: 0; color: var(--link); cursor: pointer; font-weight: 600; }
+  .privacy { color: var(--muted); font-size: 0.85rem; }
+
+  /* ---------- footer (column style) ---------- */
+  footer { background: var(--foot-bg); color: var(--foot-ink); border-top: 1px solid var(--foot-line); }
+  footer .wrap { padding-block: 40px 24px; display: grid; gap: 30px; }
+  .foot-grid { display: grid; gap: 28px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 900px) { .foot-grid { grid-template-columns: 1.4fr 1fr 1fr 1fr 1.4fr; } }
+  .foot-brand { grid-column: 1 / -1; display: grid; gap: 10px; align-content: start; }
+  @media (min-width: 900px) { .foot-brand { grid-column: auto; } }
+  .foot-brand .logo { color: var(--foot-ink); justify-self: start; }
+  .foot-brand p { max-width: 28ch; }
+  .foot-brand small { color: var(--foot-muted); font-size: 0.86rem; }
+  .foot-col { display: grid; gap: 9px; align-content: start; min-width: 0; }
+  .foot-col h3 { font-size: 0.98rem; margin-bottom: 4px; }
+  .foot-col button, .foot-col a { justify-self: start; background: none; border: 0; padding: 0; color: var(--foot-muted); font-size: 0.94rem; cursor: pointer; text-decoration: none; text-align: left; }
+  .foot-col button:hover, .foot-col a:hover { color: var(--foot-ink); }
+  .foot-help { grid-column: 1 / -1; }
+  @media (min-width: 900px) { .foot-help { grid-column: auto; } }
+  .foot-help p { color: var(--foot-muted); font-size: 0.94rem; max-width: 34ch; }
+  .foot-help a { color: var(--link); }
+  .foot-bottom { border-top: 1px solid var(--foot-line); padding-top: 16px; display: flex; flex-wrap: wrap; gap: 10px 22px; justify-content: space-between; color: var(--foot-muted); font-size: 0.82rem; }
+  .foot-bottom nav { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .foot-bottom a, .foot-bottom button { color: var(--foot-muted); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: none; font-size: 0.82rem; }
+  .credit { flex-basis: 100%; font-size: 0.78rem; opacity: 0.85; }
+  @media (prefers-reduced-motion: reduce) { details.cat > summary::after { transition: none; } }
+</style>
+
+<header>
+  <div class="wrap topbar-in">
+    <span class="where" id="eyebrow"></span>
+    <button class="logo" id="homeBtn" type="button" aria-label="SafeConnect home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B58CFF"/><stop offset="1" stop-color="#FF8F6B"/></linearGradient></defs>
+        <path fill="url(#lg)" d="M16 2c6.6 0 12 5.2 12 11.7C28 22.5 16 30 16 30S4 22.5 4 13.7C4 7.2 9.4 2 16 2Z"/><circle cx="16" cy="13.5" r="4.6" fill="#fff"/></svg>
+      SafeConnect
+    </button>
+    <div class="top-actions">
+      <a class="hpill h999" id="h999" href="tel:999"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg><span id="h999Text">৯৯৯</span></a>
+      <button class="hpill" id="langBtn" type="button" aria-label="Language: English / বাংলা">EN</button>
+      <button class="hpill round" id="themeBtn" type="button" aria-label="Night or day"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg></button>
+    </div>
+  </div>
+  <div class="mainnav"><div class="wrap"><nav class="nav" id="nav" aria-label="Main"></nav></div></div>
+</header>
+
+<main>
+  <!-- HOME -->
+  <div id="home">
+    <section class="hero" aria-labelledby="hello">
+      <div class="wrap hero-grid">
+        <div class="hero-text">
+          <p class="greet" id="greet"></p>
+          <h1 id="hello"><span id="hello1"></span><span class="grad" id="hello2"></span></h1>
+          <p class="lead" id="lead"></p>
+          <div class="actions">
+            <a class="act glass red" id="call999" href="tel:999">
+              <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>
+              <span><strong id="call999Title"></strong><small id="call999Sub"></small></span>
+              <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
+            </a>
+            <button class="act glass violet" id="sosBtn" type="button">
+              <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2.5 11.2 20.6 3.4c.8-.34 1.6.46 1.26 1.26L14.1 22.8c-.37.86-1.62.78-1.87-.12l-1.9-6.98-6.98-1.9c-.9-.25-.98-1.5-.12-1.87Zm8.7 3.2 1.3 4.8 5.5-12.8-6.8 8Zm-1.2-1.2 8-6.8-12.8 5.5 4.8 1.3Z"/></svg></span>
+              <span><strong id="sosBtnTitle"></strong><small id="sosBtnSub"></small></span>
+              <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
+            </button>
+            <button class="act glass amber" id="locateBtn" type="button">
+              <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg></span>
+              <span><strong id="locateTitle"></strong><small id="locateSub"></small></span>
+              <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
+            </button>
+          </div>
+          <ul class="trust" id="trust"></ul>
+          <section class="welcome" id="welcome" hidden aria-labelledby="welcomeTitle"></section>
+          <div class="home-msgs" id="homeMsgs"><p class="msg" id="locMsg" role="status" hidden></p><div class="demo" id="demo" hidden><p id="demoText"></p><div class="chips" id="demoChips"></div></div></div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="scene">
+            <div class="stars"></div><div class="orb"></div><div class="arch"></div>
+            <span class="gem g1"></span><span class="gem g2"></span><span class="gem g3"></span><span class="gem g4"></span>
+            <svg class="hills" viewBox="0 0 1200 200" preserveAspectRatio="none">
+              <path class="h1" d="M0 120 C150 60 260 90 380 70 C520 45 600 110 760 80 C900 55 1010 30 1200 75 L1200 200 L0 200 Z"/>
+              <path class="h2" d="M0 160 C180 120 300 150 460 130 C640 108 760 160 920 140 C1040 125 1120 120 1200 130 L1200 200 L0 200 Z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="icons" aria-label="Quick numbers">
+      <div class="wrap"><div class="icon-row" id="iconRow"></div></div>
+    </section>
+
+    <section class="section tint" id="findSec" aria-labelledby="findTitle">
+      <div class="wrap search-band">
+        <div>
+          <div class="intro"><h2 id="findTitle"></h2><p id="findText"></p></div>
+          <div class="finder">
+            <label class="searchbar" for="areaInput">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.8 4.8-1.4 1.4-4.8-4.8A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
+              <span id="areaLabel" hidden></span>
+              <input id="areaInput" type="search" autocomplete="off" aria-describedby="areaHint" aria-controls="suggest">
+              <select id="distSel" aria-label="District"></select>
+            </label>
+            <p class="hint" id="areaHint"></p>
+            <ul class="suggest" id="suggest" hidden aria-live="polite"></ul>
+            <button class="btn recent" id="recentBtn" type="button" hidden></button>
+          </div>
+          <p id="orText" hidden></p>
+        </div>
+        <svg class="find-art" viewBox="0 0 240 200" aria-hidden="true">
+          <rect class="map" x="20" y="40" width="200" height="140" rx="18"/>
+          <path class="road" d="M30 150 C80 120 110 160 150 120 S200 80 212 60"/>
+          <path class="road" d="M60 50 C70 90 120 100 130 180"/>
+          <path class="pin" d="M150 20c19 0 34 15 34 33 0 25-34 61-34 61s-34-36-34-61c0-18 15-33 34-33Zm0 20a13 13 0 1 0 0 26 13 13 0 0 0 0-26Z"/>
+          <circle class="pin2" cx="70" cy="140" r="9"/>
+        </svg>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="guideTitle">
+      <div class="wrap">
+        <div class="section-title"><h2 id="guideTitle"></h2><p id="guideText"></p></div>
+        <div class="grid-3" id="guideCards"></div>
+      </div>
+    </section>
+
+    <section class="section tint" aria-labelledby="quickTitle">
+      <div class="wrap">
+        <div class="section-title"><p class="eyebrow" id="quickEyebrow" hidden></p><h2 id="quickTitle"></h2><p id="quickText"></p></div>
+        <div class="places" id="places"></div>
+        <div class="stats glass" id="stats"></div>
+      </div>
+    </section>
+
+    <section class="section" aria-label="Prepare">
+      <div class="wrap duo" id="duoCards"></div>
+    </section>
+
+    <section class="section tint" id="about" aria-labelledby="aboutTitle">
+      <div class="wrap about">
+        <div class="intro"><p class="eyebrow" id="aboutEyebrow"></p><h2 id="aboutTitle"></h2><p id="aboutText"></p></div>
+        <div class="points" id="points"></div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="helpTitle">
+      <div class="wrap">
+        <div class="section-title"><h2 id="helpTitle"></h2></div>
+        <div class="help-row" id="helpRow"></div>
+      </div>
+    </section>
+
+    <section class="feature" aria-labelledby="netTitle">
+      <div class="scene" aria-hidden="true">
+        <div class="stars"></div><div class="orb"></div>
+        <svg class="hills" viewBox="0 0 1200 200" preserveAspectRatio="none">
+          <path class="h1" d="M0 120 C150 60 260 90 380 70 C520 45 600 110 760 80 C900 55 1010 30 1200 75 L1200 200 L0 200 Z"/>
+          <path class="h2" d="M0 160 C180 120 300 150 460 130 C640 108 760 160 920 140 C1040 125 1120 120 1200 130 L1200 200 L0 200 Z"/>
+        </svg>
+      </div>
+      <div class="wrap">
+        <div class="feature-box"><h2 id="netTitle"></h2><ul class="ticks" id="netList"></ul></div>
+      </div>
+    </section>
+
+    <section class="section tint" id="faq" aria-labelledby="faqTitle">
+      <div class="wrap faq">
+        <div><p class="eyebrow" id="faqEyebrow"></p><h2 id="faqTitle"></h2></div>
+        <div class="faq-list" id="faqList"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- AREA -->
+  <div class="wrap page" id="area" hidden>
+    <div class="page-top"><button class="back" id="backBtn" type="button"></button></div>
+    <section class="here glass" aria-labelledby="placeName">
+      <p class="label" id="youAreIn"></p>
+      <h1 id="placeName"></h1>
+      <p class="sub" id="placeSub"></p>
+      <div class="here-row"><button class="btn" id="changeBtn" type="button"></button></div>
+    </section>
+    <section class="share glass" id="share" hidden aria-labelledby="shareTitle">
+      <h2 id="shareTitle"></h2>
+      <p id="shareText"></p>
+      <div class="chips" id="shareBtns"></div>
+    </section>
+    <p class="msg plain" id="outside" hidden></p>
+    <p class="note" id="placeNote" hidden></p>
+    <section class="first" aria-labelledby="firstTitle">
+      <h2 id="firstTitle"></h2>
+      <p class="calm" id="firstCalm"></p>
+      <div class="first" id="firstList"></div>
+    </section>
+    <section class="more" aria-labelledby="moreTitle" id="moreSec">
+      <h2 id="moreTitle"></h2>
+      <div class="more" id="moreList"></div>
+    </section>
+  </div>
+
+  <!-- SEND LOCATION -->
+  <div class="wrap page" id="sos" hidden>
+    <div class="page-top">
+      <button class="back" id="sosBack" type="button"></button>
+      <h1 class="page-title" id="sosTitle"></h1>
+    </div>
+    <section class="panel glass" aria-labelledby="sitTitle">
+      <h2 id="sitTitle"></h2>
+      <div class="chips" id="situations"></div>
+    </section>
+    <section class="panel glass" aria-labelledby="locTitle">
+      <h2 id="locTitle"></h2>
+      <p class="locline" id="sosLoc" role="status"></p>
+      <div class="demo" id="sosDemo" hidden><p id="sosDemoText"></p><div class="chips" id="sosDemoChips"></div></div>
+    </section>
+    <section class="panel glass" aria-labelledby="sendTitle">
+      <h2 id="sendTitle"></h2>
+      <div id="sendList"></div>
+      <div class="tools" id="sendTools"></div>
+      <p class="privacy" id="smsHint"></p>
+    </section>
+    <section class="panel glass" aria-labelledby="msgTitle">
+      <label for="sosMsg"><h2 id="msgTitle"></h2></label>
+      <textarea id="sosMsg" rows="4"></textarea>
+    </section>
+    <details class="cat" id="peopleBox">
+      <summary><span id="peopleTitle"></span><span class="count" id="peopleCount"></span></summary>
+      <div class="cat-body" style="padding: 8px 16px 16px; gap: 10px;">
+        <div id="savedList"></div>
+        <form class="form" id="addForm" novalidate>
+          <div class="row">
+            <label><span id="lblName"></span><input id="pName" type="text" autocomplete="off" maxlength="40"></label>
+            <label><span id="lblRel"></span><input id="pRel" type="text" autocomplete="off" maxlength="20"></label>
+          </div>
+          <label><span id="lblPhone"></span><input id="pPhone" type="tel" inputmode="tel" autocomplete="off" maxlength="20"></label>
+          <p class="err" id="formErr" hidden></p>
+          <button class="send" id="saveBtn" type="submit"></button>
+        </form>
+        <p class="privacy" id="privacy"></p>
+      </div>
+    </details>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid" id="footGrid"></div>
+    <div class="foot-bottom" id="footBottom"></div>
+  </div>
+</footer>
+
+<script type="module">
+import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm } from './js/data.js';
+import { loadLocations, getPosition, nearestPlace, mapsLink } from './js/location.js';
+
+const T = {
+  bn: {
+    lang: 'EN', hello1: 'বিপদে আছেন?', hello2: 'শান্ত থাকুন। আপনার এলাকার সরকারি নম্বর এখানেই আছে।',
+    eyebrow: 'নোয়াখালী ও কক্সবাজারের সরকারি নম্বর', h999: '৯৯৯',
+    lead: 'প্রতিটি ইউনিয়নের থানা, চেয়ারম্যান, গ্রাম পুলিশ ও হাসপাতালের নম্বর। সব সরকারি ওয়েবসাইট থেকে নেওয়া, প্রতি সপ্তাহে যাচাই করা।',
+    distAll: 'সব জেলা',
+    stats: ['সরকারি নম্বর', 'ইউনিয়ন ও পৌরসভা', 'উপজেলা', 'যাচাই করা হয়েছে'],
+    quickEyebrow: 'দ্রুত যান', quickTitle: 'পরিচিত জায়গা', quickText: 'এক চাপে সেই এলাকার থানা ও জরুরি নম্বর দেখুন।',
+    places: { chowmuhani: ['চৌমুহনী', 'বেগমগঞ্জ, নোয়াখালী'], inani: ['ইনানী সৈকত', 'উখিয়া, কক্সবাজার'], hatiya: ['হাতিয়া', 'দ্বীপ উপজেলা, নোয়াখালী'], coxtown: ['কক্সবাজার শহর', 'পৌরসভা'] },
+    ctaEyebrow: 'আগে থেকে প্রস্তুত থাকুন', ctaTitle: 'প্রিয়জনের নম্বর এখনই সেভ করে রাখুন',
+    ctaText: 'বিপদের সময় নম্বর খোঁজার সময় থাকে না। একবার সেভ করলে এক চাপেই আপনার অবস্থান তাদের কাছে যাবে। লগইন লাগে না।', ctaBtn: 'নম্বর সেভ করুন',
+    call999: '৯৯৯-এ কল করুন', call999Sub: 'পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স · বিনা খরচে',
+    locate: 'আমার কাছের সাহায্য', locateSub: 'আপনার এলাকার থানা, চেয়ারম্যান ও গ্রাম পুলিশের নম্বর · ইন্টারনেট ছাড়াও চলে',
+    locating: 'আপনার অবস্থান খোঁজা হচ্ছে…', or: 'অথবা',
+    areaLabel: 'এলাকার নাম লিখুন', areaHint: 'ইউনিয়ন, পৌরসভা বা উপজেলা। যেমন: চৌমুহনী, হাতিয়া, ইনানী',
+    noMatch: 'এই নামে কোনো জায়গা তালিকায় নেই। তবুও সাহায্য পাবেন:', didYouMean: 'কাছাকাছি নাম', noExact: 'ঠিক এই বানানে পাইনি। নিচের কোনোটি কি আপনার জায়গা?', tellUs: 'আপনার জায়গার নাম তালিকায় না থাকলে নিচের "ভুল নম্বর জানান" দিয়ে জানান, আমরা যোগ করব।',
+    pickUpazila: 'আপনার উপজেলা বেছে নিন। থানা ও ইউএনও-র নম্বর সেখানেই পাবেন।',
+    kinds: { municipality: 'পৌরসভা', place: 'জায়গা', union: 'ইউনিয়ন', village: 'গ্রাম', upazila: 'উপজেলা' }, recent: (n) => `আগের এলাকা: ${n}`,
+    denied: 'লোকেশনের অনুমতি নেই। ফোনের সেটিংসে লোকেশন চালু করুন, অথবা নিচে এলাকার নাম লিখুন।',
+    unavailable: 'লোকেশন পাওয়া যায়নি। খোলা জায়গায় গিয়ে আবার চাপুন, অথবা নিচে এলাকার নাম লিখুন।',
+    timeout: 'লোকেশন পেতে দেরি হচ্ছে। আবার চাপুন, অথবা নিচে এলাকার নাম লিখুন।',
+    unsupported: 'এই ব্রাউজারে লোকেশন নেই। নিচে এলাকার নাম লিখুন।',
+    demo: 'পরীক্ষা (ডেমো): ধরে নিন আপনি এখানে আছেন। আসল ব্যবহারে এই অংশ থাকবে না।',
+    back: '← শুরুতে ফিরুন', youAreIn: 'আপনি আছেন', change: 'এলাকা বদলান', town: 'পৌরসভা', wholeUpazila: 'পুরো উপজেলা',
+    shareTitle: 'পরিবারকে আপনার অবস্থান পাঠান', shareText: 'একটি চাপেই ম্যাপ লিংকসহ বার্তা যাবে। ৯৯৯-কেও এই অবস্থান বলতে পারেন।',
+    shareMsg: (link) => `আমি বিপদে আছি। আমার অবস্থান: ${link}`, copy: 'কপি', copied: 'কপি হয়েছে', map: 'ম্যাপ',
+    outsideTitle: 'আপনার অবস্থান', outside: 'আপনি নোয়াখালী বা কক্সবাজারের বাইরে আছেন। SafeConnect এখন শুধু এই দুই জেলার স্থানীয় নম্বর দেখায়। নিচের জাতীয় নম্বরগুলো সারা দেশে কাজ করে।',
+    firstCalm: 'ওপর থেকে নিচে কল করুন। প্রথমজন না ধরলে পরেরজনকে।', first: 'আগে এদের কল করুন', more: 'আরও সাহায্য', showAll: (n) => `সবাইকে দেখুন (${n})`,
+    call: 'কল', ward: 'ওয়ার্ড', source: 'সরকারি উৎস', checked: 'যাচাই',
+    what: { emergency: 'জরুরি সেবা', police: 'পুলিশ', local: 'ইউনিয়ন পরিষদ', town: 'পৌরসভা', administration: 'উপজেলা নির্বাহী অফিসার', tourist_police: 'ট্যুরিস্ট পুলিশ' },
+    groups: { police: 'পুলিশ', tourist_police: 'ট্যুরিস্ট পুলিশ', village_police: 'গ্রাম পুলিশ (ওয়ার্ড অনুযায়ী)', local: 'চেয়ারম্যান ও মেম্বার', town: 'পৌরসভা',
+      coast: 'উপকূল ও নৌপথ', administration: 'উপজেলা প্রশাসন (ইউএনও)', health: 'হাসপাতাল ও স্বাস্থ্য', fire: 'ফায়ার সার্ভিস', women_children: 'নারী ও শিশু সহায়তা',
+      disaster: 'দুর্যোগ', helplines: 'জাতীয় হেল্পলাইন', info333: 'তথ্য ও সেবা (৩৩৩)' },
+    fallback: 'এই উপজেলার নম্বর প্রকাশিত নেই, তাই জেলার নম্বর দেখানো হচ্ছে।',
+    noNumbers: 'এই ইউনিয়নের প্রতিনিধিদের নম্বর সরকারি সাইটে নেই। থানা বা ইউএনও-কে কল করুন।',
+    flags: { number_not_published: 'নম্বর প্রকাশিত নেই', source_older_than_2_years: 'পুরোনো তথ্য হতে পারে', needs_manual_check: 'যাচাই বাকি' },
+    foot1: 'সব নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া। প্রতিটি নম্বরের নিচে উৎসের লিংক আছে। বিপদে প্রথমে ৯৯৯।',
+    sosBtn: 'প্রিয়জনকে লোকেশন পাঠান', sosBtnSubNone: 'লগইন লাগবে না · একবার একটি নম্বর সেভ করুন', sosBtnSub: 'এক চাপে পাঠান · SMS ইন্টারনেট ছাড়াও যায়',
+    sosTitle: 'প্রিয়জনকে লোকেশন পাঠান', sit: 'কী হয়েছে?', loc: 'আপনার অবস্থান', send: 'কাকে পাঠাবেন?', msgT: 'বার্তা (চাইলে বদলান)',
+    sits: { danger: ['বিপদে আছি', 'আমি বিপদে আছি, এখনই সাহায্য দরকার।'], followed: ['কেউ পিছু নিয়েছে', 'কেউ আমার পিছু নিয়েছে, আমি ভয় পাচ্ছি।'],
+      accident: ['দুর্ঘটনা', 'আমার দুর্ঘটনা হয়েছে।'], sick: ['অসুস্থ', 'আমি অসুস্থ, সাহায্য দরকার।'], lost: ['পথ হারিয়েছি', 'আমি পথ হারিয়েছি।'] },
+    urgent: 'জরুরি!', area: (n) => `আমার এলাকা: ${n}।`, mapLine: (l) => `ম্যাপ: ${l}`, noLoc: 'আমার লোকেশন পাওয়া যায়নি, এখনই আমাকে ফোন করো।',
+    timeLine: (x) => `সময়: ${x}`, sign: '(SafeConnect থেকে পাঠানো)',
+    gettingLoc: 'লোকেশন নেওয়া হচ্ছে…', gotLoc: (n, m) => `${n}${m ? ` (প্রায় ${m} মিটার)` : ''}`, outsideLoc: 'আপনার লোকেশন পাওয়া গেছে (ম্যাপ লিংক বার্তায় আছে)',
+    noLocYet: 'লোকেশন ছাড়াই পাঠাতে পারেন। বার্তায় ফোন করতে বলা আছে।',
+    sosDenied: 'লোকেশনের অনুমতি নেই (ফোনের সেটিংসে চালু করুন)।', sosNoLoc: 'লোকেশন পাওয়া যায়নি।',
+    sms: 'SMS পাঠান', smsAll: (n) => `সবাইকে SMS (${n} জন)`, wa: 'WhatsApp', other: 'অন্য অ্যাপে', copyMsg: 'বার্তা কপি', call: 'কল',
+    smsHint: 'SMS-এ ইন্টারনেট লাগে না। পাঠানোর বোতাম চাপলে ফোনের মেসেজ অ্যাপ খুলবে, সেখানে Send চাপুন।',
+    people: 'আমার প্রিয়জন', addTitle: 'নতুন নম্বর যোগ করুন', name: 'নাম', rel: 'সম্পর্ক (যেমন: মা)', phone: 'মোবাইল নম্বর', save: 'সেভ করুন', remove: 'মুছুন',
+    noPeople: 'এখনো কোনো নম্বর সেভ করা নেই। নিচে মা, বাবা বা কাছের কারো নম্বর সেভ করুন। পরে এক চাপেই পাঠাতে পারবেন।',
+    badPhone: 'সঠিক মোবাইল নম্বর দিন, যেমন ০১৭১২৩৪৫৬৭৮।', needName: 'নাম লিখুন।', maxPeople: 'সর্বোচ্চ ৩ জন সেভ করা যায়।',
+    privacy: 'নম্বরগুলো শুধু আপনার এই ফোনে সেভ থাকে। কোথাও পাঠানো হয় না, লগইনও লাগে না।', sendFamily: 'প্রিয়জনকে পাঠান',
+  },
+  en: {
+    lang: 'বাং', hello1: 'Need help?', hello2: 'Stay calm. The official numbers for your area are right here.',
+    eyebrow: "Official numbers for Noakhali & Cox's Bazar", h999: '999',
+    lead: 'Police station, chairman, village police and hospital: for every union, from official government websites, checked every week.',
+    distAll: 'All districts',
+    stats: ['official numbers', 'unions and towns', 'upazilas', 'last checked'],
+    quickEyebrow: 'Quick go', quickTitle: 'Known places', quickText: "One tap shows that area's police and emergency numbers.",
+    places: { chowmuhani: ['Chowmuhani', 'Begumganj, Noakhali'], inani: ['Inani beach', "Ukhia, Cox's Bazar"], hatiya: ['Hatiya', 'Island upazila, Noakhali'], coxtown: ["Cox's Bazar town", 'Municipality'] },
+    ctaEyebrow: 'Be ready before you need it', ctaTitle: 'Save your family\'s numbers now',
+    ctaText: 'In an emergency there is no time to look for numbers. Save them once and your location reaches them in one tap. No login.', ctaBtn: 'Save numbers',
+    call999: 'Call 999', call999Sub: 'Police, fire service, ambulance · free',
+    locate: 'Find help near me', locateSub: 'Numbers for your police station, chairman and village police · works without internet',
+    locating: 'Finding your location…', or: 'or',
+    areaLabel: 'Type your area', areaHint: 'Union, town or upazila. For example: Chowmuhani, Hatiya, Inani',
+    noMatch: 'This name is not in our list yet. You can still get help:', didYouMean: 'Similar names', noExact: 'Not found with this exact spelling. Is it one of these?', tellUs: 'If your place is missing, tell us with "Report a wrong number" below and we will add it.',
+    pickUpazila: 'Pick your upazila. Its police station and UNO numbers are there.',
+    kinds: { municipality: 'town', place: 'place', union: 'union', village: 'village', upazila: 'upazila' }, recent: (n) => `Last area: ${n}`,
+    denied: 'Location is not allowed. Turn on location in your phone settings, or type your area below.',
+    unavailable: 'Could not get your location. Move to an open place and tap again, or type your area below.',
+    timeout: 'Location is taking too long. Tap again, or type your area below.',
+    unsupported: 'This browser has no location. Type your area below.',
+    demo: 'Test (demo): pretend you are here. Real users will not see this part.',
+    back: '← Back to start', youAreIn: 'You are in', change: 'Change area', town: 'town', wholeUpazila: 'whole upazila',
+    shareTitle: 'Send your location to family', shareText: 'One tap sends a message with a map link. You can also tell 999 this location.',
+    shareMsg: (link) => `I am in danger. My location: ${link}`, copy: 'Copy', copied: 'Copied', map: 'Map',
+    outsideTitle: 'Your location', outside: "You are outside Noakhali and Cox's Bazar. SafeConnect shows local numbers only for these two districts for now. The national numbers below work everywhere.",
+    firstCalm: 'Call from top to bottom. If one does not answer, try the next.', first: 'Call these first', more: 'More help', showAll: (n) => `Show all (${n})`,
+    call: 'Call', ward: 'Ward', source: 'Official source', checked: 'Checked',
+    what: { emergency: 'Emergency', police: 'Police station', local: 'Union council', town: 'Municipality', administration: 'Upazila officer (UNO)', tourist_police: 'Tourist Police' },
+    groups: { police: 'Police', tourist_police: 'Tourist Police', village_police: 'Village police (by ward)', local: 'Chairman and members', town: 'Municipality',
+      coast: 'Coast and river', administration: 'Upazila administration (UNO)', health: 'Hospital and health', fire: 'Fire service', women_children: 'Women and children',
+      disaster: 'Disaster', helplines: 'National helplines', info333: 'Information and services (333)' },
+    fallback: 'No number is published for this upazila, so district numbers are shown.',
+    noNumbers: "This union's representatives have no published numbers. Call the police station or the UNO.",
+    flags: { number_not_published: 'Number not published', source_older_than_2_years: 'May be outdated', needs_manual_check: 'Not checked yet' },
+    foot1: 'All numbers come from official *.gov.bd websites. Each number links to its source. In danger, call 999 first.',
+    sosBtn: 'Send my location to family', sosBtnSubNone: 'No login · save one number once', sosBtnSub: 'One tap · SMS works without internet',
+    sosTitle: 'Send my location to family', sit: 'What happened?', loc: 'Your location', send: 'Send to', msgT: 'Message (you can change it)',
+    sits: { danger: ['In danger', 'I am in danger and need help now.'], followed: ['Being followed', 'Someone is following me and I am scared.'],
+      accident: ['Accident', 'I had an accident.'], sick: ['Feeling ill', 'I am ill and need help.'], lost: ['Lost', 'I am lost.'] },
+    urgent: 'URGENT!', area: (n) => `My area: ${n}.`, mapLine: (l) => `Map: ${l}`, noLoc: 'I could not get my location. Call me now.',
+    timeLine: (x) => `Time: ${x}`, sign: '(sent from SafeConnect)',
+    gettingLoc: 'Getting your location…', gotLoc: (n, m) => `${n}${m ? ` (about ${m} m)` : ''}`, outsideLoc: 'Location found (the map link is in the message)',
+    noLocYet: 'You can send without a location. The message asks them to call you.',
+    sosDenied: 'Location is not allowed (turn it on in phone settings).', sosNoLoc: 'Could not get your location.',
+    sms: 'Send SMS', smsAll: (n) => `SMS everyone (${n})`, wa: 'WhatsApp', other: 'Other app', copyMsg: 'Copy message', call: 'Call',
+    smsHint: 'SMS needs no internet. The button opens your messages app; tap Send there.',
+    people: 'My people', addTitle: 'Add a number', name: 'Name', rel: 'Relation (e.g. mother)', phone: 'Mobile number', save: 'Save', remove: 'Remove',
+    noPeople: 'No number saved yet. Save your mother, father or a close friend below. Next time it is one tap.',
+    badPhone: 'Enter a valid mobile number, like 01712345678.', needName: 'Enter a name.', maxPeople: 'You can save up to 3 people.',
+    privacy: 'These numbers are saved only on this phone. They are never sent anywhere, and no login is needed.', sendFamily: 'Send to family',
+  },
+};
+const NATIONAL_EVERYWHERE = ['national-emergency-999', 'women-children-violence-109', 'child-helpline-1098', 'health-call-centre-16263', 'fire-service-102', 'info-service-333'];
+const VISIBLE = 6;
+
+const $ = (id) => document.getElementById(id);
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+let lang = store.get('sc-lang') || 'bn';
+let data = null, locations = null, current = null, areaIndex = [];
+const t = () => T[lang];
+const digits = (s) => (lang === 'bn' ? String(s).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[d]) : String(s));
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const withPhone = (r) => r.phones && r.phones.length > 0;
+const fmtDate = (iso) => { try { return new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso)); } catch { return iso; } };
+
+/* ---------- names ---------- */
+const districtOf = (key) => DISTRICTS.find((d) => d.key === key);
+function upazilaName(dkey, en) {
+  const u = upazilas(data.docs[dkey]).find((x) => x.en === en);
+  return lang === 'bn' && u ? u.bn : en;
+}
+function areaName(a) {
+  if (!a) return '';
+  if (lang === 'en' && a.en) return a.en;
+  return a.type === 'municipality' ? a.bn.split(/[,،]/)[0].trim() : a.bn;
+}
+function placeTitle(p) {
+  if (p.label) return p.label;
+  return p.area ? areaName(p.area) : `${upazilaName(p.district, p.upazila)} (${t().wholeUpazila})`;
+}
+function placeSub(p) {
+  const d = districtOf(p.district);
+  const parts = p.area ? [upazilaName(p.district, p.upazila)] : [];
+  parts.push(lang === 'bn' ? d.bn : d.en);
+  return parts.join(', ');
+}
+
+/* ---------- area search: any spelling, Bangla or English, never a dead end ---------- */
+// Sound key: Bangla and typed English both become a consonant skeleton, so
+// "hasanhat", "hason haat" and "হাসান হাট" all become "hsnht".
+const BN_LAT = { 'ক': 'k', 'খ': 'k', 'গ': 'g', 'ঘ': 'g', 'ঙ': 'ng', 'চ': 'c', 'ছ': 's', 'জ': 'j', 'ঝ': 'j', 'ঞ': 'n', 'ট': 't', 'ঠ': 't',
+  'ড': 'd', 'ঢ': 'd', 'ণ': 'n', 'ত': 't', 'থ': 't', 'দ': 'd', 'ধ': 'd', 'ন': 'n', 'প': 'p', 'ফ': 'f', 'ব': 'b', 'ভ': 'b', 'ম': 'm',
+  'য': 'j', 'র': 'r', 'ল': 'l', 'শ': 's', 'ষ': 's', 'স': 's', 'হ': 'h', 'ড়': 'r', 'ঢ়': 'r', 'ৎ': 't', 'ং': 'ng', 'ক্ষ': 'k' };
+const GENERIC = /(ইউনিয়ন|পৌরসভা|পৌর|উপজেলা|জেলা|গ্রাম|\bunion\b|\bup\b|pourashava|paurashava|pourasava|municipality|upazila|upozila|\bzila\b|\bdistrict\b|\bgram\b|\bvillage\b|\btown\b)/gi;
+function wordKey(w) {
+  const lead = /^[aeiouঅ-ঔ]/.test(w) ? '@' : '';   // a word that starts with a vowel keeps a marker: "inani", "enani", "ইনানী" -> "@n"
+  let s = w.replace(/য়/g, '').replace(/[ডঢ]়/g, 'র');   // য় is a vowel sound; ড়/ঢ় sound like র
+  s = s.replace(/[ঀ-৿]/g, (ch) => BN_LAT[ch] ?? '');
+  s = s.replace(/c(?=[aou])/g, 'k');           // English "cox": c before a/o/u sounds like k
+  s = s.replace(/ch/g, 'c').replace(/sh/g, 's').replace(/kh/g, 'k').replace(/gh/g, 'g').replace(/th/g, 't').replace(/dh/g, 'd')
+    .replace(/bh/g, 'b').replace(/ph/g, 'f').replace(/x/g, 'ks').replace(/z/g, 'j').replace(/q/g, 'k').replace(/v/g, 'b');
+  s = s.replace(/[^a-z]/g, '').replace(/[aeiouwy]/g, '');
+  return lead + s.replace(/(.)\1+/g, '$1');     // "kks" -> "ks"
+}
+function soundKey(text) {
+  return norm(text).toLowerCase().replace(GENERIC, ' ').split(/[\s,.'’\-]+/).filter(Boolean).map(wordKey).join('');
+}
+function editDistance(a, b) {
+  if (Math.abs(a.length - b.length) > 3) return 9;
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let diag = prev[0]; prev[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = prev[j];
+      prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
+      diag = tmp;
+    }
+  }
+  return prev[b.length];
+}
+function addItem(item, names) {
+  item.words = norm(names.join(' ')).toLowerCase();
+  const parts = names.flatMap((n) => [n, ...norm(n).split(/\s+/)]);
+  item.keys = [...new Set(parts.map(soundKey).filter((k) => k.length >= 2))];
+  areaIndex.push(item);
+}
+function buildIndex() {
+  areaIndex = [];
+  for (const d of DISTRICTS) {
+    const doc = data.docs[d.key];
+    if (!doc) continue;
+    for (const u of upazilas(doc)) {
+      addItem({ kind: 'upazila', place: { district: d.key, upazila: u.en, area: null } }, [u.bn, u.en]);
+      for (const a of localAreas(doc, u.en)) addItem({ kind: a.type, place: { district: d.key, upazila: u.en, area: a } }, [a.bn.split(/[,،]/)[0], a.en || '']);
+    }
+    for (const p of doc.places || []) {
+      const upz = upazilas(doc).find((u) => norm(u.bn) === norm(p.upazila_bn));
+      if (upz) addItem({ kind: 'place', place: { district: d.key, upazila: upz.en, area: { type: 'union', bn: norm(p.union_bn) }, placeId: p.id }, named: p }, [p.name_bn, p.name_en]);
+    }
+    for (const v of doc.villages || []) {
+      if (/ওয়ার্ড|ওয়ার্ড|\d|[০-৯]/.test(norm(v.village_bn))) continue;
+      const upz = upazilas(doc).find((u) => norm(u.bn) === norm(v.upazila_bn));
+      const area = upz && localAreas(doc, upz.en).find((a) => a.type === 'union' && a.bn === norm(v.union_bn));
+      if (area) addItem({ kind: 'village', village: norm(v.village_bn), place: { district: d.key, upazila: upz.en, area } }, [v.village_bn]);
+    }
+  }
+}
+// Lower score = better. 0-2 text match, 3 same sound, 4 sound starts the same: these are real matches.
+// 5+ is only a close spelling: shown under "Did you mean", never as if it were the place.
+function scoreItem(item, s, key) {
+  const w = item.words.split(/\s+/);
+  if (w.some((x) => x === s)) return 0;
+  if (w.some((x) => x.startsWith(s))) return 1;
+  if (item.words.includes(s)) return 2;
+  if (key.length < 2) return null;
+  let best = null;
+  for (const k of item.keys) {
+    let sc = null;
+    if (k === key) sc = key.replace('@', '').length >= 4 ? 3 : 5;   // short names sound alike too easily: only "similar"
+    else if (key.length >= 4 && k.startsWith(key)) sc = 4;
+    else if (key.length >= 3) {
+      const d = editDistance(key, k);
+      if (d <= Math.max(1, Math.floor(key.length / 3))) sc = 5 + d;
+    }
+    if (sc != null) best = Math.min(best ?? 99, sc);
+  }
+  return best;
+}
+const KIND_ORDER = { municipality: 0, place: 1, union: 2, village: 3, upazila: 4 };
+function findAreas(q) {
+  const s = norm(q).toLowerCase().trim();
+  if (s.length < 2) return { hits: [], close: [] };
+  const key = soundKey(s);
+  const only = $('distSel').value;
+  const out = [];
+  for (const item of areaIndex) {
+    if (only && item.place.district !== only) continue;
+    const sc = scoreItem(item, s, key);
+    if (sc != null) out.push({ item, sc });
+  }
+  out.sort((a, b) => a.sc - b.sc || KIND_ORDER[a.item.kind] - KIND_ORDER[b.item.kind]);
+  const seen = new Set();
+  const uniq = out.filter(({ item }) => { const k = `${item.kind}|${item.village || ''}|${item.place.district}|${item.place.upazila}|${item.place.area?.bn || ''}`; if (seen.has(k)) return false; seen.add(k); return true; });
+  return { hits: uniq.filter((x) => x.sc <= 4).slice(0, 8).map((x) => x.item), close: uniq.filter((x) => x.sc > 4).slice(0, 3).map((x) => x.item) };
+}
+function itemLabel(h) {
+  const p = { ...h.place };
+  if (h.named) p.label = lang === 'bn' ? h.named.name_bn : h.named.name_en;
+  const kindWord = t().kinds[h.kind] || '';
+  let title;
+  if (h.kind === 'village') title = h.village;
+  else if (h.place.area) title = p.label || areaName(h.place.area);
+  else title = upazilaName(p.district, p.upazila);
+  const sub = h.kind === 'village' ? `${areaName(h.place.area)}, ${placeSub(p)}` : placeSub(p);
+  return { p, title: `${title} (${kindWord})`, sub };
+}
+function suggestButton(h) {
+  const li = el('li');
+  const b = el('button'); b.type = 'button';
+  const { p, title, sub } = itemLabel(h);
+  b.append(el('b', null, title), el('span', null, sub));
+  b.addEventListener('click', () => openArea(p, null));
+  li.append(b);
+  return li;
+}
+function renderSuggest() {
+  const q = $('areaInput').value;
+  const box = $('suggest');
+  if (norm(q).length < 2) { box.hidden = true; return; }
+  const { hits, close } = findAreas(q);
+  if (hits.length) { box.replaceChildren(...hits.map(suggestButton)); box.hidden = false; return; }
+  // Never a dead end: close spellings, then the upazila list, then GPS and 999.
+  const s = t();
+  const parts = [el('li', 'none', close.length ? s.noExact : s.noMatch)];
+  if (close.length) { parts.push(el('li', 'group', s.didYouMean)); close.forEach((h) => parts.push(suggestButton(h))); }
+  const ups = el('li', 'fallback-box');
+  ups.append(el('p', null, s.pickUpazila));
+  const chips = el('div', 'chips');
+  const only = $('distSel').value;
+  for (const d of DISTRICTS) {
+    if (only && d.key !== only) continue;
+    const doc = data.docs[d.key]; if (!doc) continue;
+    for (const u of upazilas(doc)) {
+      const c = el('button', 'chip', lang === 'bn' ? u.bn : u.en); c.type = 'button';
+      c.addEventListener('click', () => openArea({ district: d.key, upazila: u.en, area: null }, null));
+      chips.append(c);
+    }
+  }
+  ups.append(chips);
+  const row = el('div', 'tools');
+  const gps = el('button', 'btn violet', s.locate); gps.type = 'button'; gps.addEventListener('click', locate);
+  const call = el('a', 'btn', s.call999); call.href = 'tel:999';
+  row.append(gps, call);
+  ups.append(row, el('p', 'privacy', s.tellUs));
+  parts.push(ups);
+  box.replaceChildren(...parts);
+  box.hidden = false;
+}
+
+/* ---------- contacts ---------- */
+function callLink(num, label, red = false) {
+  const a = el('a', `call${red ? ' red' : ''}`);
+  a.href = `tel:${num}`;
+  a.append(el('small', null, label), document.createTextNode(digits(num)));
+  return a;
+}
+function personRow(r) {
+  const row = el('div', 'person');
+  const info = el('div');
+  const nm = r.kind === 'national' && lang === 'en' ? r.name_en : r.name_bn;
+  info.append(el('span', 'name', nm || r.designation_bn));
+  const role = [r.designation_bn !== nm ? r.designation_bn : '', r.office_bn].filter(Boolean).join(' · ');
+  if (role && r.kind !== 'national') info.append(el('span', 'role', role));
+  const tags = el('div', 'tags');
+  if (r.ward_no) tags.append(el('span', 'tag', `${t().ward} ${digits(r.ward_no)}`));
+  for (const f of r.flags || []) if (t().flags[f]) tags.append(el('span', 'tag warn', t().flags[f]));
+  if (tags.children.length) info.append(tags);
+  row.append(info);
+  const calls = el('div', 'calls');
+  (r.phones || []).slice(0, 2).forEach((p) => calls.append(callLink(p, t().call)));
+  row.append(calls);
+  if (r.source_url) {
+    const src = el('p', 'src');
+    const a = el('a', null, `${t().source} ↗`); a.href = r.source_url; a.target = '_blank'; a.rel = 'noopener';
+    src.append(a, ` · ${t().checked} ${fmtDate(r.script_check?.on || r.checked_on || r.retrieved_on)}`);
+    row.append(src);
+  }
+  return row;
+}
+function firstRow(what, r, red = false) {
+  const row = el('div', 'first-row glass');
+  const info = el('div');
+  info.append(el('span', 'what', what));
+  const who = r.kind === 'national' ? (lang === 'en' ? r.name_en : r.name_bn) : [r.name_bn, r.designation_bn].filter(Boolean).join(', ');
+  info.append(el('span', 'who', who));
+  row.append(info, callLink(r.phones[0], t().call, red));
+  return row;
+}
+
+function renderArea() {
+  const p = current.place;
+  const groups = p.outside ? null : areaContacts(data, p);
+  $('youAreIn').textContent = p.outside ? t().outsideTitle : t().youAreIn;
+  $('placeName').textContent = p.outside ? `${digits(current.pos.lat.toFixed(4))}, ${digits(current.pos.lon.toFixed(4))}` : placeTitle(p);
+  $('placeSub').textContent = p.outside ? '' : placeSub(p);
+  $('outside').hidden = !p.outside;
+  $('outside').textContent = t().outside;
+
+  const note = p.placeId && data.docs[p.district].places.find((x) => x.id === p.placeId);
+  $('placeNote').hidden = !note;
+  if (note) $('placeNote').textContent = note.how_to_report_bn;
+
+  // share
+  $('share').hidden = !current.pos;
+  if (current.pos) {
+    const link = mapsLink(current.pos);
+    const msg = t().shareMsg(link);
+    const wa = el('a', 'btn', 'WhatsApp'); wa.href = `https://wa.me/?text=${encodeURIComponent(msg)}`; wa.target = '_blank'; wa.rel = 'noopener';
+    const sms = el('a', 'btn', 'SMS'); sms.href = `sms:?&body=${encodeURIComponent(msg)}`;
+    const map = el('a', 'btn', t().map); map.href = link; map.target = '_blank'; map.rel = 'noopener';
+    const copy = el('button', 'btn', t().copy); copy.type = 'button';
+    copy.addEventListener('click', () => navigator.clipboard?.writeText(msg).then(() => { copy.textContent = t().copied; }, () => {}));
+    const fam = el('button', 'btn violet', t().sendFamily); fam.type = 'button';
+    fam.addEventListener('click', () => openSos(current.pos));
+    $('shareBtns').replaceChildren(fam, wa, sms, copy, map);
+  }
+
+  // call these first
+  const first = $('firstList');
+  first.replaceChildren();
+  const nat = (id) => data.national.find((n) => n.id === id);
+  first.append(firstRow(t().what.emergency, nat('national-emergency-999'), true));
+  if (groups) {
+    const g = (id) => groups.find((x) => x.id === id);
+    const pick = (id) => (g(id)?.items || []).find((r) => withPhone(r) && r.kind !== 'national');
+    const police = pick('police');
+    if (police) first.append(firstRow(t().what.police, police));
+    if (p.area && pick('tourist_police') && p.district === 'coxsbazar') first.append(firstRow(t().what.tourist_police, nat('tourist-police-helpline')));
+    const local = p.area?.type === 'municipality' ? pick('town') : pick('local');
+    if (local) first.append(firstRow(p.area?.type === 'municipality' ? t().what.town : t().what.local, local));
+    else { const uno = pick('administration'); if (uno) first.append(firstRow(t().what.administration, uno)); }
+  }
+
+  // more help
+  const more = $('moreList');
+  more.replaceChildren();
+  const list = groups
+    ? groups.filter((gr) => gr.id !== 'emergency')
+    : [{ id: 'helplines', items: NATIONAL_EVERYWHERE.slice(1).map(nat).filter(Boolean) }];
+  for (const gr of list) {
+    const items = gr.items;
+    const callable = items.filter(withPhone).length;
+    const d = el('details', 'cat');
+    const s = el('summary');
+    s.append(el('span', null, t().groups[gr.id] || gr.id), el('span', 'count', digits(callable)));
+    d.append(s);
+    const body = el('div', 'cat-body');
+    if (gr.fallback) body.append(el('p', 'fallback', t().fallback));
+    if (gr.noNumbers) body.append(el('p', 'fallback', t().noNumbers));
+    const sorted = [...items].sort((a, b) => withPhone(b) - withPhone(a));
+    sorted.forEach((r, i) => { const row = personRow(r); if (i >= VISIBLE) row.hidden = true; body.append(row); });
+    if (sorted.length > VISIBLE) {
+      const b = el('button', 'btn showall', t().showAll(digits(sorted.length))); b.type = 'button';
+      b.addEventListener('click', () => { body.querySelectorAll('.person[hidden]').forEach((x) => { x.hidden = false; }); b.remove(); });
+      body.append(b);
+    }
+    d.append(body);
+    more.append(d);
+  }
+  if (!groups) more.firstChild.open = true;
+}
+
+/* ---------- views ---------- */
+function showView(name) {
+  $('home').hidden = name !== 'home';
+  $('area').hidden = name !== 'area';
+  $('sos').hidden = name !== 'sos';
+  window.scrollTo(0, 0);
+}
+function openArea(place, pos) {
+  current = { place, pos };
+  if (!place.outside) store.set('sc-last', JSON.stringify(place));
+  renderArea();
+  showView('area');
+}
+function goHome() {
+  $('areaInput').value = '';
+  $('suggest').hidden = true;
+  renderRecent();
+  showView('home');
+}
+function renderRecent() {
+  let last = null;
+  try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
+  const b = $('recentBtn');
+  if (!last || !data.docs[last.district]) { b.hidden = true; return; }
+  b.textContent = t().recent(placeTitle(last));
+  b.onclick = () => openArea(last, null);
+  b.hidden = false;
+}
+
+/* ---------- location ---------- */
+function msg(text) { $('locMsg').textContent = text; $('locMsg').hidden = !text; }
+function resolvePlace(pos) {
+  const found = locations && nearestPlace(locations, pos);
+  if (!found) return { outside: true };
+  const place = { district: found.district, upazila: found.upazila, area: found.area };
+  const doc = data.docs[found.district];
+  const named = found.area && (doc.places || []).find((x) => norm(x.union_bn) === found.area.bn);
+  if (named) place.placeId = named.id;
+  if (found.area) {
+    const full = localAreas(doc, found.upazila).find((a) => a.type === found.area.type && a.bn === found.area.bn);
+    if (full) place.area = full;
+  }
+  return place;
+}
+function applyPosition(pos) { lastFix = { pos, at: Date.now() }; openArea(resolvePlace(pos), pos); }
+function demoPicks() {
+  if (!locations) return [];
+  const picks = [
+    [locations.municipalities.find((m) => m.municipality_bn.includes('চৌমুহনী')), { bn: 'চৌমুহনী', en: 'Chowmuhani' }],
+    [locations.unions.find((u) => u.union_en === 'Jaliapalong'), { bn: 'ইনানী সৈকত', en: 'Inani beach' }],
+    [locations.unions.find((u) => u.district === 'Noakhali' && u.upazila_en === 'Hatiya'), { bn: 'হাতিয়া', en: 'Hatiya' }],
+    [{ lat: 23.8103, lon: 90.4125 }, { bn: 'ঢাকা (জেলার বাইরে)', en: 'Dhaka (outside)' }],
+  ].filter(([p]) => p);
+  return picks;
+}
+function fillDemo(box, textEl, chipsEl, onPick) {
+  if (!locations) return;
+  textEl.textContent = t().demo;
+  chipsEl.replaceChildren(...demoPicks().map(([p, name]) => {
+    const b = el('button', 'chip', name[lang]); b.type = 'button';
+    b.addEventListener('click', () => onPick({ lat: p.lat + 0.004, lon: p.lon - 0.003, accuracy: 20 }));
+    return b;
+  }));
+  box.hidden = false;
+}
+function showDemo() { fillDemo($('demo'), $('demoText'), $('demoChips'), applyPosition); }
+async function locate() {
+  const btn = $('locateBtn');
+  btn.setAttribute('aria-busy', 'true');
+  msg(t().locating);
+  try {
+    const pos = await getPosition();
+    msg('');
+    applyPosition(pos);
+  } catch (err) {
+    msg(t()[err.code] || t().unavailable);
+    showDemo();
+  } finally {
+    btn.removeAttribute('aria-busy');
+  }
+}
+
+/* ---------- send location to family (no login) ---------- */
+let lastFix = null;          // { pos, at }
+let sos = { situation: 'danger', pos: null, place: null, state: 'idle', edited: false };
+const toAscii = (s) => String(s).replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+function normPhone(raw) {
+  let d = toAscii(raw).replace(/\D/g, '');
+  if (d.startsWith('880')) d = d.slice(2);
+  else if (d.startsWith('88') && d.length === 13) d = d.slice(2);
+  return /^01[3-9]\d{8}$/.test(d) ? d : null;
+}
+function getPeople() { try { return JSON.parse(store.get('sc-family') || '[]').filter((p) => p && normPhone(p.phone)); } catch { return []; } }
+function setPeople(list) { store.set('sc-family', JSON.stringify(list)); }
+
+function renderHomeSos() {
+  const people = getPeople();
+  const sub = $('sosBtnSub');
+  sub.replaceChildren();
+  if (!people.length) { sub.textContent = t().sosBtnSubNone; return; }
+  sub.textContent = t().sosBtnSub;
+  const chips = el('span', 'who-list');
+  people.forEach((p) => chips.append(el('span', null, p.rel || p.name)));
+  sub.append(chips);
+}
+
+function sosMessage() {
+  const s = t();
+  const lines = [`${s.urgent} ${s.sits[sos.situation][1]}`];
+  if (sos.place && !sos.place.outside) lines.push(s.area(`${placeTitle(sos.place)}, ${placeSub(sos.place)}`));
+  lines.push(sos.pos ? s.mapLine(mapsLink(sos.pos)) : s.noLoc);
+  const time = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', { hour: 'numeric', minute: '2-digit' }).format(new Date());
+  lines.push(`${s.timeLine(time)} ${s.sign}`);
+  return lines.join('\n');
+}
+function refreshMessage() { if (!sos.edited) $('sosMsg').value = sosMessage(); renderSend(); }
+
+function renderSituations() {
+  $('situations').replaceChildren(...Object.entries(t().sits).map(([k, [label]]) => {
+    const b = el('button', 'chip', label); b.type = 'button';
+    b.setAttribute('aria-pressed', String(k === sos.situation));
+    b.addEventListener('click', () => { sos.situation = k; sos.edited = false; renderSituations(); refreshMessage(); });
+    return b;
+  }));
+}
+function renderLoc() {
+  const line = $('sosLoc');
+  line.className = 'locline';
+  if (sos.state === 'getting') line.textContent = t().gettingLoc;
+  else if (sos.pos && sos.place && !sos.place.outside) {
+    line.classList.add('ok');
+    const acc = sos.pos.accuracy ? digits(Math.round(sos.pos.accuracy)) : '';
+    line.textContent = t().gotLoc(`${placeTitle(sos.place)}, ${placeSub(sos.place)}`, acc);
+  } else if (sos.pos) { line.classList.add('ok'); line.textContent = t().outsideLoc; }
+  else { line.classList.add('bad'); line.textContent = `${sos.error === 'denied' ? t().sosDenied : t().sosNoLoc} ${t().noLocYet}`; }
+}
+function setSosPos(pos) {
+  sos.pos = pos; sos.place = resolvePlace(pos); sos.state = 'done';
+  lastFix = { pos, at: Date.now() };
+  $('sosDemo').hidden = true;
+  renderLoc(); refreshMessage();
+}
+function renderSend() {
+  const people = getPeople();
+  const body = () => $('sosMsg').value;
+  const list = $('sendList');
+  list.replaceChildren();
+  if (!people.length) {
+    list.append(el('p', 'msg plain', t().noPeople));
+    $('peopleBox').open = true;
+  }
+  for (const p of people) {
+    const row = el('div', 'contact');
+    const av = el('span', 'avatar', (p.name || '?').trim().charAt(0).toUpperCase());
+    const info = el('div');
+    info.append(el('b', null, p.rel ? `${p.name} (${p.rel})` : p.name), el('span', 'num', digits(p.phone)));
+    const sendRow = el('div', 'send-row');
+    const sms = el('a', 'send'); sms.href = `sms:${p.phone}?&body=${encodeURIComponent(body())}`;
+    sms.append(document.createTextNode(t().sms), el('small', null, lang === 'bn' ? 'ইন্টারনেট লাগে না' : 'no internet needed'));
+    const wa = el('a', 'send alt', t().wa); wa.href = `https://wa.me/88${p.phone}?text=${encodeURIComponent(body())}`; wa.target = '_blank'; wa.rel = 'noopener';
+    const call = el('a', 'send alt', t().call); call.href = `tel:${p.phone}`;
+    const pair = el('div', 'pair'); pair.append(wa, call);
+    sendRow.append(sms, pair);
+    row.append(av, info, sendRow);
+    list.append(row);
+  }
+  const tools = $('sendTools');
+  tools.replaceChildren();
+  if (people.length > 1) {
+    const all = el('a', 'btn', t().smsAll(digits(people.length)));
+    all.href = `sms:${people.map((p) => p.phone).join(',')}?&body=${encodeURIComponent(body())}`;
+    tools.append(all);
+  }
+  const copy = el('button', 'btn', t().copyMsg); copy.type = 'button';
+  copy.addEventListener('click', () => navigator.clipboard?.writeText(body()).then(() => { copy.textContent = t().copied; }, () => { $('sosMsg').select(); }));
+  tools.append(copy);
+  if (navigator.share) {
+    const other = el('button', 'btn', t().other); other.type = 'button';
+    other.addEventListener('click', () => navigator.share({ text: body() }).catch(() => {}));
+    tools.append(other);
+  }
+}
+function renderPeople() {
+  const people = getPeople();
+  $('peopleCount').textContent = digits(people.length);
+  $('savedList').replaceChildren(...people.map((p, i) => {
+    const row = el('div', 'saved');
+    row.append(el('span', null, `${p.name}${p.rel ? ` (${p.rel})` : ''} · ${digits(p.phone)}`));
+    const rm = el('button', 'linkbtn', t().remove); rm.type = 'button';
+    rm.addEventListener('click', () => { const l = getPeople(); l.splice(i, 1); setPeople(l); renderPeople(); renderSend(); renderHomeSos(); });
+    row.append(rm);
+    return row;
+  }));
+  $('addForm').hidden = people.length >= 3;
+}
+async function openSos(pos) {
+  sos = { situation: sos.situation || 'danger', pos: null, place: null, state: 'getting', edited: false, error: null };
+  renderSituations(); renderPeople();
+  showView('sos');
+  const fresh = pos || (lastFix && Date.now() - lastFix.at < 120000 ? lastFix.pos : null);
+  if (fresh) { setSosPos(fresh); return; }
+  renderLoc(); refreshMessage();
+  try { setSosPos(await getPosition()); }
+  catch (err) {
+    sos.state = 'failed'; sos.error = err.code;
+    renderLoc(); refreshMessage();
+    fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos);
+  }
+}
+$('sosBtn').addEventListener('click', () => openSos(null));
+$('sosBack').addEventListener('click', goHome);
+$('sosMsg').addEventListener('input', () => { sos.edited = true; renderSend(); });
+$('addForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const err = $('formErr');
+  const name = $('pName').value.trim();
+  const phone = normPhone($('pPhone').value);
+  const people = getPeople();
+  const fail = (m) => { err.textContent = m; err.hidden = false; };
+  if (people.length >= 3) return fail(t().maxPeople);
+  if (!name) return fail(t().needName);
+  if (!phone) return fail(t().badPhone);
+  err.hidden = true;
+  people.push({ name, rel: $('pRel').value.trim(), phone });
+  setPeople(people);
+  $('pName').value = ''; $('pRel').value = ''; $('pPhone').value = '';
+  renderPeople(); renderSend(); renderHomeSos();
+});
+
+/* ---------- home extras ---------- */
+const ICONS = {
+  phone: 'M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z',
+  map: 'M15 4 9 2 3 4v18l6-2 6 2 6-2V2l-6 2Zm-1 15.3-4-1.3V4.7l4 1.3v13.3Z',
+  pin: 'M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z',
+  check: 'M9.5 16.2 5.3 12l-1.4 1.4 5.6 5.6L21 7.5l-1.4-1.4z',
+  open: 'M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v8H3V5h2Z',
+};
+const svg = (d) => { const n = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); n.setAttribute('viewBox', '0 0 24 24'); n.setAttribute('aria-hidden', 'true');
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('fill', 'currentColor'); p.setAttribute('d', d); n.append(p); return n; };
+function renderStats() {
+  const docs = Object.values(data.docs);
+  const numbers = docs.reduce((n, d) => n + d.records.filter(withPhone).length, 0) + data.national.length;
+  const areas = docs.reduce((n, d) => n + d.unions.length + d.municipalities.length, 0);
+  const upz = docs.reduce((n, d) => n + upazilas(d).length, 0);
+  const checked = docs.map((d) => d.records.find((r) => r.script_check?.on)?.script_check.on).find(Boolean) || docs[0]?.retrieved_on;
+  const fmt = (n) => digits(new Intl.NumberFormat('en-US').format(n));
+  const vals = [[fmt(numbers), ICONS.phone], [fmt(areas), ICONS.map], [fmt(upz), ICONS.pin], [checked ? fmtDate(checked) : '', ICONS.check]];
+  $('stats').replaceChildren(...vals.map(([v, ic], i) => {
+    const d = el('div', 'stat');
+    const icon = el('span', 'ic'); icon.append(svg(ic));
+    d.append(icon, el('b', null, v), el('span', null, t().stats[i]));
+    return d;
+  }));
+}
+function quickPlaces() {
+  const find = (fn) => areaIndex.find(fn);
+  return [
+    ['chowmuhani', 'town', find((x) => x.place.area?.type === 'municipality' && x.place.area.bn.includes('চৌমুহনী'))],
+    ['inani', 'beach', find((x) => x.named && x.named.id === 'place-inani-beach')],
+    ['hatiya', 'island', find((x) => !x.place.area && x.place.upazila === 'Hatiya')],
+    ['coxtown', 'city', find((x) => x.place.district === 'coxsbazar' && x.place.area?.type === 'municipality')],
+  ].filter(([, , item]) => item);
+}
+function renderPlaces() {
+  $('places').replaceChildren(...quickPlaces().map(([key, art, item]) => {
+    const [name, sub] = t().places[key];
+    const b = el('button', 'place'); b.type = 'button';
+    const label = el('span', 'label'); label.append(el('b', null, name), el('small', null, sub));
+    const corner = el('span', 'corner'); corner.append(svg(ICONS.open));
+    b.append(el('span', `art ${art}`), corner, label);
+    b.addEventListener('click', () => { const p = { ...item.place }; if (item.named) p.label = lang === 'bn' ? item.named.name_bn : item.named.name_en; openArea(p, null); });
+    return b;
+  }));
+}
+
+
+const SITE = {
+  repo: 'https://github.com/Jerin101/safe-connect',
+  report: 'https://github.com/Jerin101/safe-connect/issues/new?labels=data-gap&title=Wrong%20number',
+};
+const PAGE = {
+  bn: {
+    nav: ['হোম', 'জরুরি নম্বর', 'এলাকা খুঁজুন', 'প্রিয়জনকে লোকেশন', 'পরিস্থিতি অনুযায়ী', 'আমাদের সম্পর্কে', 'প্রশ্ন ও উত্তর'],
+    about: { eyebrow: 'আমাদের সম্পর্কে', title: 'SafeConnect কী?',
+      text: 'বিপদের সময় কাকে ফোন করবেন, খুঁজতেই সময় চলে যায়। SafeConnect আপনার অবস্থান দেখে কাছের থানা, ইউনিয়ন পরিষদ, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর ঠিক ক্রমে দেখায়। এখন নোয়াখালী ও কক্সবাজারে, পরে সারা দেশে।',
+      points: [['check', 'শুধু সরকারি নম্বর', 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া, উৎসের লিংকসহ। প্রতি সপ্তাহে আবার যাচাই হয়।'],
+        ['signal', 'দুর্বল নেটওয়ার্কের জন্য তৈরি', 'লোকেশন দিয়ে এলাকা খোঁজা আর SMS-এ লোকেশন পাঠাতে ইন্টারনেট লাগে না। পুরো অফলাইন অ্যাপ তৈরি হচ্ছে।'],
+        ['lock', 'লগইন লাগে না', 'প্রিয়জনের নম্বর শুধু আপনার ফোনে থাকে। আমরা কোনো ব্যক্তিগত তথ্য সংগ্রহ করি না।']] },
+    faq: { eyebrow: 'প্রশ্ন ও উত্তর', title: 'যা জানতে চান',
+      items: [['source', 'নম্বরগুলো কোথা থেকে আসে?', 'জেলা, উপজেলা, ইউনিয়ন ও পৌরসভার সরকারি ওয়েবসাইট (*.gov.bd) থেকে। প্রতিটি নম্বরের নিচে উৎসের লিংক ও যাচাইয়ের তারিখ আছে।'],
+        ['wrong', 'কোনো নম্বর ভুল হলে কী করব?', 'নিচের "ভুল নম্বর জানান" লিংকে জানান। আমরা সরকারি উৎস মিলিয়ে ঠিক করি। জরুরি হলে আগে ৯৯৯-এ কল করুন।'],
+        ['offline', 'ইন্টারনেট না থাকলে কাজ করবে?', 'আংশিক। পাতা খোলা থাকলে লোকেশন দিয়ে এলাকা খোঁজা আর SMS পাঠানো ইন্টারনেট ছাড়াই হয়। পুরো সাইট অফলাইনে চালানোর সুবিধা তৈরি হচ্ছে।'],
+        ['privacy', 'আমার তথ্য কোথায় যায়?', 'কোথাও না। প্রিয়জনের নম্বর ও শেষ দেখা এলাকা শুধু আপনার ফোনের ব্রাউজারে থাকে। লোকেশন যায় শুধু আপনি পাঠালে।'],
+        ['districts', 'অন্য জেলা কবে আসবে?', 'এখন নোয়াখালী ও কক্সবাজার। তথ্য যাচাই শেষ হলে ধাপে ধাপে বাকি জেলা আসবে। ৯৯৯, ১০৯, ৩৩৩-এর মতো জাতীয় নম্বর সারা দেশে কাজ করে।']] },
+    foot: { tagline: 'আপনার এলাকার সরকারি জরুরি নম্বর। লগইন ছাড়া, ইন্টারনেট ছাড়াও।', small: 'নোয়াখালী ও কক্সবাজার দিয়ে শুরু।',
+      services: ['সেবা', ['৯৯৯-এ কল', 'প্রিয়জনকে লোকেশন', 'কাছের সাহায্য', 'এলাকা খুঁজুন']],
+      areas: ['এলাকা', ['নোয়াখালী', 'কক্সবাজার', 'চৌমুহনী', 'ইনানী সৈকত']],
+      info: ['তথ্য', ['আমাদের সম্পর্কে', 'প্রশ্ন ও উত্তর', 'ভুল নম্বর জানান', 'উৎস ও যাচাই']],
+      helpTitle: 'সাহায্য দরকার?', helpText: 'সরকারি কোনো সেবার তথ্য জানতে ৩৩৩-এ কল করুন। এই প্রকল্প নিয়ে কিছু বলতে চাইলে GitHub-এ লিখুন।',
+      copy: '© ২০২৬ SafeConnect · jerin101 ও tasmintoshi', bottom: ['প্রাইভেসি', 'উৎস', 'GitHub'],
+      credit: 'নম্বর: সরকারি *.gov.bd ওয়েবসাইট। ম্যাপ: Bangladesh Bureau of Statistics boundaries via OCHA HDX (CC BY-IGO) · © OpenStreetMap contributors (ODbL)।' },
+  },
+  en: {
+    nav: ['Home', 'Emergency numbers', 'Find area', 'Send location', 'By situation', 'About', 'Questions'],
+    about: { eyebrow: 'About', title: 'What is SafeConnect?',
+      text: 'In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox\'s Bazar now, the whole country later.',
+      points: [['check', 'Official numbers only', 'Every number comes from an official *.gov.bd website, with its source link. All numbers are re-checked every week.'],
+        ['signal', 'Made for weak networks', 'Finding your area from your location and sending your location by SMS need no internet. A full offline app is being built.'],
+        ['lock', 'No login', 'Your family\'s numbers stay on your phone. We collect no personal data.']] },
+    faq: { eyebrow: 'Questions', title: 'Good to know',
+      items: [['source', 'Where do the numbers come from?', 'From the official websites (*.gov.bd) of districts, upazilas, unions and municipalities. Each number shows its source link and check date.'],
+        ['wrong', 'What if a number is wrong?', 'Tell us with "Report a wrong number" below. We fix it against the official source. In an emergency, call 999 first.'],
+        ['offline', 'Does it work without internet?', 'Partly. With the page open, finding your area from your location and sending SMS work without internet. Full offline use is being built.'],
+        ['privacy', 'Where does my data go?', 'Nowhere. Your family\'s numbers and last area stay in your phone\'s browser. Your location is sent only when you send it.'],
+        ['districts', 'When will other districts come?', 'Noakhali and Cox\'s Bazar now. More districts come step by step once their data is checked. National numbers like 999, 109 and 333 work everywhere.']] },
+    foot: { tagline: 'Official emergency numbers for your area. No login, even without internet.', small: "Starting with Noakhali and Cox's Bazar.",
+      services: ['Services', ['Call 999', 'Send location', 'Help near me', 'Find area']],
+      areas: ['Areas', ['Noakhali', "Cox's Bazar", 'Chowmuhani', 'Inani beach']],
+      info: ['Information', ['About', 'Questions', 'Report a wrong number', 'Sources and checks']],
+      helpTitle: 'Need a little help?', helpText: 'For information about any government service, call 333. To tell us about this project, write on GitHub.',
+      copy: '© 2026 SafeConnect · jerin101 & tasmintoshi', bottom: ['Privacy', 'Sources', 'GitHub'],
+      credit: 'Numbers: official *.gov.bd websites. Map: Bangladesh Bureau of Statistics boundaries via OCHA HDX (CC BY-IGO) · © OpenStreetMap contributors (ODbL).' },
+  },
+};
+const P = () => PAGE[lang];
+const MORE_ICONS = {
+  signal: 'M2 9.5a15 15 0 0 1 20 0l-1.4 1.4a13 13 0 0 0-17.2 0L2 9.5Zm3.5 3.5a10 10 0 0 1 13 0l-1.4 1.4a8 8 0 0 0-10.2 0L5.5 13Zm3.5 3.5a5 5 0 0 1 6 0L12 19.5l-3-3Z',
+  lock: 'M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3Z',
+};
+function goTo(id) { goHome(); setTimeout(() => $(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30); }
+function findArea(district) { goHome(); $('distSel').value = district || ''; setTimeout(() => { $('areaInput').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('areaInput').focus({ preventScroll: true }); }, 30); renderSuggest(); }
+function openFaq(key) { goTo('faq'); const d = document.querySelector(`#faqList details[data-key="${key}"]`); if (d) d.open = true; }
+function openQuick(key) { const q = quickPlaces().find(([k]) => k === key); if (!q) return; const [, , item] = q; const p = { ...item.place }; if (item.named) p.label = lang === 'bn' ? item.named.name_bn : item.named.name_en; openArea(p, null); }
+const textBtn = (label, fn) => { const b = el('button', null, label); b.type = 'button'; b.addEventListener('click', fn); return b; };
+const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a; };
+
+function renderNav() {
+  const [home, numbers, area, send, guide, about, faq] = P().nav;
+  $('nav').replaceChildren(textBtn(home, () => { goHome(); window.scrollTo(0, 0); }), textBtn(numbers, () => goTo('iconRow')), textBtn(area, () => findArea('')),
+    textBtn(send, () => openSos(null)), textBtn(guide, () => goTo('guideCards')), textBtn(about, () => goTo('about')), textBtn(faq, () => goTo('faq')));
+}
+function renderAbout() {
+  const a = P().about;
+  $('aboutEyebrow').textContent = a.eyebrow; $('aboutTitle').textContent = a.title; $('aboutText').textContent = a.text;
+  $('points').replaceChildren(...a.points.map(([ic, title, text]) => {
+    const d = el('div', 'point'); const i = el('span', 'ic'); i.append(svg(MORE_ICONS[ic] || ICONS[ic]));
+    d.append(i, el('b', null, title), el('span', null, text)); return d;
+  }));
+}
+function renderFaq() {
+  const f = P().faq;
+  $('faqEyebrow').textContent = f.eyebrow; $('faqTitle').textContent = f.title;
+  $('faqList').replaceChildren(...f.items.map(([key, q, a]) => {
+    const d = el('details'); d.dataset.key = key; d.append(el('summary', null, q), el('p', null, a)); return d;
+  }));
+}
+function renderFooter() {
+  const f = P().foot;
+  const brand = el('div', 'foot-brand');
+  const logo = $('homeBtn').cloneNode(true); logo.removeAttribute('id'); logo.addEventListener('click', () => { goHome(); window.scrollTo(0, 0); });
+  brand.append(logo, el('p', null, f.tagline), el('small', null, f.small));
+  const col = (title, items) => { const c = el('div', 'foot-col'); c.append(el('h3', null, title), ...items); return c; };
+  const [sT, s] = f.services, [aT, a] = f.areas, [iT, i] = f.info;
+  const call = el('a', null, s[0]); call.href = 'tel:999';
+  const help = el('div', 'foot-col foot-help');
+  help.append(el('h3', null, f.helpTitle), el('p', null, f.helpText), extLink('github.com/Jerin101/safe-connect', SITE.repo));
+  $('footGrid').replaceChildren(brand,
+    col(sT, [call, textBtn(s[1], () => openSos(null)), textBtn(s[2], () => { goHome(); locate(); }), textBtn(s[3], () => findArea(''))]),
+    col(aT, [textBtn(a[0], () => findArea('noakhali')), textBtn(a[1], () => findArea('coxsbazar')), textBtn(a[2], () => openQuick('chowmuhani')), textBtn(a[3], () => openQuick('inani'))]),
+    col(iT, [textBtn(i[0], () => goTo('about')), textBtn(i[1], () => goTo('faq')), extLink(i[2], SITE.report), textBtn(i[3], () => openFaq('source'))]),
+    help);
+  const nav = el('nav'); nav.setAttribute('aria-label', 'Footer');
+  nav.append(textBtn(f.bottom[0], () => openFaq('privacy')), textBtn(f.bottom[1], () => openFaq('source')), extLink(f.bottom[2], SITE.repo));
+  $('footBottom').replaceChildren(el('span', null, f.copy), nav, el('p', 'credit', f.credit));
+}
+
+const MORE = {
+  bn: {
+    findTitle: 'আপনার এলাকা কোথায়?', findText: 'গ্রাম, ইউনিয়ন বা উপজেলার নাম লিখুন, বাংলা বা ইংরেজিতে, যেকোনো বানানে। আমরা খুঁজে দেব।',
+    greet: { morning: 'শুভ সকাল', noon: 'শুভ দুপুর', evening: 'শুভ সন্ধ্যা', night: 'রাতেও ৯৯৯ খোলা থাকে, ২৪ ঘণ্টা, বিনা খরচে' },
+    greetTail: 'সাহায্য দরকার হলে আমরা পাশে আছি',
+    trust: ['শুধু সরকারি নম্বর', 'লগইন লাগে না', 'বিনা খরচে', 'বাংলা ও English'],
+    welcomeTitle: 'স্বাগতম! প্রথমবার এসেছেন? তিনটি কথা জেনে রাখুন:',
+    welcomeSteps: ['বিপদে সবার আগে ৯৯৯-এ কল করুন।', '"আমার কাছের সাহায্য" চাপলে আপনার এলাকার থানা আর চেয়ারম্যানের নম্বর আসবে।', 'প্রিয়জনের নম্বর এখনই সেভ করে রাখুন, বিপদে এক চাপে লোকেশন যাবে।'],
+    welcomeOk: 'বুঝেছি', welcomeSave: 'নম্বর সেভ করুন',
+    guideTitle: 'কী হয়েছে?', guideText: 'পরিস্থিতি বেছে নিন। কাকে ফোন করবেন, আমরা দেখিয়ে দেব।',
+    guides: [
+      ['night', 'রাতে বা পথে বিপদে', 'আগে ৯৯৯-এ কল করুন। তারপর এক চাপে প্রিয়জনকে আপনার লোকেশন পাঠান।', 'লোকেশন পাঠান', 'sos'],
+      ['lost', 'কিছু হারিয়েছে বা চুরি হয়েছে', 'নিকটস্থ থানায় সাধারণ ডায়েরি (GD) করুন। আপনার এলাকার থানার নম্বর এখানে পাবেন।', 'থানার নম্বর খুঁজুন', 'find'],
+      ['storm', 'ঝড়, বন্যা বা আগুন', 'ফায়ার সার্ভিস ১০২, দুর্যোগের আগাম বার্তা ১০৯০। আপনার উপজেলার নম্বরও দেখুন।', 'আমার কাছের সাহায্য', 'locate']],
+    duo: [
+      ['send', 'প্রিয়জনের নম্বর সেভ করুন', 'বিপদের সময় নম্বর খোঁজার সময় থাকে না। একবার সেভ করলে এক চাপে লোকেশন যাবে। লগইন লাগে না।', 'নম্বর সেভ করুন'],
+      ['flag', 'ভুল নম্বর পেয়েছেন?', 'জানান। আমরা সরকারি উৎস মিলিয়ে ঠিক করব।', 'ভুল নম্বর জানান']],
+    helpTitle: 'কীভাবে সাহায্য করতে পারি',
+    help: ['প্রশ্ন ও উত্তর', 'তথ্যের উৎস', 'প্রাইভেসি', 'ভুল নম্বর জানান'],
+    netTitle: 'দুর্বল নেটওয়ার্কের জন্য তৈরি',
+    net: [['ok', 'লোকেশন দিয়ে এলাকা খুঁজতে ইন্টারনেট লাগে না'], ['ok', 'SMS-এ প্রিয়জনকে লোকেশন পাঠাতে ইন্টারনেট লাগে না'],
+      ['ok', 'সব নম্বর সরকারি ওয়েবসাইট থেকে, উৎসের লিংকসহ'], ['soon', 'ফোনে ইনস্টল করে পুরো অফলাইনে চালানো: শীঘ্রই']],
+    icons: { 'national-emergency-999': 'জরুরি সেবা', 'fire-service-102': 'ফায়ার সার্ভিস', 'health-call-centre-16263': 'স্বাস্থ্য বাতায়ন',
+      'women-children-violence-109': 'নারী ও শিশু', 'child-helpline-1098': 'শিশু সহায়তা', 'tourist-police-helpline': 'ট্যুরিস্ট পুলিশ', 'info-service-333': 'তথ্য সেবা' },
+    iconSend: 'লোকেশন পাঠান', iconNear: 'কাছের সাহায্য', iconNearSub: 'থানা ও চেয়ারম্যান', iconSendSub: 'প্রিয়জনকে',
+  },
+  en: {
+    findTitle: 'Where are you?', findText: 'Type your village, union or upazila, in Bangla or English, any spelling. We will find it.',
+    greet: { morning: 'Good morning', noon: 'Good afternoon', evening: 'Good evening', night: '999 is open all night, 24 hours, free' },
+    greetTail: 'We are here if you need help',
+    trust: ['Official numbers only', 'No login', 'Free', 'বাংলা & English'],
+    welcomeTitle: 'Welcome! First time here? Three things to know:',
+    welcomeSteps: ['In danger, call 999 first.', 'Tap "Help near me" to see your police station and chairman.', 'Save your family\'s numbers now, so your location goes to them in one tap.'],
+    welcomeOk: 'Got it', welcomeSave: 'Save numbers',
+    guideTitle: 'What happened?', guideText: 'Pick your situation and we will show you who to call.',
+    guides: [
+      ['night', 'In danger at night or on the road', 'Call 999 first. Then send your location to your family in one tap.', 'Send location', 'sos'],
+      ['lost', 'Something lost or stolen', 'File a General Diary (GD) at the nearest police station. Find your police station number here.', 'Find police station', 'find'],
+      ['storm', 'Storm, flood or fire', 'Fire service 102, disaster warning 1090. See your upazila numbers too.', 'Help near me', 'locate']],
+    duo: [
+      ['send', "Save your family's numbers", 'In an emergency there is no time to look for numbers. Save them once and your location goes in one tap. No login.', 'Save numbers'],
+      ['flag', 'Found a wrong number?', 'Tell us. We check it against the official source and fix it.', 'Report a wrong number']],
+    helpTitle: 'How can we help',
+    help: ['Questions', 'Data sources', 'Privacy', 'Report a wrong number'],
+    netTitle: 'Made for weak networks',
+    net: [['ok', 'Finding your area from your location needs no internet'], ['ok', 'Sending your location by SMS needs no internet'],
+      ['ok', 'Every number from an official website, with its source'], ['soon', 'Install on your phone and use fully offline: coming soon']],
+    icons: { 'national-emergency-999': 'Emergency', 'fire-service-102': 'Fire service', 'health-call-centre-16263': 'Health line',
+      'women-children-violence-109': 'Women & children', 'child-helpline-1098': 'Child helpline', 'tourist-police-helpline': 'Tourist Police', 'info-service-333': 'Info service' },
+    iconSend: 'Send location', iconNear: 'Help near me', iconNearSub: 'police & chairman', iconSendSub: 'to family',
+  },
+};
+const M = () => MORE[lang];
+const GP_ICONS = {
+  phone: 'M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z',
+  fire: 'M13.5 2s1 3.5-1.5 6.5c-1.6 1.9-4 3.4-4 6.6A6 6 0 0 0 20 15c0-3-1.4-4.6-2.6-6-.4 1.6-1.3 2.6-2.4 3 .9-3.6-.2-7.4-1.5-10Z',
+  health: 'M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z',
+  woman: 'M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm-1 10h2a5 5 0 0 1 5 5v1h-3v4h-6v-4H6v-1a5 5 0 0 1 5-5Z',
+  child: 'M12 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm-4 8h8l-1 6h-2v4h-2v-4H9l-1-6Z',
+  bag: 'M9 3h6a1 1 0 0 1 1 1v2h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3V4a1 1 0 0 1 1-1Zm1 3h4V5h-4v1Z',
+  info: 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm-1 8v7h2v-7h-2Zm0-4v2h2V6h-2Z',
+  send: 'M2.5 11.2 20.6 3.4c.8-.34 1.6.46 1.26 1.26L14.1 22.8c-.37.86-1.62.78-1.87-.12l-1.9-6.98-6.98-1.9c-.9-.25-.98-1.5-.12-1.87Zm8.7 3.2 1.3 4.8 5.5-12.8-6.8 8Zm-1.2-1.2 8-6.8-12.8 5.5 4.8 1.3Z',
+  pin: 'M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z',
+  flag: 'M5 3h2v18H5V3Zm3 1h11l-2.5 4L19 12H8V4Z',
+  question: 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm-1 14v2h2v-2h-2Zm1-10a4 4 0 0 0-4 4h2a2 2 0 1 1 3 1.7c-1.2.7-2 1.6-2 3.3h2c0-1 .4-1.4 1.2-1.9A4 4 0 0 0 12 6Z',
+  db: 'M12 2c4.4 0 8 1.3 8 3v14c0 1.7-3.6 3-8 3s-8-1.3-8-3V5c0-1.7 3.6-3 8-3Zm6 6.2C16.5 9 14.4 9.5 12 9.5S7.5 9 6 8.2V11c0 .6 2.4 1.6 6 1.6s6-1 6-1.6V8.2Zm0 6c-1.5.8-3.6 1.3-6 1.3s-4.5-.5-6-1.3V17c0 .6 2.4 1.6 6 1.6s6-1 6-1.6v-2.8Z',
+  lock: 'M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3Z',
+  arrow: 'M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z',
+};
+const ICON_ROW = [['national-emergency-999', 'phone', 'c-red'], ['fire-service-102', 'fire', 'c-orange'], ['health-call-centre-16263', 'health', 'c-green'],
+  ['women-children-violence-109', 'woman', 'c-pink'], ['child-helpline-1098', 'child', 'c-blue'], ['tourist-police-helpline', 'bag', 'c-teal'], ['info-service-333', 'info', 'c-slate']];
+function iconCircle(path, cls) { const c = el('span', `circle ${cls}`); c.append(svg(path)); return c; }
+function renderIconRow() {
+  const row = $('iconRow');
+  const items = [];
+  if (data) {
+    for (const [id, ic, cls] of ICON_ROW) {
+      const n = data.national.find((x) => x.id === id);
+      if (!n || !n.phones?.length) continue;
+      const a = el('a', 'icon-item'); a.href = `tel:${n.phones[0]}`;
+      a.append(iconCircle(GP_ICONS[ic], cls), el('b', null, M().icons[id]), el('small', null, digits(n.phones[0])));
+      items.push(a);
+    }
+  }
+  const act = (label, sub, ic, cls, fn) => { const b = el('button', 'icon-item'); b.type = 'button'; b.append(iconCircle(GP_ICONS[ic], cls), el('b', null, label), el('small', null, sub)); b.addEventListener('click', fn); return b; };
+  items.splice(1, 0, act(M().iconSend, M().iconSendSub, 'send', 'c-violet', () => openSos(null)), act(M().iconNear, M().iconNearSub, 'pin', 'c-amber', () => locate()));
+  row.replaceChildren(...items);
+}
+function primaryBtn(label, fn, href) {
+  const b = el(href ? 'a' : 'button', 'btn-primary');
+  if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else { b.type = 'button'; b.addEventListener('click', fn); }
+  b.append(document.createTextNode(label), svg(GP_ICONS.arrow));
+  return b;
+}
+function saveNumbers() { openSos(null); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
+function renderGuides() {
+  $('guideTitle').textContent = M().guideTitle; $('guideText').textContent = M().guideText;
+  const actions = { sos: () => openSos(null), find: () => findArea(''), locate: () => { goHome(); window.scrollTo(0, 0); locate(); } };
+  $('guideCards').replaceChildren(...M().guides.map(([art, title, text, btn, act]) => {
+    const c = el('article', 'card');
+    const body = el('div', 'body');
+    body.append(el('h3', null, title), el('p', null, text), primaryBtn(btn, actions[act]));
+    c.append(el('div', `art ${art}`), body);
+    return c;
+  }));
+}
+function renderDuo() {
+  const [[ic1, t1, p1, b1], [ic2, t2, p2, b2]] = M().duo;
+  const card = (ic, cls, title, text, btn) => {
+    const c = el('div', 'duo-card'); const d = el('div');
+    d.append(el('h3', null, title), el('p', null, text), btn);
+    const badge = el('span', `badge-ic ${cls}`); badge.append(svg(GP_ICONS[ic]));
+    c.append(d, badge); return c;
+  };
+  $('duoCards').replaceChildren(card(ic1, 'c-violet', t1, p1, primaryBtn(b1, saveNumbers)), card(ic2, 'c-amber', t2, p2, primaryBtn(b2, null, SITE.report)));
+}
+function renderHelp() {
+  $('helpTitle').textContent = M().helpTitle;
+  const [q, src, priv, rep] = M().help;
+  const item = (label, ic, fn, href) => {
+    const b = el(href ? 'a' : 'button', 'help-item');
+    if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else { b.type = 'button'; b.addEventListener('click', fn); }
+    const c = el('span', 'circle'); c.append(svg(GP_ICONS[ic])); b.append(c, el('span', null, label)); return b;
+  };
+  $('helpRow').replaceChildren(item(q, 'question', () => goTo('faq')), item(src, 'db', () => openFaq('source')), item(priv, 'lock', () => openFaq('privacy')), item(rep, 'flag', null, SITE.report));
+}
+function renderNet() {
+  $('netTitle').textContent = M().netTitle;
+  $('netList').replaceChildren(...M().net.map(([k, text]) => el('li', k === 'soon' ? 'soon' : null, text)));
+}
+function renderWarm() {
+  const h = new Date().getHours();
+  const part = h >= 21 || h < 5 ? 'night' : h < 12 ? 'morning' : h < 17 ? 'noon' : 'evening';
+  const g = $('greet');
+  const dot = el('span', 'dot', part === 'night' ? '☾' : '☀');
+  dot.setAttribute('aria-hidden', 'true');
+  g.replaceChildren(dot, document.createTextNode(part === 'night' ? M().greet.night : `${M().greet[part]}! ${M().greetTail}`));
+  $('trust').replaceChildren(...M().trust.map((x) => el('li', null, x)));
+  let seen = false;
+  try { seen = localStorage.getItem('sc-welcomed') === '1'; } catch {}
+  const w = $('welcome');
+  w.hidden = seen;
+  if (seen) return;
+  const ok = el('button', 'btn', M().welcomeOk); ok.type = 'button';
+  ok.addEventListener('click', () => { try { localStorage.setItem('sc-welcomed', '1'); } catch {} w.hidden = true; });
+  const save = el('button', 'btn violet', M().welcomeSave); save.type = 'button';
+  save.addEventListener('click', () => { try { localStorage.setItem('sc-welcomed', '1'); } catch {} w.hidden = true; saveNumbers(); });
+  const ol = el('ol'); M().welcomeSteps.forEach((x) => ol.append(el('li', null, x)));
+  const row = el('div', 'row'); row.append(save, ok);
+  const title = el('h2', null, M().welcomeTitle); title.id = 'welcomeTitle';
+  w.replaceChildren(title, ol, row);
+}
+function renderPage() {
+  renderWarm(); renderNav(); renderAbout(); renderFaq(); renderFooter(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderIconRow();
+  $('findTitle').textContent = M().findTitle; $('findText').textContent = M().findText;
+}
+
+/* ---------- text ---------- */
+function setText() {
+  const s = t();
+  document.documentElement.lang = lang;
+  $('langBtn').textContent = s.lang;
+  $('hello1').textContent = s.hello1; $('hello2').textContent = s.hello2;
+  $('eyebrow').textContent = s.eyebrow; $('lead').textContent = s.lead; $('h999Text').textContent = s.h999;
+  $('quickEyebrow').textContent = s.quickEyebrow; $('quickTitle').textContent = s.quickTitle; $('quickText').textContent = s.quickText;
+  const dv = $('distSel').value;
+  $('distSel').replaceChildren(...[['', s.distAll], ...DISTRICTS.map((d) => [d.key, lang === 'bn' ? d.bn : d.en])].map(([v, l]) => { const o = el('option', null, l); o.value = v; return o; }));
+  $('distSel').value = dv;
+  $('call999Title').textContent = s.call999; $('call999Sub').textContent = s.call999Sub;
+  $('locateTitle').textContent = s.locate; $('locateSub').textContent = s.locateSub;
+  $('orText').textContent = s.or;
+  $('areaLabel').textContent = s.areaLabel; $('areaHint').textContent = s.areaHint; $('areaInput').placeholder = s.areaLabel; $('areaInput').setAttribute('aria-label', s.areaLabel);
+  $('backBtn').textContent = s.back; $('changeBtn').textContent = s.change;
+  $('shareTitle').textContent = s.shareTitle; $('shareText').textContent = s.shareText;
+  $('firstTitle').textContent = s.first; $('firstCalm').textContent = s.firstCalm; $('moreTitle').textContent = s.more;
+  $('sosBtnTitle').textContent = s.sosBtn;
+  $('sosBack').textContent = s.back; $('sosTitle').textContent = s.sosTitle;
+  $('sitTitle').textContent = s.sit; $('locTitle').textContent = s.loc; $('sendTitle').textContent = s.send; $('msgTitle').textContent = s.msgT;
+  $('smsHint').textContent = s.smsHint; $('peopleTitle').textContent = s.people;
+  $('lblName').textContent = s.name; $('lblRel').textContent = s.rel; $('lblPhone').textContent = s.phone; $('saveBtn').textContent = s.save;
+  $('privacy').textContent = s.privacy;
+  renderHomeSos();
+  renderPage();
+}
+
+$('locateBtn').addEventListener('click', locate);
+$('areaInput').addEventListener('input', renderSuggest);
+$('distSel').addEventListener('change', renderSuggest);
+$('backBtn').addEventListener('click', goHome);
+$('homeBtn').addEventListener('click', goHome);
+$('changeBtn').addEventListener('click', () => { goHome(); $('areaInput').focus(); });
+$('langBtn').addEventListener('click', () => {
+  lang = lang === 'bn' ? 'en' : 'bn';
+  store.set('sc-lang', lang);
+  setText();
+  if (!$('demo').hidden) showDemo();
+  if (data) { renderRecent(); renderSuggest(); renderStats(); renderPlaces(); if (current) renderArea(); }
+  if (!$('sos').hidden) { renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
+});
+$('themeBtn').addEventListener('click', () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+});
+
+setText();
+try {
+  [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
+  buildIndex();
+  renderRecent(); renderStats(); renderPlaces(); renderIconRow();
+} catch (err) {
+  msg(`${err.message}. Please reload the page.`);
+}
+</script>
