@@ -624,6 +624,7 @@ const PAGE = {
       'women-children-violence-109': 'নারী ও শিশু', 'child-helpline-1098': 'শিশু সহায়তা', 'tourist-police-helpline': 'ট্যুরিস্ট পুলিশ', 'info-service-333': 'তথ্য সেবা' },
     iconSend: 'লোকেশন পাঠান', iconSendSub: 'প্রিয়জনকে', iconNear: 'কাছের সাহায্য', iconNearSub: 'থানা ও চেয়ারম্যান',
     iconSrc: 'এই নম্বরগুলোর সরকারি উৎস ও যাচাইয়ের তারিখ',
+    findTitle: 'আপনার এলাকা কোথায়?', findText: 'গ্রাম, ইউনিয়ন বা উপজেলার নাম লিখুন, বাংলা বা ইংরেজিতে, যেকোনো বানানে। আমরা খুঁজে দেব।',
     nav: { home: 'হোম', numbers: 'জরুরি নম্বর', area: 'এলাকা খুঁজুন', send: 'প্রিয়জনকে লোকেশন', about: 'আমাদের সম্পর্কে', faq: 'প্রশ্ন ও উত্তর' },
     about: { eyebrow: 'আমাদের সম্পর্কে', title: 'SafeConnect কী?',
       text: 'বিপদের সময় কাকে ফোন করবেন, খুঁজতেই সময় চলে যায়। SafeConnect আপনার অবস্থান দেখে কাছের থানা, ইউনিয়ন পরিষদ, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর ঠিক ক্রমে দেখায়। এখন নোয়াখালী ও কক্সবাজারে, পরে সারা দেশে।',
@@ -655,6 +656,7 @@ const PAGE = {
       'women-children-violence-109': 'Women & children', 'child-helpline-1098': 'Child helpline', 'tourist-police-helpline': 'Tourist Police', 'info-service-333': 'Info service' },
     iconSend: 'Send location', iconSendSub: 'to family', iconNear: 'Help near me', iconNearSub: 'police & chairman',
     iconSrc: 'Official source and check date of these numbers',
+    findTitle: 'Where are you?', findText: 'Type your village, union or upazila, in Bangla or English, any spelling. We will find it.',
     nav: { home: 'Home', numbers: 'Emergency numbers', area: 'Find area', send: 'Send location', about: 'About', faq: 'Questions' },
     about: { eyebrow: 'About', title: 'What is SafeConnect?',
       text: 'In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox\'s Bazar now, the whole country later.',
@@ -801,7 +803,10 @@ function renderWarm() {
   const title = el('h2', null, P().welcomeTitle); title.id = 'welcomeTitle';
   w.replaceChildren(title, ol, row);
 }
-function renderPage() { renderWarm(); renderIconRow(); renderNav(); renderAbout(); renderFaq(); renderFooter(); }
+function renderPage() {
+  renderWarm(); renderIconRow(); renderNav(); renderAbout(); renderFaq(); renderFooter();
+  $('findTitle').textContent = P().findTitle; $('findText').textContent = P().findText;
+}
 
 /* ---------- text ---------- */
 function setText() {
