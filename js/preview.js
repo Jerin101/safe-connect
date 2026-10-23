@@ -6,7 +6,7 @@ import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.j
 const T = {
   bn: {
     lang: 'EN', hello1: 'বিপদে আছেন?', hello2: 'আপনার এলাকার সরকারি নম্বর এক জায়গায়',
-    eyebrow: 'নোয়াখালী · কক্সবাজার · লোকেশন খুঁজতে ইন্টারনেট লাগে না', h999: '৯৯৯',
+    eyebrow: 'নোয়াখালী ও কক্সবাজারের সরকারি নম্বর', h999: '৯৯৯',
     lead: 'প্রতিটি ইউনিয়নের থানা, চেয়ারম্যান, গ্রাম পুলিশ ও হাসপাতালের নম্বর, সব সরকারি ওয়েবসাইট থেকে নেওয়া।',
     distAll: 'সব জেলা',
     stats: ['সরকারি নম্বর', 'ইউনিয়ন ও পৌরসভা', 'উপজেলা', 'যাচাই করা হয়েছে'],
@@ -62,7 +62,7 @@ const T = {
   },
   en: {
     lang: 'বাং', hello1: 'Need help?', hello2: 'Official numbers for your area, in one place',
-    eyebrow: "Noakhali · Cox's Bazar · finding your location needs no internet", h999: '999',
+    eyebrow: "Official numbers for Noakhali & Cox's Bazar", h999: '999',
     lead: 'Police station, chairman, village police and hospital numbers for every union, all taken from official government websites.',
     distAll: 'All districts',
     stats: ['official numbers', 'unions and towns', 'upazilas', 'last checked'],
@@ -613,7 +613,7 @@ const SITE = {
 };
 const PAGE = {
   bn: {
-    nav: ['হোম', 'এলাকা খুঁজুন', 'প্রিয়জনকে লোকেশন', 'আমাদের সম্পর্কে'],
+    nav: { home: 'হোম', area: 'এলাকা খুঁজুন', send: 'প্রিয়জনকে লোকেশন', about: 'আমাদের সম্পর্কে', faq: 'প্রশ্ন ও উত্তর' },
     about: { eyebrow: 'আমাদের সম্পর্কে', title: 'SafeConnect কী?',
       text: 'বিপদের সময় কাকে ফোন করবেন, খুঁজতেই সময় চলে যায়। SafeConnect আপনার অবস্থান দেখে কাছের থানা, ইউনিয়ন পরিষদ, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর ঠিক ক্রমে দেখায়। এখন নোয়াখালী ও কক্সবাজারে, পরে সারা দেশে।',
       points: [['check', 'শুধু সরকারি নম্বর', 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া, উৎসের লিংকসহ। প্রতি সপ্তাহে আবার যাচাই হয়।'],
@@ -634,7 +634,7 @@ const PAGE = {
       credit: 'নম্বর: সরকারি *.gov.bd ওয়েবসাইট। ম্যাপ: উপজেলার সীমানা ও ইউনিয়ন/পৌরসভার কেন্দ্রবিন্দু বাংলাদেশ পরিসংখ্যান ব্যুরো (BBS), OCHA HDX-এর মাধ্যমে (CC BY-IGO)। BBS-এর নাম না মিললে টুলগুলো OpenStreetMap-এর বিন্দু যোগ করতে পারে (© OpenStreetMap contributors, ODbL)।' },
   },
   en: {
-    nav: ['Home', 'Find area', 'Send location', 'About'],
+    nav: { home: 'Home', area: 'Find area', send: 'Send location', about: 'About', faq: 'Questions' },
     about: { eyebrow: 'About', title: 'What is SafeConnect?',
       text: 'In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox\'s Bazar now, the whole country later.',
       points: [['check', 'Official numbers only', 'Every number comes from an official *.gov.bd website, with its source link. All numbers are re-checked every week.'],
@@ -667,9 +667,16 @@ function openQuick(key) { const q = quickPlaces().find(([k]) => k === key); if (
 const textBtn = (label, fn) => { const b = el('button', null, label); b.type = 'button'; b.addEventListener('click', fn); return b; };
 const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a; };
 
+// Second header row: one button per home section, in page order (DESIGN.md §3).
+const NAV = [
+  ['home', () => { goHome(); window.scrollTo(0, 0); }],
+  ['area', () => findArea('')],
+  ['send', () => openSos(null)],
+  ['about', () => goTo('about')],
+  ['faq', () => goTo('faq')],
+];
 function renderNav() {
-  const [home, area, send, about] = P().nav;
-  $('nav').replaceChildren(textBtn(home, goHome), textBtn(area, () => findArea('')), textBtn(send, () => openSos(null)), textBtn(about, () => goTo('about')));
+  $('nav').replaceChildren(...NAV.map(([key, fn]) => textBtn(P().nav[key], fn)));
 }
 function renderAbout() {
   const a = P().about;
