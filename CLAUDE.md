@@ -36,6 +36,14 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 - `python tools/validate_data.py data` must report **0 errors** before any data PR.
 - Cards must show: the source link, the check date, and badges for the flags `number_not_published`, `source_older_than_2_years`, `administrator_not_elected`.
 
+## Save usage
+
+- Never read `data/*.json` or `design/portal-v2.html` in full. Use grep or read only the needed lines.
+- For one step, show all commands together with one simple sentence each, then wait for one OK.
+- Don't print long command output; show only errors or the last few lines.
+- Keep replies short.
+- When the person can do a step themselves, give the exact terminal commands so they can run them by hand.
+
 ## Commands
 
 - Run the site: VS Code → right-click `index.html` → **Open with Live Server** (or `python -m http.server 8000`).
