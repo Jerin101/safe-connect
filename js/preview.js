@@ -29,7 +29,7 @@ const T = {
     shareTitle: 'পরিবারকে আপনার অবস্থান পাঠান', shareText: 'একটি চাপেই ম্যাপ লিংকসহ বার্তা যাবে। ৯৯৯-কেও এই অবস্থান বলতে পারেন।',
     shareMsg: (link) => `আমি বিপদে আছি। আমার অবস্থান: ${link}`, copy: 'কপি', copied: 'কপি হয়েছে', map: 'ম্যাপ',
     outsideTitle: 'আপনার অবস্থান', outside: 'আপনি নোয়াখালী বা কক্সবাজারের বাইরে আছেন। SafeConnect এখন শুধু এই দুই জেলার স্থানীয় নম্বর দেখায়। নিচের জাতীয় নম্বরগুলো সারা দেশে কাজ করে।',
-    first: 'আগে এদের কল করুন', more: 'আরও সাহায্য', showAll: (n) => `সবাইকে দেখুন (${n})`,
+    firstCalm: 'ওপর থেকে নিচে কল করুন। প্রথমজন না ধরলে পরেরজনকে।', first: 'আগে এদের কল করুন', more: 'আরও সাহায্য', showAll: (n) => `সবাইকে দেখুন (${n})`,
     call: 'কল', ward: 'ওয়ার্ড', source: 'সরকারি উৎস', checked: 'যাচাই',
     what: { emergency: 'জরুরি সেবা', police: 'পুলিশ', local: 'ইউনিয়ন পরিষদ', town: 'পৌরসভা', administration: 'উপজেলা নির্বাহী অফিসার', tourist_police: 'ট্যুরিস্ট পুলিশ' },
     groups: { police: 'পুলিশ', tourist_police: 'ট্যুরিস্ট পুলিশ', village_police: 'গ্রাম পুলিশ (ওয়ার্ড অনুযায়ী)', local: 'চেয়ারম্যান ও মেম্বার', town: 'পৌরসভা',
@@ -83,7 +83,7 @@ const T = {
     shareTitle: 'Send your location to family', shareText: 'One tap sends a message with a map link. You can also tell 999 this location.',
     shareMsg: (link) => `I am in danger. My location: ${link}`, copy: 'Copy', copied: 'Copied', map: 'Map',
     outsideTitle: 'Your location', outside: "You are outside Noakhali and Cox's Bazar. SafeConnect shows local numbers only for these two districts for now. The national numbers below work everywhere.",
-    first: 'Call these first', more: 'More help', showAll: (n) => `Show all (${n})`,
+    firstCalm: 'Call from top to bottom. If one does not answer, try the next.', first: 'Call these first', more: 'More help', showAll: (n) => `Show all (${n})`,
     call: 'Call', ward: 'Ward', source: 'Official source', checked: 'Checked',
     what: { emergency: 'Emergency', police: 'Police station', local: 'Union council', town: 'Municipality', administration: 'Upazila officer (UNO)', tourist_police: 'Tourist Police' },
     groups: { police: 'Police', tourist_police: 'Tourist Police', village_police: 'Village police (by ward)', local: 'Chairman and members', town: 'Municipality',
@@ -896,7 +896,7 @@ function setText() {
   $('areaLabel').textContent = s.areaLabel; $('areaHint').textContent = s.areaHint; $('areaInput').placeholder = s.areaLabel; $('areaInput').setAttribute('aria-label', s.areaLabel);
   $('backBtn').textContent = s.back; $('changeBtn').textContent = s.change;
   $('shareTitle').textContent = s.shareTitle; $('shareText').textContent = s.shareText;
-  $('firstTitle').textContent = s.first; $('moreTitle').textContent = s.more;
+  $('firstTitle').textContent = s.first; $('firstCalm').textContent = s.firstCalm; $('moreTitle').textContent = s.more;
   $('sosBtnTitle').textContent = s.sosBtn;
   $('sosBack').textContent = s.back; $('sosTitle').textContent = s.sosTitle;
   $('sitTitle').textContent = s.sit; $('locTitle').textContent = s.loc; $('sendTitle').textContent = s.send; $('msgTitle').textContent = s.msgT;
