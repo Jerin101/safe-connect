@@ -48,6 +48,7 @@ const T = {
       accident: ['দুর্ঘটনা', 'আমার দুর্ঘটনা হয়েছে।'], sick: ['অসুস্থ', 'আমি অসুস্থ, সাহায্য দরকার।'], lost: ['পথ হারিয়েছি', 'আমি পথ হারিয়েছি।'] },
     urgent: 'জরুরি!', area: (n) => `আমার এলাকা: ${n}।`, mapLine: (l) => `ম্যাপ: ${l}`, noLoc: 'আমার লোকেশন পাওয়া যায়নি, এখনই আমাকে ফোন করো।',
     timeLine: (x) => `সময়: ${x}`, sign: '(SafeConnect থেকে পাঠানো)',
+    offline: 'ইন্টারনেট নেই। নম্বর, এলাকা খোঁজা আর SMS এখনো কাজ করবে।',
     gettingLoc: 'লোকেশন নেওয়া হচ্ছে…', gotLoc: (n, m) => `${n}${m ? ` (প্রায় ${m} মিটার)` : ''}`, outsideLoc: 'আপনার লোকেশন পাওয়া গেছে (ম্যাপ লিংক বার্তায় আছে)',
     noLocYet: 'লোকেশন ছাড়াই পাঠাতে পারেন। বার্তায় ফোন করতে বলা আছে।',
     sosDenied: 'লোকেশনের অনুমতি নেই (ফোনের সেটিংসে চালু করুন)।', sosNoLoc: 'লোকেশন পাওয়া যায়নি।',
@@ -102,6 +103,7 @@ const T = {
       accident: ['Accident', 'I had an accident.'], sick: ['Feeling ill', 'I am ill and need help.'], lost: ['Lost', 'I am lost.'] },
     urgent: 'URGENT!', area: (n) => `My area: ${n}.`, mapLine: (l) => `Map: ${l}`, noLoc: 'I could not get my location. Call me now.',
     timeLine: (x) => `Time: ${x}`, sign: '(sent from SafeConnect)',
+    offline: 'No internet. Numbers, area search and SMS still work.',
     gettingLoc: 'Getting your location…', gotLoc: (n, m) => `${n}${m ? ` (about ${m} m)` : ''}`, outsideLoc: 'Location found (the map link is in the message)',
     noLocYet: 'You can send without a location. The message asks them to call you.',
     sosDenied: 'Location is not allowed (turn it on in phone settings).', sosNoLoc: 'Could not get your location.',
@@ -903,6 +905,7 @@ function setText() {
   $('smsHint').textContent = s.smsHint; $('peopleTitle').textContent = s.people;
   $('lblName').textContent = s.name; $('lblRel').textContent = s.rel; $('lblPhone').textContent = s.phone; $('saveBtn').textContent = s.save;
   $('privacy').textContent = s.privacy;
+  $('offlineText').textContent = s.offline;
   renderHomeSos();
   renderPage();
 }
@@ -935,6 +938,12 @@ try {
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);
 }
+
+// Calm notice while the phone has no internet; it goes away by itself when the internet is back.
+function showOnline() { $('offlineNote').hidden = navigator.onLine; }
+window.addEventListener('online', showOnline);
+window.addEventListener('offline', showOnline);
+showOnline();
 
 // Offline app (P34): save the site on this phone after the first visit, so it opens with no internet.
 // Registered after the data is loaded, so it does not slow down the first view.

@@ -171,6 +171,9 @@
   .who-list { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
   .who-list span { background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 0 10px; font-size: 0.8rem; font-weight: 600; color: var(--ink); }
 
+  /* calm notice when the phone has no internet (P34); in the page flow, so it never covers 999 */
+  .offline-wrap { padding-block: 10px 0; }
+  .offline-note { border-left: 4px solid var(--amber-1); background: var(--warn-bg); color: var(--warn); border-radius: 0 12px 12px 0; padding: 8px 14px; font-weight: 600; font-size: 0.92rem; }
   .home-msgs { display: grid; gap: 12px; margin-top: 14px; }
   .home-msgs:empty { display: none; }
 
@@ -455,6 +458,7 @@
 </header>
 
 <main>
+  <div class="wrap offline-wrap" id="offlineNote" hidden><p class="offline-note" id="offlineText" role="status"></p></div>
   <!-- HOME -->
   <div id="home">
     <section class="hero" aria-labelledby="hello">
