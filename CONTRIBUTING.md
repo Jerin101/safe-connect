@@ -24,6 +24,8 @@ Two people build SafeConnect: **jerin101** (lead: data and backend) and **tasmin
 - Change files in `data/` only with the scripts in `tools/` or through `data/manual_additions.json`. Never hand-edit the other `data/*.json` files.
 - Hand-entered records go into `data/manual_additions.json` with **both** a `source_url` and a `source_quote_bn` copied from the page.
 - Before a data PR, run `python tools/validate_data.py data`. It must say **0 errors**. GitHub runs it again automatically (after P11).
+- **Any PR that changes a file in `data/` must raise `VERSION` in `service-worker.js`, otherwise phones keep the old numbers.**
+  Why: the offline app (P34, #53) saves the data on each phone. A new `VERSION` (for example `v1-2026-10-23` → `v2-2026-11-02`) tells every phone to throw away its saved copy and download the new numbers. Put the version change in the same PR as the data change.
 
 ## Code rules
 
