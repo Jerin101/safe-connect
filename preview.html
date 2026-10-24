@@ -4,10 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SafeConnect</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1B1546" media="(prefers-color-scheme: dark)">
 <style>
+  /* Fonts saved inside the project (fonts/, SIL OFL 1.1): no request to Google, and they work offline. */
+  @font-face { font-family: "Manrope"; font-style: normal; font-display: swap; font-weight: 200 800;
+    src: url(fonts/manrope-latin-wght.woff2) format("woff2-variations"), url(fonts/manrope-latin-wght.woff2) format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: "Noto Sans Bengali"; font-style: normal; font-display: swap; font-weight: 100 900;
+    src: url(fonts/noto-sans-bengali-wght.woff2) format("woff2-variations"), url(fonts/noto-sans-bengali-wght.woff2) format("woff2");
+    unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1; }
   /* Portal layout from design/portal.html (rules: docs/DESIGN.md): two-row header, banner, round icon row,
      search band, situation cards, known places, side cards, about, help icons, weak-network band, FAQ, column footer.
      Night = deep indigo with a dusk banner; day = warm white with a dawn banner. */
@@ -162,6 +171,9 @@
   .who-list { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
   .who-list span { background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 0 10px; font-size: 0.8rem; font-weight: 600; color: var(--ink); }
 
+  /* calm notice when the phone has no internet (P34); in the page flow, so it never covers 999 */
+  .offline-wrap { padding-block: 10px 0; }
+  .offline-note { border-left: 4px solid var(--amber-1); background: var(--warn-bg); color: var(--warn); border-radius: 0 12px 12px 0; padding: 8px 14px; font-weight: 600; font-size: 0.92rem; }
   /* short phones (e.g. 360x640): a compact banner so all 3 big actions fit without scrolling (DESIGN.md §3) */
   @media (max-height: 799px) and (max-width: 899px) {
     .hero { padding-block: 10px 20px; }
@@ -465,6 +477,7 @@
 </header>
 
 <main>
+  <div class="wrap offline-wrap" id="offlineNote" hidden><p class="offline-note" id="offlineText" role="status"></p></div>
   <!-- HOME -->
   <div id="home">
     <section class="hero" aria-labelledby="hello">

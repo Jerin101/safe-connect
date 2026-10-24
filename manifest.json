@@ -1,0 +1,21 @@
+{
+  "name": "SafeConnect: সরকারি জরুরি নম্বর",
+  "short_name": "SafeConnect",
+  "description": "নোয়াখালী ও কক্সবাজারের সরকারি জরুরি ও সেবার নম্বর, বাংলা ও English-এ। Official emergency numbers for Noakhali and Cox's Bazar.",
+  "lang": "bn",
+  "dir": "ltr",
+  "id": "./",
+  "start_url": "./preview.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D0A24",
+  "theme_color": "#1B1546",
+  "categories": ["utilities", "navigation"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

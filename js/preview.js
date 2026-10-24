@@ -13,7 +13,7 @@ const T = {
     quickEyebrow: 'দ্রুত যান', quickTitle: 'পরিচিত জায়গা', quickText: 'এক চাপে সেই এলাকার থানা ও জরুরি নম্বর দেখুন।',
     places: { chowmuhani: ['চৌমুহনী', 'বেগমগঞ্জ, নোয়াখালী'], inani: ['ইনানী সৈকত', 'উখিয়া, কক্সবাজার'], hatiya: ['হাতিয়া', 'দ্বীপ উপজেলা, নোয়াখালী'], coxtown: ['কক্সবাজার শহর', 'পৌরসভা'] },
     call999: '৯৯৯-এ কল করুন', call999Sub: 'পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স · বিনা খরচে',
-    locate: 'আমার কাছের সাহায্য', locateSub: 'আপনার এলাকার থানা, চেয়ারম্যান ও গ্রাম পুলিশের নম্বর · পাতা খোলা থাকলে ইন্টারনেট ছাড়াও চলে',
+    locate: 'আমার কাছের সাহায্য', locateSub: 'আপনার এলাকার থানা, চেয়ারম্যান ও গ্রাম পুলিশের নম্বর · ইন্টারনেট ছাড়াও চলে',
     locating: 'আপনার অবস্থান খোঁজা হচ্ছে…', or: 'অথবা',
     areaLabel: 'এলাকার নাম লিখুন', areaHint: 'গ্রাম, ইউনিয়ন, পৌরসভা বা উপজেলা, বাংলা বা ইংরেজিতে, যেকোনো বানানে। যেমন: চৌমুহনী, Hatiya, ইনানী',
     noMatch: 'এই নামে কোনো জায়গা তালিকায় নেই। তবুও সাহায্য পাবেন:', didYouMean: 'কাছাকাছি নাম', noExact: 'ঠিক এই বানানে পাইনি। নিচের কোনোটি কি আপনার জায়গা?', tellUs: 'আপনার জায়গার নাম তালিকায় না থাকলে নিচের "ভুল নম্বর জানান" দিয়ে জানান (GitHub অ্যাকাউন্ট লাগবে)।',
@@ -42,17 +42,19 @@ const T = {
     credit: 'ম্যাপ তথ্য: উপজেলার সীমানা ও ইউনিয়ন/পৌরসভার কেন্দ্রবিন্দু বাংলাদেশ পরিসংখ্যান ব্যুরো (BBS), OCHA HDX-এর মাধ্যমে (CC BY-IGO)। BBS-এর নাম না মিললে টুলগুলো OpenStreetMap-এর বিন্দু যোগ করতে পারে (© OpenStreetMap contributors, ODbL)।',
     testsLink: 'সার্চ টেস্ট (ডেভেলপারদের জন্য)',
     foot1: 'সব নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া। প্রতিটি নম্বরের নিচে উৎসের লিংক আছে। বিপদে প্রথমে ৯৯৯।',
-    sosBtn: 'প্রিয়জনকে লোকেশন পাঠান', sosBtnSubNone: 'লগইন লাগবে না · একবার একটি নম্বর সেভ করুন', sosBtnSub: 'এক চাপে পাঠান · SMS ইন্টারনেট ছাড়াও যায়',
+    sosBtn: 'প্রিয়জনকে লোকেশন পাঠান', sosBtnSubNone: 'লগইন লাগবে না · একবার একটি নম্বর সেভ করুন', sosBtnSub: 'এক চাপে পাঠান · SMS-এ ইন্টারনেট লাগে না',
     sosTitle: 'প্রিয়জনকে লোকেশন পাঠান', sit: 'কী হয়েছে?', loc: 'আপনার অবস্থান', send: 'কাকে পাঠাবেন?', msgT: 'বার্তা (চাইলে বদলান)',
     sits: { danger: ['বিপদে আছি', 'আমি বিপদে আছি, এখনই সাহায্য দরকার।'], followed: ['কেউ পিছু নিয়েছে', 'কেউ আমার পিছু নিয়েছে, আমি ভয় পাচ্ছি।'],
       accident: ['দুর্ঘটনা', 'আমার দুর্ঘটনা হয়েছে।'], sick: ['অসুস্থ', 'আমি অসুস্থ, সাহায্য দরকার।'], lost: ['পথ হারিয়েছি', 'আমি পথ হারিয়েছি।'] },
     urgent: 'জরুরি!', area: (n) => `আমার এলাকা: ${n}।`, mapLine: (l) => `ম্যাপ: ${l}`, noLoc: 'আমার লোকেশন পাওয়া যায়নি, এখনই আমাকে ফোন করো।',
     timeLine: (x) => `সময়: ${x}`, sign: '(SafeConnect থেকে পাঠানো)',
+    offline: 'ইন্টারনেট নেই। নম্বর, এলাকা খোঁজা আর SMS এখনো কাজ করবে।',
     locIdle: 'লোকেশন এখনো নেওয়া হয়নি। পাঠাতে চাইলে নিচের বোতাম চাপুন।', locBtn: 'আমার লোকেশন নিন',
     gettingLoc: 'লোকেশন নেওয়া হচ্ছে…', gotLoc: (n, m) => `${n}${m ? ` (প্রায় ${m} মিটার)` : ''}`, outsideLoc: 'আপনার লোকেশন পাওয়া গেছে (ম্যাপ লিংক বার্তায় আছে)',
     noLocYet: 'লোকেশন ছাড়াই পাঠাতে পারেন। বার্তায় ফোন করতে বলা আছে।',
     sosDenied: 'লোকেশনের অনুমতি নেই (ফোনের সেটিংসে চালু করুন)।', sosNoLoc: 'লোকেশন পাওয়া যায়নি।',
     sms: 'SMS পাঠান', smsAll: (n) => `সবাইকে SMS (${n} জন)`, wa: 'WhatsApp', other: 'অন্য অ্যাপে', copyMsg: 'বার্তা কপি', call: 'কল',
+    smsNoNet: 'ইন্টারনেট লাগে না',
     smsHint: 'SMS-এ ইন্টারনেট লাগে না। পাঠানোর বোতাম চাপলে ফোনের মেসেজ অ্যাপ খুলবে, সেখানে Send চাপুন।',
     people: 'আমার প্রিয়জন', addTitle: 'নতুন নম্বর যোগ করুন', name: 'নাম', rel: 'সম্পর্ক (যেমন: মা)', phone: 'মোবাইল নম্বর', save: 'সেভ করুন', remove: 'মুছুন',
     noPeople: 'এখনো কোনো নম্বর সেভ করা নেই। নিচে মা, বাবা বা কাছের কারো নম্বর সেভ করুন। পরে এক চাপেই পাঠাতে পারবেন।',
@@ -68,7 +70,7 @@ const T = {
     quickEyebrow: 'Quick go', quickTitle: 'Known places', quickText: "One tap shows that area's police and emergency numbers.",
     places: { chowmuhani: ['Chowmuhani', 'Begumganj, Noakhali'], inani: ['Inani beach', "Ukhia, Cox's Bazar"], hatiya: ['Hatiya', 'Island upazila, Noakhali'], coxtown: ["Cox's Bazar town", 'Municipality'] },
     call999: 'Call 999', call999Sub: 'Police, fire service, ambulance · free',
-    locate: 'Find help near me', locateSub: 'Numbers for your police station, chairman and village police · works offline once the page is open',
+    locate: 'Find help near me', locateSub: 'Numbers for your police station, chairman and village police · works without internet',
     locating: 'Finding your location…', or: 'or',
     areaLabel: 'Type your area', areaHint: 'Village, union, town or upazila, in Bangla or English, any spelling. For example: Chowmuhani, হাতিয়া, Inani',
     noMatch: 'This name is not in our list yet. You can still get help:', didYouMean: 'Similar names', noExact: 'Not found with this exact spelling. Is it one of these?', tellUs: 'If your place is missing, tell us with "Report a wrong number" below (needs a GitHub account).',
@@ -103,11 +105,13 @@ const T = {
       accident: ['Accident', 'I had an accident.'], sick: ['Feeling ill', 'I am ill and need help.'], lost: ['Lost', 'I am lost.'] },
     urgent: 'URGENT!', area: (n) => `My area: ${n}.`, mapLine: (l) => `Map: ${l}`, noLoc: 'I could not get my location. Call me now.',
     timeLine: (x) => `Time: ${x}`, sign: '(sent from SafeConnect)',
+    offline: 'No internet. Numbers, area search and SMS still work.',
     locIdle: 'Location not taken yet. To send it, tap the button below.', locBtn: 'Get my location',
     gettingLoc: 'Getting your location…', gotLoc: (n, m) => `${n}${m ? ` (about ${m} m)` : ''}`, outsideLoc: 'Location found (the map link is in the message)',
     noLocYet: 'You can send without a location. The message asks them to call you.',
     sosDenied: 'Location is not allowed (turn it on in phone settings).', sosNoLoc: 'Could not get your location.',
     sms: 'Send SMS', smsAll: (n) => `SMS everyone (${n})`, wa: 'WhatsApp', other: 'Other app', copyMsg: 'Copy message', call: 'Call',
+    smsNoNet: 'no internet needed',
     smsHint: 'SMS needs no internet. The button opens your messages app; tap Send there.',
     people: 'My people', addTitle: 'Add a number', name: 'Name', rel: 'Relation (e.g. mother)', phone: 'Mobile number', save: 'Save', remove: 'Remove',
     noPeople: 'No number saved yet. Save your mother, father or a close friend below. Next time it is one tap.',
@@ -497,7 +501,7 @@ function renderSend() {
     info.append(el('b', null, p.rel ? `${p.name} (${p.rel})` : p.name), el('span', 'num', digits(p.phone)));
     const sendRow = el('div', 'send-row');
     const sms = el('a', 'send'); sms.href = `sms:${p.phone}?&body=${encodeURIComponent(body())}`;
-    sms.append(document.createTextNode(t().sms), el('small', null, lang === 'bn' ? 'ইন্টারনেট লাগে না' : 'no internet needed'));
+    sms.append(document.createTextNode(t().sms), el('small', null, t().smsNoNet));
     const wa = el('a', 'send alt', t().wa); wa.href = `https://wa.me/88${p.phone}?text=${encodeURIComponent(body())}`; wa.target = '_blank'; wa.rel = 'noopener';
     const call = el('a', 'send alt', t().call); call.href = `tel:${p.phone}`;
     const pair = el('div', 'pair'); pair.append(wa, call);
@@ -652,21 +656,21 @@ const PAGE = {
       ['flag', 'ভুল নম্বর পেয়েছেন?', 'জানান (GitHub অ্যাকাউন্ট লাগবে)। আমরা সরকারি উৎস মিলিয়ে দেখব, ভুল হলে ঠিক করব।', 'ভুল নম্বর জানান']],
     helpTitle: 'কীভাবে সাহায্য করতে পারি?', help: ['প্রশ্ন ও উত্তর', 'তথ্যের উৎস', 'প্রাইভেসি', 'ভুল নম্বর জানান'],
     netTitle: 'দুর্বল নেটওয়ার্কের জন্য তৈরি',
-    net: [['ok', 'পাতা খোলা থাকলে লোকেশন দিয়ে এলাকা খুঁজতে ইন্টারনেট লাগে না'], ['ok', 'SMS-এ প্রিয়জনকে লোকেশন পাঠাতে ইন্টারনেট লাগে না'],
-      ['ok', 'সব নম্বর সরকারি ওয়েবসাইট থেকে, উৎসের লিংকসহ'], ['soon', 'ফোনে ইনস্টল করে পুরো অফলাইনে চালানো: শীঘ্রই']],
+    net: [['ok', 'লোকেশন দিয়ে এলাকা খুঁজতে ইন্টারনেট লাগে না'], ['ok', 'SMS-এ প্রিয়জনকে লোকেশন পাঠাতে ইন্টারনেট লাগে না'],
+      ['ok', 'সব নম্বর সরকারি ওয়েবসাইট থেকে, উৎসের লিংকসহ'], ['ok', 'একবার খোলার পর ইন্টারনেট ছাড়াও চলে; ফোনে ইনস্টলও করা যায়']],
     nav: { home: 'হোম', numbers: 'জরুরি নম্বর', area: 'এলাকা খুঁজুন', send: 'প্রিয়জনকে লোকেশন', guide: 'কী হয়েছে?', about: 'আমাদের সম্পর্কে', faq: 'প্রশ্ন ও উত্তর' },
     about: { eyebrow: 'আমাদের সম্পর্কে', title: 'SafeConnect কী?',
       text: 'বিপদের সময় কাকে ফোন করবেন, খুঁজতেই সময় চলে যায়। SafeConnect আপনার অবস্থান দেখে কাছের থানা, ইউনিয়ন পরিষদ, গ্রাম পুলিশ ও হাসপাতালের সরকারি নম্বর ঠিক ক্রমে দেখায়। এখন নোয়াখালী ও কক্সবাজারে, পরে সারা দেশে।',
       points: [['check', 'শুধু সরকারি নম্বর', 'প্রতিটি নম্বর সরকারি *.gov.bd ওয়েবসাইট থেকে নেওয়া, উৎসের লিংকসহ। প্রতি সপ্তাহে উৎস আবার মিলিয়ে দেখা হয়।'],
-        ['signal', 'দুর্বল নেটওয়ার্কের জন্য তৈরি', 'পাতা খোলা থাকলে লোকেশন দিয়ে এলাকা খোঁজা যায় আর SMS-এ লোকেশন পাঠানো যায়, ইন্টারনেট ছাড়াই। পুরো অফলাইন অ্যাপ তৈরি হচ্ছে।'],
+        ['signal', 'দুর্বল নেটওয়ার্কের জন্য তৈরি', 'একবার খোলার পর নম্বর দেখা, এলাকা খোঁজা, "আমার কাছের সাহায্য" আর SMS-এ লোকেশন পাঠানো ইন্টারনেট ছাড়াও চলে।'],
         ['lock', 'লগইন লাগে না', 'প্রিয়জনের নম্বর শুধু আপনার ফোনে থাকে। আমরা কোনো ব্যক্তিগত তথ্য সংগ্রহ করি না।']] },
     faq: { eyebrow: 'প্রশ্ন ও উত্তর', title: 'যা জানতে চান',
       items: [['source', 'নম্বরগুলো কোথা থেকে আসে?', 'জেলা, উপজেলা, ইউনিয়ন ও পৌরসভার সরকারি ওয়েবসাইট (*.gov.bd) থেকে। প্রতিটি নম্বরের নিচে উৎসের লিংক ও যাচাইয়ের তারিখ আছে।'],
         ['wrong', 'কোনো নম্বর ভুল হলে কী করব?', 'নিচের "ভুল নম্বর জানান" লিংকে জানান। আমরা সরকারি উৎস মিলিয়ে ঠিক করি। জরুরি হলে আগে ৯৯৯-এ কল করুন।'],
-        ['offline', 'ইন্টারনেট না থাকলে কাজ করবে?', 'আংশিক। পাতাটি আগে থেকে খোলা থাকলে লোকেশন দিয়ে এলাকা খোঁজা আর SMS পাঠানো ইন্টারনেট ছাড়াই হয়। পুরো সাইট অফলাইনে চালানোর সুবিধা তৈরি হচ্ছে।'],
+        ['offline', 'ইন্টারনেট না থাকলে কাজ করবে?', 'হ্যাঁ। ইন্টারনেট থাকা অবস্থায় একবার সাইটটি খুললেই সব নম্বর, এলাকা খোঁজা, "আমার কাছের সাহায্য" আর SMS ইন্টারনেট ছাড়াও চলে। শুধু WhatsApp, ম্যাপ, উৎসের লিংক আর ভুল নম্বর জানাতে ইন্টারনেট লাগে। কল আর SMS-এর জন্য মোবাইল নেটওয়ার্ক লাগবে।'],
         ['privacy', 'আমার তথ্য কোথায় যায়?', 'কোথাও না। প্রিয়জনের নম্বর ও শেষ দেখা এলাকা শুধু আপনার ফোনের ব্রাউজারে থাকে। লোকেশন যায় শুধু আপনি পাঠালে।'],
         ['districts', 'অন্য জেলা কবে আসবে?', 'এখন নোয়াখালী ও কক্সবাজার। তথ্য যাচাই শেষ হলে ধাপে ধাপে বাকি জেলা আসবে। ৯৯৯, ১০৯, ৩৩৩-এর মতো জাতীয় নম্বর সারা দেশে কাজ করে।']] },
-    foot: { tagline: 'আপনার এলাকার সরকারি জরুরি নম্বর। লগইন ছাড়া।', small: 'নোয়াখালী ও কক্সবাজার দিয়ে শুরু।',
+    foot: { tagline: 'আপনার এলাকার সরকারি জরুরি নম্বর। লগইন ছাড়া, ইন্টারনেট ছাড়াও।', small: 'নোয়াখালী ও কক্সবাজার দিয়ে শুরু।',
       services: ['সেবা', ['৯৯৯-এ কল', 'প্রিয়জনকে লোকেশন', 'কাছের সাহায্য', 'এলাকা খুঁজুন']],
       areas: ['এলাকা', ['নোয়াখালী', 'কক্সবাজার', 'চৌমুহনী', 'ইনানী সৈকত']],
       info: ['তথ্য', ['আমাদের সম্পর্কে', 'প্রশ্ন ও উত্তর', 'ভুল নম্বর জানান', 'উৎস ও যাচাই']],
@@ -696,21 +700,21 @@ const PAGE = {
       ['flag', 'Found a wrong number?', 'Tell us (needs a GitHub account). We check it against the official source and fix it if it is wrong.', 'Report a wrong number']],
     helpTitle: 'How can we help?', help: ['Questions', 'Sources', 'Privacy', 'Report a wrong number'],
     netTitle: 'Made for weak networks',
-    net: [['ok', 'Once the page is open, finding your area from your location needs no internet'], ['ok', 'Sending your location by SMS needs no internet'],
-      ['ok', 'Every number from an official website, with its source'], ['soon', 'Install on your phone and use fully offline: coming soon']],
+    net: [['ok', 'Finding your area from your location needs no internet'], ['ok', 'Sending your location by SMS needs no internet'],
+      ['ok', 'Every number from an official website, with a link to its source'], ['ok', 'After one visit, it works without internet; you can also install it on your phone']],
     nav: { home: 'Home', numbers: 'Emergency numbers', area: 'Find area', send: 'Send location', guide: 'What happened?', about: 'About', faq: 'Questions' },
     about: { eyebrow: 'About', title: 'What is SafeConnect?',
       text: 'In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox\'s Bazar now, the whole country later.',
       points: [['check', 'Official numbers only', 'Every number comes from an official *.gov.bd website, with its source link. The sources are re-checked every week.'],
-        ['signal', 'Made for weak networks', 'Once the page is open, you can find your area from your location and send it by SMS, with no internet. A full offline app is being built.'],
+        ['signal', 'Made for weak networks', 'After one visit, the numbers, area search, "Find help near me" and sending your location by SMS work without internet.'],
         ['lock', 'No login', 'Your family\'s numbers stay on your phone. We collect no personal data.']] },
     faq: { eyebrow: 'Questions', title: 'Good to know',
       items: [['source', 'Where do the numbers come from?', 'From the official websites (*.gov.bd) of districts, upazilas, unions and municipalities. Each number shows its source link and check date.'],
         ['wrong', 'What if a number is wrong?', 'Tell us with "Report a wrong number" below. We fix it against the official source. In an emergency, call 999 first.'],
-        ['offline', 'Does it work without internet?', 'Partly. If the page is already open, finding your area from your location and sending SMS work without internet. Full offline use is being built.'],
+        ['offline', 'Does it work without internet?', 'Yes. Open the site once with internet; after that all numbers, area search, "Find help near me" and SMS work without internet. Only WhatsApp, maps, source links and reporting a wrong number need internet. Calls and SMS still need mobile signal.'],
         ['privacy', 'Where does my data go?', 'Nowhere. Your family\'s numbers and last area stay in your phone\'s browser. Your location is sent only when you send it.'],
         ['districts', 'When will other districts come?', 'Noakhali and Cox\'s Bazar now. More districts come step by step once their data is checked. National numbers like 999, 109 and 333 work everywhere.']] },
-    foot: { tagline: 'Official emergency numbers for your area. No login.', small: "Starting with Noakhali and Cox's Bazar.",
+    foot: { tagline: 'Official emergency numbers for your area. No login; works without internet too.', small: "Starting with Noakhali and Cox's Bazar.",
       services: ['Services', ['Call 999', 'Send location', 'Find help near me', 'Find area']],
       areas: ['Areas', ['Noakhali', "Cox's Bazar", 'Chowmuhani', 'Inani beach']],
       info: ['Information', ['About', 'Questions', 'Report a wrong number', 'Sources and checks']],
@@ -925,6 +929,7 @@ function setText() {
   $('smsHint').textContent = s.smsHint; $('peopleTitle').textContent = s.people;
   $('lblName').textContent = s.name; $('lblRel').textContent = s.rel; $('lblPhone').textContent = s.phone; $('saveBtn').textContent = s.save;
   $('privacy').textContent = s.privacy;
+  $('offlineText').textContent = s.offline;
   renderHomeSos();
   renderPage();
 }
@@ -957,3 +962,13 @@ try {
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);
 }
+
+// Calm notice while the phone has no internet; it goes away by itself when the internet is back.
+function showOnline() { $('offlineNote').hidden = navigator.onLine; }
+window.addEventListener('online', showOnline);
+window.addEventListener('offline', showOnline);
+showOnline();
+
+// Offline app (P34): save the site on this phone after the first visit, so it opens with no internet.
+// Registered after the data is loaded, so it does not slow down the first view.
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
