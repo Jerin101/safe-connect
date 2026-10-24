@@ -1,0 +1,24 @@
+# Runs the Firestore security-rule tests in the free emulator on every PR that touches the rules.
+# Fake "demo-" project: no real Firebase project, data or secrets are used.
+name: Firestore rules tests
+on:
+  pull_request:
+    paths: ['firestore.rules', 'tests/rules/**', 'package.json', 'package-lock.json', 'firebase.json']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npm run test:rules
