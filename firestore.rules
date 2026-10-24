@@ -1,0 +1,122 @@
+rules_version = '2';
+
+// SafeConnect security rules (P17). The site has no server code (Firebase Spark),
+// so these rules are the only protection. Hiding a button is never enough.
+// - Help (999, send location, area numbers) never touches Firestore: it works signed out.
+// - Roles: users/{uid}.role is a copy for display; admins/{uid} is added only in the Firebase console.
+// - Every admin change is a batched write together with a new audit/{id} entry (checked with getAfter).
+// - Anything not listed here (applications, confirmations, volunteers, teams) stays closed until P38.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isMe(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function incoming() { return request.resource.data; }
+    function changed() { return incoming().diff(resource.data).affectedKeys(); }
+    function shortText(v, max) { return v is string && v.size() <= max; }
+    function bdMobile(v) { return v is string && v.matches('^01[3-9][0-9]{8}$'); }
+
+    // An admin change must carry lastAuditId, and that audit entry must be created
+    // in the same batch, by this admin, about this exact document and action.
+    function audited(entity, id, action) {
+      let auditId = incoming().lastAuditId;
+      let path = /databases/$(database)/documents/audit/$(auditId);
+      return auditId is string
+        && !exists(path)
+        && existsAfter(path)
+        && getAfter(path).data.actorUid == request.auth.uid
+        && getAfter(path).data.entity == entity
+        && getAfter(path).data.entityId == id
+        && getAfter(path).data.action == action;
+    }
+
+    // ---------- people ----------
+    match /users/{uid} {
+      allow read: if isMe(uid) || isAdmin();
+      allow create: if isMe(uid)
+        && incoming().keys().hasOnly(['name', 'email', 'lang', 'createdAt', 'role'])
+        && incoming().role == 'user'
+        && incoming().get('email', '') == request.auth.token.get('email', '')
+        && shortText(incoming().get('name', ''), 60)
+        && incoming().get('lang', 'bn') in ['bn', 'en']
+        && incoming().createdAt == request.time;
+      // The owner may change only name and language, never the role.
+      allow update: if (isMe(uid)
+          && changed().hasOnly(['name', 'lang'])
+          && shortText(incoming().get('name', ''), 60)
+          && incoming().get('lang', 'bn') in ['bn', 'en'])
+        // An admin may change only the role (user <-> volunteer), with an audit entry.
+        // New admins are added only in the Firebase console.
+        || (isAdmin()
+          && changed().hasOnly(['role', 'lastAuditId'])
+          && incoming().role in ['user', 'volunteer']
+          && audited('users', uid, 'ROLE_CHANGED'));
+      allow delete: if isMe(uid);
+    }
+
+    match /admins/{uid} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Family numbers: only if the person turns on sync. Owner only.
+    match /family/{uid}/people/{personId} {
+      allow read, delete: if isMe(uid);
+      allow create, update: if isMe(uid)
+        && incoming().keys().hasOnly(['name', 'relation', 'phone'])
+        && shortText(incoming().name, 40) && incoming().name.size() > 0
+        && shortText(incoming().get('relation', ''), 20)
+        && bdMobile(incoming().phone);
+    }
+
+    // Saved areas. Owner only. No home addresses: only district, upazila and area names.
+    match /places/{uid}/saved/{placeId} {
+      allow read, delete: if isMe(uid);
+      allow create, update: if isMe(uid)
+        && incoming().keys().hasOnly(['district', 'upazila', 'area'])
+        && incoming().district in ['noakhali', 'coxsbazar']
+        && shortText(incoming().upazila, 60)
+        && shortText(incoming().get('area', ''), 80);
+    }
+
+    // ---------- wrong-number reports ----------
+    match /reports/{reportId} {
+      allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
+      allow create: if signedIn()
+        && incoming().keys().hasOnly(['uid', 'recordId', 'district', 'area', 'problem', 'note', 'status', 'createdAt', 'updatedAt'])
+        && incoming().uid == request.auth.uid
+        && incoming().status == 'open'
+        && shortText(incoming().recordId, 120)
+        && incoming().district in ['noakhali', 'coxsbazar']
+        && shortText(incoming().get('area', ''), 80)
+        && incoming().problem in ['off', 'other_person', 'changed', 'other']
+        && shortText(incoming().get('note', ''), 500)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      // Only an admin moves the status, always with an audit entry.
+      allow update: if isAdmin()
+        && changed().hasOnly(['status', 'updatedAt', 'lastAuditId'])
+        && incoming().status in ['open', 'review', 'fixed', 'same']
+        && incoming().updatedAt == request.time
+        && audited('reports', reportId, 'REPORT_STATUS_CHANGED');
+      allow delete: if false;
+    }
+
+    // ---------- audit log: append-only ----------
+    match /audit/{auditId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && incoming().keys().hasOnly(['actorUid', 'action', 'entity', 'entityId', 'at', 'meta'])
+        && incoming().actorUid == request.auth.uid
+        && incoming().action in ['REPORT_STATUS_CHANGED', 'ROLE_CHANGED']
+        && incoming().entity in ['reports', 'users']
+        && incoming().entityId is string
+        && incoming().at == request.time
+        && (!('meta' in incoming()) || incoming().meta is map);
+      allow update, delete: if false;
+    }
+
+    // Everything else is closed (volunteer collections open in P38).
+  }
+}
