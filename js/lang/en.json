@@ -1,0 +1,405 @@
+{
+  "ui": {
+    "lang": "বাং",
+    "hello1": "Need help?",
+    "hello2": "Stay calm. The official numbers for your area are right here.",
+    "eyebrow": "Official numbers for Noakhali & Cox's Bazar",
+    "h999": "999",
+    "lead": "Police station, chairman, village police and hospital numbers for your union. All from official government websites; the sources are re-checked every week.",
+    "distAll": "All districts",
+    "stats": [
+      "official numbers",
+      "unions and towns",
+      "upazilas",
+      "last checked"
+    ],
+    "quickEyebrow": "Quick go",
+    "quickTitle": "Known places",
+    "quickText": "One tap shows that area's police and emergency numbers.",
+    "places": {
+      "chowmuhani": [
+        "Chowmuhani",
+        "Begumganj, Noakhali"
+      ],
+      "inani": [
+        "Inani beach",
+        "Ukhia, Cox's Bazar"
+      ],
+      "hatiya": [
+        "Hatiya",
+        "Island upazila, Noakhali"
+      ],
+      "coxtown": [
+        "Cox's Bazar town",
+        "Municipality"
+      ]
+    },
+    "call999": "Call 999",
+    "call999Sub": "Police, fire service, ambulance · free",
+    "locate": "Find help near me",
+    "locateSub": "Numbers for your police station, chairman and village police · works without internet",
+    "locating": "Finding your location…",
+    "or": "or",
+    "areaLabel": "Type your area",
+    "areaHint": "Village, union, town or upazila, in Bangla or English, any spelling. For example: Chowmuhani, হাতিয়া, Inani",
+    "noMatch": "This name is not in our list yet. You can still get help:",
+    "didYouMean": "Similar names",
+    "noExact": "Not found with this exact spelling. Is it one of these?",
+    "tellUs": "If your place is missing, tell us with \"Report a wrong number\" below (needs a GitHub account).",
+    "pickUpazila": "Pick your upazila. Its police station and UNO numbers are there.",
+    "kinds": {
+      "municipality": "town",
+      "place": "place",
+      "union": "union",
+      "village": "village",
+      "upazila": "upazila",
+      "local": "local name",
+      "market and post office": "market and post office",
+      "market": "market",
+      "post office": "post office"
+    },
+    "recent": "Last area: {n}",
+    "denied": "Location is not allowed. Turn on location in your phone settings, or type your area below.",
+    "unavailable": "Could not get your location. Move to an open place and tap again, or type your area below.",
+    "timeout": "Location is taking too long. Tap again, or type your area below.",
+    "unsupported": "This browser has no location. Type your area below.",
+    "demo": "Test (demo): pretend you are here. Real users will not see this part.",
+    "back": "← Back to start",
+    "youAreIn": "You are in",
+    "change": "Change area",
+    "town": "town",
+    "wholeUpazila": "whole upazila",
+    "shareTitle": "Send your location to family",
+    "shareText": "One tap sends a message with a map link. You can also tell 999 this location.",
+    "shareMsg": "I am in danger. My location: {link}",
+    "copy": "Copy",
+    "copied": "Copied",
+    "map": "Map",
+    "outsideTitle": "Your location",
+    "outside": "You are outside Noakhali and Cox's Bazar. SafeConnect shows local numbers only for these two districts for now. The national numbers below work everywhere.",
+    "firstCalm": "Call from top to bottom. If one does not answer, try the next.",
+    "first": "Call these first",
+    "more": "More help",
+    "showAll": "Show all ({n})",
+    "call": "Call",
+    "ward": "Ward",
+    "source": "Official source",
+    "checked": "Checked",
+    "what": {
+      "emergency": "Emergency",
+      "police": "Police station",
+      "local": "Union council",
+      "town": "Municipality",
+      "administration": "Upazila officer (UNO)",
+      "tourist_police": "Tourist Police"
+    },
+    "groups": {
+      "police": "Police",
+      "tourist_police": "Tourist Police",
+      "village_police": "Village police (by ward)",
+      "local": "Chairman and members",
+      "town": "Municipality",
+      "coast": "Coast and river",
+      "administration": "Upazila administration (UNO)",
+      "health": "Hospital and health",
+      "fire": "Fire service",
+      "women_children": "Women and children",
+      "disaster": "Disaster",
+      "helplines": "National helplines",
+      "info333": "Information and services (333)"
+    },
+    "fallback": "No number is published for this upazila, so district numbers are shown.",
+    "noNumbers": "This union's representatives have no published numbers. Call the police station or the UNO.",
+    "flags": {
+      "number_not_published": "Number not published",
+      "source_older_than_2_years": "May be outdated",
+      "needs_manual_check": "Not checked yet",
+      "administrator_not_elected": "Administrator"
+    },
+    "credit": "Map data: upazila boundaries and union/town centre points from the Bangladesh Bureau of Statistics (BBS) via OCHA HDX (CC BY-IGO). Where BBS names do not match, the tools can add OpenStreetMap points (© OpenStreetMap contributors, ODbL).",
+    "testsLink": "Search tests (for developers)",
+    "foot1": "All numbers come from official *.gov.bd websites. Each number links to its source. In danger, call 999 first.",
+    "sosBtn": "Send my location to family",
+    "sosBtnSubNone": "No login · save one number once",
+    "sosBtnSub": "One tap · SMS works without internet",
+    "sosTitle": "Send my location to family",
+    "sit": "What happened?",
+    "loc": "Your location",
+    "send": "Send to",
+    "msgT": "Message (you can change it)",
+    "sits": {
+      "danger": [
+        "In danger",
+        "I am in danger and need help now."
+      ],
+      "followed": [
+        "Being followed",
+        "Someone is following me and I am scared."
+      ],
+      "accident": [
+        "Accident",
+        "I had an accident."
+      ],
+      "sick": [
+        "Feeling ill",
+        "I am ill and need help."
+      ],
+      "lost": [
+        "Lost",
+        "I am lost."
+      ]
+    },
+    "urgent": "URGENT!",
+    "area": "My area: {n}.",
+    "mapLine": "Map: {l}",
+    "noLoc": "I could not get my location. Call me now.",
+    "timeLine": "Time: {x}",
+    "sign": "(sent from SafeConnect)",
+    "offline": "No internet. Numbers, area search and SMS still work.",
+    "locIdle": "Location not taken yet. To send it, tap the button below.",
+    "locBtn": "Get my location",
+    "gettingLoc": "Getting your location…",
+    "gotLoc": "{place}",
+    "gotLocAcc": "{place} (about {m} m)",
+    "outsideLoc": "Location found (the map link is in the message)",
+    "noLocYet": "You can send without a location. The message asks them to call you.",
+    "sosDenied": "Location is not allowed (turn it on in phone settings).",
+    "sosNoLoc": "Could not get your location.",
+    "sms": "Send SMS",
+    "smsAll": "SMS everyone ({n})",
+    "wa": "WhatsApp",
+    "other": "Other app",
+    "copyMsg": "Copy message",
+    "smsNoNet": "no internet needed",
+    "smsHint": "SMS needs no internet. The button opens your messages app; tap Send there.",
+    "people": "My people",
+    "addTitle": "Add a number",
+    "name": "Name",
+    "rel": "Relation (e.g. mother)",
+    "phone": "Mobile number",
+    "save": "Save",
+    "remove": "Remove",
+    "noPeople": "No number saved yet. Save your mother, father or a close friend below. Next time it is one tap.",
+    "badPhone": "Enter a valid mobile number, like 01XXXXXXXXX.",
+    "needName": "Enter a name.",
+    "maxPeople": "You can save up to 3 people.",
+    "privacy": "These numbers are saved only on this phone. They are never sent anywhere, and no login is needed.",
+    "sendFamily": "Send to family",
+    "demoPlaces": {
+      "chowmuhani": "Chowmuhani",
+      "inani": "Inani beach",
+      "hatiya": "Hatiya",
+      "dhaka": "Dhaka (outside)"
+    },
+    "smsShort": "SMS"
+  },
+  "page": {
+    "greet": {
+      "morning": "Good morning",
+      "noon": "Good afternoon",
+      "evening": "Good evening",
+      "night": "999 works all night too, and it is free."
+    },
+    "greetTail": "If you need help, the numbers are right below.",
+    "trust": [
+      "Official numbers only",
+      "No login",
+      "Free to use",
+      "বাংলা & English"
+    ],
+    "welcomeTitle": "Welcome! First time here? Three things to know:",
+    "welcomeSteps": [
+      "In danger, call 999 first.",
+      "Tap \"Find help near me\" to see the numbers of your police station and chairman.",
+      "Save your family's numbers now, so you can send your location quickly."
+    ],
+    "welcomeOk": "Got it",
+    "welcomeSave": "Save numbers",
+    "icons": {
+      "national-emergency-999": "Emergency",
+      "fire-service-102": "Fire service",
+      "health-call-centre-16263": "Health line",
+      "women-children-violence-109": "Women & children",
+      "child-helpline-1098": "Child helpline",
+      "tourist-police-helpline": "Tourist Police",
+      "info-service-333": "Info service",
+      "disaster-warning-1090": "Disaster warning"
+    },
+    "iconSend": "Send location",
+    "iconSendSub": "to family",
+    "iconNear": "Help near me",
+    "iconNearSub": "police station & chairman",
+    "iconSrc": "Official source and check date of these numbers",
+    "findTitle": "Which area are you in?",
+    "findText": "Type your village, union, town or upazila, in Bangla or English, any spelling.",
+    "guideTitle": "What happened?",
+    "guideText": "Pick your situation and we will show you who to call.",
+    "guides": [
+      [
+        "night",
+        "In danger at night or on the road",
+        "Call 999 first. Then send your location to your family.",
+        "Send location",
+        "sos"
+      ],
+      [
+        "lost",
+        "Something lost or stolen",
+        "File a General Diary (GD) at the nearest police station. Find your police station number here.",
+        "Find police station number",
+        "find"
+      ],
+      [
+        "storm",
+        "Storm, flood or fire",
+        "Fire service {fire}, disaster warning {warn}. See your upazila numbers too.",
+        "Find help near me",
+        "locate"
+      ]
+    ],
+    "duo": [
+      [
+        "send",
+        "Save your family's numbers",
+        "In an emergency there is no time to look for numbers. Save them once and you can send your location quickly. No login.",
+        "Save numbers"
+      ],
+      [
+        "flag",
+        "Found a wrong number?",
+        "Tell us (needs a GitHub account). We check it against the official source and fix it if it is wrong.",
+        "Report a wrong number"
+      ]
+    ],
+    "helpTitle": "How can we help?",
+    "help": [
+      "Questions",
+      "Sources",
+      "Privacy",
+      "Report a wrong number"
+    ],
+    "netTitle": "Made for weak networks",
+    "net": [
+      [
+        "ok",
+        "Finding your area from your location needs no internet"
+      ],
+      [
+        "ok",
+        "Sending your location by SMS needs no internet"
+      ],
+      [
+        "ok",
+        "Every number from an official website, with a link to its source"
+      ],
+      [
+        "ok",
+        "After one visit, it works without internet; you can also install it on your phone"
+      ]
+    ],
+    "nav": {
+      "home": "Home",
+      "numbers": "Emergency numbers",
+      "area": "Find area",
+      "send": "Send location",
+      "guide": "What happened?",
+      "about": "About",
+      "faq": "Questions"
+    },
+    "about": {
+      "eyebrow": "About",
+      "title": "What is SafeConnect?",
+      "text": "In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox's Bazar now, the whole country later.",
+      "points": [
+        [
+          "check",
+          "Official numbers only",
+          "Every number comes from an official *.gov.bd website, with its source link. The sources are re-checked every week."
+        ],
+        [
+          "signal",
+          "Made for weak networks",
+          "After one visit, the numbers, area search, \"Find help near me\" and sending your location by SMS work without internet."
+        ],
+        [
+          "lock",
+          "No login",
+          "Your family's numbers stay on your phone. We collect no personal data."
+        ]
+      ]
+    },
+    "faq": {
+      "eyebrow": "Questions",
+      "title": "Good to know",
+      "items": [
+        [
+          "source",
+          "Where do the numbers come from?",
+          "From the official websites (*.gov.bd) of districts, upazilas, unions and municipalities. Each number shows its source link and check date."
+        ],
+        [
+          "wrong",
+          "What if a number is wrong?",
+          "Tell us with \"Report a wrong number\" below. We fix it against the official source. In an emergency, call 999 first."
+        ],
+        [
+          "offline",
+          "Does it work without internet?",
+          "Yes. Open the site once with internet; after that all numbers, area search, \"Find help near me\" and SMS work without internet. Only WhatsApp, maps, source links and reporting a wrong number need internet. Calls and SMS still need mobile signal."
+        ],
+        [
+          "privacy",
+          "Where does my data go?",
+          "Nowhere. Your family's numbers and last area stay in your phone's browser. Your location is sent only when you send it."
+        ],
+        [
+          "districts",
+          "When will other districts come?",
+          "Noakhali and Cox's Bazar now. More districts come step by step once their data is checked. National numbers like 999, 109 and 333 work everywhere."
+        ]
+      ]
+    },
+    "foot": {
+      "tagline": "Official emergency numbers for your area. No login; works without internet too.",
+      "small": "Starting with Noakhali and Cox's Bazar.",
+      "services": [
+        "Services",
+        [
+          "Call 999",
+          "Send location",
+          "Find help near me",
+          "Find area"
+        ]
+      ],
+      "areas": [
+        "Areas",
+        [
+          "Noakhali",
+          "Cox's Bazar",
+          "Chowmuhani",
+          "Inani beach"
+        ]
+      ],
+      "info": [
+        "Information",
+        [
+          "About",
+          "Questions",
+          "Report a wrong number",
+          "Sources and checks"
+        ]
+      ],
+      "helpTitle": "Need a little help?",
+      "helpText": "For information about any government service, call 333. To tell us about this project, write on GitHub.",
+      "copy": "© 2026 SafeConnect · jerin101 & tasmintoshi",
+      "bottom": [
+        "Privacy",
+        "Sources",
+        "GitHub",
+        "Search tests"
+      ],
+      "credit": "Numbers: official *.gov.bd websites. Map: upazila boundaries and union/town centre points from the Bangladesh Bureau of Statistics (BBS) via OCHA HDX (CC BY-IGO). Where BBS names do not match, the tools can add OpenStreetMap points (© OpenStreetMap contributors, ODbL)."
+    },
+    "guideStormNoNumbers": "See the fire service, disaster and upazila numbers."
+  }
+}
