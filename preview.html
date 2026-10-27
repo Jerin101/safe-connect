@@ -30,6 +30,7 @@
     --violet-1: #8457FF; --violet-2: #5427D6; --on-color: #FFFFFF;
     --orange-1: #FF9B5C; --orange-2: #E8542E; --green-1: #3FC98A; --green-2: #14895A; --pink-1: #FF7AB8; --pink-2: #C8327E; --blue-1: #6FA8FF; --blue-2: #2E5BD6; --teal-1: #4FD6D0; --teal-2: #13858F; --slate-1: #9AA3C7; --slate-2: #59618A;
     --warn: #8A4B00; --warn-bg: #FFEBD2; --ok: #12804C;
+    --danger-soft: #FFE8EC; --accent-soft: rgba(107, 63, 224, 0.18); --backdrop: rgba(20, 12, 50, 0.5);
     --shadow: 0 6px 24px rgba(80, 50, 160, 0.10);
     --foot-bg: #F2EEFA; --foot-ink: #1C1442; --foot-muted: #574E7E; --foot-line: rgba(90, 60, 180, 0.15);
     --font: "Manrope", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -45,6 +46,7 @@
       --red-1: #FF4D6D; --red-2: #D61F45; --amber-1: #FFCB5C; --amber-2: #FF9548;
       --violet-1: #9D72FF; --violet-2: #6435F0;
       --warn: #FFC98A; --warn-bg: rgba(255, 170, 80, 0.14); --ok: #6EE7A8;
+      --danger-soft: rgba(255, 77, 109, 0.14); --accent-soft: rgba(157, 114, 255, 0.3); --backdrop: rgba(0, 0, 0, 0.6);
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
       --foot-bg: #0A0820; --foot-ink: #F3EFFF; --foot-muted: #A9A0CC; --foot-line: rgba(255, 255, 255, 0.10);
       color-scheme: dark;
@@ -59,6 +61,7 @@
     --red-1: #FF4D6D; --red-2: #D61F45; --amber-1: #FFCB5C; --amber-2: #FF9548;
     --violet-1: #9D72FF; --violet-2: #6435F0;
     --warn: #FFC98A; --warn-bg: rgba(255, 170, 80, 0.14); --ok: #6EE7A8;
+    --danger-soft: rgba(255, 77, 109, 0.14); --accent-soft: rgba(157, 114, 255, 0.3); --backdrop: rgba(0, 0, 0, 0.6);
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     --foot-bg: #0A0820; --foot-ink: #F3EFFF; --foot-muted: #A9A0CC; --foot-line: rgba(255, 255, 255, 0.10);
     color-scheme: dark;
@@ -456,6 +459,53 @@
   .people-body { padding: 8px 16px 16px; gap: 10px; }
   .first-row .src { color: var(--muted); font-size: 0.78rem; }
   .first-row .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+
+  /* ---------- sign in (P45): account button, sign-in view, workspace placeholder, sign-out dialog ---------- */
+  .acct svg { width: 16px; height: 16px; }
+  /* Small phones (as in design/portal-v2.html): the logo keeps only its pin, and on the smallest the account
+     button keeps only its icon, so 999 always keeps its place. */
+  @media (max-width: 430px) { .logo .logo-text { display: none; } }
+  @media (max-width: 345px) { .acct { width: 36px; height: 36px; padding: 0; justify-content: center; } .acct .acct-text { display: none; } }
+  #signin .btn, #ws .btn, .confirm .btn { min-height: 44px; }
+  .btn.red { background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: var(--on-color); border-color: transparent; }
+  .btn.wide { width: 100%; justify-content: center; }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .nologin { display: grid; gap: 10px; border: 1px solid color-mix(in srgb, var(--red-2) 35%, transparent); background: var(--danger-soft); border-radius: var(--r); padding: 14px 16px; }
+  .nologin p { color: var(--muted); font-size: 0.92rem; }
+  .nologin-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .si-head { display: grid; gap: 8px; justify-items: start; }
+  .si-head h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); }
+  .si-head h1 .soft { display: block; font-size: 0.55em; font-weight: 600; margin-top: 6px; color: var(--muted); }
+  .role-pick { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  @media (min-width: 680px) { .role-pick { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .role-opt { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; align-content: start; text-align: left; border: 1px solid var(--line);
+    border-radius: var(--r); background: var(--surface); padding: 14px; cursor: pointer; color: var(--ink); }
+  .role-opt .ico { grid-row: span 3; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); color: var(--muted); }
+  .role-opt .ico svg { width: 20px; height: 20px; }
+  .role-opt[aria-checked="true"] .ico { color: var(--accent); }
+  .role-opt b { font-size: 1rem; padding-right: 22px; }
+  .role-opt small { color: var(--muted); font-size: 0.86rem; line-height: 1.45; }
+  .role-opt .tag { justify-self: start; margin-top: 4px; }
+  .role-opt::after { content: ""; position: absolute; top: 14px; right: 14px; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line); }
+  .role-opt[aria-checked="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .role-opt[aria-checked="true"]::after { border: 5px solid var(--accent); }
+  .si-form { border: 1px solid var(--line); border-radius: 20px; background: var(--surface); padding: 22px; display: grid; gap: 14px; min-width: 0; }
+  .si-form h2 { font-size: 1.2rem; }
+  .field { display: grid; gap: 6px; font-size: 0.88rem; font-weight: 600; min-width: 0; }
+  .field input { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 1rem; font-weight: 400; min-height: 44px; }
+  .field input:focus, .role-opt:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.84rem; }
+  .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .si-links { display: flex; flex-wrap: wrap; gap: 0 18px; }
+  .linkbtn { background: none; border: 0; padding: 0; min-height: 44px; color: var(--link); font-weight: 600; cursor: pointer; text-decoration: underline; text-align: left; }
+  .linkbtn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .si-note { color: var(--muted); font-size: 0.9rem; border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; }
+  .confirm { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); color: var(--ink); padding: 20px; width: min(420px, calc(100vw - 32px)); box-shadow: var(--shadow); }
+  .confirm::backdrop { background: var(--backdrop); }
+  .confirm form { display: grid; gap: 12px; }
+  .confirm-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  .toast { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 7; margin: 0 auto; max-width: 480px; background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+    border-left: 4px solid var(--ok); border-radius: 12px; padding: 12px 16px; box-shadow: var(--shadow); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -465,10 +515,11 @@
     <button class="logo" id="homeBtn" type="button" aria-label="SafeConnect home">
       <svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B58CFF"/><stop offset="1" stop-color="#FF8F6B"/></linearGradient></defs>
         <path fill="url(#lg)" d="M16 2c6.6 0 12 5.2 12 11.7C28 22.5 16 30 16 30S4 22.5 4 13.7C4 7.2 9.4 2 16 2Z"/><circle cx="16" cy="13.5" r="4.6" fill="#fff"/></svg>
-      SafeConnect
+      <span class="logo-text">SafeConnect</span>
     </button>
     <div class="top-actions">
       <a class="hpill h999" id="h999" href="tel:999"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg><span id="h999Text">৯৯৯</span></a>
+      <button class="hpill acct" id="acctBtn" type="button" aria-label="Sign in"></button>
       <button class="hpill" id="langBtn" type="button" aria-label="Language: English / বাংলা">EN</button>
       <button class="hpill round" id="themeBtn" type="button" aria-label="Night or day"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg></button>
     </div>
@@ -681,6 +732,49 @@
       </div>
     </details>
   </div>
+
+  <!-- SIGN IN (P45): help first, then the three options. Built by js/auth.js. -->
+  <div class="wrap page" id="signin" hidden>
+    <div class="page-top"><button class="back" id="siBack" type="button"></button></div>
+    <section class="nologin" aria-labelledby="noLoginTitle">
+      <b id="noLoginTitle"></b><p id="noLoginText"></p>
+      <div class="nologin-btns" id="noLoginBtns"></div>
+    </section>
+    <div class="si-head"><p class="eyebrow" id="siEyebrow"></p><h1><span id="siT1"></span><span class="soft" id="siT2"></span></h1></div>
+    <div class="role-pick" id="rolePick" role="radiogroup"></div>
+    <form class="si-form" id="siForm" novalidate>
+      <h2 id="siFormTitle"></h2>
+      <p class="offline-note" id="siOffline" role="status" hidden></p>
+      <button class="btn wide" id="siGoogle" type="button"></button>
+      <p class="or" id="siOr"></p>
+      <label class="field"><span id="siEmailL"></span><input id="siEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+      <label class="field"><span id="siPassL"></span><input id="siPass" type="password" autocomplete="current-password"></label>
+      <p class="msg" id="siMsg" role="alert" hidden></p>
+      <button class="btn violet wide" id="siSubmit" type="submit"></button>
+      <div class="si-links"><button class="linkbtn" id="siCreate" type="button"></button><button class="linkbtn" id="siForgot" type="button"></button></div>
+      <p class="si-note" id="siNote"></p>
+      <div id="siExtra"></div>
+    </form>
+  </div>
+
+  <!-- WORKSPACE: a simple placeholder for now; the real workspace comes with P35. -->
+  <div class="wrap page" id="ws" hidden>
+    <div class="page-top"><button class="back" id="wsBack" type="button"></button></div>
+    <div class="si-head"><p class="eyebrow" id="wsEyebrow"></p><h1 id="wsTitle"></h1></div>
+    <p class="si-note" id="wsNote" role="status" hidden></p>
+    <p id="wsWho" hidden></p>
+    <p class="msg plain" id="wsSoon"></p>
+    <div><button class="btn" id="wsOut" type="button"></button></div>
+  </div>
+
+  <dialog class="confirm" id="outDialog" aria-labelledby="outTitle" aria-describedby="outText">
+    <form method="dialog">
+      <h2 id="outTitle"></h2>
+      <p id="outText"></p>
+      <div class="confirm-row"><button class="btn" id="outNo" value="cancel"></button><button class="btn violet" id="outYes" value="yes"></button></div>
+    </form>
+  </dialog>
+  <p class="toast" id="toast" role="status" hidden></p>
 </main>
 
 <footer>

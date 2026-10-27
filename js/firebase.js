@@ -17,6 +17,8 @@ const db = getFirestore(app);
 export function setLang(lang) { auth.languageCode = lang; }
 
 export const watchUser = (callback) => onAuthStateChanged(auth, callback);
+// Waits until Firebase knows whether someone is signed in on this phone, then gives that user (or null).
+export const currentUser = async () => { await auth.authStateReady(); return auth.currentUser; };
 // Popup only: a redirect breaks on phones, because github.io and firebaseapp.com are different sites.
 export const signInGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
 export const signInEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
