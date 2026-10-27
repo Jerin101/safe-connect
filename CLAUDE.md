@@ -23,7 +23,7 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 
 ## Code style
 
-- **Design:** for any page, button or text, follow `docs/DESIGN.md`. `design/portal.html` is the reference.
+- **Design:** for any page, button or text, follow `docs/DESIGN.md`. `design/portal-v2.html` is the reference.
 - HTML: semantic tags, a `lang` attribute, a label for every button and input, no inline JavaScript.
 - CSS: colours and sizes only as variables in `css/base.css`; dark and light themes; mobile-first (test at 360 px).
 - JavaScript: ES modules, `const`/`let`, small functions, no global variables, `textContent` (never `innerHTML` with data), and `tel:` links with normal digits.
@@ -35,6 +35,14 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 - Data files live in `data/`. Change them only with the scripts in `tools/` or through `data/manual_additions.json` (with a `source_url` and a `source_quote_bn`).
 - `python tools/validate_data.py data` must report **0 errors** before any data PR.
 - Cards must show: the source link, the check date, and badges for the flags `number_not_published`, `source_older_than_2_years`, `administrator_not_elected`.
+
+## Save usage
+
+- Never read `data/*.json` or `design/portal-v2.html` in full. Use grep or read only the needed lines.
+- For one step, show all commands together with one simple sentence each, then wait for one OK.
+- Don't print long command output; show only errors or the last few lines.
+- Keep replies short.
+- When the person can do a step themselves, give the exact terminal commands so they can run them by hand.
 
 ## Commands
 
