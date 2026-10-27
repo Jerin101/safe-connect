@@ -49,7 +49,10 @@ No carousels, no auto-sliding, no autoplay video, no flashing (except the siren 
 - **Cards and corners:** one look for all cards. 12 px corners on small parts, slightly rounder cards, as in the reference page.
 - **One signature element: the "signal ring"** (a soft location ping) on the home banner and the sign-in page. Nothing else animates.
 - **Motion:** turn all motion off when the phone asks for less motion (`prefers-reduced-motion: reduce`).
-- Not allowed: another company's logo, colours, photos or text (we are not Grameenphone or any brand); bookings, prices, stock photos, heavy 3D/WebGL, slogans.
+- No other company's logo, colours, photos or text.
+  Exception: sign-in buttons may show the provider's official logo exactly as the provider's
+  branding guidelines say (the multicolour Google 'G', not recoloured, not stretched).
+- Not allowed: bookings, prices, stock photos, heavy 3D/WebGL, slogans.
 
 ## 5. Must always be true
 - 999 visible on every page; nothing covers it.
