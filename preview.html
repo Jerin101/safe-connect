@@ -31,6 +31,8 @@
     --orange-1: #FF9B5C; --orange-2: #E8542E; --green-1: #3FC98A; --green-2: #14895A; --pink-1: #FF7AB8; --pink-2: #C8327E; --blue-1: #6FA8FF; --blue-2: #2E5BD6; --teal-1: #4FD6D0; --teal-2: #13858F; --slate-1: #9AA3C7; --slate-2: #59618A;
     --warn: #8A4B00; --warn-bg: #FFEBD2; --ok: #12804C;
     --danger-soft: #FFE8EC; --accent-soft: rgba(107, 63, 224, 0.18); --backdrop: rgba(20, 12, 50, 0.5);
+    /* Google sign-in button: colours from Google's sign-in branding guidelines (light / dark theme). */
+    --gbtn-bg: #FFFFFF; --gbtn-line: #747775; --gbtn-ink: #1F1F1F;
     --shadow: 0 6px 24px rgba(80, 50, 160, 0.10);
     --foot-bg: #F2EEFA; --foot-ink: #1C1442; --foot-muted: #574E7E; --foot-line: rgba(90, 60, 180, 0.15);
     --font: "Manrope", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -47,6 +49,7 @@
       --violet-1: #9D72FF; --violet-2: #6435F0;
       --warn: #FFC98A; --warn-bg: rgba(255, 170, 80, 0.14); --ok: #6EE7A8;
       --danger-soft: rgba(255, 77, 109, 0.14); --accent-soft: rgba(157, 114, 255, 0.3); --backdrop: rgba(0, 0, 0, 0.6);
+      --gbtn-bg: #131314; --gbtn-line: #8E918F; --gbtn-ink: #E3E3E3;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
       --foot-bg: #0A0820; --foot-ink: #F3EFFF; --foot-muted: #A9A0CC; --foot-line: rgba(255, 255, 255, 0.10);
       color-scheme: dark;
@@ -62,6 +65,7 @@
     --violet-1: #9D72FF; --violet-2: #6435F0;
     --warn: #FFC98A; --warn-bg: rgba(255, 170, 80, 0.14); --ok: #6EE7A8;
     --danger-soft: rgba(255, 77, 109, 0.14); --accent-soft: rgba(157, 114, 255, 0.3); --backdrop: rgba(0, 0, 0, 0.6);
+    --gbtn-bg: #131314; --gbtn-line: #8E918F; --gbtn-ink: #E3E3E3;
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     --foot-bg: #0A0820; --foot-ink: #F3EFFF; --foot-muted: #A9A0CC; --foot-line: rgba(255, 255, 255, 0.10);
     color-scheme: dark;
@@ -462,6 +466,15 @@
 
   /* ---------- sign in (P45): account button, sign-in view, workspace placeholder, sign-out dialog ---------- */
   .acct svg { width: 16px; height: 16px; }
+  /* Signed in: the Google photo (or the first letter of the name) in a small circle. */
+  .acct .av { width: 20px; height: 20px; flex: none; border-radius: 50%; object-fit: cover; display: grid; place-items: center;
+    background: var(--accent); color: var(--accent-ink); font-size: 0.72rem; font-weight: 700; line-height: 1; }
+  /* Google sign-in button as in Google's branding guidelines: neutral fill, 1 px border, logo left of the text. */
+  .gbtn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+    background: var(--gbtn-bg); border: 1px solid var(--gbtn-line); color: var(--gbtn-ink); font-weight: 600; font-size: 0.95rem; }
+  .gbtn .g-logo { width: 18px; height: 18px; flex: none; }
+  .gbtn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .gbtn:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
   /* Small phones (as in design/portal-v2.html): the logo keeps only its pin, and on the smallest the account
      button keeps only its icon, so 999 always keeps its place. */
   @media (max-width: 430px) { .logo .logo-text { display: none; } }
@@ -745,7 +758,11 @@
     <form class="si-form" id="siForm" novalidate>
       <h2 id="siFormTitle"></h2>
       <p class="offline-note" id="siOffline" role="status" hidden></p>
-      <button class="btn wide" id="siGoogle" type="button"></button>
+      <!-- The official Google "G" (docs/DESIGN.md §4): inline, never recoloured or stretched. -->
+      <button class="gbtn" id="siGoogle" type="button">
+        <svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        <span id="siGoogleText"></span>
+      </button>
       <p class="or" id="siOr"></p>
       <label class="field"><span id="siEmailL"></span><input id="siEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
       <label class="field"><span id="siPassL"></span><input id="siPass" type="password" autocomplete="current-password"></label>

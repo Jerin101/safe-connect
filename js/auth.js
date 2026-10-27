@@ -60,10 +60,28 @@ function loadFirebase() {
 }
 
 /* ---------- header button ---------- */
+// First letter of the name (or email), kept whole for Bangla letters with signs.
+function initial(u) {
+  const name = (u.displayName || u.email || '').trim();
+  if (!name) return '';
+  if (typeof Intl.Segmenter === 'function') return [...new Intl.Segmenter().segment(name)][0].segment.toUpperCase();
+  return name[0].toUpperCase();
+}
+// Signed in: the Google photo, loaded straight from Google and never stored; no photo or offline -> the initial.
+function avatar(u) {
+  const letter = () => (initial(u) ? ctx.el('span', 'av', initial(u)) : icon(ICON.user));
+  if (!u.photoURL) return letter();
+  const img = document.createElement('img');
+  img.className = 'av'; img.alt = ''; img.width = 20; img.height = 20;
+  img.referrerPolicy = 'no-referrer';
+  img.addEventListener('error', () => img.replaceWith(letter()), { once: true });
+  img.src = u.photoURL;
+  return img;
+}
 function renderButton() {
   const b = $('acctBtn');
   const on = signedIn();
-  b.replaceChildren(icon(ICON.user), ctx.el('span', 'acct-text', on ? A().account : A().signIn));
+  b.replaceChildren(user ? avatar(user) : icon(ICON.user), ctx.el('span', 'acct-text', on ? A().account : A().signIn));
   b.setAttribute('aria-label', on ? A().accountLabel : A().signIn);
 }
 
@@ -104,7 +122,7 @@ function renderSignin() {
   }));
   $('siFormTitle').textContent = a.roles[pick].form;
   $('siOffline').textContent = a.offline;
-  $('siGoogle').textContent = a.google;
+  $('siGoogleText').textContent = a.google;
   $('siOr').textContent = a.or;
   $('siEmailL').textContent = a.email;
   $('siPassL').textContent = a.password;
