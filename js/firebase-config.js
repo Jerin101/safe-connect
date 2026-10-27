@@ -1,7 +1,7 @@
 // Public web config for the Firebase project safeconnect-67d83 (P45).
 // It is safe in Git: it only names the project. firestore.rules decide what anyone may read or write.
 export const firebaseConfig = {
-  apiKey: 'PASTE_THE_FULL_API_KEY_HERE',
+  apiKey: 'AIzaSyBqlp9kFeWb9HY4gUPsyciqVbJSQNVXquw',
   authDomain: 'safeconnect-67d83.firebaseapp.com',
   projectId: 'safeconnect-67d83',
   storageBucket: 'safeconnect-67d83.firebasestorage.app',
