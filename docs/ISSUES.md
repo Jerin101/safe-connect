@@ -75,10 +75,10 @@ From a laptop in Bangladesh, check `noakhali.police.gov.bd` / `coxsbazar.police.
 ### [P15] Content: how to report a crime / file a GD — J · data, docs · Day 11
 Confirm `gd.police.gov.bd` from Bangladesh. Write short Bangla and English steps (GD vs case, what to bring, women & children help desk, legal aid 16699) with official links.
 
-### [P16] Bangla/English text files — J · backend · Day 9
+### [P16] Bangla/English text files — J · backend · Day 9 · done (GitHub #57, merged via #63)
 `js/lang/bn.json`, `js/lang/en.json`: every button and label, the 8 SOS message templates, the guide texts. Checked by the `bangla-reviewer` agent.
 
-### [P17] Firebase setup: Auth, Firestore, roles, rules — J · backend · v2 Day 2 · **Must**
+### [P17] Firebase setup: Auth, Firestore, roles, rules — J · backend · v2 Day 2 · **Must** · done (GitHub #60, PR #61, rules deployed to `safeconnect-67d83`)
 Free **Spark** project (no card): Auth (email + password, Google), Firestore, `users/{uid}.role`, `admins/{uid}` (first admin set **by hand in the Firebase console**, never from the site), base **security rules** and **rules tests in the Firebase emulator**. `js/firebase.js`. The site must work fully **without** sign-in. **No secret keys in Git** (the public web config is fine). See `docs/SYSTEM_DESIGN.md` §2, §5 and `docs/ROLES.md`.
 
 ### [P18] Report a wrong number (3 steps) + my reports + admin reports — J · backend · v2 Day 4 · **Must**

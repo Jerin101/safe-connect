@@ -61,7 +61,7 @@ If a day slips, move the next day's work. Don't skip tests.
 | v2 Day | Work | Issues | Lead | Showable result |
 |---|---|---|---|---|
 | 1 | Merge open PRs; offline test on a real phone; **design tokens v2** (`DESIGN.md` §4) on the existing pages | open PRs, P21 (v2) | J + T | The preview in the new look, works offline |
-| 2 | **Firebase project, Auth, Firestore, rules + emulator tests** | P17 | J | Sign-in works; rules tests pass |
+| 2 | **Firebase project, Auth, Firestore, rules + emulator tests** | P17 | J | Rules tests pass · **done** (#60, PR #61) |
 | 3 | **Sign-in page with three options** + "তিন ভূমিকা, এক লক্ষ্য" home section · **workspace shell** (sidebar, top bar with 999) + user dashboard | P45, P35 | T (or J) | Sign in, see your dashboard, sign out |
 | 4 | **Report a wrong number** (3 steps) + my reports + admin reports | P18 | J | A test report goes from user to admin |
 | 5 | **Admin dashboard, users and roles, audit log** (batched writes) | P44 | J | A role change shows up in the audit log |
@@ -84,9 +84,9 @@ If a day slips, move the next day's work. Don't skip tests.
 | 6 | P10 manual additions + places · P23 `data.js` (load, cache, search) | P25 area page + contact cards + fallback chain | |
 | 7 | P11 validator + GitHub Action · **review** | Finish P25 · **review** | **Checkpoint:** search + area page work with real data |
 | 8 | P12 verify + coverage tools · P26 "Find help near me" (`location.js`, works offline) | P28 Bangla/English + Bangla digits · **P34 offline app (PWA)**, moved to J (#53) | **Offline:** the app opens and finds your upazila in airplane mode |
-| 9 | P16 Bangla/English texts (UI + SOS messages + guides) | P29 SOS + family contacts | |
+| 9 | P16 Bangla/English texts (UI + SOS messages + guides), done (#57 via #63) | P29 SOS + family contacts | |
 | 10 | P13 spot-check 40 records · P14 police data gaps | P30 Silent SOS + siren · P27 village search + places | |
-| 11 | P15 GD / crime-report guide content · P17 Firebase setup (login + Firestore) | P31 Safe Journey · P33 GD helper | |
+| 11 | P15 GD / crime-report guide content · P17 Firebase setup → moved to v2 Day 2, done (#60) | P31 Safe Journey · P33 GD helper | |
 | 12 | P18 report-wrong-number + admin page · P38 volunteer verification backend (start) | P35 login/account page · P39 volunteer sign-up, teams, `confirm.html`, list (start) | |
 | 13 | Finish P38 · P19 GitHub Pages deploy · release notes | Finish P39 · P36 accessibility + polish | Site live on GitHub Pages |
 | 14 | **P37 both:** test both scenarios on real phones, fix bugs, demo script, tag `v1.0` | same | **Showcase ready** |
