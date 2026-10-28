@@ -3,7 +3,6 @@
     "lang": "বাং",
     "hello1": "Need help?",
     "hello2": "Stay calm. The official numbers for your area are right here.",
-    "eyebrow": "Official numbers for Noakhali & Cox's Bazar",
     "h999": "999",
     "lead": "Police station, chairman, village police and hospital numbers for your union. All from official government websites; the sources are re-checked every week.",
     "distAll": "All districts",
@@ -297,6 +296,16 @@
         "After one visit, it works without internet; you can also install it on your phone"
       ]
     ],
+    "head": {
+      "chipEmpty": "Choose your area",
+      "chipSub": "Noakhali and Cox's Bazar",
+      "cta": "Send location",
+      "search": "Search your area",
+      "home": "SafeConnect home",
+      "navLabel": "Main menu",
+      "langLabel": "Change language: English / বাংলা",
+      "themeLabel": "Night or day colours"
+    },
     "nav": {
       "home": "Home",
       "numbers": "Emergency numbers",
