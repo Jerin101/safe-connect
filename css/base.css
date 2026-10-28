@@ -10,55 +10,62 @@
   unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1; }
 /* Portal layout from design/portal.html (rules: docs/DESIGN.md): two-row header, banner, round icon row,
    search band, situation cards, known places, side cards, about, help icons, weak-network band, FAQ, column footer.
-   Night = deep indigo with a dusk banner; day = warm white with a dawn banner. */
+   v3 colours (design/portal-v3.html): day = white with a soft violet tint; night = near-black with a violet accent. */
 :root {
-  --bg: #FFFAF6; --band: #FBF0F4; --surface: #FFFFFF; --surface-2: #F7F1FA; --line: rgba(90, 60, 180, 0.15);
-  --ink: #1C1442; --muted: #574E7E; --accent: #6B3FE0; --accent-ink: #FFFFFF; --link: #5A2FD6;
+  --bg: #FFFFFF; --band: #F6F6F9; --surface: #FFFFFF; --surface-2: #F3F3F7; --line: rgba(20, 20, 45, 0.10); --line-2: rgba(20, 20, 45, 0.18);
+  --tint: #F1EEFF; --tint-2: #E6E0FF;
+  --ink: #1A1724; --ink-2: #4A4557; --muted: #645F70; --accent: #5B47E0; --accent-ink: #FFFFFF; --link: #4B37CF;
+  --danger: #D7263D; --danger-ink: #FFFFFF; --ok-soft: rgba(18, 128, 79, 0.10); --glow: rgba(91, 71, 224, 0.10);
   --title-2: #6B3FE0; --title-3: #C0408C;
   --sky-1: #DCD0FF; --sky-2: #F0E0FF; --sky-3: #FFDCE6; --sky-4: #FFCFA8; --hill-1: #CDB8F5; --hill-2: #B194EC; --water: #E7DCFF;
   --stars: 0; --orb-1: #FFF8E1; --orb-2: #FFB86B;
   --red-1: #F2385E; --red-2: #C0123A; --amber-1: #FFC94D; --amber-2: #FF8F3F; --amber-ink: #2A1500;
   --violet-1: #8457FF; --violet-2: #5427D6; --on-color: #FFFFFF;
   --orange-1: #FF9B5C; --orange-2: #E8542E; --green-1: #3FC98A; --green-2: #14895A; --pink-1: #FF7AB8; --pink-2: #C8327E; --blue-1: #6FA8FF; --blue-2: #2E5BD6; --teal-1: #4FD6D0; --teal-2: #13858F; --slate-1: #9AA3C7; --slate-2: #59618A;
-  --warn: #8A4B00; --warn-bg: #FFEBD2; --ok: #12804C;
-  --danger-soft: #FFE8EC; --accent-soft: rgba(107, 63, 224, 0.18); --backdrop: rgba(20, 12, 50, 0.5);
+  --warn: #8F5300; --warn-bg: #FBEBD3; --ok: #12804F;
+  --danger-soft: rgba(215, 38, 61, 0.09); --accent-soft: rgba(91, 71, 224, 0.09); --backdrop: rgba(20, 12, 50, 0.5);
   /* Google sign-in button: colours from Google's sign-in branding guidelines (light / dark theme). */
   --gbtn-bg: #FFFFFF; --gbtn-line: #747775; --gbtn-ink: #1F1F1F;
-  --shadow: 0 6px 24px rgba(80, 50, 160, 0.10);
-  --foot-bg: #F2EEFA; --foot-ink: #1C1442; --foot-muted: #574E7E; --foot-line: rgba(90, 60, 180, 0.15);
+  --shadow: 0 14px 40px rgba(60, 40, 20, 0.08);
+  --foot-bg: #F3EDE6; --foot-ink: #1A1724; --foot-muted: #645F70; --foot-line: rgba(20, 20, 45, 0.10);
   --font: "Manrope", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --r: 14px;
+  --r: 16px;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0D0A24; --band: #140F36; --surface: #1B1546; --surface-2: #241C56; --line: rgba(255, 255, 255, 0.12);
-    --ink: #F4F0FF; --muted: #BDB3E0; --accent: #9D72FF; --accent-ink: #FFFFFF; --link: #C7A9FF;
+    --bg: #0C0B11; --band: #100F17; --surface: #15141D; --surface-2: #1C1B26; --line: rgba(255, 255, 255, 0.08); --line-2: rgba(255, 255, 255, 0.15);
+    --tint: #1E1A33; --tint-2: #2A2447;
+    --ink: #EFEDF6; --ink-2: #C3BFD3; --muted: #A4A0B8; --accent: #A495FF; --accent-ink: #0C0B11; --link: #B9AEFF;
+    --danger: #FF5C6C; --danger-ink: #FFFFFF; --ok-soft: rgba(90, 211, 154, 0.12); --glow: rgba(164, 149, 255, 0.14);
     --title-2: #D9BCFF; --title-3: #A98BFF;
     --sky-1: #160F3A; --sky-2: #34206C; --sky-3: #84489C; --sky-4: #F09A78; --hill-1: #2B1C58; --hill-2: #1B1240; --water: #1B1446;
     --stars: 1; --orb-1: #F3EEFF; --orb-2: #8D6BFF;
     --red-1: #FF4D6D; --red-2: #D61F45; --amber-1: #FFCB5C; --amber-2: #FF9548;
     --violet-1: #9D72FF; --violet-2: #6435F0;
-    --warn: #FFC98A; --warn-bg: rgba(255, 170, 80, 0.14); --ok: #6EE7A8;
-    --danger-soft: rgba(255, 77, 109, 0.14); --accent-soft: rgba(157, 114, 255, 0.3); --backdrop: rgba(0, 0, 0, 0.6);
+    --warn: #F2B65A; --warn-bg: rgba(242, 182, 90, 0.12); --ok: #5AD39A;
+    --danger-soft: rgba(255, 92, 108, 0.12); --accent-soft: rgba(164, 149, 255, 0.13); --backdrop: rgba(0, 0, 0, 0.6);
     --gbtn-bg: #131314; --gbtn-line: #8E918F; --gbtn-ink: #E3E3E3;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-    --foot-bg: #0A0820; --foot-ink: #F3EFFF; --foot-muted: #A9A0CC; --foot-line: rgba(255, 255, 255, 0.10);
+    --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+    --foot-bg: #09080D; --foot-ink: #EFEDF6; --foot-muted: #A4A0B8; --foot-line: rgba(255, 255, 255, 0.08);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0D0A24; --band: #140F36; --surface: #1B1546; --surface-2: #241C56; --line: rgba(255, 255, 255, 0.12);
-  --ink: #F4F0FF; --muted: #BDB3E0; --accent: #9D72FF; --accent-ink: #FFFFFF; --link: #C7A9FF;
+  --bg: #0C0B11; --band: #100F17; --surface: #15141D; --surface-2: #1C1B26; --line: rgba(255, 255, 255, 0.08); --line-2: rgba(255, 255, 255, 0.15);
+  --tint: #1E1A33; --tint-2: #2A2447;
+  --ink: #EFEDF6; --ink-2: #C3BFD3; --muted: #A4A0B8; --accent: #A495FF; --accent-ink: #0C0B11; --link: #B9AEFF;
+  --danger: #FF5C6C; --danger-ink: #FFFFFF; --ok-soft: rgba(90, 211, 154, 0.12); --glow: rgba(164, 149, 255, 0.14);
   --title-2: #D9BCFF; --title-3: #A98BFF;
   --sky-1: #160F3A; --sky-2: #34206C; --sky-3: #84489C; --sky-4: #F09A78; --hill-1: #2B1C58; --hill-2: #1B1240; --water: #1B1446;
   --stars: 1; --orb-1: #F3EEFF; --orb-2: #8D6BFF;
   --red-1: #FF4D6D; --red-2: #D61F45; --amber-1: #FFCB5C; --amber-2: #FF9548;
   --violet-1: #9D72FF; --violet-2: #6435F0;
-  --warn: #FFC98A; --warn-bg: rgba(255, 170, 80, 0.14); --ok: #6EE7A8;
-  --danger-soft: rgba(255, 77, 109, 0.14); --accent-soft: rgba(157, 114, 255, 0.3); --backdrop: rgba(0, 0, 0, 0.6);
+  --warn: #F2B65A; --warn-bg: rgba(242, 182, 90, 0.12); --ok: #5AD39A;
+  --danger-soft: rgba(255, 92, 108, 0.12); --accent-soft: rgba(164, 149, 255, 0.13); --backdrop: rgba(0, 0, 0, 0.6);
   --gbtn-bg: #131314; --gbtn-line: #8E918F; --gbtn-ink: #E3E3E3;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --foot-bg: #0A0820; --foot-ink: #F3EFFF; --foot-muted: #A9A0CC; --foot-line: rgba(255, 255, 255, 0.10);
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  --foot-bg: #09080D; --foot-ink: #EFEDF6; --foot-muted: #A4A0B8; --foot-line: rgba(255, 255, 255, 0.08);
   color-scheme: dark;
 }
 
