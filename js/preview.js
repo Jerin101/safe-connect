@@ -21,6 +21,7 @@ const $ = (id) => document.getElementById(id);
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
 let lang = store.get('sc-lang') || 'bn';
 let data = null, locations = null, current = null, areaIndex = [];
+let activeTab = 'home'; // header tab that gets aria-current="page"
 const t = () => LANG[lang].ui;
 const digits = (s) => (lang === 'bn' ? String(s).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[d]) : String(s));
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -242,16 +243,27 @@ function showView(name) {
 function openArea(place, pos) {
   current = { place, pos };
   if (!place.outside) store.set('sc-last', JSON.stringify(place));
+  renderChip();
   renderArea();
   showView('area');
 }
 function goHome() {
+  activeTab = 'home'; markTab();
   $('areaInput').value = '';
   $('suggest').hidden = true;
   renderRecent();
   showView('home');
 }
+// Header area chip: the last opened area (saved on this phone only), or "choose your area".
+function renderChip() {
+  let last = null;
+  try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
+  const h = P().head;
+  $('areaChipT').textContent = last && data && data.docs[last.district] ? placeTitle(last) : h.chipEmpty;
+  $('areaChipS').textContent = h.chipSub;
+}
 function renderRecent() {
+  renderChip();
   let last = null;
   try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
   const b = $('recentBtn');
@@ -550,7 +562,29 @@ const NAV = [
   ['faq', () => goTo('faq')],
 ];
 function renderNav() {
-  $('nav').replaceChildren(...NAV.map(([key, fn]) => textBtn(P().nav[key], fn)));
+  $('nav').replaceChildren(...NAV.map(([key, fn]) => {
+    const b = textBtn(P().nav[key], () => { fn(); activeTab = key; markTab(); });
+    b.dataset.key = key;
+    return b;
+  }));
+  markTab();
+}
+function markTab() {
+  $('nav').querySelectorAll('button').forEach((b) => {
+    if (b.dataset.key === activeTab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+}
+// Header texts and labels (row 1 and the search pill in row 2).
+function renderHead() {
+  const h = P().head;
+  $('homeBtn').setAttribute('aria-label', h.home);
+  $('nav').setAttribute('aria-label', h.navLabel);
+  $('langBtn').setAttribute('aria-label', h.langLabel);
+  $('themeBtn').setAttribute('aria-label', h.themeLabel);
+  $('h999').setAttribute('aria-label', t().call999);
+  $('ctaSend').textContent = h.cta;
+  $('hFinderText').textContent = h.search;
+  renderChip();
 }
 function renderAbout() {
   const a = P().about;
@@ -705,7 +739,7 @@ function renderWarm() {
   w.replaceChildren(title, ol, row);
 }
 function renderPage() {
-  renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderNav(); renderAbout(); renderFaq(); renderFooter();
+  renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
   $('findTitle').textContent = P().findTitle; $('findText').textContent = P().findText;
 }
 
@@ -715,7 +749,7 @@ function setText() {
   document.documentElement.lang = lang;
   $('langBtn').textContent = s.lang;
   $('hello1').textContent = s.hello1; $('hello2').textContent = s.hello2;
-  $('eyebrow').textContent = s.eyebrow; $('lead').textContent = s.lead; $('h999Text').textContent = s.h999;
+  $('lead').textContent = s.lead; $('h999Text').textContent = s.h999;
   $('quickEyebrow').textContent = s.quickEyebrow; $('quickTitle').textContent = s.quickTitle; $('quickText').textContent = s.quickText;
   const dv = $('distSel').value;
   $('distSel').replaceChildren(...[['', s.distAll], ...DISTRICTS.map((d) => [d.key, lang === 'bn' ? d.bn : d.en])].map(([v, l]) => { const o = el('option', null, l); o.value = v; return o; }));
@@ -743,6 +777,9 @@ $('areaInput').addEventListener('input', renderSuggest);
 $('distSel').addEventListener('change', renderSuggest);
 $('backBtn').addEventListener('click', goHome);
 $('homeBtn').addEventListener('click', goHome);
+$('areaChip').addEventListener('click', () => findArea(''));
+$('hFinder').addEventListener('click', () => findArea(''));
+$('ctaSend').addEventListener('click', () => openSos(null));
 $('changeBtn').addEventListener('click', () => { goHome(); $('areaInput').focus(); });
 $('langBtn').addEventListener('click', () => {
   lang = lang === 'bn' ? 'en' : 'bn';

@@ -88,25 +88,50 @@ p { margin: 0; }
 .section-title h2 { font-size: clamp(1.4rem, 3.6vw, 1.85rem); }
 .section-title p { color: var(--muted); max-width: 56ch; margin: 0 auto; }
 
-/* ---------- header: two rows ---------- */
-header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; background: var(--surface); border-bottom: 1px solid var(--line); }
-.topbar-in { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding-block: 8px; }
-.where { font-size: 0.85rem; color: var(--muted); font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.logo { display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; cursor: pointer; font-weight: 800; font-size: 1.2rem; color: var(--ink); justify-self: center; }
+/* ---------- header (v3, issue #70): row 1 = logo, area chip, actions; row 2 = tabs and search pill ---------- */
+/* 999 is the first control after the logo and is never hidden; the other parts shrink or hide first. */
+header.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 8; background: var(--bg); border-bottom: 1px solid var(--line);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--line) 40%, transparent); }
+.bar1 { display: flex; align-items: center; gap: 14px; padding-block: 12px; }
+.logo { display: flex; align-items: center; gap: 9px; flex: none; background: none; border: 0; padding: 0; cursor: pointer; font-weight: 800; font-size: 1.25rem; color: var(--ink); }
 .logo svg { width: 28px; height: 28px; flex: none; }
-.top-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
-.hpill { border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2); padding: 6px 12px; font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
-.h999 { background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: var(--on-color); border-color: transparent; font-weight: 800; }
+.mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none; background: var(--accent); color: var(--accent-ink); }
+.mark svg { width: 20px; height: 20px; }
+.areachip { order: 1; display: flex; align-items: center; gap: 8px; margin: 0 auto; min-width: 0; max-width: 360px; background: none; border: 0; cursor: pointer; color: var(--ink); text-align: left; padding: 6px 10px; border-radius: 10px; }
+.areachip:hover { background: var(--surface-2); }
+.areachip > svg { width: 22px; height: 22px; flex: none; }
+.areachip .chev { width: 18px; height: 18px; color: var(--muted); }
+.areachip span { display: grid; min-width: 0; line-height: 1.25; }
+.areachip b { font-weight: 700; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.areachip small { color: var(--muted); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.top-actions { order: 2; display: flex; gap: 8px; justify-content: flex-end; align-items: center; min-width: 0; }
+.hpill { border-radius: 10px; border: 1px solid var(--line-2); background: var(--surface); min-height: 40px; padding: 7px 14px; font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none;
+  color: var(--ink); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; min-width: 0; }
+.h999 { flex: none; min-height: 44px; min-width: 44px; justify-content: center; background: var(--danger); color: var(--danger-ink); border-color: transparent; font-weight: 800; }
 .h999 svg { width: 15px; height: 15px; }
-.round { width: 36px; height: 36px; padding: 0; justify-content: center; }
+.hpill.acct { border: 1.5px solid var(--ink); background: transparent; font-weight: 700; }
+.acct .acct-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.hpill.cta { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 700; }
+.hpill.lang { flex: none; border-color: transparent; background: transparent; }
+.round { flex: none; width: 40px; height: 40px; padding: 0; justify-content: center; border-color: transparent; background: var(--surface-2); border-radius: 50%; }
 .round svg { width: 17px; height: 17px; }
-@media (max-width: 560px) { .topbar-in { grid-template-columns: auto 1fr; } .where { display: none; } .logo { justify-self: start; font-size: 1.05rem; } .hpill { padding: 6px 10px; } }
-.mainnav { border-top: 1px solid var(--line); }
-.nav { display: flex; gap: 4px; justify-content: center; overflow-x: auto; scrollbar-width: none; padding-block: 4px; }
-.nav::-webkit-scrollbar { display: none; }
-.nav button { flex: none; background: none; border: 0; border-radius: 999px; padding: 7px 14px; color: var(--ink); font-weight: 600; font-size: 0.92rem; cursor: pointer; white-space: nowrap; }
-.nav button:hover { background: var(--surface-2); color: var(--link); }
-@media (max-width: 760px) { .nav { justify-content: flex-start; } }
+.bar2 { display: flex; align-items: center; gap: 16px; }
+.tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button { flex: none; display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; border-bottom: 3px solid transparent; border-radius: 0; padding: 12px 12px 11px;
+  color: var(--muted); font-weight: 700; font-size: 0.95rem; cursor: pointer; white-space: nowrap; }
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
+.hfinder { flex: none; width: min(240px, 22%); display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 16px 4px 12px; border: 0; border-radius: 999px;
+  background: var(--surface-2); color: var(--muted); font-size: 0.95rem; cursor: pointer; text-align: left; }
+.hfinder:hover { color: var(--ink); }
+.hfinder svg { width: 20px; height: 20px; flex: none; }
+.hfinder span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 1060px) { .hpill.cta { display: none; } }
+@media (max-width: 760px) { .areachip, .hfinder { display: none; } .bar1 { justify-content: space-between; } .tabs button { padding: 10px 10px 9px; font-size: 0.9rem; } }
+/* Small phones: the logo keeps only its mark, and on the smallest the account button keeps only its icon, so 999 always keeps its place. */
+@media (max-width: 430px) { .logo .logo-text { display: none; } .hpill { padding: 6px 10px; } .bar1 { gap: 8px; padding-block: 10px; } .top-actions { gap: 5px; } }
+@media (max-width: 345px) { .acct { width: 40px; padding: 0; justify-content: center; } .acct .acct-text { display: none; } }
 
 /* ---------- shared parts used by more than one page ---------- */
 .offline-wrap { padding-block: 10px 0; }
@@ -132,10 +157,6 @@ main > .wrap.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2
 .gbtn .g-logo { width: 18px; height: 18px; flex: none; }
 .gbtn:disabled { opacity: 0.55; cursor: not-allowed; }
 .gbtn:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
-/* Small phones (as in design/portal-v2.html): the logo keeps only its pin, and on the smallest the account
-   button keeps only its icon, so 999 always keeps its place. */
-@media (max-width: 430px) { .logo .logo-text { display: none; } }
-@media (max-width: 345px) { .acct { width: 36px; height: 36px; padding: 0; justify-content: center; } .acct .acct-text { display: none; } }
 #signin .btn, #ws .btn, .confirm .btn { min-height: 44px; }
 .btn.red { background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: var(--on-color); border-color: transparent; }
 .btn.wide { width: 100%; justify-content: center; }
