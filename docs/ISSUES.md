@@ -105,6 +105,10 @@ GitHub Pages from `main`, release check on the live site, real-phone test. Relea
 - 999 in the top bar; sidebar groups কাজ / অ্যাকাউন্ট ও সাহায্য + "Emergency (works signed out too)"
 **Needs:** P17. **Done when:** rules tests in the emulator pass (a user can't make themselves admin; the audit log can't be edited), tested with **test accounts only**, test data deleted.
 
+### [P46] Secret scan on every pull request — J · backend · v3 · **Must**
+`.github/workflows/secret-scan.yml` runs gitleaks (pinned version, checksum checked) on every PR and on main; `.gitleaks.toml` allows only the public Firebase web apiKey in `js/firebase-config.js`. Rule in `CLAUDE.md`: never commit a real secret; if one was committed, rotate it first.
+**Done when:** the scan passes on main and fails on a test branch with a fake key.
+
 ### [P26] "Find help near me" (location, works offline) — J · backend · Day 8
 `js/location.js` + `data/locations.json` + `tools/collect_locations.py`, `fill_locations.py`, `build_locations.py`:
 - one-tap **"Find help near me"** button; after the tap it locates straight away (no extra prompt) if the user gave permission before. Never read location without a tap
