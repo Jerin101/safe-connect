@@ -349,22 +349,33 @@
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap topbar-in">
-    <span class="where" id="eyebrow"></span>
-    <button class="logo" id="homeBtn" type="button" aria-label="SafeConnect home">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B58CFF"/><stop offset="1" stop-color="#FF8F6B"/></linearGradient></defs>
-        <path fill="url(#lg)" d="M16 2c6.6 0 12 5.2 12 11.7C28 22.5 16 30 16 30S4 22.5 4 13.7C4 7.2 9.4 2 16 2Z"/><circle cx="16" cy="13.5" r="4.6" fill="#fff"/></svg>
+<header class="site">
+  <div class="wrap bar1">
+    <button class="logo" id="homeBtn" type="button">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg></span>
       <span class="logo-text">SafeConnect</span>
     </button>
     <div class="top-actions">
       <a class="hpill h999" id="h999" href="tel:999"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg><span id="h999Text">৯৯৯</span></a>
       <button class="hpill acct" id="acctBtn" type="button" aria-label="Sign in"></button>
-      <button class="hpill" id="langBtn" type="button" aria-label="Language: English / বাংলা">EN</button>
+      <button class="hpill cta" id="ctaSend" type="button"></button>
+      <button class="hpill lang" id="langBtn" type="button" aria-label="Language: English / বাংলা">EN</button>
       <button class="hpill round" id="themeBtn" type="button" aria-label="Night or day"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg></button>
     </div>
+    <!-- Shown in the middle by CSS order; placed last so 999 is the first control after the logo. -->
+    <button class="areachip" id="areaChip" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
+      <span><b id="areaChipT"></b><small id="areaChipS"></small></span>
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m7 10 5 5 5-5z"/></svg>
+    </button>
   </div>
-  <div class="mainnav"><div class="wrap"><nav class="nav" id="nav" aria-label="Main"></nav></div></div>
+  <div class="wrap bar2">
+    <nav class="tabs" id="nav" aria-label="Main"></nav>
+    <button class="hfinder" id="hFinder" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.8 4.8-1.4 1.4-4.8-4.8A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
+      <span id="hFinderText"></span>
+    </button>
+  </div>
 </header>
 
 <main>
