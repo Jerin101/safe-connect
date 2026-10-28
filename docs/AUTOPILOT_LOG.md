@@ -9,13 +9,15 @@
 - [ ] Test on your real phone (airplane mode, 360 px, Bangla and English, night and day).
 - [ ] P13 (#80): open the 40 sample links by hand before setting `status: verified` (sample below).
 
-**Where to continue:** step 2, #77 on branch `feature/77-secret-scan` (open the PR, wait for the checks, tester GO, merge). Then step 3, #69 on `feature/69-base-css` (2 commits ready).
+**Where to continue:** step 3, PR #84 (#69, branch `feature/69-base-css`): wait for checks and tester GO, merge, check the live VERSION is `v5-2026-10-28`. Then step 4, #70.
+
+**How each PR is checked (tools kept outside the repo, in the session scratchpad):** Playwright (`npm i --no-save playwright-core@1.48.2`, uses the installed Chrome) runs every page at 360/1280 px, day/night, bn/en: sideways scroll, 999 visible and first, console errors; it also runs `tests/search-test.html`. Rules tests run from PowerShell (`npm run test:rules`); if port 8080 is taken by another emulator, run them in a copy with port 8085.
 
 | Step | Task | Issue | Branch | PR | Status |
 |---|---|---|---|---|---|
 | 1 | Design v3 reference and plan | #68 | docs/68-design-v3 | #76 | done: #68 closed, merged in PR #76, nothing waiting |
-| 2 | Secret scan (gitleaks + rule in CLAUDE.md) | #77 | feature/77-secret-scan | #83 | in progress: tester NO-GO fixed (allowlist target), local scan clean, fake token caught |
-| 3 | css/base.css + v3 colours | #69 | feature/69-base-css | - | ready: style move (360 px screenshots identical before/after), v3 colours; page check 8/8 OK |
+| 2 | Secret scan (gitleaks + rule in CLAUDE.md) | #77 | feature/77-secret-scan | #83 | done: merged. Tester NO-GO (allowlist target) fixed, then GO. Local scan clean, fake token caught. Rules 35/35, validator 0 errors, search 26/0 |
+| 3 | css/base.css + v3 colours | #69 | feature/69-base-css | #84 | in review: style move (360 px screenshots identical before/after), v3 colours; page check 8/8 OK; rules 35/35, validator 0 errors, search 26/0 |
 | 4 | New header | #70 | - | - | to do |
 | 5 | Real pages with routes | #71 | - | - | to do |
 | 6 | New home layout (+ "তিন ভূমিকা, এক লক্ষ্য") | #72 | - | - | to do |
@@ -39,3 +41,5 @@ Reminder: volunteer and report tests use a test account and a fake code, and the
 ## Log
 - **#68:** nothing to do (closed, merged in PR #76).
 - **project-manager:** created issues #77–#82 (milestone v1.0); added #65, #52, #49 to milestone v1.0.
+- **#77 → PR #83 (merged):** gitleaks 8.30.1 workflow (checksum checked), `.gitleaks.toml` allows only the public Firebase key in `js/firebase-config.js` (rules `gcp-api-key` and `generic-api-key`), CLAUDE.md rule 4a, P46 in ISSUES.md. Agents: tester (NO-GO, then GO). Live VERSION unchanged (`v4-2026-10-27`, no site files changed). Can wait: `actions/checkout@v7` here vs `@v4` elsewhere (fix in #52).
+- **#69 → PR #84:** see the PR body. Agents: tester. No text or data changes, so no bangla-reviewer or data-checker.
