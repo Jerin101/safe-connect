@@ -50,6 +50,22 @@ Full list: [`docs/FEATURES.md`](docs/FEATURES.md) · Technology and workflow: [`
 
 Every number comes from an official Bangladesh government website, and the exact page link is stored with it. Nothing is guessed. Scripts re-check every number against its source before release.
 
+## Accounts (optional)
+
+- **Help never needs an account.** 999, sending your location, "Find help near me", area search and every number work without signing in.
+- Three sign-in options: **general user**, **volunteer** and **admin**. Everyone starts as a general user.
+- Sign in with **Email/Password** or **Google** (free Firebase sign-in).
+- Roles are enforced by the Firestore security rules ([`firestore.rules`](firestore.rules), checked by 35 tests), not only by hiding buttons.
+- Admins are added only by hand in the Firebase console, never from the website.
+
+## Limits (honest)
+
+- Your location is sent by **SMS**: one tap sends one update. It is not automatic live tracking.
+- GPS works without internet, but it needs open sky and can take up to a few minutes when you are offline.
+- SMS and calls need phone signal.
+- The person who receives your SMS needs mobile data to open the map link, so the message also has your area name.
+- Google sign-in needs internet.
+
 ## Run locally
 
 *(Available after the first frontend tasks are merged.)* Open the folder in VS Code → right-click `index.html` → **Open with Live Server**.

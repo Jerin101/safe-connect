@@ -2,6 +2,7 @@
 // Location is read only after a tap (CLAUDE.md rule 5). The area search lives in data.js (issue #36).
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
+import { initAuth } from './auth.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -235,9 +236,7 @@ function renderArea() {
 
 /* ---------- views ---------- */
 function showView(name) {
-  $('home').hidden = name !== 'home';
-  $('area').hidden = name !== 'area';
-  $('sos').hidden = name !== 'sos';
+  for (const view of ['home', 'area', 'sos', 'signin', 'ws']) $(view).hidden = name !== view;
   window.scrollTo(0, 0);
 }
 function openArea(place, pos) {
@@ -752,6 +751,7 @@ $('langBtn').addEventListener('click', () => {
   if (!$('demo').hidden) showDemo();
   if (data) { renderRecent(); renderSuggest(); renderStats(); renderPlaces(); if (current) renderArea(); }
   if (!$('sos').hidden) { renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
+  auth.setText();
 });
 $('themeBtn').addEventListener('click', () => {
   const root = document.documentElement;
@@ -760,6 +760,8 @@ $('themeBtn').addEventListener('click', () => {
 });
 
 setText();
+// Sign-in (P45): only the account button and its views; help never waits for it.
+const auth = initAuth({ $, el, store, fill, lang: () => lang, texts: () => LANG[lang], showView, goHome, openSos, locate });
 try {
   [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
   areaIndex = buildAreaIndex(data);
