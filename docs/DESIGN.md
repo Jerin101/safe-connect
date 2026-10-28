@@ -34,6 +34,20 @@ Never block the screen with a welcome, pop-up or loading splash: 999 must be one
 
 No carousels, no auto-sliding, no autoplay video, no flashing (except the siren page, P30).
 
+## 3b. v3 layout (`design/portal-v3.html`, issue #68)
+The reference shows the look; it is not code to copy (it uses outside fonts, a QR library from the web, `innerHTML` and fixed colours).
+Build each part from its own issue in milestone v1.0.
+- **Header:** logo · area picker ("এলাকা বেছে নিন") · **999 first** · সাইন ইন · EN/বাং · night/day. Second row: tabs with icons and a round search pill.
+  On phones the area picker hides and the search pill sits above the tabs.
+- **Sidebar (desktop):** a QR card ("ফোনে রাখুন") and filters (district, type of service). On phones the filters go below the feed and the QR card is hidden.
+- **Banner:** greeting, "বিপদে আছেন?", one calm line, and the **3 big actions**, side by side on wide screens (999 red, send location violet, help near me soft violet).
+- **Rows of cards:** national numbers as big tiles that scroll sideways by hand (with arrows, never by themselves), "আপনার এলাকা কোথায়?" with example searches,
+  known places, "কী হয়েছে?" cards, the two side cards.
+- **Sign-in:** a two-panel modal over the current page. Left: the red "বিপদে আছেন? সাইন ইন লাগবে না।" box (999, send location, help near me).
+  Right: three options, Google, email. Esc and × close it.
+- **Not in v1.0:** partner strip and "for organisations" page (revenue plan paused).
+- Every rule in §5 "Must always be true" still applies to every v3 part.
+
 ## 4. Look (classy, calm, ours: `docs/SYSTEM_DESIGN.md` §7)
 - **Background:** warm white by day, near-black by night. Thin 1 px borders; soft shadows only on parts that float (cards over the banner, menus).
 - **One accent colour: violet**, for main buttons, links, focus rings and small accent eyebrows ("● জরুরি সাহায্য").
