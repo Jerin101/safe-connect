@@ -1,0 +1,13 @@
+# Secret scan (P46, issue #77). Uses gitleaks' normal rules.
+# The only allowed key is the public Firebase web apiKey, and only in js/firebase-config.js:
+# it is meant to be public and is protected by Firestore rules and API key website limits.
+# Never add a real secret here: if one was committed, rotate it first, then remove it.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Public Firebase web apiKey (not a secret)"
+condition = "AND"
+targetRules = ["gcp-api-key", "generic-api-key"]
+paths = ['''^js/firebase-config\.js$''']
+regexes = ['''^AIzaSyBqlp9kFeWb9HY4gUPsyciqVbJSQNVXquw$''']
