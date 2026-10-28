@@ -15,6 +15,7 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 2. **Zero budget.** No paid services, no paid APIs, no paid datasets. Free tiers only: GitHub Pages, GitHub Actions, Firebase Spark (no Cloud Functions, no file storage), OpenStreetMap Nominatim only in the `tools/` scripts (at most 1 request per second, with credit).
 3. **No frameworks and no build step** for the website: plain HTML, CSS and JavaScript (ES modules). The Python tools use only the standard library.
 4. **Never turn off certificate checking** (`verify=False`, `-k`, etc.).
+4a. **Never commit a real secret** (passwords, private keys, service-account files, tokens). The only allowed key is the public Firebase web apiKey in `js/firebase-config.js` (`.gitleaks.toml`). If a secret was committed, **rotate it first** (make a new one, turn off the old one), then remove it; deleting the file is not enough because Git history keeps it.
 5. **Privacy:** without login, nothing leaves the phone. Location is read only when the user taps SOS or "Find help near me", and the lookup happens on the phone. Never log or upload personal data. Volunteer applications are private, verification is hidden from users, and no home address is ever shown.
 6. **The humans commit.** Make small changes, explain them, and let the person review the diff and commit it themselves. Never push, merge or force-push.
 7. Every change belongs to a GitHub issue (planning ID `Pxx` in `docs/ISSUES.md`) and a branch: `docs/`, `data/`, `feature/` or `fix/` + **GitHub issue number** + short name.
