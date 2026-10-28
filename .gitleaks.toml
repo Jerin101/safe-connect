@@ -8,6 +8,6 @@ useDefault = true
 [[allowlists]]
 description = "Public Firebase web apiKey (not a secret)"
 condition = "AND"
+targetRules = ["gcp-api-key", "generic-api-key"]
 paths = ['''^js/firebase-config\.js$''']
-regexTarget = "match"
 regexes = ['''^AIzaSyBqlp9kFeWb9HY4gUPsyciqVbJSQNVXquw$''']

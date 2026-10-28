@@ -14,7 +14,7 @@
 | Step | Task | Issue | Branch | PR | Status |
 |---|---|---|---|---|---|
 | 1 | Design v3 reference and plan | #68 | docs/68-design-v3 | #76 | done: #68 closed, merged in PR #76, nothing waiting |
-| 2 | Secret scan (gitleaks + rule in CLAUDE.md) | #77 | feature/77-secret-scan | - | in progress |
+| 2 | Secret scan (gitleaks + rule in CLAUDE.md) | #77 | feature/77-secret-scan | #83 | in progress: tester NO-GO fixed (allowlist target), local scan clean, fake token caught |
 | 3 | css/base.css + v3 colours | #69 | feature/69-base-css | - | ready: style move (360 px screenshots identical before/after), v3 colours; page check 8/8 OK |
 | 4 | New header | #70 | - | - | to do |
 | 5 | Real pages with routes | #71 | - | - | to do |
