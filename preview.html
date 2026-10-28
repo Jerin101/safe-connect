@@ -12,16 +12,37 @@
 <link rel="stylesheet" href="css/base.css">
 <style>
   /* Page-only styles; shared colours, fonts, header, buttons and sign-in parts are in css/base.css. */
+  /* ---------- home shell (v3, issue #72): sidebar on wide screens + feed of rows ---------- */
+  .shell { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 20px 40px; }
+  .feed { display: grid; gap: 34px; align-content: start; min-width: 0; }
+  .rail { display: grid; gap: 20px; align-content: start; min-width: 0; }
+  /* The sidebar comes after the feed in the page (999 first for keyboards and screen readers); CSS puts it on the left. */
+  @media (min-width: 1060px) {
+    main[data-page="home"] .shell { grid-template-columns: 280px minmax(0, 1fr); gap: 32px; }
+    main[data-page="home"] .feed { grid-column: 2; grid-row: 1; }
+    main[data-page="home"] .rail { grid-column: 1; grid-row: 1; position: sticky; top: 130px; }
+  }
+  /* "Keep it on your phone" card: the short address (no QR image yet); only on wide screens. */
+  .appcard { display: grid; justify-items: center; gap: 8px; text-align: center; border-radius: 18px; padding: 20px 18px; background: var(--tint); border: 1px solid var(--line); }
+  .appcard .app-ic { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: var(--surface); color: var(--accent); }
+  .appcard .app-ic svg { width: 26px; height: 26px; }
+  .appcard b { font-size: 1.1rem; line-height: 1.35; }
+  .appcard small { color: var(--ink-2); font-size: 0.86rem; line-height: 1.5; }
+  .appcard .app-url { margin-top: 4px; padding: 8px 12px; border-radius: 10px; background: var(--surface); border: 1px dashed var(--line-2); font-weight: 700; font-size: 0.8rem; overflow-wrap: anywhere; text-decoration: none; }
+  @media (max-width: 1059px) { .appcard { display: none; } }
+  .filter { border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: grid; gap: 10px; background: var(--surface); }
+  .filter h2 { font-size: 1.25rem; }
+  .filter .field select { width: 100%; min-height: 44px; background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px; padding: 8px 10px; font-size: 1rem; font-weight: 400; }
+  .filter .fnote { color: var(--muted); font-size: 0.86rem; }
+  .filter .linkbtn { justify-self: start; }
+
   /* ---------- banner ---------- */
-  .hero { padding-block: 22px 30px; background: linear-gradient(180deg, var(--band), var(--bg)); }
-  .hero-grid { display: grid; gap: 22px; align-items: center; }
-  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.05fr 0.95fr; } }
+  .hero { border-radius: 22px; padding: 24px; background: radial-gradient(70% 90% at 100% 0%, var(--tint-2), transparent 70%), var(--tint); }
   .hero-text { display: grid; gap: 14px; min-width: 0; }
-  .hero h1 { font-size: clamp(1.9rem, 5.4vw, 3rem); line-height: 1.2; }
+  .hero h1 { font-size: clamp(1.9rem, 4.6vw, 2.8rem); line-height: 1.18; }
   .hero h1 .grad { display: block; font-size: 0.52em; margin-top: 6px; line-height: 1.4; font-weight: 600; }
-  .lead { color: var(--muted); max-width: 50ch; }
-  .hero-art { position: relative; overflow: hidden; border-radius: 22px; aspect-ratio: 1.3; max-width: 100%; box-shadow: var(--shadow); isolation: isolate; }
-  @media (max-width: 899px) { .hero-art { display: none; } }
+  .lead { color: var(--ink-2); max-width: 56ch; }
+  /* scene for the weak-network band */
   .scene { position: absolute; inset: 0; z-index: -1;
     background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 38%, var(--sky-3) 60%, var(--sky-4) 72%, var(--water) 72.5%, var(--water) 100%); }
   .stars { position: absolute; inset: 0 0 35% 0; opacity: var(--stars);
@@ -31,20 +52,8 @@
       radial-gradient(1.5px 1.5px at 84% 16%, #fff 60%, transparent), radial-gradient(1px 1px at 93% 42%, #fff 60%, transparent); }
   .orb { position: absolute; width: 22%; aspect-ratio: 1; right: 12%; top: 46%; border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, var(--orb-1), var(--orb-2) 70%); box-shadow: 0 0 70px 16px color-mix(in srgb, var(--orb-2) 55%, transparent); }
-  .arch { position: absolute; left: 30%; top: 12%; width: 40%; aspect-ratio: 0.82; border-radius: 999px 999px 0 0; border: 14px solid transparent; border-bottom: 0;
-    background: linear-gradient(160deg, rgba(255,255,255,0.95), var(--violet-1) 45%, var(--sky-4) 85%) border-box;
-    -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
-    filter: drop-shadow(0 0 16px color-mix(in srgb, var(--violet-1) 70%, transparent)); }
-  .gem { position: absolute; width: 30px; height: 30px; border-radius: 8px; transform: rotate(var(--rot, 18deg));
-    background: linear-gradient(135deg, rgba(255,255,255,0.9), var(--c, #8ee6ff) 45%, rgba(0,0,0,0.25)); box-shadow: 0 0 20px var(--c, #8ee6ff), inset 0 0 8px rgba(255,255,255,0.6); }
-  .g1 { --c: #7FE3FF; left: 18%; top: 20%; --rot: 24deg; } .g2 { --c: #B58CFF; left: 44%; top: 30%; width: 42px; height: 42px; --rot: -14deg; }
-  .g3 { --c: #FFC75A; right: 12%; top: 18%; width: 26px; height: 26px; --rot: 40deg; } .g4 { --c: #FF8FD1; left: 26%; top: 52%; width: 20px; height: 20px; }
   .hills { position: absolute; left: 0; right: 0; bottom: 27%; width: 100%; height: 22%; }
   .hills .h1 { fill: var(--hill-1); } .hills .h2 { fill: var(--hill-2); }
-  @media (prefers-reduced-motion: no-preference) {
-    .gem { animation: float 7s ease-in-out infinite; } .g2 { animation-duration: 9s; } .g3 { animation-duration: 6s; animation-delay: -2s; }
-    @keyframes float { 50% { translate: 0 -8px; } }
-  }
 
   /* warm opening */
   .greet { display: inline-flex; align-items: center; gap: 8px; justify-self: start; font-weight: 600; font-size: 0.92rem; color: var(--ink);
@@ -60,10 +69,11 @@
   .welcome .row { display: flex; gap: 8px; flex-wrap: wrap; }
   .calm { color: var(--muted); font-size: 0.92rem; margin-top: -4px; }
 
-  /* the three big actions */
-  .actions { display: grid; gap: 10px; }
-  .act { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; text-align: left; width: 100%;
+  /* the three big actions: 999 first; one under the other on phones, side by side from 720 px (DESIGN.md §3b) */
+  .actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .act { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; text-align: left; width: 100%;
     border-radius: var(--r); padding: 12px 14px; cursor: pointer; text-decoration: none; color: var(--ink); box-shadow: var(--shadow); }
+  .hero .act { border-color: transparent; }
   .act > span:nth-child(2) { display: grid; min-width: 0; }
   .act strong { font-weight: 700; font-size: 1.1rem; line-height: 1.3; }
   .act small { color: var(--muted); font-size: 0.86rem; line-height: 1.45; }
@@ -71,19 +81,26 @@
   .tile svg { width: 26px; height: 26px; }
   .arrow { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); }
   .arrow svg { width: 16px; height: 16px; }
-  .act.red { border-color: color-mix(in srgb, var(--red-1) 50%, transparent); }
-  .act.red strong { color: var(--red-1); }
+  .hero .act.red { border: 1.5px solid color-mix(in srgb, var(--red-1) 45%, transparent); }
+  .act.red strong { color: var(--red-ink); }
   .act.red .tile { background: linear-gradient(140deg, var(--red-1), var(--red-2)); }
   .act.violet .tile { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); }
   .act.amber .tile { background: linear-gradient(140deg, var(--amber-1), var(--amber-2)); color: var(--amber-ink); }
   .act[aria-busy="true"] { opacity: 0.7; cursor: progress; }
+  @media (min-width: 720px) {
+    .actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .act { grid-template-columns: minmax(0, 1fr); align-content: start; gap: 10px; padding: 14px; }
+    .act .arrow { display: none; }
+    .act strong { font-size: 1.02rem; }
+  }
   .who-list { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
   .who-list span { background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 0 10px; font-size: 0.8rem; font-weight: 600; color: var(--ink); }
 
-  /* calm notice when the phone has no internet (P34); in the page flow, so it never covers 999 */
   /* short phones (e.g. 360x640): a compact banner so all 3 big actions fit without scrolling (DESIGN.md §3) */
   @media (max-height: 799px) and (max-width: 899px) {
-    .hero { padding-block: 10px 20px; }
+    .shell { padding-block: 8px 32px; gap: 24px; }
+    .feed { gap: 28px; }
+    .hero { padding: 10px 12px 14px; border-radius: 18px; }
     .hero-text { gap: 8px; }
     .greet { font-size: 0.8rem; padding: 3px 12px 3px 6px; }
     .greet .dot { width: 18px; height: 18px; font-size: 0.7rem; }
@@ -98,30 +115,33 @@
     .tile svg { width: 21px; height: 21px; }
     .arrow { width: 28px; height: 28px; }
   }
+  /* very short phones (e.g. 320x568): the greeting and the calm line step aside so 999 and the other 2 actions stay on the first screen */
+  @media (max-height: 600px) and (max-width: 899px) { .hero .greet, .hero .lead { display: none; } }
   .home-msgs { display: grid; gap: 12px; margin-top: 14px; }
   .home-msgs:empty { display: none; }
 
-  /* ---------- round icon row ---------- */
-  .icons { padding-block: 22px; background: var(--surface); border-block: 1px solid var(--line); }
-  .icon-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(96px, 1fr); gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: 4px; }
-  .icon-item { scroll-snap-align: start; display: grid; justify-items: center; gap: 6px; text-align: center; padding: 8px 4px; border-radius: 12px; text-decoration: none; color: var(--ink);
+  /* ---------- rows (v3): a title with arrows, then cards ---------- */
+  .row-sec { display: grid; gap: 16px; min-width: 0; }
+  .row-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+  .row-head h2 { font-size: clamp(1.35rem, 3vw, 1.75rem); }
+  .row-head .soft { color: var(--muted); margin-top: 4px; }
+  .row-arrows { display: flex; gap: 8px; flex: none; }
+  .arrowbtn { width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); display: grid; place-items: center; cursor: pointer; color: var(--ink); }
+  .arrowbtn svg { width: 18px; height: 18px; }
+  /* national numbers: quiet tiles that scroll sideways only by hand or with the arrows; only 999's tile is soft red (DESIGN.md §3) */
+  .icon-row { display: grid; grid-auto-flow: column; grid-auto-columns: 112px; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; padding: 4px 2px 8px; }
+  .icon-item { scroll-snap-align: start; display: grid; justify-items: center; align-content: start; gap: 8px; text-align: center; padding: 4px; border-radius: 16px; text-decoration: none; color: var(--ink);
     background: none; border: 0; cursor: pointer; }
-  .icon-item:hover { background: var(--surface-2); }
-  .icon-item .circle { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; color: var(--on-color); box-shadow: var(--shadow); }
-  .icon-item .circle svg { width: 26px; height: 26px; }
-  .icon-item b { font-size: 0.86rem; font-weight: 600; line-height: 1.3; }
-  .icon-item small { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .c-red { background: linear-gradient(140deg, var(--red-1), var(--red-2)); }
-  .c-orange { background: linear-gradient(140deg, var(--orange-1), var(--orange-2)); }
-  .c-green { background: linear-gradient(140deg, var(--green-1), var(--green-2)); }
-  .c-pink { background: linear-gradient(140deg, var(--pink-1), var(--pink-2)); }
-  .c-blue { background: linear-gradient(140deg, var(--blue-1), var(--blue-2)); }
-  .c-teal { background: linear-gradient(140deg, var(--teal-1), var(--teal-2)); }
+  .icon-item .circle { width: 104px; height: 104px; border-radius: 18px; display: grid; place-items: center; background: var(--surface-2); color: var(--ink-2); }
+  .icon-item:hover .circle { background: var(--tint); color: var(--accent); }
+  .icon-item .circle.soft-red { background: var(--danger-soft); color: var(--red-ink); }
+  .icon-item .circle svg { width: 38px; height: 38px; }
+  .icon-item b { font-size: 0.92rem; font-weight: 700; line-height: 1.3; color: var(--link); }
+  .icon-item small { font-size: 0.86rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  @media (max-width: 430px) { .icon-row { grid-auto-columns: 92px; gap: 10px; } .icon-item .circle { width: 84px; height: 84px; } .icon-item .circle svg { width: 32px; height: 32px; } }
   .c-violet { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); }
   .c-amber { background: linear-gradient(140deg, var(--amber-1), var(--amber-2)); color: var(--amber-ink); }
-  .c-slate { background: linear-gradient(140deg, var(--slate-1), var(--slate-2)); }
 
-  .icon-src { margin-top: 10px; }
   .icon-src .cat-body { padding: 6px 16px 12px; gap: 4px; }
   .icon-src .src { font-size: 0.82rem; color: var(--muted); }
 
@@ -159,34 +179,30 @@
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: 0.95rem; color: var(--ink); }
   .chip[aria-pressed="true"] { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); border-color: transparent; font-weight: 600; }
-  /* ---------- cards ---------- */
-  .grid-3 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: grid; grid-template-rows: auto 1fr; box-shadow: var(--shadow); min-width: 0; }
-  .card .art { aspect-ratio: 2.2; max-width: 100%; position: relative; }
-  .card .body { padding: 16px 18px 18px; display: grid; gap: 8px; align-content: start; }
+  /* ---------- cards (v3): a soft tinted top with one line icon, the text under it ---------- */
+  .grid-3 { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+  .card { display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+  .card .art { height: 140px; border-radius: var(--r); position: relative; background: radial-gradient(90% 120% at 100% 0%, var(--tint-2), transparent 70%), var(--tint); }
+  .card .art .ico { position: absolute; left: 16px; top: 16px; width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: var(--surface); color: var(--accent); }
+  .card .art .ico svg { width: 26px; height: 26px; }
+  .card .body { padding: 14px 4px 4px; display: grid; gap: 8px; align-content: start; }
   .card h3 { font-size: 1.1rem; }
   .card p { color: var(--muted); font-size: 0.95rem; }
   .card .btn-primary { margin-top: 6px; }
-  .art.night { background: radial-gradient(30% 40% at 75% 30%, #fff6d8, #f7c56b 45%, transparent 47%), linear-gradient(180deg, #1a1244, #4b2c8a 60%, #2a1b55 61%, #1a1240); }
-  .art.lost { background: radial-gradient(28% 50% at 30% 55%, rgba(255,255,255,0.85), transparent 52%), repeating-linear-gradient(45deg, #6a3aa8 0 14px, #7b4bc0 14px 28px); }
-  .art.storm { background: linear-gradient(160deg, transparent 48%, #ffd66b 49%, #ffd66b 51%, transparent 52%), linear-gradient(180deg, #2b3a7a, #5866b8 55%, #3d7fb8 56%, #234d7a); }
 
+  /* known places (v3): an icon tile and the name, side by side */
+  .places { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr)); }
+  .place { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--line); border-radius: var(--r);
+    background: var(--surface); color: var(--ink); text-align: left; cursor: pointer; min-width: 0; }
+  .place:hover { border-color: var(--line-2); }
+  .place .thumb { width: 64px; height: 64px; border-radius: 14px; display: grid; place-items: center; background: var(--tint); color: var(--accent); }
+  .place .thumb svg { width: 28px; height: 28px; }
+  .place .label { display: grid; gap: 2px; min-width: 0; }
+  .place .label b { font-weight: 700; font-size: 1rem; line-height: 1.3; }
+  .place .label small { color: var(--muted); font-size: 0.84rem; line-height: 1.4; }
 
-  .art.town { background: radial-gradient(60% 40% at 50% 100%, rgba(255, 190, 110, 0.9), transparent 70%), repeating-linear-gradient(90deg, transparent 0 14px, rgba(255, 220, 140, 0.5) 14px 16px, transparent 16px 30px), linear-gradient(180deg, #2a1d6b, #6a3aa8 60%, #f39a7c); }
-  .art.beach { background: radial-gradient(30% 22% at 70% 28%, #fff4c9, #ffb36b 60%, transparent 62%), linear-gradient(180deg, #ff9f8a 0%, #c86fb4 38%, #3c6fd1 58%, #2a4fa6 70%, #f2d3a0 72%, #e8c08a 100%); }
-  .art.island { background: radial-gradient(70% 30% at 40% 70%, #2e7a64, transparent 70%), linear-gradient(180deg, #19285e, #3c4fa8 45%, #7ec7c9 62%, #1d5a73 64%, #123a52 100%); }
-  .art.city { background: radial-gradient(45% 30% at 30% 30%, rgba(160, 120, 255, 0.8), transparent 70%), repeating-linear-gradient(90deg, #22184f 0 18px, #2c1f66 18px 26px), linear-gradient(180deg, #0f0b2b, #3b2378); }
-
-  /* known places (product-grid style) */
-  .places { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  @media (min-width: 900px) { .places { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  .place { position: relative; border: 1px solid var(--line); border-radius: var(--r); aspect-ratio: 1.1; max-width: 100%; overflow: hidden; cursor: pointer; padding: 0; text-align: left; color: var(--on-color); box-shadow: var(--shadow); }
-  .place .art { position: absolute; inset: 0; }
-  .place .label { position: absolute; left: 10px; bottom: 10px; right: 10px; display: grid; gap: 2px; }
-  .place .label b { justify-self: start; background: rgba(15, 10, 40, 0.6); border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; padding: 3px 12px; font-weight: 600; font-size: 0.95rem; }
-  .place .label small { padding-left: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.9); text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
-  .place .corner { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: rgba(15, 10, 40, 0.5); border: 1px solid rgba(255,255,255,0.25); }
-  .place .corner svg { width: 14px; height: 14px; }
+  /* the area search as one card (v3) */
+  .findcard { border: 1px solid var(--line); border-radius: 18px; padding: 20px; background: var(--surface); }
 
   /* stats strip */
   .stats { border-radius: var(--r); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 6px; margin-top: 22px; }
@@ -347,7 +363,29 @@
   .first-row .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
 
   /* ---------- pages (issue #71): one copy of each section; the router shows the ones marked data-pages ---------- */
-  .icons .page-title { margin-bottom: 14px; }
+  .row-head .more-link { flex: none; }
+
+  /* ---------- three roles, one goal (issue #72, from #66): user · volunteer · admin, one line each ---------- */
+  .roles { border: 1px solid var(--line); border-radius: 22px; background: var(--surface); overflow: hidden; }
+  .roles-top { display: grid; gap: 16px; padding: 24px; align-items: center; background: radial-gradient(60% 120% at 100% 0%, var(--glow), transparent 70%); }
+  @media (min-width: 760px) { .roles-top { grid-template-columns: minmax(0, 1fr) auto; } }
+  .roles-head { display: grid; gap: 8px; justify-items: start; }
+  .roles-top h2 { font-size: clamp(1.4rem, 3.6vw, 1.9rem); }
+  .roles-top h2 .soft { display: block; color: var(--muted); }
+  .roles-top p { color: var(--ink-2); max-width: 54ch; }
+  .roles-top .btn { min-height: 44px; padding-inline: 22px; justify-self: start; }
+  .roles-grid { display: grid; grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--line); }
+  @media (min-width: 760px) { .roles-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .role { padding: 18px 24px; display: grid; gap: 8px; align-content: start; border-bottom: 1px solid var(--line); min-width: 0; }
+  .role:last-child { border-bottom: 0; }
+  @media (min-width: 760px) { .role { border-bottom: 0; border-right: 1px solid var(--line); } .role:last-child { border-right: 0; } }
+  .role h3 { font-size: 1.02rem; display: flex; align-items: center; gap: 10px; }
+  .role .ico { width: 36px; height: 36px; flex: none; border-radius: 11px; display: grid; place-items: center; background: var(--surface-2); color: var(--accent); }
+  .role .ico svg { width: 18px; height: 18px; }
+  .role p { color: var(--muted); font-size: 0.92rem; }
+  .role .tag { justify-self: start; }
+  .roles-note { padding: 14px 24px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 0.9rem; }
+  .roles-note b { color: var(--ink); margin-right: 6px; }
   .more-link { justify-self: start; color: var(--link); font-weight: 700; text-decoration: none; }
   .more-link:hover { text-decoration: underline; }
   .more-link::after { content: " →"; content: " →" / ""; }
@@ -399,101 +437,122 @@
   <div class="wrap offline-wrap" id="offlineNote" hidden><p class="offline-note" id="offlineText" role="status"></p></div>
   <!-- HOME -->
   <div id="home">
-    <section class="hero" aria-labelledby="hello" data-pages="home">
-      <div class="wrap hero-grid">
-        <div class="hero-text">
-          <p class="greet" id="greet"></p>
-          <h1 id="hello" tabindex="-1"><span id="hello1"></span><span class="grad" id="hello2"></span></h1>
-          <p class="lead" id="lead"></p>
-          <div class="actions">
-            <a class="act glass red" id="call999" href="tel:999">
-              <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>
-              <span><strong id="call999Title"></strong><small id="call999Sub"></small></span>
-              <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
-            </a>
-            <button class="act glass violet" id="sosBtn" type="button">
-              <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2.5 11.2 20.6 3.4c.8-.34 1.6.46 1.26 1.26L14.1 22.8c-.37.86-1.62.78-1.87-.12l-1.9-6.98-6.98-1.9c-.9-.25-.98-1.5-.12-1.87Zm8.7 3.2 1.3 4.8 5.5-12.8-6.8 8Zm-1.2-1.2 8-6.8-12.8 5.5 4.8 1.3Z"/></svg></span>
-              <span><strong id="sosBtnTitle"></strong><small id="sosBtnSub"></small></span>
-              <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
-            </button>
-            <button class="act glass amber" id="locateBtn" type="button">
-              <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg></span>
-              <span><strong id="locateTitle"></strong><small id="locateSub"></small></span>
-              <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
-            </button>
+    <!-- v3 home (issue #72): the feed comes first in the page, so 999 is reached first; on wide screens the sidebar sits on the left. -->
+    <div class="wrap shell">
+      <div class="feed">
+        <section class="hero" aria-labelledby="hello" data-pages="home">
+          <div class="hero-text">
+            <p class="greet" id="greet"></p>
+            <h1 id="hello" tabindex="-1"><span id="hello1"></span><span class="grad" id="hello2"></span></h1>
+            <p class="lead" id="lead"></p>
+            <div class="actions">
+              <a class="act glass red" id="call999" href="tel:999">
+                <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>
+                <span><strong id="call999Title"></strong><small id="call999Sub"></small></span>
+                <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
+              </a>
+              <button class="act glass violet" id="sosBtn" type="button">
+                <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2.5 11.2 20.6 3.4c.8-.34 1.6.46 1.26 1.26L14.1 22.8c-.37.86-1.62.78-1.87-.12l-1.9-6.98-6.98-1.9c-.9-.25-.98-1.5-.12-1.87Zm8.7 3.2 1.3 4.8 5.5-12.8-6.8 8Zm-1.2-1.2 8-6.8-12.8 5.5 4.8 1.3Z"/></svg></span>
+                <span><strong id="sosBtnTitle"></strong><small id="sosBtnSub"></small></span>
+                <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
+              </button>
+              <button class="act glass amber" id="locateBtn" type="button">
+                <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg></span>
+                <span><strong id="locateTitle"></strong><small id="locateSub"></small></span>
+                <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
+              </button>
+            </div>
+            <ul class="trust" id="trust"></ul>
+            <section class="welcome" id="welcome" hidden aria-labelledby="welcomeTitle"></section>
+            <div class="home-msgs" id="homeMsgs"><p class="msg" id="locMsg" role="status" hidden></p><div class="demo" id="demo" hidden><p id="demoText"></p><div class="chips" id="demoChips"></div></div></div>
           </div>
-          <ul class="trust" id="trust"></ul>
-          <section class="welcome" id="welcome" hidden aria-labelledby="welcomeTitle"></section>
-          <div class="home-msgs" id="homeMsgs"><p class="msg" id="locMsg" role="status" hidden></p><div class="demo" id="demo" hidden><p id="demoText"></p><div class="chips" id="demoChips"></div></div></div>
-        </div>
-        <div class="hero-art" aria-hidden="true">
-          <div class="scene">
-            <div class="stars"></div><div class="orb"></div><div class="arch"></div>
-            <span class="gem g1"></span><span class="gem g2"></span><span class="gem g3"></span><span class="gem g4"></span>
-            <svg class="hills" viewBox="0 0 1200 200" preserveAspectRatio="none">
-              <path class="h1" d="M0 120 C150 60 260 90 380 70 C520 45 600 110 760 80 C900 55 1010 30 1200 75 L1200 200 L0 200 Z"/>
-              <path class="h2" d="M0 160 C180 120 300 150 460 130 C640 108 760 160 920 140 C1040 125 1120 120 1200 130 L1200 200 L0 200 Z"/>
+        </section>
+
+        <section class="row-sec icons" aria-labelledby="numbersTitle" data-pages="home numbers">
+          <div class="row-head">
+            <h1 class="page-title" id="numbersTitle" tabindex="-1" data-pages="numbers"></h1>
+            <h2 id="numRowTitle" data-pages="home"></h2>
+            <div class="row-arrows">
+              <button class="arrowbtn" id="rowBack" type="button" data-dir="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m15.4 6.4-1.4-1.4-7 7 7 7 1.4-1.4L9.8 12z"/></svg></button>
+              <button class="arrowbtn" id="rowMore" type="button" data-dir="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m8.6 17.6 1.4 1.4 7-7-7-7-1.4 1.4 5.6 5.6z"/></svg></button>
+            </div>
+          </div>
+          <div class="icon-row" id="iconRow"></div>
+          <details class="cat icon-src" id="iconSrc" hidden>
+            <summary><span id="iconSrcTitle"></span></summary>
+            <div class="cat-body" id="iconSrcList"></div>
+          </details>
+        </section>
+
+        <section class="row-sec findcard" id="findSec" aria-labelledby="findTitle" data-pages="home area">
+          <div class="search-band">
+            <div>
+              <div class="intro"><h2 id="findTitle" tabindex="-1"></h2><p id="findText"></p></div>
+              <div class="finder">
+                <label class="searchbar" for="areaInput">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.8 4.8-1.4 1.4-4.8-4.8A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
+                  <span id="areaLabel" hidden></span>
+                  <input id="areaInput" type="search" autocomplete="off" aria-describedby="areaHint" aria-controls="suggest">
+                  <select id="distSel" aria-label="District"></select>
+                </label>
+                <p class="hint" id="areaHint"></p>
+                <ul class="suggest" id="suggest" hidden aria-live="polite"></ul>
+                <button class="btn recent" id="recentBtn" type="button" hidden></button>
+              </div>
+              <p id="orText" hidden></p>
+            </div>
+            <svg class="find-art" viewBox="0 0 240 200" aria-hidden="true">
+              <rect class="map" x="20" y="40" width="200" height="140" rx="18"/>
+              <path class="road" d="M30 150 C80 120 110 160 150 120 S200 80 212 60"/>
+              <path class="road" d="M60 50 C70 90 120 100 130 180"/>
+              <path class="pin" d="M150 20c19 0 34 15 34 33 0 25-34 61-34 61s-34-36-34-61c0-18 15-33 34-33Zm0 20a13 13 0 1 0 0 26 13 13 0 0 0 0-26Z"/>
+              <circle class="pin2" cx="70" cy="140" r="9"/>
             </svg>
           </div>
+        </section>
+
+        <section class="row-sec" aria-labelledby="quickTitle" data-pages="home area">
+          <div class="row-head"><div><p class="eyebrow" id="quickEyebrow" hidden></p><h2 id="quickTitle"></h2><p class="soft" id="quickText"></p></div></div>
+          <div class="places" id="places"></div>
+          <div class="stats glass" id="stats"></div>
+        </section>
+
+        <section class="row-sec" aria-labelledby="guideTitle" data-pages="home guide">
+          <div class="row-head"><div><h2 id="guideTitle" tabindex="-1"></h2><p class="soft" id="guideText"></p></div><a class="more-link" id="guideMore" href="#/guide" data-pages="home"></a></div>
+          <div class="grid-3" id="guideCards"></div>
+        </section>
+
+        <section class="row-sec" aria-label="Prepare" data-pages="home guide">
+          <div class="duo" id="duoCards"></div>
+        </section>
+      </div>
+
+      <!-- Sidebar: on wide screens on the left (CSS), on phones under the feed. -->
+      <aside class="rail" id="rail" data-pages="home">
+        <section class="appcard" aria-labelledby="appTitle">
+          <span class="app-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 3v13h10V5H7Zm5 14.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/></svg></span>
+          <b id="appTitle"></b>
+          <small id="appText"></small>
+          <a class="app-url" id="appUrl" href="https://jerin101.github.io/safe-connect/">jerin101.github.io/safe-connect</a>
+        </section>
+        <section class="filter" aria-labelledby="fTitle">
+          <h2 id="fTitle"></h2>
+          <label class="field"><span id="fDist"></span><select id="railDist"></select></label>
+          <p class="fnote" id="fNote"></p>
+          <button class="linkbtn" id="fReset" type="button"></button>
+        </section>
+      </aside>
+    </div>
+
+    <section class="section" id="rolesSec" aria-labelledby="rolesTitle" data-pages="home">
+      <div class="wrap"><div class="roles">
+        <div class="roles-top">
+          <div class="roles-head"><p class="eyebrow" id="rolesEyebrow"></p><h2 id="rolesTitle"><span id="rolesT1"></span><span class="soft" id="rolesT2"></span></h2><p id="rolesText"></p></div>
+          <a class="btn violet" id="rolesSignin" href="#/account"></a>
         </div>
-      </div>
-    </section>
-
-    <section class="icons" aria-labelledby="numbersTitle" data-pages="home numbers">
-      <div class="wrap">
-        <h1 class="page-title" id="numbersTitle" tabindex="-1" data-pages="numbers"></h1>
-        <div class="icon-row" id="iconRow"></div>
-        <details class="cat icon-src" id="iconSrc" hidden>
-          <summary><span id="iconSrcTitle"></span></summary>
-          <div class="cat-body" id="iconSrcList"></div>
-        </details>
-      </div>
-    </section>
-
-    <section class="section tint" id="findSec" aria-labelledby="findTitle" data-pages="home area">
-      <div class="wrap search-band">
-        <div>
-          <div class="intro"><h2 id="findTitle" tabindex="-1"></h2><p id="findText"></p></div>
-          <div class="finder">
-            <label class="searchbar" for="areaInput">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.8 4.8-1.4 1.4-4.8-4.8A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
-              <span id="areaLabel" hidden></span>
-              <input id="areaInput" type="search" autocomplete="off" aria-describedby="areaHint" aria-controls="suggest">
-              <select id="distSel" aria-label="District"></select>
-            </label>
-            <p class="hint" id="areaHint"></p>
-            <ul class="suggest" id="suggest" hidden aria-live="polite"></ul>
-            <button class="btn recent" id="recentBtn" type="button" hidden></button>
-          </div>
-          <p id="orText" hidden></p>
-        </div>
-        <svg class="find-art" viewBox="0 0 240 200" aria-hidden="true">
-          <rect class="map" x="20" y="40" width="200" height="140" rx="18"/>
-          <path class="road" d="M30 150 C80 120 110 160 150 120 S200 80 212 60"/>
-          <path class="road" d="M60 50 C70 90 120 100 130 180"/>
-          <path class="pin" d="M150 20c19 0 34 15 34 33 0 25-34 61-34 61s-34-36-34-61c0-18 15-33 34-33Zm0 20a13 13 0 1 0 0 26 13 13 0 0 0 0-26Z"/>
-          <circle class="pin2" cx="70" cy="140" r="9"/>
-        </svg>
-      </div>
-    </section>
-
-    <section class="section" aria-labelledby="guideTitle" data-pages="home guide">
-      <div class="wrap">
-        <div class="section-title"><h2 id="guideTitle" tabindex="-1"></h2><p id="guideText"></p><a class="more-link" id="guideMore" href="#/guide" data-pages="home"></a></div>
-        <div class="grid-3" id="guideCards"></div>
-      </div>
-    </section>
-
-    <section class="section tint" aria-labelledby="quickTitle" data-pages="home area">
-      <div class="wrap">
-        <div class="section-title"><p class="eyebrow" id="quickEyebrow" hidden></p><h2 id="quickTitle"></h2><p id="quickText"></p></div>
-        <div class="places" id="places"></div>
-        <div class="stats glass" id="stats"></div>
-      </div>
-    </section>
-
-    <section class="section" aria-label="Prepare" data-pages="home guide">
-      <div class="wrap duo" id="duoCards"></div>
+        <div class="roles-grid" id="rolesGrid"></div>
+        <p class="roles-note" id="rolesNote"></p>
+      </div></div>
     </section>
 
     <section class="section tint" id="about" aria-labelledby="aboutTitle" data-pages="home about">
