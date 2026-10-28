@@ -236,11 +236,16 @@ function renderArea() {
 }
 
 /* ---------- views ---------- */
+// Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see preview.html).
 function showView(name) {
   for (const view of ['home', 'area', 'sos', 'signin', 'ws']) $(view).hidden = name !== view;
-  window.scrollTo(0, 0);
+  const v = $(name);
+  v.classList.remove('page-in'); void v.offsetWidth; v.classList.add('page-in');   // restart the fade
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 }
-function openArea(place, pos) {
+// Opening an area = going to its address (#/area/...); the router then calls showArea.
+function openArea(place, pos) { go(areaPath(place), { place, pos }); }
+function showArea(place, pos) {
   current = { place, pos };
   if (!place.outside) store.set('sc-last', JSON.stringify(place));
   renderChip();
@@ -248,11 +253,117 @@ function openArea(place, pos) {
   showView('area');
 }
 function goHome() {
-  activeTab = 'home'; markTab();
   $('areaInput').value = '';
   $('suggest').hidden = true;
-  renderRecent();
+  go('');
+}
+
+/* ---------- pages (issue #71): hash addresses inside preview.html, so they also work offline ---------- */
+// #/ home · #/numbers · #/area (search) · #/area/<district>/<upazila>[/<union or town>[/<place id>]] · #/send
+// #/guide · #/about · #/faq · #/account. Anything else opens home. The home sections carry data-pages="..."
+// in preview.html: each page shows the sections that list its name, so no content or id is copied.
+const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account'];
+const HEADING = { home: 'hello', numbers: 'numbersTitle', area: 'findTitle', guide: 'guideTitle', about: 'aboutTitle', faq: 'faqTitle' };
+let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
+let firstRoute = true;       // the first page after loading does not move focus
+let routeMsg = false;        // the "area not found" line is showing
+let pageTitle = () => '';
+const slug = (s) => norm(s).toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function go(path, intent = null) {
+  pending = intent;
+  const hash = `#/${path}`;
+  if (location.hash === hash || (!path && !location.hash)) route(); else location.hash = hash;
+}
+// Address of a place, built from the ids already in the data: district key, upazila and union names, place id.
+function areaPath(p) {
+  if (p.outside) return 'area/outside';
+  const parts = ['area', p.district, slug(p.upazila)];
+  const doc = data?.docs[p.district];
+  if (p.area && doc) {
+    const all = localAreas(doc, p.upazila);
+    const full = all.find((a) => a.type === p.area.type && a.bn === norm(p.area.bn));
+    if (full?.type === 'union' && full.en) parts.push(slug(full.en));
+    else if (full?.type === 'municipality') {
+      const i = all.filter((a) => a.type === 'municipality').indexOf(full);
+      parts.push(i ? `town-${i + 1}` : 'town');
+    }
+  }
+  if (p.placeId && parts.length === 4) parts.push(p.placeId);
+  return parts.join('/');
+}
+// The place for an address, or null when it is not in the data.
+function placeFromPath([dkey, upz, areaSlug, placeId]) {
+  const doc = data?.docs[dkey];
+  if (!doc || !upz) return null;
+  const u = upazilas(doc).find((x) => slug(x.en) === upz);
+  if (!u) return null;
+  const place = { district: dkey, upazila: u.en, area: null };
+  if (!areaSlug) return place;
+  const all = localAreas(doc, u.en);
+  const towns = all.filter((a) => a.type === 'municipality');
+  const m = /^town(?:-(\d+))?$/.exec(areaSlug);
+  place.area = m ? towns[(m[1] ? Number(m[1]) : 1) - 1] : all.find((a) => a.type === 'union' && a.en && slug(a.en) === areaSlug);
+  if (!place.area) return null;
+  const named = placeId && (doc.places || []).find((x) => x.id === placeId && norm(x.union_bn) === place.area.bn);
+  if (named) { place.placeId = named.id; place.label = lang === 'bn' ? named.name_bn : named.name_en || named.name_bn; }
+  return place;
+}
+function readHash() {
+  return location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map((s) => { try { return decodeURIComponent(s); } catch { return s; } });
+}
+// Home and the pages made of home sections.
+function showPage(page) {
+  $('main').dataset.page = page;
+  document.querySelectorAll('#home [data-pages]').forEach((e) => { e.hidden = !e.dataset.pages.split(' ').includes(page); });
+  if (!$('iconSrc').hidden) $('iconSrc').open = page === 'numbers';
+  if (page === 'home') renderRecent();
   showView('home');
+}
+function setTitle() { const x = pageTitle(); document.title = x ? `${x} · SafeConnect` : 'SafeConnect'; }
+function finish(tab, title, headingId, intent) {
+  activeTab = tab; markTab();
+  pageTitle = title; setTitle();
+  if (!firstRoute) $(headingId)?.focus({ preventScroll: true });
+  firstRoute = false;
+  intent?.after?.();
+}
+async function route() {
+  const intent = pending; pending = null;
+  if (routeMsg) { msg(''); routeMsg = false; }
+  let [name = 'home', ...rest] = readHash();
+  if (!PAGES.includes(name)) { history.replaceState(null, '', '#/'); name = 'home'; rest = []; }
+  const titleOf = (key) => () => P().titles[key];
+  if (name === 'area' && rest.length) {
+    const path = ['area', ...rest].join('/');
+    const same = current && areaPath(current.place) === path;
+    const place = intent?.place || (same ? current.place : placeFromPath(rest));
+    if (place) {
+      $('main').dataset.page = 'place';
+      showArea(place, intent ? intent.pos : same ? current.pos : null);
+      finish('area', () => (current.place.outside ? t().outsideTitle : placeTitle(current.place)), 'placeName', intent);
+      return;
+    }
+    // Not in the data (old link, typo): home with a calm line, never an empty page.
+    history.replaceState(null, '', '#/');
+    showPage('home');
+    msg(P().notFound); routeMsg = true;
+    finish('home', titleOf('home'), 'hello', null);
+    return;
+  }
+  if (name === 'send') {
+    $('main').dataset.page = 'send';
+    showSos(intent?.pos || null, Boolean(intent?.ask));
+    finish('send', titleOf('send'), 'sosTitle', intent);
+    return;
+  }
+  if (name === 'account') {
+    $('main').dataset.page = 'account';
+    await auth.open();
+    finish(null, titleOf('account'), $('ws').hidden ? 'siTitle' : 'wsTitle', intent);
+    return;
+  }
+  showPage(name);
+  finish(name, titleOf(name), HEADING[name], intent);
 }
 // Header area chip: the last opened area (saved on this phone only), or "choose your area".
 function renderChip() {
@@ -267,7 +378,7 @@ function renderRecent() {
   let last = null;
   try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
   const b = $('recentBtn');
-  if (!last || !data.docs[last.district]) { b.hidden = true; return; }
+  if (!last || !data || !data.docs[last.district]) { b.hidden = true; return; }   // home can open before the data is loaded
   b.textContent = fill(t().recent, { n: placeTitle(last) });
   b.onclick = () => openArea(last, null);
   b.hidden = false;
@@ -311,6 +422,7 @@ function fillDemo(box, textEl, chipsEl, onPick) {
 }
 function showDemo() { fillDemo($('demo'), $('demoText'), $('demoChips'), applyPosition); }
 async function locate() {
+  if ($('main').dataset.page !== 'home') go('');   // the location messages and the demo are on home
   const btn = $('locateBtn');
   btn.setAttribute('aria-busy', 'true');
   msg(t().locating);
@@ -446,7 +558,9 @@ function renderPeople() {
 }
 // askLocation = false: open the page without asking for location (e.g. only to save family numbers).
 // Location is then read only when the person taps "Get my location" (CLAUDE.md rule 5).
-async function openSos(pos, askLocation = true) {
+// Opening #/send by Back, reload or a link never asks for location: only a tap does.
+function openSos(pos, askLocation = true, after = null) { go('send', { pos, ask: askLocation, after }); }
+function showSos(pos, askLocation) {
   sos = { situation: sos.situation || 'danger', pos: null, place: null, state: 'idle', edited: false, error: null };
   renderSituations(); renderPeople();
   showView('sos');
@@ -532,7 +646,7 @@ function renderPlaces() {
     return b;
   }));
 }
-function saveNumbers() { openSos(null, false); $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
+function saveNumbers() { openSos(null, false, () => { $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ block: 'start' }), 50); }); }
 
 
 const SITE = {
@@ -544,26 +658,35 @@ const MORE_ICONS = {
   signal: 'M2 9.5a15 15 0 0 1 20 0l-1.4 1.4a13 13 0 0 0-17.2 0L2 9.5Zm3.5 3.5a10 10 0 0 1 13 0l-1.4 1.4a8 8 0 0 0-10.2 0L5.5 13Zm3.5 3.5a5 5 0 0 1 6 0L12 19.5l-3-3Z',
   lock: 'M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3Z',
 };
-function goTo(id) { goHome(); setTimeout(() => $(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30); }
-function findArea(district) { goHome(); $('distSel').value = district || ''; setTimeout(() => { $('areaInput').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('areaInput').focus({ preventScroll: true }); }, 30); renderSuggest(); }
-function openFaq(key) { goTo('faq'); const d = document.querySelector(`#faqList details[data-key="${key}"]`); if (d) d.open = true; }
+// The area search page; focusInput = true when the person tapped a search box or "change area".
+function findArea(district = '', focusInput = true) {
+  go('area', { after: () => { $('distSel').value = district; renderSuggest(); if (focusInput) $('areaInput').focus({ preventScroll: true }); } });
+}
+// The questions page with one answer open.
+function openFaq(key) {
+  go('faq', { after: () => {
+    const d = document.querySelector(`#faqList details[data-key="${key}"]`);
+    if (!d) return;
+    d.open = true; d.scrollIntoView({ block: 'center' }); d.querySelector('summary').focus({ preventScroll: true });
+  } });
+}
 function openQuick(key) { const q = quickPlaces().find(([k]) => k === key); if (!q) return; const [, , item] = q; const p = { ...item.place }; if (item.named) p.label = lang === 'bn' ? item.named.name_bn : item.named.name_en; openArea(p, null); }
 const textBtn = (label, fn) => { const b = el('button', null, label); b.type = 'button'; b.addEventListener('click', fn); return b; };
 const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a; };
 
-// Second header row: one button per home section, in page order (DESIGN.md §3).
+// Second header row: one button per page (DESIGN.md §3). Each tab changes the address; the router shows the page.
 const NAV = [
-  ['home', () => { goHome(); window.scrollTo(0, 0); }],
-  ['numbers', () => goTo('iconRow')],
-  ['area', () => findArea('')],
+  ['home', goHome],
+  ['numbers', () => go('numbers')],
+  ['area', () => findArea('', false)],
   ['send', () => openSos(null)],
-  ['guide', () => goTo('guideCards')],
-  ['about', () => goTo('about')],
-  ['faq', () => goTo('faq')],
+  ['guide', () => go('guide')],
+  ['about', () => go('about')],
+  ['faq', () => go('faq')],
 ];
 function renderNav() {
   $('nav').replaceChildren(...NAV.map(([key, fn]) => {
-    const b = textBtn(P().nav[key], () => { fn(); activeTab = key; markTab(); });
+    const b = textBtn(P().nav[key], fn);
     b.dataset.key = key;
     return b;
   }));
@@ -588,7 +711,7 @@ function renderHead() {
 }
 function renderAbout() {
   const a = P().about;
-  $('aboutEyebrow').textContent = a.eyebrow; $('aboutTitle').textContent = a.title; $('aboutText').textContent = a.text;
+  $('aboutEyebrow').textContent = a.eyebrow; $('aboutTitle').textContent = a.title; $('aboutText').textContent = a.text; $('aboutMore').textContent = P().seeMore;
   $('points').replaceChildren(...a.points.map(([ic, title, text]) => {
     const d = el('div', 'point'); const i = el('span', 'ic'); i.append(svg(MORE_ICONS[ic] || ICONS[ic]));
     d.append(i, el('b', null, title), el('span', null, text)); return d;
@@ -596,7 +719,7 @@ function renderAbout() {
 }
 function renderFaq() {
   const f = P().faq;
-  $('faqEyebrow').textContent = f.eyebrow; $('faqTitle').textContent = f.title;
+  $('faqEyebrow').textContent = f.eyebrow; $('faqTitle').textContent = f.title; $('faqMore').textContent = P().seeMore;
   $('faqList').replaceChildren(...f.items.map(([key, q, a]) => {
     const d = el('details'); d.dataset.key = key; d.append(el('summary', null, q), el('p', null, a)); return d;
   }));
@@ -604,7 +727,7 @@ function renderFaq() {
 function renderFooter() {
   const f = P().foot;
   const brand = el('div', 'foot-brand');
-  const logo = $('homeBtn').cloneNode(true); logo.removeAttribute('id'); logo.addEventListener('click', () => { goHome(); window.scrollTo(0, 0); });
+  const logo = $('homeBtn').cloneNode(true); logo.removeAttribute('id'); logo.addEventListener('click', goHome);
   brand.append(logo, el('p', null, f.tagline), el('small', null, f.small));
   const col = (title, items) => { const c = el('div', 'foot-col'); c.append(el('h3', null, title), ...items); return c; };
   const [sT, s] = f.services, [aT, a] = f.areas, [iT, i] = f.info;
@@ -612,9 +735,9 @@ function renderFooter() {
   const help = el('div', 'foot-col foot-help');
   help.append(el('h3', null, f.helpTitle), el('p', null, f.helpText), extLink('github.com/Jerin101/safe-connect', SITE.repo));
   $('footGrid').replaceChildren(brand,
-    col(sT, [call, textBtn(s[1], () => openSos(null)), textBtn(s[2], () => { goHome(); locate(); }), textBtn(s[3], () => findArea(''))]),
+    col(sT, [call, textBtn(s[1], () => openSos(null)), textBtn(s[2], locate), textBtn(s[3], () => findArea(''))]),
     col(aT, [textBtn(a[0], () => findArea('noakhali')), textBtn(a[1], () => findArea('coxsbazar')), textBtn(a[2], () => openQuick('chowmuhani')), textBtn(a[3], () => openQuick('inani'))]),
-    col(iT, [textBtn(i[0], () => goTo('about')), textBtn(i[1], () => goTo('faq')), extLink(i[2], SITE.report), textBtn(i[3], () => openFaq('source'))]),
+    col(iT, [textBtn(i[0], () => go('about')), textBtn(i[1], () => go('faq')), extLink(i[2], SITE.report), textBtn(i[3], () => openFaq('source'))]),
     help);
   const nav = el('nav'); nav.setAttribute('aria-label', 'Footer');
   const tests = el('a', null, f.bottom[3]); tests.href = 'tests/search-test.html';
@@ -660,6 +783,7 @@ function renderIconRow() {
   items.splice(1, 0, act(P().iconSend, P().iconSendSub, 'send', 'c-violet', () => openSos(null)), act(P().iconNear, P().iconNearSub, 'pin', 'c-amber', () => locate()));
   $('iconRow').replaceChildren(...items);
   $('iconSrc').hidden = !shown.length;
+  if ($('main').dataset.page === 'numbers') $('iconSrc').open = true;   // the numbers page shows the sources open
   $('iconSrcTitle').textContent = P().iconSrc;
   $('iconSrcList').replaceChildren(...shown.map((n) => {
     const line = el('p', 'src');
@@ -677,10 +801,10 @@ function primaryBtn(label, fn, href) {
 }
 // "What happened?" cards. Numbers in the text come from data/national_hotlines.json, never typed in (CLAUDE.md rule 1).
 function renderGuides() {
-  $('guideTitle').textContent = P().guideTitle; $('guideText').textContent = P().guideText;
+  $('guideTitle').textContent = P().guideTitle; $('guideText').textContent = P().guideText; $('guideMore').textContent = P().seeMore;
   const num = (id) => data?.national.find((x) => x.id === id)?.phones?.[0];
   const n = num('fire-service-102') && num('disaster-warning-1090') ? { fire: digits(num('fire-service-102')), warn: digits(num('disaster-warning-1090')) } : null;
-  const actions = { sos: () => openSos(null), find: () => findArea(''), locate: () => { goHome(); window.scrollTo(0, 0); locate(); } };
+  const actions = { sos: () => openSos(null), find: () => findArea(''), locate };
   $('guideCards').replaceChildren(...P().guides.map(([art, title, text, btn, act]) => {
     const c = el('article', 'card');
     const body = el('div', 'body');
@@ -709,7 +833,7 @@ function renderHelp() {
     if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else { b.type = 'button'; b.addEventListener('click', fn); }
     const c = el('span', 'circle'); c.append(svg(GP_ICONS[ic])); b.append(c, el('span', null, label)); return b;
   };
-  $('helpRow').replaceChildren(item(q, 'question', () => goTo('faq')), item(src, 'db', () => openFaq('source')), item(priv, 'lock', () => openFaq('privacy')), item(rep, 'flag', null, SITE.report));
+  $('helpRow').replaceChildren(item(q, 'question', () => go('faq')), item(src, 'db', () => openFaq('source')), item(priv, 'lock', () => openFaq('privacy')), item(rep, 'flag', null, SITE.report));
 }
 // Weak-network band: only what works today gets a tick; the rest says "coming soon" (DESIGN.md §2).
 function renderNet() {
@@ -740,7 +864,7 @@ function renderWarm() {
 }
 function renderPage() {
   renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
-  $('findTitle').textContent = P().findTitle; $('findText').textContent = P().findText;
+  $('findTitle').textContent = P().findTitle; $('numbersTitle').textContent = P().titles.numbers; $('findText').textContent = P().findText;
 }
 
 /* ---------- text ---------- */
@@ -780,7 +904,7 @@ $('homeBtn').addEventListener('click', goHome);
 $('areaChip').addEventListener('click', () => findArea(''));
 $('hFinder').addEventListener('click', () => findArea(''));
 $('ctaSend').addEventListener('click', () => openSos(null));
-$('changeBtn').addEventListener('click', () => { goHome(); $('areaInput').focus(); });
+$('changeBtn').addEventListener('click', () => findArea(''));
 $('langBtn').addEventListener('click', () => {
   lang = lang === 'bn' ? 'en' : 'bn';
   store.set('sc-lang', lang);
@@ -789,6 +913,7 @@ $('langBtn').addEventListener('click', () => {
   if (data) { renderRecent(); renderSuggest(); renderStats(); renderPlaces(); if (current) renderArea(); }
   if (!$('sos').hidden) { renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
   auth.setText();
+  setTitle();
 });
 $('themeBtn').addEventListener('click', () => {
   const root = document.documentElement;
@@ -798,7 +923,12 @@ $('themeBtn').addEventListener('click', () => {
 
 setText();
 // Sign-in (P45): only the account button and its views; help never waits for it.
-const auth = initAuth({ $, el, store, fill, lang: () => lang, texts: () => LANG[lang], showView, goHome, openSos, locate });
+const auth = initAuth({ $, el, store, fill, lang: () => lang, texts: () => LANG[lang], showView, goHome, openSos, locate, go });
+// Pages: show the page in the address now; an area address waits for the data it needs.
+history.scrollRestoration = 'manual';
+window.addEventListener('hashchange', () => route());
+const isPlace = () => readHash()[0] === 'area' && readHash().length > 1;
+if (!isPlace()) route();
 try {
   [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
   areaIndex = buildAreaIndex(data);
@@ -806,6 +936,7 @@ try {
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);
 }
+if (isPlace()) route();
 
 // Calm notice while the phone has no internet; it goes away by itself when the internet is back.
 function showOnline() { $('offlineNote').hidden = navigator.onLine; }

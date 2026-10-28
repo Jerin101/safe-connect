@@ -30,6 +30,7 @@
   --foot-bg: #F3EDE6; --foot-ink: #1A1724; --foot-muted: #645F70; --foot-line: rgba(20, 20, 45, 0.10);
   --font: "Manrope", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
   --r: 16px;
+  --fade: 200ms;   /* page change fade (issue #71) */
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {

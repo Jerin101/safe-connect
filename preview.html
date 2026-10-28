@@ -346,6 +346,23 @@
   .first-row .src { color: var(--muted); font-size: 0.78rem; }
   .first-row .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
 
+  /* ---------- pages (issue #71): one copy of each section; the router shows the ones marked data-pages ---------- */
+  .icons .page-title { margin-bottom: 14px; }
+  .more-link { justify-self: start; color: var(--link); font-weight: 700; text-decoration: none; }
+  .more-link:hover { text-decoration: underline; }
+  .more-link::after { content: " →"; content: " →" / ""; }
+  .section-title .more-link { justify-self: center; }
+  .faq-head { display: grid; gap: 10px; align-content: start; }
+  /* Home shows a short preview; the full list is on its own page. */
+  main[data-page="home"] #points > :nth-child(n+3),
+  main[data-page="home"] #faqList > :nth-child(n+3),
+  main[data-page="home"] #guideCards > :nth-child(n+3) { display: none; }
+  /* Soft fade when a page opens; none for people who ask for less motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .page-in { animation: page-in var(--fade) ease-out; }
+    @keyframes page-in { from { opacity: 0; } }
+  }
+
 </style>
 </head>
 <body>
@@ -378,15 +395,15 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <div class="wrap offline-wrap" id="offlineNote" hidden><p class="offline-note" id="offlineText" role="status"></p></div>
   <!-- HOME -->
   <div id="home">
-    <section class="hero" aria-labelledby="hello">
+    <section class="hero" aria-labelledby="hello" data-pages="home">
       <div class="wrap hero-grid">
         <div class="hero-text">
           <p class="greet" id="greet"></p>
-          <h1 id="hello"><span id="hello1"></span><span class="grad" id="hello2"></span></h1>
+          <h1 id="hello" tabindex="-1"><span id="hello1"></span><span class="grad" id="hello2"></span></h1>
           <p class="lead" id="lead"></p>
           <div class="actions">
             <a class="act glass red" id="call999" href="tel:999">
@@ -422,8 +439,9 @@
       </div>
     </section>
 
-    <section class="icons" aria-label="Quick numbers">
+    <section class="icons" aria-labelledby="numbersTitle" data-pages="home numbers">
       <div class="wrap">
+        <h1 class="page-title" id="numbersTitle" tabindex="-1" data-pages="numbers"></h1>
         <div class="icon-row" id="iconRow"></div>
         <details class="cat icon-src" id="iconSrc" hidden>
           <summary><span id="iconSrcTitle"></span></summary>
@@ -432,10 +450,10 @@
       </div>
     </section>
 
-    <section class="section tint" id="findSec" aria-labelledby="findTitle">
+    <section class="section tint" id="findSec" aria-labelledby="findTitle" data-pages="home area">
       <div class="wrap search-band">
         <div>
-          <div class="intro"><h2 id="findTitle"></h2><p id="findText"></p></div>
+          <div class="intro"><h2 id="findTitle" tabindex="-1"></h2><p id="findText"></p></div>
           <div class="finder">
             <label class="searchbar" for="areaInput">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.8 4.8-1.4 1.4-4.8-4.8A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
@@ -459,14 +477,14 @@
       </div>
     </section>
 
-    <section class="section" aria-labelledby="guideTitle">
+    <section class="section" aria-labelledby="guideTitle" data-pages="home guide">
       <div class="wrap">
-        <div class="section-title"><h2 id="guideTitle"></h2><p id="guideText"></p></div>
+        <div class="section-title"><h2 id="guideTitle" tabindex="-1"></h2><p id="guideText"></p><a class="more-link" id="guideMore" href="#/guide" data-pages="home"></a></div>
         <div class="grid-3" id="guideCards"></div>
       </div>
     </section>
 
-    <section class="section tint" aria-labelledby="quickTitle">
+    <section class="section tint" aria-labelledby="quickTitle" data-pages="home area">
       <div class="wrap">
         <div class="section-title"><p class="eyebrow" id="quickEyebrow" hidden></p><h2 id="quickTitle"></h2><p id="quickText"></p></div>
         <div class="places" id="places"></div>
@@ -474,25 +492,25 @@
       </div>
     </section>
 
-    <section class="section" aria-label="Prepare">
+    <section class="section" aria-label="Prepare" data-pages="home guide">
       <div class="wrap duo" id="duoCards"></div>
     </section>
 
-    <section class="section tint" id="about" aria-labelledby="aboutTitle">
+    <section class="section tint" id="about" aria-labelledby="aboutTitle" data-pages="home about">
       <div class="wrap about">
-        <div class="intro"><p class="eyebrow" id="aboutEyebrow"></p><h2 id="aboutTitle"></h2><p id="aboutText"></p></div>
+        <div class="intro"><p class="eyebrow" id="aboutEyebrow"></p><h2 id="aboutTitle" tabindex="-1"></h2><p id="aboutText"></p><a class="more-link" id="aboutMore" href="#/about" data-pages="home"></a></div>
         <div class="points" id="points"></div>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="helpTitle">
+    <section class="section" aria-labelledby="helpTitle" data-pages="home faq">
       <div class="wrap">
         <div class="section-title"><h2 id="helpTitle"></h2></div>
         <div class="help-row" id="helpRow"></div>
       </div>
     </section>
 
-    <section class="feature" aria-labelledby="netTitle">
+    <section class="feature" aria-labelledby="netTitle" data-pages="home about">
       <div class="scene" aria-hidden="true">
         <div class="stars"></div><div class="orb"></div>
         <svg class="hills" viewBox="0 0 1200 200" preserveAspectRatio="none">
@@ -505,9 +523,9 @@
       </div>
     </section>
 
-    <section class="section tint" id="faq" aria-labelledby="faqTitle">
+    <section class="section tint" id="faq" aria-labelledby="faqTitle" data-pages="home faq">
       <div class="wrap faq">
-        <div><p class="eyebrow" id="faqEyebrow"></p><h2 id="faqTitle"></h2></div>
+        <div class="faq-head"><p class="eyebrow" id="faqEyebrow"></p><h2 id="faqTitle" tabindex="-1"></h2><a class="more-link" id="faqMore" href="#/faq" data-pages="home"></a></div>
         <div class="faq-list" id="faqList"></div>
       </div>
     </section>
@@ -518,7 +536,7 @@
     <div class="page-top"><button class="back" id="backBtn" type="button"></button></div>
     <section class="here glass" aria-labelledby="placeName">
       <p class="label" id="youAreIn"></p>
-      <h1 id="placeName"></h1>
+      <h1 id="placeName" tabindex="-1"></h1>
       <p class="sub" id="placeSub"></p>
       <div class="here-row"><button class="btn" id="changeBtn" type="button"></button></div>
     </section>
@@ -544,7 +562,7 @@
   <div class="wrap page" id="sos" hidden>
     <div class="page-top">
       <button class="back" id="sosBack" type="button"></button>
-      <h1 class="page-title" id="sosTitle"></h1>
+      <h1 class="page-title" id="sosTitle" tabindex="-1"></h1>
     </div>
     <section class="panel glass" aria-labelledby="sitTitle">
       <h2 id="sitTitle"></h2>
@@ -591,7 +609,7 @@
       <b id="noLoginTitle"></b><p id="noLoginText"></p>
       <div class="nologin-btns" id="noLoginBtns"></div>
     </section>
-    <div class="si-head"><p class="eyebrow" id="siEyebrow"></p><h1><span id="siT1"></span><span class="soft" id="siT2"></span></h1></div>
+    <div class="si-head"><p class="eyebrow" id="siEyebrow"></p><h1 id="siTitle" tabindex="-1"><span id="siT1"></span><span class="soft" id="siT2"></span></h1></div>
     <div class="role-pick" id="rolePick" role="radiogroup"></div>
     <form class="si-form" id="siForm" novalidate>
       <h2 id="siFormTitle"></h2>
@@ -615,7 +633,7 @@
   <!-- WORKSPACE: a simple placeholder for now; the real workspace comes with P35. -->
   <div class="wrap page" id="ws" hidden>
     <div class="page-top"><button class="back" id="wsBack" type="button"></button></div>
-    <div class="si-head"><p class="eyebrow" id="wsEyebrow"></p><h1 id="wsTitle"></h1></div>
+    <div class="si-head"><p class="eyebrow" id="wsEyebrow"></p><h1 id="wsTitle" tabindex="-1"></h1></div>
     <p class="si-note" id="wsNote" role="status" hidden></p>
     <p id="wsWho" hidden></p>
     <p class="msg plain" id="wsSoon"></p>

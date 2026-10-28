@@ -315,6 +315,18 @@
       "about": "About",
       "faq": "Questions"
     },
+    "titles": {
+      "home": "Emergency help",
+      "numbers": "Emergency numbers",
+      "area": "Find area",
+      "send": "Send location",
+      "guide": "What happened?",
+      "about": "About",
+      "faq": "Questions",
+      "account": "Account"
+    },
+    "seeMore": "See more",
+    "notFound": "We could not find the area in this link. Type its name below to search.",
     "about": {
       "eyebrow": "About",
       "title": "What is SafeConnect?",

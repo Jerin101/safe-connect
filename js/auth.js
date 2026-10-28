@@ -18,7 +18,7 @@ const ERR = {
   'auth/network-request-failed': 'network', 'unavailable': 'network', 'auth/too-many-requests': 'tooMany',
 };
 
-let ctx = null;          // helpers from preview.js: $, el, store, fill, lang(), texts(), showView, goHome, openSos, locate
+let ctx = null;          // helpers from preview.js: $, el, store, fill, lang(), texts(), showView, goHome, openSos, locate, go
 let fbLoad = null;       // the import('./firebase.js') promise, started once
 let fb = null;           // the module, once loaded
 let user = null;         // the signed-in Firebase user (only in memory)
@@ -233,7 +233,8 @@ function toast(text) {
 /* ---------- start ---------- */
 export function initAuth(helpers) {
   ctx = helpers;
-  $('acctBtn').addEventListener('click', () => (signedIn() ? openAccount() : openSignin()));
+  // The account page has its own address (#/account, issue #71); the router then calls open() below.
+  $('acctBtn').addEventListener('click', () => ctx.go('account'));
   $('siBack').addEventListener('click', ctx.goHome);
   $('wsBack').addEventListener('click', ctx.goHome);
   $('siGoogle').addEventListener('click', () => run(() => fb.signInGoogle()));
@@ -255,6 +256,8 @@ export function initAuth(helpers) {
   // Signed in before: load Firebase in the background to know the account; help does not wait for it.
   if (signedIn()) loadFirebase().catch(() => {});
   return {
+    // Shows the sign-in view, or the workspace when this phone is already signed in.
+    async open() { if (signedIn()) await openAccount(); else openSignin(); },
     setText() {
       renderButton();
       if (fb) fb.setLang(ctx.lang());
