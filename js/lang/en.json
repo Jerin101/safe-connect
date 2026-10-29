@@ -454,8 +454,16 @@
     "signIn": "Sign in",
     "account": "Account",
     "accountLabel": "My account",
+    "close": "Close",
     "noLoginTitle": "In danger? No sign-in needed.",
     "noLoginText": "These buttons work right now, without an account.",
+    "addsTitle": "What an account adds",
+    "adds": [
+      "Your family's numbers on a new phone too",
+      "Follow the wrong-number reports you send",
+      "Apply to be a local volunteer"
+    ],
+    "addsSoon": "These extras are still being built. 999 and help work without signing in.",
     "eyebrow": "Account",
     "title1": "Sign in",
     "title2": "Choose how you want to sign in.",
@@ -492,8 +500,11 @@
     "create": "Create a new account",
     "forgot": "Forgot your password?",
     "wait": "Please wait…",
-    "offline": "Signing in needs the internet. \"Call 999\", \"Send my location to family\" and \"Find help near me\" work right now.",
+    "offline": "No internet, so signing in cannot work now. 999 and the numbers saved on this phone still work.",
     "resetSent": "If this email has an account, we have sent a link to set a new password. If it does not arrive, check your spam folder.",
+    "acctOut": "You are not signed in on this phone. Signing in is optional: 999, sending your location and area numbers work without it.",
+    "acctHint": "You signed in on this phone before. Tap the button to open your account. This needs the internet.",
+    "openAccount": "Open my account",
     "err": {
       "needEmail": "Please type your email first.",
       "needBoth": "Please type both your email and password.",
@@ -504,7 +515,12 @@
       "popup": "The Google window was closed. Please try again.",
       "network": "No internet connection. Please try again in a little while.",
       "tooMany": "Too many tries. Please wait a while and try again.",
-      "other": "Sign-in did not work. Please try again in a little while."
+      "other": "Sign-in did not work. Please try again in a little while.",
+      "popupBlocked": "The browser blocked the Google window. Please allow pop-ups for this site and try again.",
+      "otherWay": "This email already has an account with another way of signing in. Please sign in the way you used before.",
+      "disabled": "This account is turned off. 999 and help still work without signing in.",
+      "notAllowed": "This way of signing in is not turned on yet. Please try the other way, or try again later.",
+      "domain": "Sign-in does not work on this web address yet. It is not your fault. 999 and help work without signing in."
     },
     "mismatch": {
       "admin": "This account is not on the team list, so you are signed in as a general user.",
