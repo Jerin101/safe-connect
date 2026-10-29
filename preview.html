@@ -548,7 +548,7 @@
       <div class="wrap"><div class="roles">
         <div class="roles-top">
           <div class="roles-head"><p class="eyebrow" id="rolesEyebrow"></p><h2 id="rolesTitle"><span id="rolesT1"></span><span class="soft" id="rolesT2"></span></h2><p id="rolesText"></p></div>
-          <a class="btn violet" id="rolesSignin" href="#/account"></a>
+          <button class="btn violet" id="rolesSignin" type="button"></button>
         </div>
         <div class="roles-grid" id="rolesGrid"></div>
         <p class="roles-note" id="rolesNote"></p>
@@ -661,33 +661,57 @@
     </details>
   </div>
 
-  <!-- SIGN IN (P45): help first, then the three options. Built by js/auth.js. -->
-  <div class="wrap page" id="signin" hidden>
-    <div class="page-top"><button class="back" id="siBack" type="button"></button></div>
-    <section class="nologin" aria-labelledby="noLoginTitle">
-      <b id="noLoginTitle"></b><p id="noLoginText"></p>
-      <div class="nologin-btns" id="noLoginBtns"></div>
-    </section>
-    <div class="si-head"><p class="eyebrow" id="siEyebrow"></p><h1 id="siTitle" tabindex="-1"><span id="siT1"></span><span class="soft" id="siT2"></span></h1></div>
-    <div class="role-pick" id="rolePick" role="radiogroup"></div>
-    <form class="si-form" id="siForm" novalidate>
-      <h2 id="siFormTitle"></h2>
-      <p class="offline-note" id="siOffline" role="status" hidden></p>
-      <!-- The official Google "G" (docs/DESIGN.md §4): inline, never recoloured or stretched. -->
-      <button class="gbtn" id="siGoogle" type="button">
-        <svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        <span id="siGoogleText"></span>
-      </button>
-      <p class="or" id="siOr"></p>
-      <label class="field"><span id="siEmailL"></span><input id="siEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
-      <label class="field"><span id="siPassL"></span><input id="siPass" type="password" autocomplete="current-password"></label>
-      <p class="msg" id="siMsg" role="alert" hidden></p>
-      <button class="btn violet wide" id="siSubmit" type="submit"></button>
-      <div class="si-links"><button class="linkbtn" id="siCreate" type="button"></button><button class="linkbtn" id="siForgot" type="button"></button></div>
-      <p class="si-note" id="siNote"></p>
-      <div id="siExtra"></div>
-    </form>
+  <!-- ACCOUNT PAGE (#/account, issue #73): opening the address never loads Firebase; a tap on the button does. -->
+  <div class="wrap page" id="acct" hidden>
+    <div class="si-head"><p class="eyebrow" id="acctEyebrow"></p><h1 id="acctTitle" tabindex="-1"></h1></div>
+    <p id="acctText"></p>
+    <p class="offline-note" id="acctOffline" role="status" hidden></p>
+    <p class="msg" id="acctMsg" role="alert" hidden></p>
+    <div><button class="btn violet" id="acctGo" type="button"></button></div>
   </div>
+
+  <!-- SIGN IN (P45, issue #73): a modal over the current page. 999 comes first, then help without signing in, then the options. Built by js/auth.js. -->
+  <dialog class="simodal" id="signin" aria-labelledby="siTitle">
+    <div class="mbar">
+      <a class="hpill h999" id="si999" href="tel:999"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg><span id="si999Text"></span></a>
+      <button class="mclose" id="siClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6 10.6 12 5 6.4Z"/></svg></button>
+    </div>
+    <div class="mcard">
+      <div class="mleft">
+        <section class="nologin" aria-labelledby="noLoginTitle">
+          <b id="noLoginTitle"></b><p id="noLoginText"></p>
+          <div class="nologin-btns" id="noLoginBtns"></div>
+        </section>
+        <section class="adds" aria-labelledby="addsTitle">
+          <h2 id="addsTitle"></h2>
+          <ul id="addsList"></ul>
+          <small id="addsSoon"></small>
+        </section>
+      </div>
+      <div class="mright">
+        <div class="si-head"><p class="eyebrow" id="siEyebrow"></p><h1 id="siTitle" tabindex="-1"><span id="siT1"></span><span class="soft" id="siT2"></span></h1></div>
+        <div class="role-pick" id="rolePick" role="radiogroup"></div>
+        <form class="si-form" id="siForm" novalidate>
+          <h2 id="siFormTitle"></h2>
+          <p class="offline-note" id="siOffline" role="status" hidden></p>
+          <!-- The official Google "G" (docs/DESIGN.md §4): inline, never recoloured or stretched. -->
+          <button class="gbtn" id="siGoogle" type="button">
+            <svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            <span id="siGoogleText"></span>
+          </button>
+          <p class="msg" id="siGMsg" role="alert" hidden></p>
+          <p class="or" id="siOr"></p>
+          <label class="field"><span id="siEmailL"></span><input id="siEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+          <label class="field"><span id="siPassL"></span><input id="siPass" type="password" autocomplete="current-password"></label>
+          <p class="msg" id="siMsg" role="alert" hidden></p>
+          <button class="btn violet wide" id="siSubmit" type="submit"></button>
+          <div class="si-links"><button class="linkbtn" id="siCreate" type="button"></button><button class="linkbtn" id="siForgot" type="button"></button></div>
+          <p class="si-note" id="siNote"></p>
+          <div id="siExtra"></div>
+        </form>
+      </div>
+    </div>
+  </dialog>
 
   <!-- WORKSPACE: a simple placeholder for now; the real workspace comes with P35. -->
   <div class="wrap page" id="ws" hidden>
