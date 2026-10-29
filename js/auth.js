@@ -2,7 +2,10 @@
 // Sign-in is a modal over the current page (issue #73). Help never waits for an account.
 // Privacy: Firebase (js/firebase.js) is loaded with import() ONLY after a tap (opening the sign-in modal, or
 // "Open my account"), never on page load, a link, reload or Back. The phone keeps one flag, "sc-signed-in" = "1",
-// and no personal data. Sign-out never touches other keys ("sc-family" and "sc-last" stay on the phone).
+// and no personal data. Sign-out keeps "sc-family", "sc-places" and "sc-last" on the phone, unless the person
+// ticks "also remove from this phone" (issue #78). The workspace itself is js/workspace.js.
+import { initWorkspace, LOCAL_KEYS, SYNC, syncOn } from './workspace.js';
+
 const ROLES = ['user', 'volunteer', 'admin'];
 const FLAG = 'sc-signed-in';
 export const ICON = {
@@ -44,6 +47,7 @@ let busy = false;        // a sign-in is running in the modal
 let gateBusy = false;    // "Open my account" is loading
 let gateErr = null;      // error key shown on the account page
 let opener = null;       // the button that opened the modal; focus goes back to it
+let ws = null;           // the workspace (js/workspace.js)
 
 const A = () => ctx.texts().auth;
 const $ = (id) => ctx.$(id);
@@ -268,23 +272,11 @@ async function openAccount() {
   }
 }
 
-/* ---------- workspace placeholder (part 2 builds the real one) ---------- */
-function renderWorkspace() {
-  const a = A();
-  $('wsBack').textContent = ctx.texts().ui.back;
-  $('wsEyebrow').textContent = a.eyebrow;
-  $('wsTitle').textContent = a.roles[wsRole].name;
-  $('wsNote').textContent = mismatch ? a.mismatch[mismatch] : '';
-  $('wsNote').hidden = !mismatch;
-  const who = user ? (user.email || user.displayName || '') : '';
-  $('wsWho').textContent = who ? ctx.fill(a.wsSignedAs, { who }) : '';
-  $('wsWho').hidden = !who;
-  $('wsSoon').textContent = a.wsSoon;
-  $('wsOut').textContent = a.signOut;
-}
+/* ---------- workspace (P35, issue #78): js/workspace.js ---------- */
+// Admins and volunteers see the user workspace for now (their own tools come with later issues).
 function openWorkspace(role) {
   wsRole = role;
-  renderWorkspace();
+  ws.open({ user, fb, role, mismatch, who: user ? (user.displayName || user.email || '') : '', letter: user ? initial(user) : '' });
   ctx.showView('ws');
 }
 
@@ -293,18 +285,27 @@ function askSignOut() {
   const a = A();
   $('outTitle').textContent = a.outTitle;
   $('outText').textContent = a.outText;
+  $('outRemoveText').textContent = a.outRemove;
+  $('outRemove').checked = false;
+  $('outSync').textContent = a.outSync;
+  $('outSync').hidden = !syncOn(ctx.store);
   $('outYes').textContent = a.outYes;
   $('outNo').textContent = a.outNo;
   $('outDialog').returnValue = '';
   $('outDialog').showModal();
 }
-async function signOut() {
+// removeLocal: the person ticked "also remove from this phone". Otherwise their numbers and areas stay.
+// The copy in the account (if it was on) stays in the account; this phone stops updating it.
+async function signOut(removeLocal) {
   try { if (fb) await fb.signOutNow(); } catch {}
   user = null; wsRole = null; mismatch = null;
   clearFlag();
+  for (const key of removeLocal ? LOCAL_KEYS : [SYNC]) { try { localStorage.removeItem(key); } catch {} }
+  ws.close();
+  ctx.people.changed();
   renderButton();
   ctx.goHome();
-  toast(A().outDone);
+  toast(removeLocal ? A().outRemoved : A().outDone);
 }
 let toastTimer = 0;
 function toast(text) {
@@ -326,7 +327,7 @@ export function initAuth(helpers) {
   dlg().addEventListener('click', (e) => { if (e.target === dlg()) closeModal(); });
   // Moving to another page (Back, a link) closes the modal, so it never stays over the new page.
   window.addEventListener('hashchange', () => closeModal(false));
-  $('wsBack').addEventListener('click', ctx.goHome);
+  ws = initWorkspace({ ...ctx, askSignOut });
   $('siGoogle').addEventListener('click', () => run(() => fb.signInGoogle(), 'google'));
   $('siForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -337,8 +338,7 @@ export function initAuth(helpers) {
     const f = fields(false);
     if (f) run(async () => { await fb.resetPassword(f.email); say('resetSent', true); });
   });
-  $('wsOut').addEventListener('click', askSignOut);
-  $('outDialog').addEventListener('close', () => { if ($('outDialog').returnValue === 'yes') signOut(); });
+  $('outDialog').addEventListener('close', () => { if ($('outDialog').returnValue === 'yes') signOut($('outRemove').checked); });
   const onNet = () => {
     if (dlg().open) { if (navigator.onLine && !fb) loadFirebase().catch(() => {}).finally(renderOnline); renderOnline(); }
     if (!$('acct').hidden) renderGate();
@@ -359,7 +359,7 @@ export function initAuth(helpers) {
       renderButton();
       if (fb) fb.setLang(ctx.lang());
       if (dlg().open) renderSignin();
-      if (!$('ws').hidden) renderWorkspace();
+      if (!$('ws').hidden) ws.render();
       if (!$('acct').hidden) renderGate();
     },
   };

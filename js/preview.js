@@ -1040,7 +1040,13 @@ $('themeBtn').addEventListener('click', () => {
 
 setText();
 // Sign-in (P45, #73): the account button, the sign-in modal and #/account; help never waits for it.
-const auth = initAuth({ $, el, store, fill, lang: () => lang, texts: () => LANG[lang], showView, goHome, openSos, locate, go });
+// The workspace (P35, #78) uses the same family list as "Send location" ("sc-family") and the area names.
+const auth = initAuth({
+  $, el, store, fill, digits, lang: () => lang, texts: () => LANG[lang], showView, goHome, openSos, locate, go,
+  people: { get: getPeople, set: setPeople, norm: normPhone, changed: () => { renderHomeSos(); if (!$('sos').hidden) { renderPeople(); renderSend(); } } },
+  placeName: (p) => (data && data.docs[p.district] ? { title: placeTitle(p), sub: placeSub(p) } : null),
+  openArea: (p) => openArea(p, null),
+});
 // Pages: show the page in the address now; an area address waits for the data it needs.
 history.scrollRestoration = 'manual';
 window.addEventListener('hashchange', () => route());
