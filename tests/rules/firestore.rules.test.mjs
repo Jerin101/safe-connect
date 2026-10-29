@@ -403,6 +403,10 @@ describe('admin workspace: users and roles (issue #65)', () => {
     b2.update(doc(f2, 'users', KARIM), { role: 'volunteer', lastAuditId: a2.id });
     await assertFails(b2.commit());
   });
+  test('an admin cannot change the role of another admin (review of PR #93)', async () => {
+    await assertFails(roleBatch(ADMIN2, ADMIN, 'user', 'volunteer'));
+    await assertSucceeds(roleBatch(ADMIN2, KARIM, 'user', 'volunteer'));
+  });
   test('nobody can change their own role, not even an admin', async () => {
     await assertFails(roleBatch(ADMIN, ADMIN, 'user', 'volunteer'));
     await assertFails(roleBatch(RINA, RINA, 'user', 'volunteer'));

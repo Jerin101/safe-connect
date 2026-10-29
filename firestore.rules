@@ -61,6 +61,7 @@ service cloud.firestore {
         // that names the old and the new role. New admins are added only in the Firebase console.
         || (isAdmin()
           && uid != request.auth.uid
+          && !exists(/databases/$(database)/documents/admins/$(uid))
           && changed().hasOnly(['role', 'lastAuditId'])
           && incoming().role in ['user', 'volunteer']
           && incoming().role != resource.data.get('role', 'user')
