@@ -14,6 +14,8 @@ const MIN = 6;   // Firebase's shortest allowed password
 const params = new URLSearchParams(location.search);
 const MODE = params.get('mode');
 const CODE = params.get('oobCode') || '';
+// Keep the code in memory only: take it out of the address bar and the browser history.
+if (CODE) { const u = new URL(location.href); u.searchParams.delete('oobCode'); history.replaceState(null, '', u.pathname + u.search + u.hash); }
 // Other kinds of Firebase email links; SafeConnect does not use them yet, so they get a short calm message.
 const OTHER_MODES = ['verifyEmail', 'recoverEmail', 'verifyAndChangeEmail', 'revertSecondFactorAddition', 'signIn'];
 const okLang = (l) => (l === 'bn' || l === 'en' ? l : null);

@@ -68,8 +68,10 @@ self.addEventListener('fetch', (event) => {
 async function fromCache(event, req) {
   const cache = await caches.open(CACHE);
   const cached = await cache.match(req, { ignoreSearch: true });
+  // Save under the address without "?..." so a one-time code (e.g. reset.html?oobCode=...) is never stored.
+  const key = new URL(req.url); key.search = '';
   const fresh = fetch(req)
-    .then((res) => { if (res.ok) cache.put(req, res.clone()); return res; })
+    .then((res) => { if (res.ok) cache.put(key.href, res.clone()); return res; })
     .catch(() => null);
   if (cached) {
     event.waitUntil(fresh);   // update quietly in the background
