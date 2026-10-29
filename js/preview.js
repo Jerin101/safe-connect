@@ -238,7 +238,7 @@ function renderArea() {
 /* ---------- views ---------- */
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see preview.html).
 function showView(name) {
-  for (const view of ['home', 'area', 'sos', 'signin', 'ws']) $(view).hidden = name !== view;
+  for (const view of ['home', 'area', 'sos', 'acct', 'ws']) $(view).hidden = name !== view;
   const v = $(name);
   v.classList.remove('page-in'); void v.offsetWidth; v.classList.add('page-in');   // restart the fade
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -358,8 +358,9 @@ async function route() {
   }
   if (name === 'account') {
     $('main').dataset.page = 'account';
-    await auth.open();
-    finish(null, titleOf('account'), $('ws').hidden ? 'siTitle' : 'wsTitle', intent);
+    // Never loads Firebase by itself (issue #73): only a tap that brought the person here may.
+    auth.open(intent);
+    finish(null, titleOf('account'), $('ws').hidden ? 'acctTitle' : 'wsTitle', intent);
     return;
   }
   showPage(name);
@@ -978,7 +979,7 @@ $('themeBtn').addEventListener('click', () => {
 });
 
 setText();
-// Sign-in (P45): only the account button and its views; help never waits for it.
+// Sign-in (P45, #73): the account button, the sign-in modal and #/account; help never waits for it.
 const auth = initAuth({ $, el, store, fill, lang: () => lang, texts: () => LANG[lang], showView, goHome, openSos, locate, go });
 // Pages: show the page in the address now; an area address waits for the data it needs.
 history.scrollRestoration = 'manual';
