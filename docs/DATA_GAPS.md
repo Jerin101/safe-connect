@@ -148,3 +148,8 @@ A number on the official page was broken (a birth date or too short) and was rem
 - Noakhali: `2b99842cdf` (8-digit fire station number)
 - Cox's Bazar: `cd6d7fcf2e`, `72cc9edd7b` (Demusia, 8-digit numbers); `bfd0b1001f`, `20d696d805`, `5ccd2673f8`, `7e5ba78cb1`, `cb23e6b647`, `d1848782b5` (Dhalghata village police, birth dates as phones); `e177044a3d` (9 members in one cell)
 - After P11 (#27): also `5c580f87b4` (no name and no title on the page)
+
+## 11. Spot-check mismatches (P13, issue #80)
+`data/spot_check_40.csv` (made with `python tools/spot_check.py data --auto`, seed 20261028, 40 of 1,059 key contacts): the automatic hint found 39 of 40 numbers on their source page. A person still checks every row by hand (`human_ok`).
+
+- Noakhali › Begumganj › Amanullapur: `acd98005cc` (union secretary, 01823239591). The officers page changed after 2026-10-21 and no longer lists him or this number; it now lists a chairman (মোঃ বাহরুল আলম) that our data does not have yet. Check the page and its archive ("আর্কাইভ দেখুন") by hand; do not mark this record verified. A new chairman record may be added only through `data/manual_additions.json` with `source_url` and `source_quote_bn`.

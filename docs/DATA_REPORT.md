@@ -18,7 +18,7 @@ No number was typed from memory or taken from news sites.
 | `manual_additions.json` | Hand-entered official records (BCG Station Inani) + places (Inani beach) (P10, #26) | small |
 | `locations.json` | Offline "Find help near me" (P26): 18 upazila boundaries + 158 union and 4 town centre points (see "Map data" below) | 36 KB |
 | `verify_report.json` | Result of the last full source check (also re-run every Monday by the "Weekly source check" GitHub Action) | small |
-| `spot_check_40.csv` | 40 key contacts for a person to check by hand (P13, to do) | – |
+| `spot_check_40.csv` | 40 key contacts for a person to check by hand (P13): made by `tools/spot_check.py`; the hand check (`human_ok`) is still to do | small |
 | `docs/DATA_GAPS.md` | Everything missing, ready to become GitHub issues | – |
 | `docs/COVERAGE.md` | Every upazila, union and municipality: what's covered and which fallback is used | – |
 | `BUILD_PLAN.md` · `FEATURES.md` | Technology, workflow, scenarios · feature list | – |

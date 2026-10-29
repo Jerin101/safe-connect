@@ -13,6 +13,7 @@ Python 3, standard library only. Run them from this `tools` folder. They wait be
 | `build_contacts.py` | Cleans everything into `data/contacts_<district>.json` (runs `clean_contacts.py` at the end) | seconds |
 | `clean_contacts.py` | Fixes names in the wrong cell, glued ID numbers, dates or broken numbers in phones, bad emails; removes UDC entrepreneurs (private people). Can re-clean a built file: `python clean_contacts.py ../data/contacts_noakhali.json` | seconds |
 | `validate_data.py` | Checks every data file; must report 0 errors | seconds |
+| `spot_check.py` | Picks 40 random key contacts (fixed seed) into `data/spot_check_40.csv` for a person to check by hand; `--auto` adds a hint from the source page | ~1 min |
 | `verify_sources.py` | Re-downloads every source page and confirms each number is still there | ~25 min |
 | `coverage_report.py` | Shows what's covered for every upazila, union and town | seconds |
 | `collect_locations.py`, `fill_locations.py`, `build_locations.py` | Map points and upazila boundaries for GPS → area (BBS boundaries via OCHA HDX, OpenStreetMap) | ~15 min |
