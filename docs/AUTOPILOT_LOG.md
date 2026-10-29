@@ -10,10 +10,10 @@
 - [ ] P13 (#80): open each link in `data/spot_check_40.csv`, fill `human_ok` (yes/no), `checked_by`, `checked_on`; only then mark the "yes" rows `verified` (through the tools). Row `acd98005cc` is already known not to match (DATA_GAPS §11).
 - [ ] Try a real Google and email sign-in with a **test account** on the live site after #73 (the error texts were only tested with a stub).
 - [ ] On a real Android phone (#75): does Messenger open with the map link, and does WhatsApp open with the message? If Messenger does not work, the button should only open the share menu.
-- [ ] Leftover test processes from the #78 rules run (only in the scratchpad, emulator on port 8093): you can close them in Task Manager or with `Stop-Process -Id 9088,16652,25916,22568,17088` in PowerShell (check the IDs first with `Get-Process -Id 9088,16652,25916,22568,17088`).
+- [ ] Leftover Firestore emulators (no parent program left): port 8093, java PID 17088 (and its helper processes 9088, 16652, 25916, 22568) from the #78 rules run; port 8080, java PID 20600, started 2026-10-29 09:13, which may be from the autopilot's first rules run or your own. Close them in Task Manager, or check with `Get-Process -Id 17088,20600` and stop with `Stop-Process -Id 17088,20600`.
 - [ ] Workspace (#78) with a real **test account** (Tasmin): sync on/off, then delete the test data in Firestore.
 
-**Where to continue:** step 14, PR for #80 (branch `data/80-spot-check`): data-checker OK + tester GO, merge (the hand check stays open for Jerin, so #80 stays open). Then close #49 with a note (number already live), then the final release check by the tester.
+**Where to continue:** the autopilot is **finished and stopped** (2026-10-29, on Jerin's change of plan). Nothing is in progress. Next work: the new nationwide plan (union volunteer network, M4) that Jerin adds to `docs/`.
 
 **How each PR is checked (tools kept outside the repo, in the session scratchpad):** Playwright (`npm i --no-save playwright-core@1.48.2`, uses the installed Chrome) runs every page at 360/1280 px, day/night, bn/en: sideways scroll, 999 visible and first, console errors; it also runs `tests/search-test.html`. Rules tests run from PowerShell (`npm run test:rules`); if port 8080 is taken by another emulator, run them in a copy with port 8085.
 
@@ -32,11 +32,54 @@
 | 11 | P18 wrong-number reports | #79 | feature/79-reports | #92 | done: merged, live `v13-2026-10-29`, offline area OK |
 | 12 | P44 admin workspace | #65 | feature/65-admin-workspace | #93 | done: merged, **rules + indexes deployed** (b53b65e), live `v14-2026-10-29`, offline `#/account` OK |
 | 13 | Action versions | #52 | fix/52-action-versions | #94 | done: merged; CI on ubuntu-24.04 with no Node 20 warning |
-| 14 | P13 spot-check of 40 contacts | #80 | data/80-spot-check | (this PR) | in review; the hand check is for Jerin |
-| 15 | Inani Coast Guard number | #49 | - | - | research done (see below) |
-| 16 | P38 / P39 volunteers (only if all above merged) | #81 / #82 | - | - | waiting |
+| 14 | P13 spot-check of 40 contacts | #80 | data/80-spot-check | #95 | done: merged; sheet + tool ready. **#80 stays open** for the hand check |
+| 15 | Inani Coast Guard number | #49 | - | - | done: closed with a note; the official number was already in the data and is live |
+| 16 | P38 / P39 volunteers | #81 / #82 | - | - | not started: closed as "Replaced by the union volunteer network (nationwide plan M4)" |
 
 Reminder: volunteer and report tests use a test account and a fake code, and the test data is deleted afterwards.
+
+## Final report (2026-10-29)
+
+**Merged PRs (13), all with tester GO:** #83 secret scan (#77) · #84 base.css + v3 colours (#69) · #85 header (#70) · #86 routes (#71) · #87 home layout (#72) · #88 sign-in modal (#73) · #89 reset page (#74) · #90 share buttons (#75) · #91 user workspace (#78) · #92 wrong-number reports (#79) · #93 admin workspace + rules (#65) · #94 action versions (#52) · #95 spot-check sheet (#80, issue stays open).
+**Closed without a PR:** #49 (number already in the data and live), #81 and #82 (replaced by the union volunteer network).
+
+**What is live:** https://jerin101.github.io/safe-connect/preview.html, service worker `v14-2026-10-29` (identical to main 486f9d5). Firestore rules + 3 audit indexes deployed from main b53b65e.
+
+**Final release check (tester, live site): GO.**
+- Pages: 88/88. 11 pages × 360/1280 px × day/night × bn/en: 999 first and visible, no sideways scroll, no console errors.
+- Offline: home, numbers, an area, send, FAQ, account and reset.html all open from the cache with 999.
+- Privacy: no Firebase request before a tap.
+- Search tests: 26/0.
+- Scenarios: A (Chowmuhani) and B (Inani: Coast Guard 01769442310 shown) work.
+
+**Bugs the reviews caught before merge:**
+- #83: the allowlist didn't match.
+- #89: the reset code was stored in the cache.
+- #91: another person's numbers could be uploaded.
+- #93: an admin could change another admin's role.
+
+All were fixed with a test that fails on the old code.
+
+**Skipped, and why:**
+- P38/P39: Jerin's change of plan.
+- The P13 hand check: only a person may mark records verified.
+- The QR picture (#72): a home-made code could not be test-scanned.
+- National hotlines can't be reported, and there is no "which number" field (#79): the existing rules don't allow them.
+- The "signal ring" (#73).
+- Real-account, real-phone and Android tests: see NEEDS JERIN.
+
+**Can wait (good next issues):**
+- Scenario A: the police station OC is not in "Call these first" (outpost first). This is a product decision.
+- The outpost card label says "Police station".
+- English mode shows Bangla official names; the data has no English names.
+- Turning sync on replaces the account copy; ask which copy to keep.
+- Store the uid with the sync flag.
+- Report-status audit meta is not checked against the real status.
+- A lone audit entry is possible if a dangling `lastAuditId` exists (console only).
+- Filter messages: "not in our list" when the district filter hides a place.
+- Some `aria-label`s are still English in the HTML.
+- Update the "Done when" counts in the issues (rules are now 69).
+- A small issue for the later move to Ubuntu 26.
 
 ## Research (source-researcher, 2026-10-28)
 - **#49:** the official number is already in `data/manual_additions.json` (`manual-bcg-inani`, 01769442310, source: jaliapalongup.coxsbazar.gov.bd, page updated 2026-08-08, re-checked live 2026-10-28). To check: does the site load it as a Cox's Bazar `coast_river` contact?
