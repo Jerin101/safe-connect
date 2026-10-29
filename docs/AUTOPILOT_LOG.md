@@ -1,16 +1,16 @@
 # Autopilot log
 
 ## NEEDS JERIN (only you can do these)
-- [ ] Firebase console (for #74): Authentication → Templates → Password reset → edit → "Customize action URL" → `https://jerin101.github.io/safe-connect/reset.html`; sender name "SafeConnect", Bangla subject and text; check `jerin101.github.io` is in Authentication → Settings → Authorized domains. Then test one real reset with a **test account** on the live site (localhost is refused by the API key restrictions).
-- [ ] Admins, part F (Firebase console, by hand).
+- [ ] Firebase console (for #74): Authentication → Templates → Password reset → edit → "Customize action URL" → `https://jerin101.github.io/safe-connect/reset.html`; sender name "SafeConnect", Bangla subject and text; check `jerin101.github.io` is in Authentication → Settings → Authorized domains. Then test one real reset with a **test account** on the live site (localhost is refused by the API key restrictions), and delete that test account afterwards.
+- [ ] Add the first admins: `docs/FIREBASE_SETUP.md` part F. Sign in on the site once, copy your User UID from Authentication → Users, then in Firestore create `admins/<your UID>` with `since` (timestamp) and `addedBy` = `console`. Do the same for Tasmin. Only the console can add admins; the site never can.
 - [ ] Remove `localhost` from Firebase Auth authorized domains before v1.0.
 - [ ] Google Cloud console: add website restrictions to the Firebase API key.
 - [ ] GitHub settings: turn on Secret scanning and Push protection (for #77).
-- [ ] Test on your real phone (airplane mode, 360 px, Bangla and English, night and day).
+- [ ] Test on your real phone: install it to the home screen, then open it from the icon in airplane mode and check the offline list; also 360 px, Bangla and English, night and day, a slow connection and large text. Open the dialer for 999 but cancel; never call.
 - [ ] P13 (#80): open each link in `data/spot_check_40.csv`, fill `human_ok` (yes/no), `checked_by`, `checked_on`; only then mark the "yes" rows `verified` (through the tools). Row `acd98005cc` is already known not to match (DATA_GAPS §11).
-- [ ] Try a real Google and email sign-in with a **test account** on the live site after #73 (the error texts were only tested with a stub).
+- [ ] Try a real Google and email sign-in with a **test account** on the live site (the error texts were only tested with a stub); also send one test "wrong number" report. Afterwards delete the test account and its `users`, `family` and `reports` documents in the console (audit entries can only be deleted there too).
 - [ ] On a real Android phone (#75): does Messenger open with the map link, and does WhatsApp open with the message? If Messenger does not work, the button should only open the share menu.
-- [ ] Leftover Firestore emulators (no parent program left): port 8093, java PID 17088 (and its helper processes 9088, 16652, 25916, 22568) from the #78 rules run; port 8080, java PID 20600, started 2026-10-29 09:13, which may be from the autopilot's first rules run or your own. Close them in Task Manager, or check with `Get-Process -Id 17088,20600` and stop with `Stop-Process -Id 17088,20600`.
+- [ ] Leftover Firestore emulators (no parent program left): port 8093, java PID 17088 (and its helper processes 9088, 16652, 25916, 22568) from the #78 rules run; port 8080, java PID 20600, started 2026-10-29 09:13, which may be from the autopilot's first rules run or your own. Close them in Task Manager, or check with `Get-Process -Id 17088,20600,9088,16652,25916,22568` and stop them with `Stop-Process -Id 17088,20600,9088,16652,25916,22568` (an ID that is already gone just shows an error, which is fine).
 - [ ] Workspace (#78) with a real **test account** (Tasmin): sync on/off, then delete the test data in Firestore.
 
 **Where to continue:** the autopilot is **finished and stopped** (2026-10-29, on Jerin's change of plan). Nothing is in progress. Next work: the new nationwide plan (union volunteer network, M4) that Jerin adds to `docs/`.
