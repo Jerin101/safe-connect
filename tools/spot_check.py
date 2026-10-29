@@ -1,6 +1,6 @@
 """Human spot-check sheet (P13, issue #80): 40 random key contacts for a person to check by hand.
 
-Usage: python spot_check.py <data folder> [--seed N] [--auto]
+Usage: python spot_check.py <data folder> [--seed N] [--auto] [--force]
 Writes <data folder>/spot_check_40.csv (UTF-8 with BOM, so Excel shows Bangla).
   --auto  also opens each source page once (1.2 s between requests, certificate checks on) and fills
           auto_result / auto_quote. That is only a hint: a person still opens every link, compares the
@@ -44,6 +44,13 @@ def auto_check(phones, text):
     return ("found" if all(hits) else "partly found" if any(hits) else "not found"), quote
 
 
+out = os.path.join(DATA, "spot_check_40.csv")
+# Never erase a person's work: once any human_ok is filled in, only --force may write the sheet again.
+if os.path.exists(out) and "--force" not in sys.argv:
+    with open(out, encoding="utf-8-sig", newline="") as f:
+        if any((row.get("human_ok") or "").strip() for row in csv.DictReader(f)):
+            sys.exit(f"{out} already has hand-check answers (human_ok). Not overwritten; use --force to replace it.")
+
 pool = sorted(((f, r) for f in FILES for r in load(f)
                if r.get("key_contact") and r.get("phones") and r.get("source_url")), key=lambda x: x[1]["id"])
 sample = random.Random(SEED).sample(pool, 40)
@@ -68,7 +75,6 @@ for f, r in sample:
             row["auto_result"], row["auto_quote"] = auto_check(r["phones"], page_text(body))
     rows.append(row)
 
-out = os.path.join(DATA, "spot_check_40.csv")
 with open(out, "w", encoding="utf-8-sig", newline="") as f:
     w = csv.DictWriter(f, fieldnames=COLUMNS)
     w.writeheader()
