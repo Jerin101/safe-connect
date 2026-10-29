@@ -533,6 +533,34 @@
     "outText": "Your family's numbers saved on this phone stay here. \"Call 999\", \"Send my location to family\" and \"Find help near me\" keep working after you sign out.",
     "outYes": "Sign out",
     "outNo": "Cancel",
-    "outDone": "Signed out. \"Call 999\", \"Send my location to family\" and \"Find help near me\" still work as before."
+    "outDone": "Signed out. \"Call 999\", \"Send my location to family\" and \"Find help near me\" still work as before.",
+    "reset": {
+      "pageTitle": "New password",
+      "title": "Set a new password",
+      "checking": "Checking the link…",
+      "forEmail": "Account: {email}",
+      "newPass": "New password",
+      "again": "Type the new password again",
+      "hint": "At least 6 characters.",
+      "show": "Show password",
+      "hide": "Hide password",
+      "save": "Save new password",
+      "doneTitle": "Your password has been changed",
+      "doneText": "You can now sign in with your new password.",
+      "goSignIn": "Sign in",
+      "badTitle": "This link is not working",
+      "otherMode": "SafeConnect does not use this kind of link yet. You do not need to do anything here.",
+      "newLink": "Ask for a new link",
+      "newLinkHow": "To get a new link: open sign-in, type your email and tap \"Forgot your password?\".",
+      "home": "Go to SafeConnect",
+      "retry": "Try again",
+      "offline": "No internet. Changing a password needs the internet, so please open this page again when you are online. 999 works without internet.",
+      "err": {
+        "expired": "This link is too old or was already used. Please ask for a new one.",
+        "invalid": "This link is not complete or not valid. Please ask for a new one.",
+        "mismatch": "The two passwords are not the same. Please type them again.",
+        "other": "The password could not be changed. Please try again in a little while."
+      }
+    }
   }
 }

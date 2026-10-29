@@ -159,7 +159,7 @@ main > .wrap.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2
 .gbtn .g-logo { width: 18px; height: 18px; flex: none; }
 .gbtn:disabled { opacity: 0.55; cursor: not-allowed; }
 .gbtn:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
-#signin .btn, #acct .btn, #ws .btn, .confirm .btn { min-height: 44px; }
+#signin .btn, #acct .btn, #ws .btn, .confirm .btn, .reset-page .btn { min-height: 44px; }
 .btn.red { background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: var(--on-color); border-color: transparent; }
 .btn.wide { width: 100%; justify-content: center; }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -230,6 +230,17 @@ body.modal-open { overflow: hidden; }
 .confirm-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .toast { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 7; margin: 0 auto; max-width: 480px; background: var(--surface); color: var(--ink); border: 1px solid var(--line);
   border-left: 4px solid var(--ok); border-radius: 12px; padding: 12px 16px; box-shadow: var(--shadow); font-weight: 600; }
+
+/* ---------- password reset page (reset.html, issue #74): one narrow column ---------- */
+a.logo { text-decoration: none; }
+.top-actions.end { margin-left: auto; }   /* no area chip on this page: the buttons go to the right */
+main > .wrap.page.reset-page { max-width: 560px; gap: 16px; }
+.reset-page .si-form { gap: 12px; }
+.reset-page .linkbtn { justify-self: start; }
+.rs-who { color: var(--ink-2); font-weight: 600; overflow-wrap: anywhere; }
+.rs-links { display: flex; flex-wrap: wrap; gap: 8px; }
+/* The heading gets focus only so screen readers read the new state; it is not a control, so no focus ring. */
+.reset-page h1[tabindex="-1"]:focus { outline: none; }
 
 /* ---------- main button and form fields (SOS contacts, saved places) ---------- */
 .btn-primary { justify-self: start; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 10px; padding: 10px 18px; font-weight: 700; cursor: pointer; text-decoration: none;

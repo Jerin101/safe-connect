@@ -1,7 +1,7 @@
 // SafeConnect offline app (P34). After one visit with internet, the site opens with no internet.
 // Change VERSION whenever a file in FILES changes in a way that must reach every phone at once
 // (new data, a new page or script): the old cache is then deleted and everything is saved again.
-const VERSION = 'v9-2026-10-29';
+const VERSION = 'v10-2026-10-29';
 const CACHE = `safeconnect-${VERSION}`;
 
 // Every page, script, data file, font and icon the site needs (paths relative to this file).
@@ -9,12 +9,14 @@ const FILES = [
   './',
   'index.html',
   'preview.html',
+  'reset.html',
   'css/base.css',
   'manifest.json',
   'js/preview.js',
   'js/data.js',
   'js/location.js',
   'js/auth.js',
+  'js/reset.js',
   'js/firebase.js',
   'js/firebase-config.js',
   'js/lang/bn.json',
@@ -66,8 +68,10 @@ self.addEventListener('fetch', (event) => {
 async function fromCache(event, req) {
   const cache = await caches.open(CACHE);
   const cached = await cache.match(req, { ignoreSearch: true });
+  // Save under the address without "?..." so a one-time code (e.g. reset.html?oobCode=...) is never stored.
+  const key = new URL(req.url); key.search = '';
   const fresh = fetch(req)
-    .then((res) => { if (res.ok) cache.put(req, res.clone()); return res; })
+    .then((res) => { if (res.ok) cache.put(key.href, res.clone()); return res; })
     .catch(() => null);
   if (cached) {
     event.waitUntil(fresh);   // update quietly in the background

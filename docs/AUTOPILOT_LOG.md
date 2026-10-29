@@ -1,7 +1,7 @@
 # Autopilot log
 
 ## NEEDS JERIN (only you can do these)
-- [ ] Firebase console: set the password-reset email template and the action URL (for #74).
+- [ ] Firebase console (for #74): Authentication → Templates → Password reset → edit → "Customize action URL" → `https://jerin101.github.io/safe-connect/reset.html`; sender name "SafeConnect", Bangla subject and text; check `jerin101.github.io` is in Authentication → Settings → Authorized domains. Then test one real reset with a **test account** on the live site (localhost is refused by the API key restrictions).
 - [ ] Admins, part F (Firebase console, by hand).
 - [ ] Remove `localhost` from Firebase Auth authorized domains before v1.0.
 - [ ] Google Cloud console: add website restrictions to the Firebase API key.
@@ -10,7 +10,7 @@
 - [ ] P13 (#80): open the 40 sample links by hand before setting `status: verified` (sample below).
 - [ ] Try a real Google and email sign-in with a **test account** on the live site after #73 (the error texts were only tested with a stub).
 
-**Where to continue:** step 7, PR for #73 (branch `feature/73-signin-modal`): wait for checks, tester GO and bangla-reviewer OK, merge, check the live VERSION is `v9-2026-10-29`. Then step 8, #74 (password-reset page, code only).
+**Where to continue:** step 8, PR for #74 (branch `feature/74-reset-page`): wait for checks, tester GO and bangla-reviewer OK, merge, check the live VERSION is `v10-2026-10-29`. Then step 9, #75 (share buttons).
 
 **How each PR is checked (tools kept outside the repo, in the session scratchpad):** Playwright (`npm i --no-save playwright-core@1.48.2`, uses the installed Chrome) runs every page at 360/1280 px, day/night, bn/en: sideways scroll, 999 visible and first, console errors; it also runs `tests/search-test.html`. Rules tests run from PowerShell (`npm run test:rules`); if port 8080 is taken by another emulator, run them in a copy with port 8085.
 
@@ -22,8 +22,8 @@
 | 4 | New header | #70 | feature/70-new-header | #85 | done: merged, live `v6-2026-10-28`, offline reload OK |
 | 5 | Real pages with routes | #71 | feature/71-routes | #86 | done: merged, live `v7-2026-10-28`, offline `#/faq` OK |
 | 6 | New home layout (+ "তিন ভূমিকা, এক লক্ষ্য") | #72 | feature/72-home-layout | #87 | done: merged, live `v8-2026-10-28`, offline reload OK |
-| 7 | Sign-in modal + Google error messages | #73 | feature/73-signin-modal | (this PR) | in review |
-| 8 | Password-reset page (code only) | #74 | - | - | to do |
+| 7 | Sign-in modal + Google error messages | #73 | feature/73-signin-modal | #88 | done: merged, live `v9-2026-10-29`, offline `#/account` OK |
+| 8 | Password-reset page (code only) | #74 | feature/74-reset-page | (this PR) | in review |
 | 9 | Share buttons | #75 | - | - | to do |
 | 10 | P35 user workspace | #78 | - | - | to do |
 | 11 | P18 wrong-number reports | #79 | - | - | to do |
@@ -48,4 +48,5 @@ Reminder: volunteer and report tests use a test account and a fake code, and the
 - **#71 → PR #86 (merged):** hash routes (`#/`, `#/numbers`, `#/area`, `#/send`, `#/guide`, `#/about`, `#/faq`, `#/account`, `#/area/<district>/<upazila>/<union|town>[/<place>]`). Agents: developer, bangla-reviewer (OK; 2 small fixes applied: "Find area" title, arrow hidden from screen readers), tester GO (location asked only after a tap; Back/reload/links never ask). Route flow test 42/42, page check all OK, rules 35/35, search 26/0, validator 0. Can wait: the "outside" result can't be reopened by Back; an English town address shows the Bangla town name (data has no English names); check on main that the Chowmuhani police outpost shows in the first calls.
 - **#72 → PR #87 (merged):** v3 home: banner with the 3 actions (all fit on 360x640, 320x568), number-tile row, card rows, desktop sidebar (short web address instead of a QR picture: a home-made QR could not be test-scanned; district filter), "তিন ভূমিকা, এক লক্ষ্য" section (volunteers marked "soon"). Night 999 contrast fixed: white on reds now ≥ 4.61 in both themes (new `--red-ink` for red text). Agents: developer, bangla-reviewer (5 text fixes applied: no "fast help" promise, honest offline line, real button names), tester GO. Rules 35/35. Page check all OK, routes 0 FAIL, search 26/0, validator 0. Not done: QR picture; service-type filter; v3 card badges with hand-typed numbers (numbers must come from data).
   Can wait (from tester): with the district filter on, searching a place in the other district says "not in our list" (should say "in another district, show all?"); "Change area" clears the sidebar filter; `aria-label="District"`/`"Prepare"` are English in the HTML. To re-check after P35/P18: `auth.roles.user.desc` promises numbers on a new phone and report tracking.
-- **#73:** sign-in is a two-panel `<dialog>` over the current page (999 link first inside it, Escape/× close, focus returns). Firebase loads **only after a tap** (never on load, link, reload or Back to `#/account`); slow-network race fixed; Google/Firebase error codes mapped to calm bn/en texts; offline text without trying. Agents: developer. Tests with a stubbed Firebase (no real account): p73 ALL OK (no Firebase request before a tap), routes73 ALL OK (replaces routes71: the account button now opens the modal instead of changing the address), page check OK, search 26/0, validator 0. Not done: "signal ring" on the sign-in page; a real Google sign-in with a test account on the live site (NEEDS JERIN).
+- **#73 → PR #88 (merged):** sign-in is a two-panel `<dialog>` over the current page (999 link first inside it, Escape/× close, focus returns). Firebase loads **only after a tap** (never on load, link, reload or Back to `#/account`); slow-network race fixed; Google/Firebase error codes mapped to calm bn/en texts; offline text without trying. Agents: developer, bangla-reviewer (8 text fixes applied), tester GO. Rules 35/35. After review: `auth/internal-error` named, stale comment in firebase.js fixed. Tests with a stubbed Firebase (no real account): p73 ALL OK (no Firebase request before a tap), routes73 ALL OK (replaces routes71: the account button now opens the modal instead of changing the address), page check OK, search 26/0, validator 0. Not done: "signal ring" on the sign-in page; a real Google sign-in with a test account on the live site (NEEDS JERIN).
+- **#74:** new `reset.html` + `js/reset.js` (action-URL page for reset emails): 999 in the HTML (shows before scripts and offline), Firebase loaded with `import()` only for `mode=resetPassword` with a code and online; masked email, new password twice with show/hide, calm errors (expired/invalid/weak/mismatch/network/too many), offline text, `continueUrl` only for this site, the code and email never logged. Both files cached, VERSION v10. Agents: developer. Stub tests: p74 ALL OK (55 checks incl. airplane mode from cache), check74 ALL OK (24 runs), p73/routes73 OK, search 26/0, validator 0.

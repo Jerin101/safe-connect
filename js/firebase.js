@@ -1,10 +1,11 @@
 // SafeConnect accounts (P45): Firebase App, Auth and Firestore, one pinned version from gstatic.
-// Load this file only with import(), and only after a tap (opening sign-in or "Open my account"):
+// Load this file only with import(), and only after a tap (opening sign-in or "Open my account") or on reset.html,
+// which the person opened from their password-reset email (and only after that page shows 999):
 // help (999, send location, area numbers) must never wait for it and works with no internet.
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {
   getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, sendPasswordResetEmail, signOut,
+  createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
@@ -23,7 +24,13 @@ export const currentUser = async () => { await auth.authStateReady(); return aut
 export const signInGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
 export const signInEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
 export const createAccount = (email, password) => createUserWithEmailAndPassword(auth, email, password);
+// The link in the reset email opens the "action URL" set in the Firebase console, not an address in this code.
+// TODO (NEEDS JERIN, issue #74): Firebase console -> Authentication -> Templates -> Password reset -> "Customize action URL"
+// -> https://jerin101.github.io/safe-connect/reset.html . Until then the email opens Firebase's own default page.
 export const resetPassword = (email) => sendPasswordResetEmail(auth, email);
+// reset.html (issue #74): check the code from the email link (gives the account's email), then save the new password.
+export const verifyResetCode = (code) => verifyPasswordResetCode(auth, code);
+export const confirmReset = (code, password) => confirmPasswordReset(auth, code, password);
 export const signOutNow = () => signOut(auth);
 
 // First sign-in: create users/{uid} with exactly the fields firestore.rules allow.
