@@ -193,9 +193,9 @@
     "smsShort": "SMS",
     "messenger": "Messenger",
     "needNet": "needs internet",
-    "waFailed": "WhatsApp did not open. Copy the message and send it yourself, or send an SMS.",
-    "msgrFailed": "Messenger did not open. Copy the message and send it yourself, or send an SMS.",
-    "msgrHint": "Messenger sends only the map link. You choose the person in Messenger.",
+    "waFailed": "WhatsApp did not open. Send an SMS, or copy the message and paste it in another app.",
+    "msgrFailed": "Messenger did not open. Send an SMS, or copy the message and paste it in another app.",
+    "msgrHint": "Messenger sends only the map link, not your message. Choose the person in Messenger.",
     "copiedPaste": "Message copied. Paste it in any app and send it.",
     "copyFailed": "Could not copy. Press and hold the text in the message box and copy it yourself."
   },
