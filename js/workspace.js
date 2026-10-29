@@ -5,7 +5,10 @@
 // to family/{uid}/people (fields allowed by firestore.rules: name, relation, phone). Turning it off deletes that copy.
 // "My reports" and the admin list "Check reports" (P18, issue #79) read reports with the only queries the rules allow:
 // a user lists only their own (uid == their uid); "check" is shown only to admins, and the rules check admins/{uid} again.
+// Admins also get "Users and roles" and "Audit log" (P44, issue #65, js/admin.js).
 import { STATUSES, REPORT_DISTRICTS, auditFields } from './reports.js';
+// Admin parts (P44, issue #65): dashboard cards, users and roles, audit log. Only for admins (the rules check again).
+import { initAdmin, openAdmin, adminOnline, clearAdminMsg, resetAdmin, dashCards, usersSection, auditSection, ADMIN_ICON } from './admin.js';
 
 const WORK = ['dash', 'family', 'places', 'reports'];
 export const SYNC = 'sc-family-sync';     // "1" while the copy in the account is on (this phone only; cleared at sign-out)
@@ -24,6 +27,8 @@ const ICON = {
   phone: 'M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z',
   send: 'M2 21 23 12 2 3v7l15 2-15 2v7Z',
   check: 'M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1 14-4-4 1.4-1.4L11 13.2l4.6-4.6L17 10l-6 6Z',
+  users: ADMIN_ICON.users,
+  audit: ADMIN_ICON.audit,
 };
 
 let ctx = null;        // helpers from auth.js / preview.js
@@ -48,7 +53,8 @@ const $ = (id) => ctx.$(id);
 const online = () => navigator.onLine;
 const visible = () => acct && !$('ws').hidden;
 export const syncOn = (store) => store.get(SYNC) === '1';
-const sections = () => (acct && acct.role === 'admin' ? [...WORK, 'check', 'settings'] : [...WORK, 'settings']);
+const isAdmin = () => acct && acct.role === 'admin';
+const sections = () => (isAdmin() ? [...WORK, 'check', 'users', 'audit', 'settings'] : [...WORK, 'settings']);
 
 function icon(d) {
   const n = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -441,7 +447,8 @@ const SECTION = {
       stat('family', ctx.digits(people.length), syncOn(ctx.store) ? w.onPhoneSync : w.onPhone),
       stat('places', ctx.digits(places.length), w.onPhone),
       stat('reports', mine ? ctx.digits(mine.length) : '—', reportsSub()));
-    return [strip, stats, card(w.nav.family, personRows(false), button(w.seeAll, 'btn sm', () => show('family', true)))];
+    const admin = isAdmin() ? [dashCards(ICON.reports)] : [];
+    return [strip, ...admin, stats, card(w.nav.family, personRows(false), button(w.seeAll, 'btn sm', () => show('family', true)))];
   },
   family() {
     const w = W();
@@ -450,6 +457,8 @@ const SECTION = {
   places() { return [card(W().nav.places, placeRows()), ...placeActions()]; },
   reports() { return [card(W().nav.reports, mineRows(), reloadBtn('wsMineReload', loadMine, mineBusy))]; },
   check() { return [filters(), card(W().checkTitle, checkRows(), reloadBtn('wsAllReload', loadAll, allBusy))]; },
+  users() { return usersSection(); },
+  audit() { return auditSection(); },
   settings() {
     const w = W(), dark = isDark();
     const lang = button(w.langBtn, 'btn sm', () => { ctx.$('langBtn').click(); $('wsLangBtn')?.focus(); }, 'wsLangBtn');
@@ -476,7 +485,7 @@ function render() {
 // A section from the sidebar or the section bar: its heading gets the focus (screen readers read it).
 function show(key, focus = false) {
   section = sections().includes(key) ? key : 'dash';
-  formErr = null; placeMsg = null; rowMsg = null;
+  formErr = null; placeMsg = null; rowMsg = null; clearAdminMsg();
   render();
   if (focus) { $('wsTitle').focus({ preventScroll: true }); window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }
 }
@@ -484,10 +493,11 @@ function show(key, focus = false) {
 export function initWorkspace(helpers) {
   ctx = helpers;
   $('wsOut').addEventListener('click', ctx.askSignOut);
+  initAdmin({ ctx, acct: () => acct, render, visible, card, button, icon, select, note, stateNotes, reloadBtn, show, reports: () => all });
   const onNet = () => {
     if (!visible()) return;
     render();
-    if (online()) { checkCloud(); if (!mine) loadMine(); if (acct.role === 'admin' && !all) loadAll(); }
+    if (online()) { checkCloud(); if (!mine) loadMine(); if (isAdmin()) { if (!all) loadAll(); adminOnline(); } }
   };
   window.addEventListener('online', onNet);
   window.addEventListener('offline', onNet);
@@ -500,7 +510,7 @@ export function initWorkspace(helpers) {
       if (want) { section = want; want = null; }
       if (!sections().includes(section)) section = 'dash';
       render();
-      if (first) { checkCloud(); loadMine(); if (acct.role === 'admin') loadAll(); } else if (!mine) loadMine();
+      if (first) { resetAdmin(); checkCloud(); loadMine(); if (isAdmin()) { loadAll(); openAdmin(); } } else if (!mine) loadMine();
     },
     // Open this section the next time the workspace opens (e.g. "My reports" after sending a report).
     want(key) { want = key; },
@@ -508,6 +518,6 @@ export function initWorkspace(helpers) {
     reportsChanged() { mine = null; if (visible()) loadMine(); },
     render() { if (acct) render(); },
     // Sign-out: nothing of this account stays in memory.
-    close() { acct = null; section = 'dash'; syncMsg = null; formErr = null; placeMsg = null; mine = null; all = null; choice = {}; rowMsg = null; },
+    close() { acct = null; section = 'dash'; syncMsg = null; formErr = null; placeMsg = null; mine = null; all = null; choice = {}; rowMsg = null; resetAdmin(); },
   };
 }
