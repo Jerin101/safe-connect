@@ -586,8 +586,8 @@
       "themeToNight": "Use night colours",
       "themeToDay": "Use day colours",
       "roleSoon": {
-        "volunteer": "Volunteer tools will come in a later update. Everything a general user has is here.",
-        "admin": "Applications, volunteers and teams come in a later update. Everything else for admins is here."
+        "volunteer": "Volunteer tools are not ready yet. Everything a general user has is here.",
+        "admin": "Applications, volunteers and teams are not ready yet. Everything else for admins is here."
       },
       "reportsNet": "\"My reports\" needs the internet. 999 and the numbers on this phone work without internet.",
       "reportsErr": "Your reports could not be loaded. Please try again in a little while.",
@@ -610,7 +610,7 @@
       "saved": "Status saved and written to the audit log.",
       "saveErr": "The status could not be saved. Please try again.",
       "usersText": "See who has which role, and change a role. Every change is written to the audit log. New admins are added only in the Firebase console.",
-      "auditText": "Who changed what, and when. Nobody can edit or delete these entries, not even an admin.",
+      "auditText": "Who changed what, and when. Nobody can edit or delete these entries on this site, not even an admin.",
       "overview": "Admin overview",
       "openReports": "Open reports",
       "reviewSub": "{n} being checked",
@@ -618,7 +618,7 @@
       "activeVols": "Active volunteers",
       "notBuilt": "not built yet",
       "lastCheck": "Last source check",
-      "lastCheckSub": "{n} records checked, {removed} removed, {unreach} pages not reached",
+      "lastCheckSub": "{n} records checked, {removed} removed from the data, {unreach} kept (page did not open)",
       "lastCheckNone": "No check result found",
       "fRole": "Role",
       "fFind": "Search name or email",
@@ -637,8 +637,8 @@
       "roleErr": "The role could not be saved. Please try again.",
       "fType": "Type",
       "fPerson": "Done by",
-      "fFrom": "From",
-      "fTo": "To",
+      "fFrom": "Start date",
+      "fTo": "End date",
       "badDates": "The end date cannot be before the start date.",
       "actions": {
         "ROLE_CHANGED": "Role changed",
