@@ -9,7 +9,7 @@
 - [ ] Test on your real phone (airplane mode, 360 px, Bangla and English, night and day).
 - [ ] P13 (#80): open the 40 sample links by hand before setting `status: verified` (sample below).
 
-**Where to continue:** step 5, PR for #71 (branch `feature/71-routes`): wait for checks, tester GO and bangla-reviewer OK, merge, check the live VERSION is `v7-2026-10-28`. Then step 6, #72 (also fix the night 999 contrast there).
+**Where to continue:** step 6, PR for #72 (branch `feature/72-home-layout`): wait for checks, tester GO and bangla-reviewer OK, merge, check the live VERSION is `v8-2026-10-28`. Then step 7, #73 (sign-in modal; also fix from #71 review: `#/account` by link/reload loads Firebase without a tap, and the slow-network race that can show sign-in over home).
 
 **How each PR is checked (tools kept outside the repo, in the session scratchpad):** Playwright (`npm i --no-save playwright-core@1.48.2`, uses the installed Chrome) runs every page at 360/1280 px, day/night, bn/en: sideways scroll, 999 visible and first, console errors; it also runs `tests/search-test.html`. Rules tests run from PowerShell (`npm run test:rules`); if port 8080 is taken by another emulator, run them in a copy with port 8085.
 
@@ -19,8 +19,8 @@
 | 2 | Secret scan (gitleaks + rule in CLAUDE.md) | #77 | feature/77-secret-scan | #83 | done: merged. Tester NO-GO (allowlist target) fixed, then GO. Local scan clean, fake token caught. Rules 35/35, validator 0 errors, search 26/0 |
 | 3 | css/base.css + v3 colours | #69 | feature/69-base-css | #84 | done: merged, live `v5-2026-10-28`, offline reload OK |
 | 4 | New header | #70 | feature/70-new-header | #85 | done: merged, live `v6-2026-10-28`, offline reload OK |
-| 5 | Real pages with routes | #71 | feature/71-routes | (this PR) | in review |
-| 6 | New home layout (+ "তিন ভূমিকা, এক লক্ষ্য") | #72 | - | - | to do |
+| 5 | Real pages with routes | #71 | feature/71-routes | #86 | done: merged, live `v7-2026-10-28`, offline `#/faq` OK |
+| 6 | New home layout (+ "তিন ভূমিকা, এক লক্ষ্য") | #72 | feature/72-home-layout | (this PR) | in review |
 | 7 | Sign-in modal + Google error messages | #73 | - | - | to do |
 | 8 | Password-reset page (code only) | #74 | - | - | to do |
 | 9 | Share buttons | #75 | - | - | to do |
@@ -44,4 +44,5 @@ Reminder: volunteer and report tests use a test account and a fake code, and the
 - **#77 → PR #83 (merged):** gitleaks 8.30.1 workflow (checksum checked), `.gitleaks.toml` allows only the public Firebase key in `js/firebase-config.js` (rules `gcp-api-key` and `generic-api-key`), CLAUDE.md rule 4a, P46 in ISSUES.md. Agents: tester (NO-GO, then GO). Live VERSION unchanged (`v4-2026-10-27`, no site files changed). Can wait: `actions/checkout@v7` here vs `@v4` elsewhere (fix in #52).
 - **#69 → PR #84 (merged):** style move + v3 colours. Agents: tester GO (contrast of muted/link/accent text checked, all ≥ 4.5:1). Can wait: old duplicate `.linkbtn` in preview.html; `index.html` still has its own styles.
 - **#70 → PR #85 (merged):** v3 header (area chip, 999 first, account, send button, language, theme; tabs with `aria-current`; search pill that jumps to the area search). Agents: developer, bangla-reviewer (4 text fixes applied), tester GO. Rules 35/35, validator 0, search 26/0, page check 8/8. Fixed after review: search pill narrower so all tabs fit at 1280 px. **To do (#72):** night 999 contrast is about 3:1 (white on `--red-1`), below 4.5:1; it comes from the v3 colours.
-- **#71:** hash routes (`#/`, `#/numbers`, `#/area`, `#/send`, `#/guide`, `#/about`, `#/faq`, `#/account`, `#/area/<district>/<upazila>/<union|town>[/<place>]`). Agents: developer. Route flow test 42/42 (tabs, Back, reload, offline), page check 10 addresses all OK, search 26/0, validator 0. Notes: About/FAQ/Guide/Find pages focus their `h2` (no second `h1`); first load does not move focus.
+- **#71 → PR #86 (merged):** hash routes (`#/`, `#/numbers`, `#/area`, `#/send`, `#/guide`, `#/about`, `#/faq`, `#/account`, `#/area/<district>/<upazila>/<union|town>[/<place>]`). Agents: developer, bangla-reviewer (OK; 2 small fixes applied: "Find area" title, arrow hidden from screen readers), tester GO (location asked only after a tap; Back/reload/links never ask). Route flow test 42/42, page check all OK, rules 35/35, search 26/0, validator 0. Can wait: the "outside" result can't be reopened by Back; an English town address shows the Bangla town name (data has no English names); check on main that the Chowmuhani police outpost shows in the first calls.
+- **#72:** v3 home: banner with the 3 actions (all fit on 360x640, 320x568), number-tile row, card rows, desktop sidebar (short web address instead of a QR picture: a home-made QR could not be test-scanned; district filter), "তিন ভূমিকা, এক লক্ষ্য" section (volunteers marked "soon"). Night 999 contrast fixed: white on reds now ≥ 4.61 in both themes (new `--red-ink` for red text). Agents: developer. Page check all OK, routes 0 FAIL, search 26/0, validator 0. Not done: QR picture; service-type filter; v3 card badges with hand-typed numbers (numbers must come from data).

@@ -2,7 +2,7 @@
 // Location is read only after a tap (CLAUDE.md rule 5). The area search lives in data.js (issue #36).
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
-import { initAuth } from './auth.js';
+import { initAuth, ICON as ROLE_ICON } from './auth.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -635,16 +635,34 @@ function quickPlaces() {
     ['coxtown', 'city', find((x) => x.place.district === 'coxsbazar' && x.place.area?.type === 'municipality')],
   ].filter(([, , item]) => item);
 }
+// Known places (v3 card style): a line icon and the name; data-district lets the district filter hide them.
+const PLACE_ICON = { town: ICONS.map, beach: ICONS.pin, island: ICONS.map, city: ICONS.pin };
 function renderPlaces() {
   $('places').replaceChildren(...quickPlaces().map(([key, art, item]) => {
     const [name, sub] = t().places[key];
-    const b = el('button', 'place'); b.type = 'button';
+    const b = el('button', 'place'); b.type = 'button'; b.dataset.district = item.place.district;
     const label = el('span', 'label'); label.append(el('b', null, name), el('small', null, sub));
-    const corner = el('span', 'corner'); corner.append(svg(ICONS.open));
-    b.append(el('span', `art ${art}`), corner, label);
+    const thumb = el('span', 'thumb'); thumb.append(svg(PLACE_ICON[art] || ICONS.pin));
+    b.append(thumb, label);
     b.addEventListener('click', () => { const p = { ...item.place }; if (item.named) p.label = lang === 'bn' ? item.named.name_bn : item.named.name_en; openArea(p, null); });
     return b;
   }));
+  applyDistrict();
+}
+// District filter (sidebar) and the district select in the search box are the same choice.
+function setDistrict(key) {
+  $('distSel').value = key; $('railDist').value = key;
+  applyDistrict();
+  renderSuggest();
+}
+function applyDistrict() {
+  const key = $('distSel').value;
+  $('places').querySelectorAll('.place').forEach((b) => { b.hidden = Boolean(key) && b.dataset.district !== key; });
+}
+function districtOptions(sel, allLabel) {
+  const v = sel.value;
+  sel.replaceChildren(...[['', allLabel], ...DISTRICTS.map((d) => [d.key, lang === 'bn' ? d.bn : d.en])].map(([k, l]) => { const o = el('option', null, l); o.value = k; return o; }));
+  sel.value = v;
 }
 function saveNumbers() { openSos(null, false, () => { $('peopleBox').open = true; setTimeout(() => $('peopleBox').scrollIntoView({ block: 'start' }), 50); }); }
 
@@ -660,7 +678,7 @@ const MORE_ICONS = {
 };
 // The area search page; focusInput = true when the person tapped a search box or "change area".
 function findArea(district = '', focusInput = true) {
-  go('area', { after: () => { $('distSel').value = district; renderSuggest(); if (focusInput) $('areaInput').focus({ preventScroll: true }); } });
+  go('area', { after: () => { setDistrict(district); if (focusInput) $('areaInput').focus({ preventScroll: true }); } });
 }
 // The questions page with one answer open.
 function openFaq(key) {
@@ -760,11 +778,12 @@ const GP_ICONS = {
   lock: 'M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3Z',
   arrow: 'M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z',
 };
-const ICON_ROW = [['national-emergency-999', 'phone', 'c-red'], ['fire-service-102', 'fire', 'c-orange'], ['health-call-centre-16263', 'health', 'c-green'],
-  ['women-children-violence-109', 'woman', 'c-pink'], ['child-helpline-1098', 'child', 'c-blue'], ['tourist-police-helpline', 'bag', 'c-teal'], ['info-service-333', 'info', 'c-slate']];
+// Quiet single-colour tiles; only 999's tile is soft red (DESIGN.md §3).
+const ICON_ROW = [['national-emergency-999', 'phone', 'soft-red'], ['fire-service-102', 'fire', ''], ['health-call-centre-16263', 'health', ''],
+  ['women-children-violence-109', 'woman', ''], ['child-helpline-1098', 'child', ''], ['tourist-police-helpline', 'bag', ''], ['info-service-333', 'info', '']];
 // Numbers that appear inside card text (situation cards); listed with their sources too.
 const TEXT_NUMBERS = ['disaster-warning-1090'];
-function iconCircle(path, cls) { const c = el('span', `circle ${cls}`); c.append(svg(path)); return c; }
+function iconCircle(path, cls) { const c = el('span', cls ? `circle ${cls}` : 'circle'); c.append(svg(path)); return c; }
 // Round icon row: national numbers from data/national_hotlines.json (tap = call), plus "send location" and "help near me".
 // Under it, the official source and check date of each number (DESIGN.md §5).
 function renderIconRow() {
@@ -780,7 +799,7 @@ function renderIconRow() {
     for (const id of TEXT_NUMBERS) { const n = data.national.find((x) => x.id === id); if (n && withPhone(n)) shown.push(n); }
   }
   const act = (label, sub, ic, cls, fn) => { const b = el('button', 'icon-item'); b.type = 'button'; b.append(iconCircle(GP_ICONS[ic], cls), el('b', null, label), el('small', null, sub)); b.addEventListener('click', fn); return b; };
-  items.splice(1, 0, act(P().iconSend, P().iconSendSub, 'send', 'c-violet', () => openSos(null)), act(P().iconNear, P().iconNearSub, 'pin', 'c-amber', () => locate()));
+  items.splice(1, 0, act(P().iconSend, P().iconSendSub, 'send', '', () => openSos(null)), act(P().iconNear, P().iconNearSub, 'pin', '', () => locate()));
   $('iconRow').replaceChildren(...items);
   $('iconSrc').hidden = !shown.length;
   if ($('main').dataset.page === 'numbers') $('iconSrc').open = true;   // the numbers page shows the sources open
@@ -805,11 +824,14 @@ function renderGuides() {
   const num = (id) => data?.national.find((x) => x.id === id)?.phones?.[0];
   const n = num('fire-service-102') && num('disaster-warning-1090') ? { fire: digits(num('fire-service-102')), warn: digits(num('disaster-warning-1090')) } : null;
   const actions = { sos: () => openSos(null), find: () => findArea(''), locate };
+  const artIcon = { night: GP_ICONS.send, lost: GP_ICONS.flag, storm: GP_ICONS.fire };
   $('guideCards').replaceChildren(...P().guides.map(([art, title, text, btn, act]) => {
     const c = el('article', 'card');
     const body = el('div', 'body');
     body.append(el('h3', null, title), el('p', null, text.includes('{fire}') ? (n ? fill(text, n) : P().guideStormNoNumbers) : text), primaryBtn(btn, actions[act]));
-    c.append(el('div', `art ${art}`), body);
+    const top = el('div', 'art'); top.setAttribute('aria-hidden', 'true');
+    const ic = el('span', 'ico'); ic.append(svg(artIcon[art] || GP_ICONS.info)); top.append(ic);
+    c.append(top, body);
     return c;
   }));
 }
@@ -841,6 +863,35 @@ function renderNet() {
   $('netList').replaceChildren(...P().net.map(([k, text]) => el('li', k === 'soon' ? 'soon' : null, text)));
 }
 
+// Sidebar (v3): "keep it on your phone" card with the short address, and the district filter.
+function renderRail() {
+  const r = P().rail;
+  $('rail').setAttribute('aria-label', r.label);
+  $('appTitle').textContent = r.appTitle; $('appText').textContent = r.appText;
+  $('fTitle').textContent = r.fTitle; $('fDist').textContent = r.fDist; $('fNote').textContent = r.fNote; $('fReset').textContent = r.fReset;
+  districtOptions($('railDist'), t().distAll);
+}
+// "Three roles, one goal" (from #66): one line each, honest about what is not built yet; signing in is never needed for help.
+const ROLES = ['user', 'volunteer', 'admin'];
+function renderRoles() {
+  const r = P().roles, names = LANG[lang].auth.roles;
+  $('rolesEyebrow').textContent = r.eyebrow; $('rolesT1').textContent = r.t1; $('rolesT2').textContent = r.t2; $('rolesText').textContent = r.text;
+  $('rolesSignin').textContent = r.signIn;
+  $('rolesGrid').replaceChildren(...ROLES.map((key) => {
+    const d = el('div', 'role');
+    const h = el('h3'); const i = el('span', 'ico'); i.append(svg(ROLE_ICON[key])); h.append(i, names[key].name);
+    const tag = key === 'volunteer' ? r.volunteerTag : names[key].tag;
+    d.append(h, el('p', null, r[key]), el('span', 'tag', tag));
+    return d;
+  }));
+  $('rolesNote').replaceChildren(el('b', null, r.noteB), document.createTextNode(r.note));
+}
+// Arrows beside the numbers row: scroll by hand only, never by themselves (DESIGN.md §3b).
+function scrollRow(dir) {
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  $('iconRow').scrollBy({ left: dir * 260, behavior: calm ? 'auto' : 'smooth' });
+}
+
 // Warm opening (DESIGN.md §2): greeting by time of day, trust ticks, a one-time welcome that never covers 999.
 function renderWarm() {
   const h = new Date().getHours();
@@ -864,7 +915,10 @@ function renderWarm() {
 }
 function renderPage() {
   renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
+  renderRail(); renderRoles();
   $('findTitle').textContent = P().findTitle; $('numbersTitle').textContent = P().titles.numbers; $('findText').textContent = P().findText;
+  $('numRowTitle').textContent = P().numRow.title;
+  $('rowBack').setAttribute('aria-label', P().numRow.back); $('rowMore').setAttribute('aria-label', P().numRow.more);
 }
 
 /* ---------- text ---------- */
@@ -875,9 +929,7 @@ function setText() {
   $('hello1').textContent = s.hello1; $('hello2').textContent = s.hello2;
   $('lead').textContent = s.lead; $('h999Text').textContent = s.h999;
   $('quickEyebrow').textContent = s.quickEyebrow; $('quickTitle').textContent = s.quickTitle; $('quickText').textContent = s.quickText;
-  const dv = $('distSel').value;
-  $('distSel').replaceChildren(...[['', s.distAll], ...DISTRICTS.map((d) => [d.key, lang === 'bn' ? d.bn : d.en])].map(([v, l]) => { const o = el('option', null, l); o.value = v; return o; }));
-  $('distSel').value = dv;
+  districtOptions($('distSel'), s.distAll);
   $('call999Title').textContent = s.call999; $('call999Sub').textContent = s.call999Sub;
   $('locateTitle').textContent = s.locate; $('locateSub').textContent = s.locateSub;
   $('orText').textContent = s.or;
@@ -898,7 +950,11 @@ function setText() {
 
 $('locateBtn').addEventListener('click', locate);
 $('areaInput').addEventListener('input', renderSuggest);
-$('distSel').addEventListener('change', renderSuggest);
+$('distSel').addEventListener('change', () => setDistrict($('distSel').value));
+$('railDist').addEventListener('change', () => setDistrict($('railDist').value));
+$('fReset').addEventListener('click', () => setDistrict(''));
+$('rowBack').addEventListener('click', () => scrollRow(-1));
+$('rowMore').addEventListener('click', () => scrollRow(1));
 $('backBtn').addEventListener('click', goHome);
 $('homeBtn').addEventListener('click', goHome);
 $('areaChip').addEventListener('click', () => findArea(''));

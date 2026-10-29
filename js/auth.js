@@ -5,7 +5,7 @@
 // (the family numbers in "sc-family" and the last area in "sc-last" stay on the phone).
 const ROLES = ['user', 'volunteer', 'admin'];
 const FLAG = 'sc-signed-in';
-const ICON = {
+export const ICON = {
   user: 'M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm-8 9c0-4.4 3.6-7 8-7s8 2.6 8 7H4Z',
   volunteer: 'M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10Z',
   admin: 'M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1 14-4-4 1.4-1.4L11 13.2l4.6-4.6L17 10l-6 6Z',
