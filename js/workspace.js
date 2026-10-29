@@ -77,20 +77,19 @@ function fromCloud(list) {
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b.map(toCloud));
 function setSync(on) { if (on) ctx.store.set(SYNC, '1'); else { try { localStorage.removeItem(SYNC); } catch {} } }
 
-// On opening (with internet): if this account already has a copy, keep it up to date; a new phone with no
-// numbers gets them from the account. Nothing is sent when the copy is off and the account has none.
+// On opening (with internet): a phone with no numbers gets them back from the account's copy. Numbers are sent
+// only while the copy is on for this phone (the flag is cleared at sign-out), never because another account
+// that signs in here has a copy: the numbers on this phone may belong to someone else.
 async function checkCloud() {
   if (!acct || !online() || syncBusy) return;
   const { fb, user } = acct;
   try {
     const cloud = await fb.readFamily(user.uid);
-    if (!syncOn(ctx.store) && !cloud.length) return;
-    setSync(true);
     const local = ctx.people.get();
     if (!local.length && cloud.length) {
       ctx.people.set(fromCloud(cloud)); ctx.people.changed();
-      syncMsg = 'syncRestored';
-    } else if (!same(cloudList(), fromCloud(cloud))) {
+      setSync(true); syncMsg = 'syncRestored';
+    } else if (syncOn(ctx.store) && !same(cloudList(), fromCloud(cloud))) {
       await fb.saveFamily(user.uid, cloudList());
     }
   } catch { if (syncOn(ctx.store)) syncMsg = 'syncErr'; }
