@@ -21,7 +21,7 @@ const ERR = {
   'auth/user-disabled': 'disabled',
   'auth/operation-not-allowed': 'notAllowed', 'auth/admin-restricted-operation': 'notAllowed',
   'auth/unauthorized-domain': 'domain', 'auth/invalid-api-key': 'domain',
-  'auth/network-request-failed': 'network', 'unavailable': 'network',
+  'auth/network-request-failed': 'network', 'unavailable': 'network', 'auth/internal-error': 'other',
   'auth/too-many-requests': 'tooMany',
 };
 // The text key for an error. With no internet it is always "network"; unknown codes get "other".

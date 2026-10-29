@@ -1,5 +1,5 @@
 // SafeConnect accounts (P45): Firebase App, Auth and Firestore, one pinned version from gstatic.
-// Load this file only with import(), when someone opens sign-in or was signed in before:
+// Load this file only with import(), and only after a tap (opening sign-in or "Open my account"):
 // help (999, send location, area numbers) must never wait for it and works with no internet.
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {
