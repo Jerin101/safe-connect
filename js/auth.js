@@ -5,6 +5,7 @@
 // and no personal data. Sign-out keeps "sc-family", "sc-places" and "sc-last" on the phone, unless the person
 // ticks "also remove from this phone" (issue #78). The workspace itself is js/workspace.js.
 import { initWorkspace, LOCAL_KEYS, SYNC, syncOn } from './workspace.js';
+import { initReports } from './reports.js';
 
 const ROLES = ['user', 'volunteer', 'admin'];
 const FLAG = 'sc-signed-in';
@@ -48,6 +49,8 @@ let gateBusy = false;    // "Open my account" is loading
 let gateErr = null;      // error key shown on the account page
 let opener = null;       // the button that opened the modal; focus goes back to it
 let ws = null;           // the workspace (js/workspace.js)
+let rep = null;          // the wrong-number form (js/reports.js)
+let pending = null;      // { onUser, onCancel }: what to do after a sign-in that the report form asked for
 
 const A = () => ctx.texts().auth;
 const $ = (id) => ctx.$(id);
@@ -195,6 +198,7 @@ function closeModal(returnFocus = true) {
 }
 function onModalClosed() {
   document.body.classList.remove('modal-open');
+  if (pending) { const p = pending; pending = null; p.onCancel(); }
   const o = opener; opener = null;
   if (o && o.isConnected && !o.closest('[hidden]')) o.focus();
 }
@@ -207,6 +211,8 @@ async function enter(u) {
   const ok = pick === 'user' || pick === role;
   mismatch = ok ? null : pick;
   wsRole = ok ? pick : 'user';
+  // The report form asked for this sign-in: go back to it (it sends the report), not to the account page.
+  if (pending) { const p = pending; pending = null; closeModal(); p.onUser({ fb, user: u }); return; }
   // Closed (Esc, ×) or moved to another page while signing in: stay where the person is now.
   if (!dlg().open) return;
   closeModal(false);
@@ -231,6 +237,17 @@ function fields(needPassword) {
   if (!email || (needPassword && !password)) { say(needPassword ? 'needBoth' : 'needEmail'); return null; }
   return { email, password };
 }
+
+/* ---------- wrong-number report (P18, issue #79): sign-in only when the person taps "Send" ---------- */
+// Signed in on this phone before: Firebase loads now (after the tap) and the report goes at once.
+// Otherwise the sign-in modal opens over the form; onCancel runs if it is closed without signing in.
+async function withUser(button, onUser, onCancel) {
+  try { if (!user && hasFlag() && navigator.onLine) await loadFirebase(); } catch {}
+  if (user && fb) { onUser({ fb, user }); return; }
+  pending = { onUser, onCancel };
+  openModal(button);
+}
+function openMine() { ws.want('reports'); ctx.go('account', { tap: true }); }
 
 /* ---------- account page (#/account): never loads Firebase by itself ---------- */
 function renderGate() {
@@ -328,6 +345,7 @@ export function initAuth(helpers) {
   // Moving to another page (Back, a link) closes the modal, so it never stays over the new page.
   window.addEventListener('hashchange', () => closeModal(false));
   ws = initWorkspace({ ...ctx, askSignOut });
+  rep = initReports({ ...ctx, withUser, openMine, knownUser: () => Boolean(user), reportSent: () => ws.reportsChanged() });
   $('siGoogle').addEventListener('click', () => run(() => fb.signInGoogle(), 'google'));
   $('siForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -355,8 +373,11 @@ export function initAuth(helpers) {
       showGate();
       if (user || (intent && intent.tap && hasFlag())) openAccount();
     },
+    // "Report a wrong number" on a contact row (js/preview.js). Opens the form; nothing is loaded or sent yet.
+    report(record, info, from) { rep.open(record, info, from); },
     setText() {
       renderButton();
+      rep.setText();
       if (fb) fb.setLang(ctx.lang());
       if (dlg().open) renderSignin();
       if (!$('ws').hidden) ws.render();
