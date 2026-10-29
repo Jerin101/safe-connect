@@ -7,10 +7,13 @@ import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebas
 import assert from 'node:assert/strict';
 import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, where, orderBy, limit } from 'firebase/firestore';
 import { reportFields, auditFields, PROBLEMS, REPORT_DISTRICTS, NOTE_MAX } from '../../js/reports.js';
+import { roleAuditFields, SITE_ROLES } from '../../js/admin.js';
 
 const ADMIN = 'admin-uid';
+const ADMIN2 = 'admin2-uid';
 const RINA = 'rina-uid';
 const KARIM = 'karim-uid';
+const VOL = 'vol-uid';
 let env;
 
 const db = (uid) => (uid ? env.authenticatedContext(uid, { email: `${uid}@example.com` }) : env.unauthenticatedContext()).firestore();
@@ -27,6 +30,9 @@ beforeEach(async () => {
   await env.withSecurityRulesDisabled(async (ctx) => {
     const f = ctx.firestore();
     await setDoc(doc(f, 'admins', ADMIN), { since: new Date(), addedBy: 'console' });
+    await setDoc(doc(f, 'admins', ADMIN2), { since: new Date(), addedBy: 'console' });
+    await setDoc(doc(f, 'users', ADMIN), { name: 'Admin', email: 'admin-uid@example.com', lang: 'bn', createdAt: new Date(), role: 'user' });
+    await setDoc(doc(f, 'users', VOL), { name: 'Vol', email: 'vol-uid@example.com', lang: 'bn', createdAt: new Date(), role: 'volunteer' });
     await setDoc(doc(f, 'users', RINA), { name: 'Rina', email: 'rina-uid@example.com', lang: 'bn', createdAt: new Date(), role: 'user' });
     await setDoc(doc(f, 'users', KARIM), { name: 'Karim', email: 'karim-uid@example.com', lang: 'bn', createdAt: new Date(), role: 'user' });
     await setDoc(doc(f, 'reports', 'r1'), { uid: RINA, recordId: 'noakhali-up-123', district: 'noakhali', area: 'Sharifpur', problem: 'off', note: '', status: 'open', createdAt: new Date(), updatedAt: new Date() });
@@ -85,7 +91,8 @@ describe('profiles and roles', () => {
 describe('admin role change needs an audit entry', () => {
   test('works with an audit entry in the same batch', async () => {
     const f = db(ADMIN); const b = writeBatch(f);
-    b.set(doc(f, 'audit', 'a1'), auditEntry(ADMIN, 'ROLE_CHANGED', 'users', KARIM));
+    // Since #65 the entry must also say the old and the new role.
+    b.set(doc(f, 'audit', 'a1'), { ...auditEntry(ADMIN, 'ROLE_CHANGED', 'users', KARIM), meta: { from: 'user', to: 'volunteer' } });
     b.update(doc(f, 'users', KARIM), { role: 'volunteer', lastAuditId: 'a1' });
     await assertSucceeds(b.commit());
   });
@@ -329,5 +336,164 @@ describe('report form and lists (issue #79)', () => {
     await assertFails(tryBatch(RINA, 'fixed', 'r1'));
     await assertFails(tryBatch(ADMIN, 'deleted', 'r1'));
     await assertFails(tryBatch(ADMIN, 'fixed', 'r2'));
+  });
+});
+
+// Issue #65 (P44): admin workspace. Users and roles, audit log. Fake uids only, nothing real.
+// A role change is one batch: users/{uid} { role, lastAuditId } + audit/{id} with meta { from, to }.
+describe('admin workspace: users and roles (issue #65)', () => {
+  const roleBatch = (as, target, from, to, opts = {}) => {
+    const f = db(as); const b = writeBatch(f);
+    const auditRef = doc(collection(f, 'audit'));
+    const entry = opts.entry || { actorUid: as, action: 'ROLE_CHANGED', entity: 'users', entityId: target, meta: { from, to } };
+    if (!opts.noAudit) b.set(auditRef, { ...entry, at: serverTimestamp(), ...(opts.extra || {}) });
+    if (!opts.noChange) b.update(doc(f, 'users', opts.changeId || target), { role: to, lastAuditId: opts.lastAuditId || auditRef.id, ...(opts.more || {}) });
+    return b.commit();
+  };
+  test('the site builds the audit entry only for a real change by someone else', () => {
+    assert.deepEqual(SITE_ROLES, ['user', 'volunteer']);
+    assert.deepEqual(roleAuditFields(ADMIN, KARIM, 'user', 'volunteer'),
+      { actorUid: ADMIN, action: 'ROLE_CHANGED', entity: 'users', entityId: KARIM, meta: { from: 'user', to: 'volunteer' } });
+    assert.equal(roleAuditFields(ADMIN, ADMIN, 'user', 'volunteer'), null);
+    assert.equal(roleAuditFields(ADMIN, KARIM, 'user', 'admin'), null);
+    assert.equal(roleAuditFields(ADMIN, KARIM, 'user', 'user'), null);
+    assert.equal(roleAuditFields(ADMIN, KARIM, 'admin', 'user'), null);
+    assert.equal(roleAuditFields(null, KARIM, 'user', 'volunteer'), null);
+    assert.equal(roleAuditFields(ADMIN, 'a/b', 'user', 'volunteer'), null);
+  });
+  test('the exact batch the site writes is accepted (user -> volunteer -> user)', async () => {
+    let from = 'user';
+    for (const to of ['volunteer', 'user']) {
+      const f = db(ADMIN); const b = writeBatch(f);
+      const auditRef = doc(collection(f, 'audit'));
+      b.set(auditRef, { ...roleAuditFields(ADMIN, KARIM, from, to), at: serverTimestamp() });
+      b.update(doc(f, 'users', KARIM), { role: to, lastAuditId: auditRef.id });
+      await assertSucceeds(b.commit());
+      from = to;
+    }
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      assert.equal((await getDoc(doc(ctx.firestore(), 'users', KARIM))).data().role, 'user');
+    });
+  });
+  test('a role change without its audit entry in the same batch is refused', async () => {
+    await assertFails(roleBatch(ADMIN, KARIM, 'user', 'volunteer', { noAudit: true }));
+    await assertFails(updateDoc(doc(db(ADMIN), 'users', KARIM), { role: 'volunteer' }));
+  });
+  test('an old audit entry cannot be used again', async () => {
+    await env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), 'audit', 'old1'), { actorUid: ADMIN, action: 'ROLE_CHANGED', entity: 'users', entityId: KARIM, at: new Date(), meta: { from: 'user', to: 'volunteer' } }));
+    await assertFails(roleBatch(ADMIN, KARIM, 'user', 'volunteer', { noAudit: true, lastAuditId: 'old1' }));
+  });
+  test('an audit entry about another target is refused', async () => {
+    await assertFails(roleBatch(ADMIN, KARIM, 'user', 'volunteer', { changeId: RINA }));
+    await assertFails(roleBatch(ADMIN, KARIM, 'user', 'volunteer', { entry: { actorUid: ADMIN, action: 'REPORT_STATUS_CHANGED', entity: 'reports', entityId: 'r1', meta: { from: 'open', to: 'review' } } }));
+  });
+  test('an audit entry with no change in the same batch is refused', async () => {
+    await assertFails(roleBatch(ADMIN, KARIM, 'user', 'volunteer', { noChange: true }));
+    await assertFails(setDoc(doc(db(ADMIN), 'audit', 'lone'), { actorUid: ADMIN, action: 'REPORT_STATUS_CHANGED', entity: 'reports', entityId: 'r1', at: serverTimestamp(), meta: { from: 'open', to: 'fixed' } }));
+  });
+  test('the audit entry must tell the truth: old and new role, and a real change', async () => {
+    await assertFails(roleBatch(ADMIN, KARIM, 'volunteer', 'volunteer'));
+    await assertFails(roleBatch(ADMIN, KARIM, 'user', 'user'));
+    const f = db(ADMIN); const b = writeBatch(f); const a = doc(collection(f, 'audit'));
+    b.set(a, { actorUid: ADMIN, action: 'ROLE_CHANGED', entity: 'users', entityId: KARIM, at: serverTimestamp(), meta: { from: 'user', to: 'user' } });
+    b.update(doc(f, 'users', KARIM), { role: 'volunteer', lastAuditId: a.id });
+    await assertFails(b.commit());
+    const f2 = db(ADMIN); const b2 = writeBatch(f2); const a2 = doc(collection(f2, 'audit'));
+    b2.set(a2, { actorUid: ADMIN, action: 'ROLE_CHANGED', entity: 'users', entityId: KARIM, at: serverTimestamp() });
+    b2.update(doc(f2, 'users', KARIM), { role: 'volunteer', lastAuditId: a2.id });
+    await assertFails(b2.commit());
+  });
+  test('an admin cannot change the role of another admin (review of PR #93)', async () => {
+    await assertFails(roleBatch(ADMIN2, ADMIN, 'user', 'volunteer'));
+    await assertSucceeds(roleBatch(ADMIN2, KARIM, 'user', 'volunteer'));
+  });
+  test('nobody can change their own role, not even an admin', async () => {
+    await assertFails(roleBatch(ADMIN, ADMIN, 'user', 'volunteer'));
+    await assertFails(roleBatch(RINA, RINA, 'user', 'volunteer'));
+    await assertFails(roleBatch(VOL, VOL, 'volunteer', 'user'));
+  });
+  test('self-promotion is refused: no "admin" role, no admins/{uid} from the site', async () => {
+    await assertFails(roleBatch(RINA, RINA, 'user', 'admin'));
+    await assertFails(roleBatch(ADMIN, KARIM, 'user', 'admin'));
+    const f = db(RINA); const b = writeBatch(f);
+    b.set(doc(f, 'admins', RINA), { since: new Date(), addedBy: RINA });
+    b.set(doc(f, 'audit', 'self'), { actorUid: RINA, action: 'ROLE_CHANGED', entity: 'users', entityId: RINA, at: serverTimestamp(), meta: { from: 'user', to: 'volunteer' } });
+    await assertFails(b.commit());
+    await assertFails(setDoc(doc(db(ADMIN), 'admins', KARIM), { since: new Date(), addedBy: ADMIN }));
+    await assertFails(deleteDoc(doc(db(ADMIN), 'admins', ADMIN2)));
+  });
+  test('a normal user, a volunteer or someone signed out cannot change a role', async () => {
+    await assertFails(roleBatch(RINA, KARIM, 'user', 'volunteer'));
+    await assertFails(roleBatch(VOL, KARIM, 'user', 'volunteer'));
+    await assertFails(updateDoc(doc(db(null), 'users', KARIM), { role: 'volunteer', lastAuditId: 'x' }));
+  });
+  test('a role change cannot change anything else (name, email)', async () => {
+    await assertFails(roleBatch(ADMIN, KARIM, 'user', 'volunteer', { more: { email: 'new@example.com' } }));
+    await assertFails(roleBatch(ADMIN, KARIM, 'user', 'volunteer', { more: { name: 'X' } }));
+  });
+  test('field whitelist, types and sizes of the audit entry', async () => {
+    const base = { actorUid: ADMIN, action: 'ROLE_CHANGED', entity: 'users', entityId: KARIM, meta: { from: 'user', to: 'volunteer' } };
+    const bad = [
+      { ...base, note: 'extra field' },
+      { ...base, entity: 'reports' },
+      { ...base, action: 'USER_DELETED' },
+      { ...base, actorUid: ADMIN2 },
+      { ...base, meta: { from: 'user', to: 'volunteer', email: 'x@example.com' } },
+      { ...base, meta: 'user -> volunteer' },
+      { ...base, meta: { from: 1, to: 'volunteer' } },
+    ];
+    for (const entry of bad) await assertFails(roleBatch(ADMIN, KARIM, 'user', 'volunteer', { entry }));
+    await assertFails(roleBatch(ADMIN, KARIM, 'user', 'volunteer', { extra: { at: new Date() } }));
+    const long = 'k'.repeat(129);
+    await env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), 'users', long), { name: 'L', lang: 'bn', createdAt: new Date(), role: 'user' }));
+    await assertFails(roleBatch(ADMIN, long, 'user', 'volunteer'));
+  });
+  test('an admin can list users and the admin list; others cannot', async () => {
+    const q = (uid) => query(collection(db(uid), 'users'), orderBy('createdAt', 'desc'), limit(200));
+    const snap = await assertSucceeds(getDocs(q(ADMIN)));
+    assert.equal(snap.size, 4);
+    await assertSucceeds(getDocs(collection(db(ADMIN), 'admins')));
+    for (const uid of [RINA, VOL, null]) {
+      await assertFails(getDocs(q(uid)));
+      await assertFails(getDocs(collection(db(uid), 'admins')));
+    }
+  });
+});
+
+describe('admin workspace: audit log (issue #65)', () => {
+  beforeEach(async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const f = ctx.firestore();
+      await setDoc(doc(f, 'audit', 'e1'), { actorUid: ADMIN, action: 'ROLE_CHANGED', entity: 'users', entityId: KARIM, at: new Date('2026-10-20T10:00:00Z'), meta: { from: 'user', to: 'volunteer' } });
+      await setDoc(doc(f, 'audit', 'e2'), { actorUid: ADMIN2, action: 'REPORT_STATUS_CHANGED', entity: 'reports', entityId: 'r1', at: new Date('2026-10-25T10:00:00Z'), meta: { from: 'open', to: 'review' } });
+    });
+  });
+  const listAs = (uid, ...filters) => getDocs(query(collection(db(uid), 'audit'), ...filters, orderBy('at', 'desc'), limit(100)));
+  test('an admin can list it with the filters the site uses (type, person, date)', async () => {
+    assert.equal((await assertSucceeds(listAs(ADMIN))).size, 2);
+    assert.equal((await assertSucceeds(listAs(ADMIN, where('action', '==', 'ROLE_CHANGED')))).size, 1);
+    assert.equal((await assertSucceeds(listAs(ADMIN, where('actorUid', '==', ADMIN2)))).size, 1);
+    assert.equal((await assertSucceeds(listAs(ADMIN, where('at', '>=', new Date('2026-10-22T00:00:00Z')), where('at', '<', new Date('2026-10-30T00:00:00Z'))))).size, 1);
+    assert.equal((await assertSucceeds(listAs(ADMIN, where('action', '==', 'ROLE_CHANGED'), where('actorUid', '==', ADMIN2)))).size, 0);
+  });
+  test('a user, a volunteer or someone signed out cannot read or list it', async () => {
+    for (const uid of [RINA, VOL, null]) {
+      await assertFails(listAs(uid));
+      await assertFails(listAs(uid, where('actorUid', '==', ADMIN)));
+      await assertFails(getDoc(doc(db(uid), 'audit', 'e1')));
+    }
+  });
+  test('nobody can update or delete an entry, not even the admin who wrote it', async () => {
+    await assertFails(updateDoc(doc(db(ADMIN), 'audit', 'e1'), { meta: { from: 'user', to: 'user' } }));
+    await assertFails(setDoc(doc(db(ADMIN), 'audit', 'e1'), { actorUid: ADMIN, action: 'ROLE_CHANGED', entity: 'users', entityId: KARIM, at: serverTimestamp(), meta: { from: 'user', to: 'volunteer' } }));
+    await assertFails(deleteDoc(doc(db(ADMIN), 'audit', 'e1')));
+    await assertFails(deleteDoc(doc(db(ADMIN2), 'audit', 'e1')));
+    await assertFails(deleteDoc(doc(db(RINA), 'audit', 'e1')));
+  });
+  test('an entry cannot be re-written inside a role-change batch either', async () => {
+    const f = db(ADMIN); const b = writeBatch(f);
+    b.set(doc(f, 'audit', 'e1'), { actorUid: ADMIN, action: 'ROLE_CHANGED', entity: 'users', entityId: KARIM, at: serverTimestamp(), meta: { from: 'user', to: 'volunteer' } });
+    b.update(doc(f, 'users', KARIM), { role: 'volunteer', lastAuditId: 'e1' });
+    await assertFails(b.commit());
   });
 });

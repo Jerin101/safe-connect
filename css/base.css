@@ -386,3 +386,10 @@ textarea { resize: vertical; line-height: 1.45; }
 .wnote { overflow-wrap: anywhere; color: var(--ink-2); font-size: 0.92rem; border-left: 3px solid var(--line-2); padding-left: 10px; }
 .wset { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
 .wset .field { min-width: min(100%, 180px); }
+/* Admin workspace (P44, issue #65) */
+.wstat b.date { font-size: 1.15rem; overflow-wrap: anywhere; }
+.tag.role-user { background: var(--surface-2); color: var(--ink-2); }
+.tag.role-volunteer { background: var(--ok-soft); color: var(--ok); }
+.tag.role-admin { background: var(--accent-soft); color: var(--ink); }
+.wlist { display: grid; min-width: 0; }
+.field input[type="date"] { font-family: inherit; color: inherit; }

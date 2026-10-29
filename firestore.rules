@@ -30,6 +30,17 @@ service cloud.firestore {
         && getAfter(path).data.entityId == id
         && getAfter(path).data.action == action;
     }
+    // A role change (issue #65): the audit entry must say the real old and new role.
+    function roleAudited() {
+      let meta = getAfter(/databases/$(database)/documents/audit/$(incoming().lastAuditId)).data.meta;
+      return meta.from == resource.data.get('role', 'user') && meta.to == incoming().role;
+    }
+    // The other half (issue #65): a new audit entry is allowed only together with the change it is
+    // about, in the same batch (that document must point back to this entry).
+    function changedWith(entity, id, auditId) {
+      let path = /databases/$(database)/documents/$(entity)/$(id);
+      return existsAfter(path) && getAfter(path).data.get('lastAuditId', '') == auditId;
+    }
 
     // ---------- people ----------
     match /users/{uid} {
@@ -46,12 +57,16 @@ service cloud.firestore {
           && changed().hasOnly(['name', 'lang'])
           && shortText(incoming().get('name', ''), 60)
           && incoming().get('lang', 'bn') in ['bn', 'en'])
-        // An admin may change only the role (user <-> volunteer), with an audit entry.
-        // New admins are added only in the Firebase console.
+        // An admin may change only the role (user <-> volunteer) of someone else, with an audit entry
+        // that names the old and the new role. New admins are added only in the Firebase console.
         || (isAdmin()
+          && uid != request.auth.uid
+          && !exists(/databases/$(database)/documents/admins/$(uid))
           && changed().hasOnly(['role', 'lastAuditId'])
           && incoming().role in ['user', 'volunteer']
-          && audited('users', uid, 'ROLE_CHANGED'));
+          && incoming().role != resource.data.get('role', 'user')
+          && audited('users', uid, 'ROLE_CHANGED')
+          && roleAudited());
       allow delete: if isMe(uid);
     }
 
@@ -109,11 +124,16 @@ service cloud.firestore {
       allow create: if isAdmin()
         && incoming().keys().hasOnly(['actorUid', 'action', 'entity', 'entityId', 'at', 'meta'])
         && incoming().actorUid == request.auth.uid
-        && incoming().action in ['REPORT_STATUS_CHANGED', 'ROLE_CHANGED']
-        && incoming().entity in ['reports', 'users']
+        && ((incoming().action == 'REPORT_STATUS_CHANGED' && incoming().entity == 'reports')
+          || (incoming().action == 'ROLE_CHANGED' && incoming().entity == 'users'))
         && incoming().entityId is string
+        && incoming().entityId.matches('^[A-Za-z0-9_-]{1,128}$')
         && incoming().at == request.time
-        && (!('meta' in incoming()) || incoming().meta is map);
+        && (!('meta' in incoming()) || (incoming().meta is map
+          && incoming().meta.keys().hasOnly(['from', 'to'])
+          && shortText(incoming().meta.get('from', ''), 20)
+          && shortText(incoming().meta.get('to', ''), 20)))
+        && changedWith(incoming().entity, incoming().entityId, auditId);
       allow update, delete: if false;
     }
 

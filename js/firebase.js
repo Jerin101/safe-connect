@@ -116,3 +116,36 @@ export async function setReportStatus(reportId, audit, status) {
   batch.update(doc(db, 'reports', reportId), { status, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
   await batch.commit();
 }
+
+// Admin workspace (P44, issue #65). Every call here is refused by firestore.rules unless admins/{uid} exists.
+// js/admin.js builds the audit entry (roleAuditFields); here only the server time is added.
+const asUser = (d) => { const x = d.data(); return { id: d.id, name: x.name || '', email: x.email || '', role: x.role || 'user', createdAt: millis(x.createdAt) }; };
+// The newest 200 accounts (a single-field order: no extra index). Only name, email, role and the join date are used.
+export async function listUsers() {
+  const snap = await getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc'), limit(200)));
+  return snap.docs.map(asUser);
+}
+// The uids in admins/ (added only in the Firebase console).
+export async function listAdmins() {
+  const snap = await getDocs(collection(db, 'admins'));
+  return snap.docs.map((d) => d.id);
+}
+// The new role and its audit entry in one batch (the rules refuse a change without it, or about yourself).
+export async function setUserRole(uid, audit, role) {
+  const batch = writeBatch(db);
+  const auditRef = doc(collection(db, 'audit'));
+  batch.set(auditRef, { ...audit, at: serverTimestamp() });
+  batch.update(doc(db, 'users', uid), { role, lastAuditId: auditRef.id });
+  await batch.commit();
+}
+// The newest 100 audit entries, filtered on the server. Type and person use the indexes in firestore.indexes.json;
+// the date range is on "at", the field the list is ordered by. from / to: times in milliseconds (to is not included).
+export async function listAudit({ action, actorUid, from, to } = {}) {
+  const parts = [];
+  if (action) parts.push(where('action', '==', action));
+  if (actorUid) parts.push(where('actorUid', '==', actorUid));
+  if (from) parts.push(where('at', '>=', new Date(from)));
+  if (to) parts.push(where('at', '<', new Date(to)));
+  const snap = await getDocs(query(collection(db, 'audit'), ...parts, orderBy('at', 'desc'), limit(100)));
+  return snap.docs.map((d) => { const x = d.data(); return { id: d.id, ...x, at: millis(x.at) }; });
+}
