@@ -449,7 +449,8 @@ function normPhone(raw) {
   else if (d.startsWith('88') && d.length === 13) d = d.slice(2);
   return /^01[3-9]\d{8}$/.test(d) ? d : null;
 }
-function getPeople() { try { return JSON.parse(store.get('sc-family') || '[]').filter((p) => p && normPhone(p.phone)); } catch { return []; } }
+// Saved numbers come back cleaned (01XXXXXXXXX), so every sms:, tel: and WhatsApp link gets plain digits.
+function getPeople() { try { return JSON.parse(store.get('sc-family') || '[]').filter((p) => p && normPhone(p.phone)).map((p) => ({ ...p, phone: normPhone(p.phone) })); } catch { return []; } }
 function setPeople(list) { store.set('sc-family', JSON.stringify(list)); }
 
 function renderHomeSos() {
