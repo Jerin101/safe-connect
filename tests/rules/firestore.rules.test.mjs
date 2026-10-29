@@ -4,7 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { after, before, beforeEach, describe, test } from 'node:test';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
 
 const ADMIN = 'admin-uid';
 const RINA = 'rina-uid';
@@ -119,6 +119,69 @@ describe('family numbers (sync is optional)', () => {
     await assertFails(getDoc(doc(db(KARIM), 'family', RINA, 'people', 'p1')));
     await assertFails(getDoc(doc(db(ADMIN), 'family', RINA, 'people', 'p1')));
     await assertFails(setDoc(doc(db(KARIM), 'family', RINA, 'people', 'p2'), { name: 'X', phone: '01712345678' }));
+  });
+});
+
+// The workspace copy (issue #78): "Keep a copy in my account" writes family/{uid}/people/p1..p3 in one batch,
+// reads the list when the workspace opens, and deletes every document when the person turns it off.
+// No rule changed for this; these tests show the existing rules allow exactly that and nothing more.
+const ma = { name: 'Ma', relation: 'mother', phone: '01712345678' };
+const people = (uid) => collection(db(uid), 'family', uid, 'people');
+const person = (as, owner, id) => doc(db(as), 'family', owner, 'people', id);
+const seedCopy = () => env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), 'family', RINA, 'people', 'p1'), ma));
+describe('family copy in the account (workspace, issue #78)', () => {
+  test('the owner can write the whole copy in one batch (set p1, p2; delete p3) and read the list', async () => {
+    const f = db(RINA);
+    const b = writeBatch(f);
+    b.set(doc(f, 'family', RINA, 'people', 'p1'), ma);
+    b.set(doc(f, 'family', RINA, 'people', 'p2'), { name: 'Baba', phone: '01812345678' });
+    b.delete(doc(f, 'family', RINA, 'people', 'p3'));
+    await assertSucceeds(b.commit());
+    await assertSucceeds(getDocs(people(RINA)));
+  });
+  test('the owner can turn the copy off (delete every document)', async () => {
+    await seedCopy();
+    const f = db(RINA);
+    const b = writeBatch(f);
+    for (const id of ['p1', 'p2', 'p3']) b.delete(doc(f, 'family', RINA, 'people', id));
+    await assertSucceeds(b.commit());
+  });
+  test('signed out: cannot read, list, write or delete a copy', async () => {
+    await seedCopy();
+    await assertFails(getDoc(person(null, RINA, 'p1')));
+    await assertFails(getDocs(collection(db(null), 'family', RINA, 'people')));
+    await assertFails(setDoc(person(null, RINA, 'p2'), ma));
+    await assertFails(deleteDoc(person(null, RINA, 'p1')));
+  });
+  test('another user cannot list, change or delete the copy', async () => {
+    await seedCopy();
+    await assertFails(getDocs(collection(db(KARIM), 'family', RINA, 'people')));
+    await assertFails(setDoc(person(KARIM, RINA, 'p1'), ma));
+    await assertFails(deleteDoc(person(KARIM, RINA, 'p1')));
+    await assertFails(getDocs(collection(db(ADMIN), 'family', RINA, 'people')));
+  });
+  test('an empty name, a too long name or relation, and wrong types are refused', async () => {
+    await assertFails(setDoc(person(RINA, RINA, 'p1'), { ...ma, name: '' }));
+    await assertFails(setDoc(person(RINA, RINA, 'p1'), { ...ma, name: 'x'.repeat(41) }));
+    await assertFails(setDoc(person(RINA, RINA, 'p1'), { ...ma, relation: 'x'.repeat(21) }));
+    await assertFails(setDoc(person(RINA, RINA, 'p1'), { ...ma, phone: 1712345678 }));
+    await assertFails(setDoc(person(RINA, RINA, 'p1'), { ...ma, name: 42 }));
+    await assertFails(setDoc(person(RINA, RINA, 'p1'), { name: 'Ma', relation: 'mother' }));
+    await assertFails(setDoc(person(RINA, RINA, 'p1'), { ...ma, phone: '+8801712345678' }));
+  });
+  test('a batch with one bad document is refused as a whole', async () => {
+    const f = db(RINA);
+    const b = writeBatch(f);
+    b.set(doc(f, 'family', RINA, 'people', 'p1'), ma);
+    b.set(doc(f, 'family', RINA, 'people', 'p2'), { ...ma, address: 'house 5' });
+    await assertFails(b.commit());
+  });
+  test('turning on the copy does not let the owner change their own role', async () => {
+    const f = db(RINA);
+    const b = writeBatch(f);
+    b.set(doc(f, 'family', RINA, 'people', 'p1'), ma);
+    b.update(doc(f, 'users', RINA), { role: 'admin' });
+    await assertFails(b.commit());
   });
 });
 

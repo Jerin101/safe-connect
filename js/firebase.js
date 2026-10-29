@@ -7,7 +7,7 @@ import {
   getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, writeBatch } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 
 const app = initializeApp(firebaseConfig);
@@ -59,4 +59,29 @@ export async function roleOf(user, lang) {
   const profile = await ensureProfile(user, lang);
   if (await isAdmin(user)) return 'admin';
   return profile.role === 'volunteer' ? 'volunteer' : 'user';
+}
+
+// Family numbers copy (P35, issue #78). Only when the person turns on "Keep a copy in my account".
+// The phone list (localStorage "sc-family", at most 3) is the real list; the account keeps a copy in
+// family/{uid}/people/p1..p3 with exactly the fields firestore.rules allow: name, relation (optional), phone.
+const FAMILY_IDS = ['p1', 'p2', 'p3'];
+const familyRef = (uid, id) => doc(db, 'family', uid, 'people', id);
+// The copy in the account, in order: [{ name, relation, phone }].
+export async function readFamily(uid) {
+  const snap = await getDocs(collection(db, 'family', uid, 'people'));
+  return snap.docs.filter((d) => FAMILY_IDS.includes(d.id)).sort((a, b) => a.id.localeCompare(b.id)).map((d) => d.data());
+}
+// Replace the copy with this list (already cleaned by js/workspace.js), in one batch.
+export async function saveFamily(uid, people) {
+  const batch = writeBatch(db);
+  FAMILY_IDS.forEach((id, i) => { if (people[i]) batch.set(familyRef(uid, id), people[i]); else batch.delete(familyRef(uid, id)); });
+  await batch.commit();
+}
+// Turning the copy off deletes every document in it (also any not made by this version).
+export async function deleteFamily(uid) {
+  const snap = await getDocs(collection(db, 'family', uid, 'people'));
+  const batch = writeBatch(db);
+  const ids = new Set([...FAMILY_IDS, ...snap.docs.map((d) => d.id)]);
+  for (const id of ids) batch.delete(familyRef(uid, id));
+  await batch.commit();
 }

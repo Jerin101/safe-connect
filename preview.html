@@ -718,20 +718,26 @@
     </div>
   </dialog>
 
-  <!-- WORKSPACE: a simple placeholder for now; the real workspace comes with P35. -->
-  <div class="wrap page" id="ws" hidden>
-    <div class="page-top"><button class="back" id="wsBack" type="button"></button></div>
-    <div class="si-head"><p class="eyebrow" id="wsEyebrow"></p><h1 id="wsTitle" tabindex="-1"></h1></div>
-    <p class="si-note" id="wsNote" role="status" hidden></p>
-    <p id="wsWho" hidden></p>
-    <p class="msg plain" id="wsSoon"></p>
-    <div><button class="btn" id="wsOut" type="button"></button></div>
+  <!-- WORKSPACE (P35, issue #78): built by js/workspace.js. The main part comes first in the page (999 in the header stays
+       the first control); on wide screens CSS puts the sidebar on the left. On phones: the section bar and sign-out at the top. -->
+  <div class="wrap ws" id="ws" hidden>
+    <div class="ws-main">
+      <nav class="mobnav" id="wsMob" aria-label="Sections"></nav>
+      <div class="ws-bar"><span id="wsCrumb"></span><button class="btn sm mob-out" id="wsOut" type="button"></button></div>
+      <div class="page-head"><p class="eyebrow" id="wsEyebrow"></p><h1 id="wsTitle" tabindex="-1"></h1><p id="wsLead"></p></div>
+      <p class="si-note" id="wsNote" role="status" hidden></p>
+      <p class="ws-who" id="wsWho" hidden></p>
+      <div class="ws-body" id="wsBody"></div>
+    </div>
+    <aside class="side" id="wsSide" aria-label="Workspace"></aside>
   </div>
 
   <dialog class="confirm" id="outDialog" aria-labelledby="outTitle" aria-describedby="outText">
     <form method="dialog">
       <h2 id="outTitle"></h2>
       <p id="outText"></p>
+      <label class="check"><input type="checkbox" id="outRemove"><span id="outRemoveText"></span></label>
+      <p class="si-note" id="outSync" hidden></p>
       <div class="confirm-row"><button class="btn" id="outNo" value="cancel"></button><button class="btn violet" id="outYes" value="yes"></button></div>
     </form>
   </dialog>
