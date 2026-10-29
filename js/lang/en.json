@@ -585,7 +585,7 @@
       "themeToDay": "Use day colours",
       "roleSoon": {
         "volunteer": "Volunteer tools will come in a later update. Everything a general user has is here.",
-        "admin": "More admin tools come in a later update. Reports from everyone are under \"Check reports\"."
+        "admin": "More admin tools are planned for a later update. Reports from everyone are under \"Check reports\"."
       },
       "reportsNet": "\"My reports\" needs the internet. 999 and the numbers on this phone work without internet.",
       "reportsErr": "Your reports could not be loaded. Please try again in a little while.",
@@ -651,7 +651,7 @@
     "linkLabel": "Report a wrong number: {name}",
     "eyebrow": "Report",
     "title": "Report a wrong number",
-    "lead": "Three short steps. Sending needs a sign-in, but no GitHub account.",
+    "lead": "Three short steps. You need to sign in to send it.",
     "steps": [
       "Number",
       "What is wrong",
@@ -668,21 +668,21 @@
     "kNextStep": "What happens next",
     "noChange": "Your report does not change any number on the site. A person from our team checks it against the official government page. Only after that check is a fix made in our data, and everyone gets it with the next update.",
     "problems": {
-      "off": "The number is off or does not connect",
+      "off": "The number is off, or the call does not go through",
       "other_person": "Someone else answers",
       "changed": "The number has changed",
       "other": "Another problem"
     },
     "pick": "Please choose what is wrong.",
     "noteLabel": "Anything else? (optional)",
-    "noteHint": "At most {n} letters. Please do not write your name, phone number or address.",
+    "noteHint": "At most {n} letters. Please do not write your own name, phone number or address.",
     "notePh": "For example: I tried three times yesterday afternoon",
     "noNote": "No note",
     "next": "Next",
     "back": "Back",
     "send": "Send report",
-    "signNeeded": "To send it, you sign in when you tap \"Send report\". What you chose stays here.",
-    "offline": "No internet, so the report cannot be sent now. Keep this window open and send it when the internet is back. 999 works without internet.",
+    "signNeeded": "When you tap \"Send report\", you will be asked to sign in. What you chose stays here.",
+    "offline": "No internet, so the report cannot be sent now. Keep this page open and send it when the internet is back. 999 works without internet.",
     "err": "The report could not be sent. Please try again in a little while.",
     "sentTitle": "Report received",
     "sentText": "Thank you. You can follow it in \"My reports\". The number on the site stays the same until our team has checked it.",
