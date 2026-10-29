@@ -416,15 +416,19 @@ function checkRows() {
 // The status and its audit entry go in one batch (firestore.rules refuse a change without it).
 async function saveStatus(r) {
   const to = choice[r.id] || r.status;
-  if (to === r.status || !online() || !acct) return;
+  if (to === r.status || !online() || !acct || saving.has(r.id)) return;
+  // One save at a time per report, so a double tap never writes two audit entries.
+  saving.add(r.id); const btn = $(`wsSave-${r.id}`); if (btn) btn.disabled = true;
   try {
     await acct.fb.setReportStatus(r.id, auditFields(acct.user.uid, r.id, r.status, to), to);
     r.status = to; delete choice[r.id]; rowMsg = { id: r.id, key: 'saved' };
     if (mine) { const m = mine.find((x) => x.id === r.id); if (m) m.status = to; }
   } catch { rowMsg = { id: r.id, key: 'saveErr' }; }
+  saving.delete(r.id);
   render();
   $(`wsSave-${r.id}`)?.focus({ preventScroll: true });
 }
+const saving = new Set();   // report ids whose status is being saved right now
 
 const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
 
