@@ -278,12 +278,15 @@
   .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); display: grid; place-items: center; font-weight: 800; font-size: 1.1rem; }
   .contact .num { color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
   .send-row { grid-column: 1 / -1; display: grid; gap: 8px; }
-  .send-row .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .send-row .pair { display: flex; flex-wrap: wrap; gap: 8px; }
+  .send-row .pair .send { flex: 1 1 7.5rem; }
   .send { display: grid; place-items: center; text-align: center; border-radius: 12px; padding: 12px; font-weight: 700; text-decoration: none; border: 0; cursor: pointer;
     background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); line-height: 1.2; }
   .send-row > .send { padding-block: 14px; font-size: 1.1rem; }
   .send.alt { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
   .send small { font-weight: 500; font-size: 0.78rem; opacity: 0.9; }
+  .send:disabled { opacity: 0.55; cursor: not-allowed; }
+  .send-note { display: grid; gap: 8px; justify-items: start; }
   .tools { display: flex; gap: 8px; flex-wrap: wrap; }
   .saved { display: flex; align-items: center; gap: 10px; padding-block: 8px; border-bottom: 1px solid var(--line); }
   .saved span { margin-right: auto; min-width: 0; overflow-wrap: anywhere; }
@@ -637,6 +640,8 @@
       <h2 id="sendTitle"></h2>
       <div id="sendList"></div>
       <div class="tools" id="sendTools"></div>
+      <div class="send-note" id="sendNote" role="status" aria-live="polite"></div>
+      <p class="privacy" id="msgrHint" hidden></p>
       <p class="privacy" id="smsHint"></p>
     </section>
     <section class="panel glass" aria-labelledby="msgTitle">

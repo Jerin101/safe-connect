@@ -449,7 +449,8 @@ function normPhone(raw) {
   else if (d.startsWith('88') && d.length === 13) d = d.slice(2);
   return /^01[3-9]\d{8}$/.test(d) ? d : null;
 }
-function getPeople() { try { return JSON.parse(store.get('sc-family') || '[]').filter((p) => p && normPhone(p.phone)); } catch { return []; } }
+// Saved numbers come back cleaned (01XXXXXXXXX), so every sms:, tel: and WhatsApp link gets plain digits.
+function getPeople() { try { return JSON.parse(store.get('sc-family') || '[]').filter((p) => p && normPhone(p.phone)).map((p) => ({ ...p, phone: normPhone(p.phone) })); } catch { return []; } }
 function setPeople(list) { store.set('sc-family', JSON.stringify(list)); }
 
 function renderHomeSos() {
@@ -504,30 +505,92 @@ function setSosPos(pos) {
   $('sosDemo').hidden = true;
   renderLoc(); refreshMessage();
 }
+// Share buttons per saved person (issue #75): SMS is the main one (works offline), then Call, WhatsApp and
+// Messenger. Nothing is sent by the site: each button only opens an app on the phone with the message ready.
+const isPhone = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+// The app link did not open anything if the page is still in front after about 1.5 s.
+function ifAppDidNotOpen(onFail) {
+  let left = false;
+  const away = () => { left = true; };
+  const hidden = () => { if (document.visibilityState === 'hidden') left = true; };
+  window.addEventListener('blur', away); window.addEventListener('pagehide', away);
+  document.addEventListener('visibilitychange', hidden);
+  setTimeout(() => {
+    window.removeEventListener('blur', away); window.removeEventListener('pagehide', away);
+    document.removeEventListener('visibilitychange', hidden);
+    if (!left && document.visibilityState === 'visible') onFail();
+  }, 1500);
+}
+// Copy the message: the Clipboard API, or the older select-and-copy when it is missing.
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch {}
+  try { const box = $('sosMsg'); box.select(); return document.execCommand('copy'); } catch { return false; }
+}
+function sendNote(text, withCopy = false) {
+  const note = $('sendNote');
+  note.replaceChildren(el('p', 'msg', text));
+  if (withCopy) {
+    const copy = el('button', 'btn', t().copyMsg); copy.type = 'button';
+    copy.addEventListener('click', copyMessage);
+    note.append(copy);
+  }
+}
+async function copyMessage() { sendNote((await copyText($('sosMsg').value)) ? t().copiedPaste : t().copyFailed); }
+// The phone's share menu ("Other app"); without it, copy the message.
+function shareMessage() {
+  if (!navigator.share) { copyMessage(); return; }
+  navigator.share({ text: $('sosMsg').value }).catch((err) => { if (err?.name !== 'AbortError') copyMessage(); });
+}
+// WhatsApp and Messenger need the internet: offline they show as disabled, SMS and Call stay on.
+function appButton(label, href, onTap) {
+  if (!navigator.onLine) {
+    const off = el('button', 'send alt', label); off.type = 'button'; off.disabled = true;
+    off.append(el('small', null, t().needNet));
+    return off;
+  }
+  const b = el(href ? 'a' : 'button', 'send alt', label);
+  if (href) { b.href = href; b.rel = 'noopener noreferrer'; } else b.type = 'button';
+  b.addEventListener('click', onTap);
+  return b;
+}
 function renderSend() {
   const people = getPeople();
   const body = () => $('sosMsg').value;
   const list = $('sendList');
   list.replaceChildren();
+  $('sendNote').replaceChildren();
   if (!people.length) {
     list.append(el('p', 'msg plain', t().noPeople));
     $('peopleBox').open = true;
   }
+  const map = sos.pos ? mapsLink(sos.pos) : null;
+  const msgr = isPhone();
   for (const p of people) {
     const row = el('div', 'contact');
+    const who = p.rel ? `${p.name} (${p.rel})` : p.name;
+    row.setAttribute('role', 'group'); row.setAttribute('aria-label', who);
     const av = el('span', 'avatar', (p.name || '?').trim().charAt(0).toUpperCase());
     const info = el('div');
-    info.append(el('b', null, p.rel ? `${p.name} (${p.rel})` : p.name), el('span', 'num', digits(p.phone)));
+    info.append(el('b', null, who), el('span', 'num', digits(p.phone)));
     const sendRow = el('div', 'send-row');
     const sms = el('a', 'send'); sms.href = `sms:${p.phone}?&body=${encodeURIComponent(body())}`;
     sms.append(document.createTextNode(t().sms), el('small', null, t().smsNoNet));
-    const wa = el('a', 'send alt', t().wa); wa.href = `https://wa.me/88${p.phone}?text=${encodeURIComponent(body())}`; wa.target = '_blank'; wa.rel = 'noopener';
     const call = el('a', 'send alt', t().call); call.href = `tel:${p.phone}`;
-    const pair = el('div', 'pair'); pair.append(wa, call);
+    const wa = appButton(t().wa, `whatsapp://send?phone=88${p.phone}&text=${encodeURIComponent(body())}`,
+      () => ifAppDidNotOpen(() => sendNote(t().waFailed, true)));
+    const pair = el('div', 'pair'); pair.append(call, wa);
+    // Messenger (phones only) takes only a link, so it gets the map link; with no location it opens the share menu.
+    if (msgr) {
+      pair.append(appButton(t().messenger, map ? `fb-messenger://share/?link=${encodeURIComponent(map)}` : null,
+        () => (map ? ifAppDidNotOpen(() => (navigator.share ? shareMessage() : sendNote(t().msgrFailed, true))) : shareMessage())));
+    }
     sendRow.append(sms, pair);
     row.append(av, info, sendRow);
     list.append(row);
   }
+  const hint = $('msgrHint');
+  hint.textContent = t().msgrHint;
+  hint.hidden = !(msgr && map && people.length && navigator.onLine);
   const tools = $('sendTools');
   tools.replaceChildren();
   if (people.length > 1) {
@@ -536,13 +599,10 @@ function renderSend() {
     tools.append(all);
   }
   const copy = el('button', 'btn', t().copyMsg); copy.type = 'button';
-  copy.addEventListener('click', () => navigator.clipboard?.writeText(body()).then(() => { copy.textContent = t().copied; }, () => { $('sosMsg').select(); }));
-  tools.append(copy);
-  if (navigator.share) {
-    const other = el('button', 'btn', t().other); other.type = 'button';
-    other.addEventListener('click', () => navigator.share({ text: body() }).catch(() => {}));
-    tools.append(other);
-  }
+  copy.addEventListener('click', copyMessage);
+  const other = el('button', 'btn', t().other); other.type = 'button';
+  other.addEventListener('click', shareMessage);
+  tools.append(copy, other);
 }
 function renderPeople() {
   const people = getPeople();
@@ -999,6 +1059,10 @@ if (isPlace()) route();
 function showOnline() { $('offlineNote').hidden = navigator.onLine; }
 window.addEventListener('online', showOnline);
 window.addEventListener('offline', showOnline);
+// WhatsApp and Messenger turn off and on with the internet.
+const sendOnline = () => { if (!$('sos').hidden) renderSend(); };
+window.addEventListener('online', sendOnline);
+window.addEventListener('offline', sendOnline);
 showOnline();
 
 // Offline app (P34): save the site on this phone after the first visit, so it opens with no internet.
