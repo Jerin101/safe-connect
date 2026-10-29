@@ -3,6 +3,7 @@
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
+import { REPORT_DISTRICTS } from './reports.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -121,6 +122,18 @@ function flagTags(r, tags = el('div', 'tags')) {
   for (const f of r.flags || []) if (t().flags[f]) tags.append(el('span', 'tag warn', t().flags[f]));
   return tags;
 }
+// "Report a wrong number" (P18, issue #79): only on area numbers from data/ with a record id, in the districts the
+// rules accept. National hotlines have no district, so they get no link. The tap opens the form; nothing is sent yet.
+function reportLink(r) {
+  const p = current && current.place;
+  if (!p || p.outside || r.kind === 'national' || !r.id || !withPhone(r) || !REPORT_DISTRICTS.includes(p.district)) return null;
+  const nm = [r.name_bn, r.designation_bn].filter(Boolean).join(', ') || r.office_bn || '';
+  const b = el('button', 'linkbtn rep', LANG[lang].report.link); b.type = 'button';
+  b.setAttribute('aria-label', fill(LANG[lang].report.linkLabel, { name: nm }));
+  const area = p.area ? p.area.bn : (upazilas(data.docs[p.district]).find((x) => x.en === p.upazila)?.bn || p.upazila);
+  b.addEventListener('click', () => auth.report(r, { district: p.district, area, areaLabel: [placeTitle(p), placeSub(p)].filter(Boolean).join(', ') }, b));
+  return b;
+}
 function personRow(r) {
   const row = el('div', 'person');
   const info = el('div');
@@ -142,6 +155,8 @@ function personRow(r) {
     src.append(a, ` · ${t().checked} ${fmtDate(r.script_check?.on || r.checked_on || r.retrieved_on)}`);
     row.append(src);
   }
+  const rep = reportLink(r);
+  if (rep) { const line = el('p', 'rep-line'); line.append(rep); row.append(line); }
   return row;
 }
 function firstRow(what, r, red = false) {
@@ -158,6 +173,8 @@ function firstRow(what, r, red = false) {
     src.append(a, ` · ${t().checked} ${fmtDate(r.script_check?.on || r.checked_on || r.retrieved_on)}`);
     info.append(src);
   }
+  const rep = reportLink(r);
+  if (rep) info.append(rep);
   row.append(info, callLink(r.phones[0], t().call, red));
   return row;
 }
@@ -1046,6 +1063,10 @@ const auth = initAuth({
   people: { get: getPeople, set: setPeople, norm: normPhone, changed: () => { renderHomeSos(); if (!$('sos').hidden) { renderPeople(); renderSend(); } } },
   placeName: (p) => (data && data.docs[p.district] ? { title: placeTitle(p), sub: placeSub(p) } : null),
   openArea: (p) => openArea(p, null),
+  // Reports (P18, issue #79): the record a report is about, looked up in data/ on this phone.
+  findRecord: (dkey, id) => (data && data.docs[dkey] ? data.docs[dkey].records.find((r) => r.id === id) || null : null),
+  districtName: (dkey) => { const d = districtOf(dkey); return d ? (lang === 'bn' ? d.bn : d.en) : dkey; },
+  fmtDate,
 });
 // Pages: show the page in the address now; an area address waits for the data it needs.
 history.scrollRestoration = 'manual';

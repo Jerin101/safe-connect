@@ -3,7 +3,11 @@
 // Offline first: family numbers ("sc-family") and saved areas ("sc-places") live on this phone and work with no internet.
 // The copy in the account is optional and off by default: only when the person turns it on are the numbers copied
 // to family/{uid}/people (fields allowed by firestore.rules: name, relation, phone). Turning it off deletes that copy.
-const SECTIONS = ['dash', 'family', 'places', 'reports', 'settings'];
+// "My reports" and the admin list "Check reports" (P18, issue #79) read reports with the only queries the rules allow:
+// a user lists only their own (uid == their uid); "check" is shown only to admins, and the rules check admins/{uid} again.
+import { STATUSES, REPORT_DISTRICTS, auditFields } from './reports.js';
+
+const WORK = ['dash', 'family', 'places', 'reports'];
 export const SYNC = 'sc-family-sync';     // "1" while the copy in the account is on (this phone only; cleared at sign-out)
 const PLACES = 'sc-places';        // saved areas, the same shape as "sc-last"
 const MAX_PEOPLE = 3;
@@ -19,6 +23,7 @@ const ICON = {
   out: 'M10 3H4v18h6v-2H6V5h4V3Zm6 4-1.4 1.4 2.6 2.6H9v2h8.2l-2.6 2.6L16 17l5-5-5-5Z',
   phone: 'M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z',
   send: 'M2 21 23 12 2 3v7l15 2-15 2v7Z',
+  check: 'M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1 14-4-4 1.4-1.4L11 13.2l4.6-4.6L17 10l-6 6Z',
 };
 
 let ctx = null;        // helpers from auth.js / preview.js
@@ -29,6 +34,13 @@ let syncMsg = null;    // key in auth.ws for the line under the switch
 let formErr = null;    // text under the add-number form
 let placeMsg = null;   // key in auth.ws under the saved areas
 let cardN = 0;         // numbers the card headings of one render (for aria-labelledby)
+let want = null;       // the section to open next (e.g. "reports" after sending a report)
+// Reports are kept only in memory while the workspace is open; null = not loaded yet.
+let mine = null, mineBusy = false, mineErr = null;
+let all = null, allBusy = false, allErr = null;
+let filter = { status: '', district: '' };
+let choice = {};       // admin: the status picked in each row, not saved yet
+let rowMsg = null;     // admin: { id, key } under one row
 
 const W = () => ctx.texts().auth.ws;
 const U = () => ctx.texts().ui;
@@ -36,6 +48,7 @@ const $ = (id) => ctx.$(id);
 const online = () => navigator.onLine;
 const visible = () => acct && !$('ws').hidden;
 export const syncOn = (store) => store.get(SYNC) === '1';
+const sections = () => (acct && acct.role === 'admin' ? [...WORK, 'check', 'settings'] : [...WORK, 'settings']);
 
 function icon(d) {
   const n = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -150,11 +163,11 @@ function renderSide() {
   const out = withIcon(button(null, 'navitem', ctx.askSignOut), ICON.out, a.signOut);
   $('wsSide').setAttribute('aria-label', w.side);
   $('wsSide').replaceChildren(me,
-    group(w.groupWork, ['dash', 'family', 'places', 'reports'].map(navButton)),
+    group(w.groupWork, sections().filter((k) => k !== 'settings').map(navButton)),
     group(w.groupAccount, [navButton('settings'), out]),
     group(w.groupHelp, helpItems('navitem')));
   $('wsMob').setAttribute('aria-label', w.sections);
-  $('wsMob').replaceChildren(...SECTIONS.map(navButton));
+  $('wsMob').replaceChildren(...sections().map(navButton));
 }
 function renderHead() {
   const w = W(), a = ctx.texts().auth;
@@ -300,6 +313,123 @@ function settingRow(title, now, btn) {
   r.append(txt, btn);
   return r;
 }
+/* ---------- wrong-number reports (P18, issue #79) ---------- */
+const R = () => ctx.texts().report;
+function reportsSub() {
+  if (mine) { const n = mine.filter((r) => r.status === 'open' || r.status === 'review').length; return n ? ctx.fill(W().statOpen, { n: ctx.digits(n) }) : W().noneYet; }
+  return online() ? ctx.texts().auth.wait : W().statNet;
+}
+async function loadMine() {
+  if (!acct || !online() || mineBusy) { if (visible()) render(); return; }
+  mineBusy = true; if (visible()) render();
+  const a = acct;
+  try { const list = await a.fb.myReports(a.user.uid); if (acct === a) { mine = list; mineErr = null; } } catch { if (acct === a) mineErr = 'reportsErr'; }
+  mineBusy = false;
+  if (visible()) render();
+}
+async function loadAll() {
+  if (!acct || acct.role !== 'admin' || !online() || allBusy) { if (visible()) render(); return; }
+  allBusy = true; if (visible()) render();
+  const a = acct;
+  try { const list = await a.fb.allReports(); if (acct === a) { all = list; allErr = null; } } catch { if (acct === a) allErr = 'checkErr'; }
+  allBusy = false;
+  if (visible()) render();
+}
+function reloadBtn(id, fn, busy) {
+  const b = button(busy ? ctx.texts().auth.wait : W().reload, 'btn sm', fn, id);
+  b.disabled = busy || !online();
+  return b;
+}
+function statusTag(st) { return ctx.el('span', `tag st-${STATUSES.includes(st) ? st : 'open'}`, R().statuses[st] || R().statuses.open); }
+const recordName = (rec) => [rec.name_bn, rec.designation_bn].filter(Boolean).join(', ') || rec.office_bn || '—';
+function note(cls, key) { const m = ctx.el('p', `${cls} wpad`, W()[key]); m.setAttribute('role', cls === 'err' ? 'alert' : 'status'); return m; }
+function stateNotes(list, busy, err, netKey) {
+  const out = [];
+  if (!online()) out.push(note('offline-note', netKey));
+  else if (err) out.push(note('err', err));
+  if (!list && busy) out.push(ctx.el('p', 'wempty', ctx.texts().auth.wait));
+  return out;
+}
+function reportRow(r) {
+  const rec = ctx.findRecord(r.district, r.recordId);
+  const row = ctx.el('div', 'wrow');
+  const ic = ctx.el('span', 'avatar'); ic.append(icon(ICON.reports));
+  const txt = ctx.el('div');
+  const when = r.createdAt ? ctx.fill(W().sentOn, { date: ctx.fmtDate(r.createdAt) }) : '';
+  txt.append(ctx.el('b', null, rec ? recordName(rec) : (r.area || r.recordId)),
+    ctx.el('small', null, [rec ? r.area : '', R().problems[r.problem] || '', when].filter(Boolean).join(' · ')));
+  const end = ctx.el('span', 'end'); end.append(statusTag(r.status));
+  row.append(ic, txt, end);
+  return row;
+}
+function mineRows() {
+  const out = stateNotes(mine, mineBusy, mineErr, 'reportsNet');
+  if (mine && !mine.length) out.push(ctx.el('p', 'wempty', W().reportsEmpty));
+  if (mine) out.push(...mine.map(reportRow));
+  return out;
+}
+// Admin list: the filters work on the loaded list (no extra index needed).
+function select(id, label, options, value, onChange) {
+  const l = ctx.el('label', 'field');
+  const s = document.createElement('select'); s.id = id;
+  for (const [v, text] of options) { const o = ctx.el('option', null, text); o.value = v; o.selected = v === value; s.append(o); }
+  s.addEventListener('change', () => onChange(s.value));
+  l.append(ctx.el('span', null, label), s);
+  return l;
+}
+function filters() {
+  const w = W(), r = R();
+  const box = ctx.el('div', 'wfilters');
+  box.append(
+    select('wsFStatus', w.fStatus, [['', w.fAll], ...STATUSES.map((x) => [x, r.statuses[x]])], filter.status, (v) => { filter.status = v; render(); }),
+    select('wsFDist', w.fDistrict, [['', w.fAll], ...REPORT_DISTRICTS.map((d) => [d, ctx.districtName(d)])], filter.district, (v) => { filter.district = v; render(); }));
+  return box;
+}
+function checkRow(r) {
+  const w = W(), u = ctx.texts().ui, rec = ctx.findRecord(r.district, r.recordId);
+  const row = reportRow(r);
+  row.classList.add('wcheck');
+  const more = ctx.el('div', 'wmore');
+  more.append(ctx.el('small', null, `${ctx.districtName(r.district)} · ${r.recordId}`));
+  if (r.note) more.append(ctx.el('p', 'wnote', r.note));
+  if (rec) {
+    more.append(ctx.el('small', null, `${w.nowShown}: ${(rec.phones || []).map(ctx.digits).join(', ') || '—'}`));
+    if (rec.source_url) { const a = ctx.el('a', null, `${u.source} ↗`); a.href = rec.source_url; a.target = '_blank'; a.rel = 'noopener'; more.append(a); }
+  } else more.append(ctx.el('small', null, w.recordGone));
+  const set = ctx.el('div', 'wset');
+  set.append(select(`wsSt-${r.id}`, w.setStatus, STATUSES.map((x) => [x, R().statuses[x]]), choice[r.id] || r.status, (v) => { choice[r.id] = v; rowMsg = null; }));
+  const save = button(w.saveStatus, 'btn sm violet', () => saveStatus(r), `wsSave-${r.id}`);
+  save.disabled = !online();
+  set.append(save);
+  more.append(set);
+  if (rowMsg && rowMsg.id === r.id) more.append(note(rowMsg.key === 'saveErr' ? 'err' : 'si-note', rowMsg.key));
+  row.append(more);
+  return row;
+}
+function checkRows() {
+  const out = stateNotes(all, allBusy, allErr, 'checkNet');
+  if (!all) return out;
+  const list = all.filter((r) => (!filter.status || r.status === filter.status) && (!filter.district || r.district === filter.district));
+  if (!list.length) out.push(ctx.el('p', 'wempty', W().checkNone));
+  return [...out, ...list.map(checkRow)];
+}
+// The status and its audit entry go in one batch (firestore.rules refuse a change without it).
+async function saveStatus(r) {
+  const to = choice[r.id] || r.status;
+  if (to === r.status || !online() || !acct || saving.has(r.id)) return;
+  // One save at a time per report, so a double tap never writes two audit entries.
+  saving.add(r.id); const btn = $(`wsSave-${r.id}`); if (btn) btn.disabled = true;
+  try {
+    await acct.fb.setReportStatus(r.id, auditFields(acct.user.uid, r.id, r.status, to), to);
+    r.status = to; delete choice[r.id]; rowMsg = { id: r.id, key: 'saved' };
+    if (mine) { const m = mine.find((x) => x.id === r.id); if (m) m.status = to; }
+  } catch { rowMsg = { id: r.id, key: 'saveErr' }; }
+  saving.delete(r.id);
+  render();
+  $(`wsSave-${r.id}`)?.focus({ preventScroll: true });
+}
+const saving = new Set();   // report ids whose status is being saved right now
+
 const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
 
 const SECTION = {
@@ -310,7 +440,7 @@ const SECTION = {
     stats.append(
       stat('family', ctx.digits(people.length), syncOn(ctx.store) ? w.onPhoneSync : w.onPhone),
       stat('places', ctx.digits(places.length), w.onPhone),
-      stat('reports', ctx.digits(0), w.noneYet));
+      stat('reports', mine ? ctx.digits(mine.length) : '—', reportsSub()));
     return [strip, stats, card(w.nav.family, personRows(false), button(w.seeAll, 'btn sm', () => show('family', true)))];
   },
   family() {
@@ -318,7 +448,8 @@ const SECTION = {
     return [card(w.nav.family, personRows(true)), card(w.addTitle, addForm()), card(w.syncTitle, syncSwitch())];
   },
   places() { return [card(W().nav.places, placeRows()), ...placeActions()]; },
-  reports() { return [card(W().nav.reports, [ctx.el('p', 'wempty', W().reportsEmpty)])]; },
+  reports() { return [card(W().nav.reports, mineRows(), reloadBtn('wsMineReload', loadMine, mineBusy))]; },
+  check() { return [filters(), card(W().checkTitle, checkRows(), reloadBtn('wsAllReload', loadAll, allBusy))]; },
   settings() {
     const w = W(), dark = isDark();
     const lang = button(w.langBtn, 'btn sm', () => { ctx.$('langBtn').click(); $('wsLangBtn')?.focus(); }, 'wsLangBtn');
@@ -344,8 +475,8 @@ function render() {
 }
 // A section from the sidebar or the section bar: its heading gets the focus (screen readers read it).
 function show(key, focus = false) {
-  section = SECTIONS.includes(key) ? key : 'dash';
-  formErr = null; placeMsg = null;
+  section = sections().includes(key) ? key : 'dash';
+  formErr = null; placeMsg = null; rowMsg = null;
   render();
   if (focus) { $('wsTitle').focus({ preventScroll: true }); window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }
 }
@@ -353,7 +484,11 @@ function show(key, focus = false) {
 export function initWorkspace(helpers) {
   ctx = helpers;
   $('wsOut').addEventListener('click', ctx.askSignOut);
-  const onNet = () => { if (!visible()) return; render(); if (online()) checkCloud(); };
+  const onNet = () => {
+    if (!visible()) return;
+    render();
+    if (online()) { checkCloud(); if (!mine) loadMine(); if (acct.role === 'admin' && !all) loadAll(); }
+  };
   window.addEventListener('online', onNet);
   window.addEventListener('offline', onNet);
   return {
@@ -361,12 +496,18 @@ export function initWorkspace(helpers) {
     open(state) {
       const first = !acct || acct.user !== state.user;
       acct = state;
-      if (first) { section = 'dash'; syncMsg = null; }
+      if (first) { section = 'dash'; syncMsg = null; mine = null; mineErr = null; all = null; allErr = null; choice = {}; rowMsg = null; }
+      if (want) { section = want; want = null; }
+      if (!sections().includes(section)) section = 'dash';
       render();
-      if (first) checkCloud();
+      if (first) { checkCloud(); loadMine(); if (acct.role === 'admin') loadAll(); } else if (!mine) loadMine();
     },
+    // Open this section the next time the workspace opens (e.g. "My reports" after sending a report).
+    want(key) { want = key; },
+    // A new report was sent: load "My reports" again (now if the workspace is open, else when it opens).
+    reportsChanged() { mine = null; if (visible()) loadMine(); },
     render() { if (acct) render(); },
     // Sign-out: nothing of this account stays in memory.
-    close() { acct = null; section = 'dash'; syncMsg = null; formErr = null; placeMsg = null; },
+    close() { acct = null; section = 'dash'; syncMsg = null; formErr = null; placeMsg = null; mine = null; all = null; choice = {}; rowMsg = null; },
   };
 }

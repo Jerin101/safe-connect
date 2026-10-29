@@ -4,7 +4,9 @@
 import { readFileSync } from 'node:fs';
 import { after, before, beforeEach, describe, test } from 'node:test';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
-import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
+import assert from 'node:assert/strict';
+import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, where, orderBy, limit } from 'firebase/firestore';
+import { reportFields, auditFields, PROBLEMS, REPORT_DISTRICTS, NOTE_MAX } from '../../js/reports.js';
 
 const ADMIN = 'admin-uid';
 const RINA = 'rina-uid';
@@ -254,5 +256,78 @@ describe('everything else is closed until P38', () => {
   test('volunteer applications cannot be written yet', async () => {
     await assertFails(setDoc(doc(db(RINA), 'applications', 'x'), { uid: RINA }));
     await assertFails(getDoc(doc(db(ADMIN), 'confirmations', 'code')));
+  });
+});
+
+// Issue #79: the exact documents js/reports.js and js/firebase.js write must pass the existing rules,
+// and wrong shapes must be refused. Test accounts only (fake uids), nothing real.
+describe('report form and lists (issue #79)', () => {
+  const draft = { recordId: '966c0c478a', district: 'noakhali', area: 'শরীফপুর ইউনিয়ন', problem: 'changed', note: 'গতকাল তিনবার চেষ্টা করেছি' };
+  const written = (uid, d = draft) => ({ ...reportFields(uid, d), createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  test('the site builds only the allowed fields, and nothing for a bad draft', () => {
+    assert.deepEqual(Object.keys(reportFields(KARIM, draft)).sort(), ['area', 'district', 'note', 'problem', 'recordId', 'status', 'uid']);
+    assert.equal(reportFields(KARIM, draft).status, 'open');
+    assert.deepEqual(Object.keys(reportFields(KARIM, { ...draft, note: '  ', area: '' })).sort(), ['district', 'problem', 'recordId', 'status', 'uid']);
+    assert.equal(reportFields(KARIM, { ...draft, problem: 'missing' }), null);
+    assert.equal(reportFields(KARIM, { ...draft, district: 'dhaka' }), null);
+    assert.equal(reportFields(null, draft), null);
+    assert.equal([...reportFields(KARIM, { ...draft, note: 'ক'.repeat(NOTE_MAX + 50) }).note].length, NOTE_MAX);
+  });
+  test('the exact report the site sends is accepted (with and without note and area)', async () => {
+    await assertSucceeds(setDoc(doc(collection(db(KARIM), 'reports')), written(KARIM)));
+    await assertSucceeds(setDoc(doc(collection(db(KARIM), 'reports')), written(KARIM, { ...draft, note: '', area: '' })));
+  });
+  test('the longest Bangla note and area the site allows are accepted', async () => {
+    const long = { ...draft, note: 'ক্ষ'.repeat(NOTE_MAX), area: 'ক'.repeat(200) };
+    await assertSucceeds(setDoc(doc(collection(db(KARIM), 'reports')), written(KARIM, long)));
+  });
+  test('every problem choice is accepted, in both districts', async () => {
+    for (const problem of PROBLEMS) for (const district of REPORT_DISTRICTS) {
+      await assertSucceeds(setDoc(doc(collection(db(KARIM), 'reports')), written(KARIM, { ...draft, problem, district })));
+    }
+  });
+  test('wrong shapes are refused: extra fields, unknown problem, other district, browser time, signed out', async () => {
+    const f = db(KARIM); const ref = () => doc(collection(f, 'reports'));
+    await assertFails(setDoc(ref(), { ...written(KARIM), phone: '01712345678' }));
+    await assertFails(setDoc(ref(), { ...written(KARIM), address: 'house 1' }));
+    await assertFails(setDoc(ref(), { ...written(KARIM), problem: 'missing' }));
+    await assertFails(setDoc(ref(), { ...written(KARIM), district: 'dhaka' }));
+    await assertFails(setDoc(ref(), { ...written(KARIM), createdAt: new Date() }));
+    await assertFails(setDoc(ref(), { ...written(KARIM), recordId: 7 }));
+    await assertFails(setDoc(doc(collection(db(null), 'reports')), written('nobody')));
+  });
+  test('"My reports": a user can list only their own reports', async () => {
+    const mine = await assertSucceeds(getDocs(query(collection(db(RINA), 'reports'), where('uid', '==', RINA))));
+    assert.equal(mine.size, 1);
+    await assertFails(getDocs(collection(db(RINA), 'reports')));
+    await assertFails(getDocs(query(collection(db(KARIM), 'reports'), where('uid', '==', RINA))));
+  });
+  test('admin list: an admin can list the newest reports, a user cannot', async () => {
+    const snap = await assertSucceeds(getDocs(query(collection(db(ADMIN), 'reports'), orderBy('createdAt', 'desc'), limit(100))));
+    assert.equal(snap.size, 1);
+    await assertFails(getDocs(query(collection(db(RINA), 'reports'), orderBy('createdAt', 'desc'), limit(100))));
+  });
+  test('admin status change: the exact batch the site writes is accepted for every status', async () => {
+    let from = 'open';
+    for (const to of ['review', 'fixed', 'same', 'open']) {
+      const f = db(ADMIN); const b = writeBatch(f);
+      const auditRef = doc(collection(f, 'audit'));
+      b.set(auditRef, { ...auditFields(ADMIN, 'r1', from, to), at: serverTimestamp() });
+      b.update(doc(f, 'reports', 'r1'), { status: to, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
+      await assertSucceeds(b.commit());
+      from = to;
+    }
+  });
+  test('a status change by a user, an unknown status or an audit entry about another report is refused', async () => {
+    const tryBatch = async (uid, to, entityId) => {
+      const f = db(uid); const b = writeBatch(f);
+      const auditRef = doc(collection(f, 'audit'));
+      b.set(auditRef, { ...auditFields(uid, entityId, 'open', to), at: serverTimestamp() });
+      b.update(doc(f, 'reports', 'r1'), { status: to, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
+      return b.commit();
+    };
+    await assertFails(tryBatch(RINA, 'fixed', 'r1'));
+    await assertFails(tryBatch(ADMIN, 'deleted', 'r1'));
+    await assertFails(tryBatch(ADMIN, 'fixed', 'r2'));
   });
 });

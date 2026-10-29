@@ -7,7 +7,9 @@ import {
   getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, writeBatch } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
+import {
+  getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, writeBatch, query, where, orderBy, limit,
+} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 
 const app = initializeApp(firebaseConfig);
@@ -83,5 +85,34 @@ export async function deleteFamily(uid) {
   const batch = writeBatch(db);
   const ids = new Set([...FAMILY_IDS, ...snap.docs.map((d) => d.id)]);
   for (const id of ids) batch.delete(familyRef(uid, id));
+  await batch.commit();
+}
+
+// Wrong-number reports (P18, issue #79). js/reports.js builds the fields (reportFields, auditFields) in exactly the
+// shape firestore.rules allow; here only the server times are added.
+const millis = (t) => (t && typeof t.toMillis === 'function' ? t.toMillis() : null);
+const asReport = (d) => { const x = d.data(); return { id: d.id, ...x, createdAt: millis(x.createdAt), updatedAt: millis(x.updatedAt) }; };
+const newest = (a, b) => (b.createdAt || 0) - (a.createdAt || 0);
+export async function sendReport(fields) {
+  const ref = doc(collection(db, 'reports'));
+  await setDoc(ref, { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  return ref.id;
+}
+// The person's own reports: the only list query the rules allow a user (uid == their own uid). Sorted here, so no index is needed.
+export async function myReports(uid) {
+  const snap = await getDocs(query(collection(db, 'reports'), where('uid', '==', uid)));
+  return snap.docs.map(asReport).sort(newest);
+}
+// Admins only (the rules check admins/{uid}): the newest 100 reports.
+export async function allReports() {
+  const snap = await getDocs(query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(100)));
+  return snap.docs.map(asReport);
+}
+// Admins only: the new status and its audit entry in one batch (the rules refuse a change without it).
+export async function setReportStatus(reportId, audit, status) {
+  const batch = writeBatch(db);
+  const auditRef = doc(collection(db, 'audit'));
+  batch.set(auditRef, { ...audit, at: serverTimestamp() });
+  batch.update(doc(db, 'reports', reportId), { status, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
   await batch.commit();
 }

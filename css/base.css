@@ -338,3 +338,51 @@ textarea { resize: vertical; line-height: 1.45; }
 .form .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
 .form label { display: grid; gap: 4px; font-size: 0.88rem; font-weight: 600; min-width: 0; }
 .err { color: var(--red-ink); font-size: 0.9rem; font-weight: 600; }
+
+/* ---------- wrong-number report (P18, issue #79; design/portal-v3.html): 3 steps in a dialog, status tags ---------- */
+.rmodal .rep-body { display: grid; gap: 16px; align-content: start; padding: 18px 16px 28px; max-width: 640px; margin: 0 auto; min-width: 0; }
+.rmodal .si-head h1 { font-size: clamp(1.4rem, 5vw, 1.8rem); }
+.rmodal .si-head h1:focus { outline: none; }
+.rmodal .si-head p { color: var(--ink-2); }
+.rmodal .btn { min-height: 44px; }
+@media (min-width: 860px) { .rmodal { width: min(680px, calc(100% - 40px)); } }
+.rep-step { display: grid; gap: 14px; min-width: 0; }
+.stepper { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.step { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; gap: 8px; align-items: center; font-size: 0.85rem; color: var(--muted); background: var(--surface); min-width: 0; }
+.step span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.step i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 0.75rem; border: 1px solid var(--line-2); flex: none; }
+.step.on { color: var(--ink); border-color: var(--accent); }
+.step.on i { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.step.done i { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+@media (max-width: 520px) { .step span { display: none; } .step { justify-content: center; } }
+.review { display: grid; gap: 0; margin: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.review > div { display: grid; gap: 2px; padding: 10px 14px; border-bottom: 1px solid var(--line); min-width: 0; }
+.review > div:last-child { border-bottom: 0; }
+.review dt { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+.review dd { margin: 0; overflow-wrap: anywhere; }
+.choices { display: grid; gap: 8px; border: 0; margin: 0; padding: 0; min-width: 0; }
+.choices legend { font-weight: 600; margin-bottom: 6px; padding: 0; }
+.choice { display: flex; align-items: center; gap: 10px; min-height: 48px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; background: var(--surface); cursor: pointer; }
+.choice input { width: 20px; height: 20px; margin: 0; flex: none; accent-color: var(--accent); }
+.choice:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.field textarea { background: var(--bg); font-weight: 400; }
+.field textarea:focus, .field select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.field small { color: var(--muted); font-weight: 400; }
+.field select { width: 100%; min-height: 44px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-weight: 400; }
+.success { display: grid; gap: 10px; justify-items: start; }
+.success .big { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--ok-soft); color: var(--ok); font-size: 1.4rem; font-weight: 700; }
+.success h2 { font-size: 1.15rem; }
+.linkbtn.rep { min-height: 44px; font-size: 0.84rem; }
+.rep-line { grid-column: 1 / -1; margin: -6px 0 0; }
+.tag.st-open { background: var(--accent-soft); color: var(--ink); }
+.tag.st-review { background: var(--warn-bg); color: var(--warn); }
+.tag.st-fixed { background: var(--ok-soft); color: var(--ok); }
+.tag.st-same { background: var(--surface-2); color: var(--ink-2); }
+.wrow .tag { font-size: 0.8rem; padding: 2px 8px; }
+.wpad { margin: 12px 16px; }
+.wfilters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 10px; }
+.wmore { grid-column: 1 / -1; display: grid; gap: 6px; justify-items: start; min-width: 0; }
+.wmore a { color: var(--link); font-weight: 600; font-size: 0.88rem; min-height: 32px; display: inline-flex; align-items: center; }
+.wnote { overflow-wrap: anywhere; color: var(--ink-2); font-size: 0.92rem; border-left: 3px solid var(--line-2); padding-left: 10px; }
+.wset { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+.wset .field { min-width: min(100%, 180px); }
