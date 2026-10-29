@@ -425,29 +425,29 @@
     "numRow": {
       "title": "Emergency numbers",
       "back": "Previous numbers",
-      "more": "More numbers"
+      "more": "Next numbers"
     },
     "rail": {
       "label": "Keep on your phone and filters",
       "appTitle": "Keep it on your phone",
-      "appText": "Open this address in your phone's browser, then tap \"Add to Home screen\". After one visit it works without internet.",
+      "appText": "Open this address in your phone's browser, then tap \"Add to Home screen\" in the menu. After one visit, the numbers work without internet.",
       "fTitle": "Filters",
       "fDist": "District",
-      "fNote": "Shows known places and search results for the chosen district.",
+      "fNote": "Shows only places and search results in the chosen district.",
       "fReset": "Show all"
     },
     "roles": {
       "eyebrow": "Account (optional)",
       "t1": "Three roles, ",
-      "t2": "one goal: fast help.",
-      "text": "Signing in only adds extras. 999, sending your location and help near me work without signing in.",
+      "t2": "one goal: the right number at hand.",
+      "text": "Signing in only adds extras. 999, sending your location and \"Find help near me\" work without signing in.",
       "signIn": "Sign in",
       "user": "Anyone can sign in. Getting your saved numbers on another phone is coming soon.",
       "volunteer": "The part for local volunteers is still being built.",
       "volunteerTag": "Soon",
       "admin": "Only for the SafeConnect team, to keep the numbers correct.",
       "noteB": "No sign-in needed:",
-      "note": "999, sending your location, help near me, area search and every number."
+      "note": "999, sending your location to family, \"Find help near me\", area search and every number."
     }
   },
   "auth": {
