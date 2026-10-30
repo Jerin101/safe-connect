@@ -31,6 +31,7 @@
   --foot-bg: #F3EDE6; --foot-ink: #1A1724; --foot-muted: #645F70; --foot-line: rgba(20, 20, 45, 0.10);
   --font: "Manrope", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
   --r: 16px;
+  --header-h: 150px;   /* height of header.site; js/preview.js replaces it with the measured height (issue #103) */
   --fade: 200ms;   /* page change fade (issue #71) */
   color-scheme: light;
 }

@@ -388,8 +388,16 @@ function renderChip() {
   let last = null;
   try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
   const h = P().head;
-  $('areaChipT').textContent = last && data && data.docs[last.district] ? placeTitle(last) : h.chipEmpty;
+  const name = last && data && data.docs[last.district] ? placeTitle(last) : h.chipEmpty;
+  $('areaChipT').textContent = name;
   $('areaChipS').textContent = h.chipSub;
+  $('hcAreaS').textContent = name;    // "My area" in the sidebar's emergency card
+}
+// Sidebar "My area": opens the last area, or the area finder when none is saved yet.
+function openMyArea() {
+  let last = null;
+  try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
+  if (last && data && data.docs[last.district]) openArea(last, null); else findArea('');
 }
 function renderRecent() {
   renderChip();
@@ -941,10 +949,13 @@ function renderNet() {
   $('netList').replaceChildren(...P().net.map(([k, text]) => el('li', k === 'soon' ? 'soon' : null, text)));
 }
 
-// Sidebar (v3): "keep it on your phone" card with the short address, and the district filter.
+// Sidebar (v3): emergency help card (#103), the district filter, and the "keep it on your phone" card with the short address.
 function renderRail() {
   const r = P().rail;
   $('rail').setAttribute('aria-label', r.label);
+  $('hcTitle').textContent = r.helpTitle;
+  $('hc999T').textContent = t().call999; $('hcSendT').textContent = P().head.cta; $('hcNearT').textContent = t().locate;
+  $('hcAreaT').textContent = r.myArea;
   $('appTitle').textContent = r.appTitle; $('appText').textContent = r.appText;
   $('fTitle').textContent = r.fTitle; $('fDist').textContent = r.fDist; $('fNote').textContent = r.fNote; $('fReset').textContent = r.fReset;
   districtOptions($('railDist'), t().distAll);
@@ -1038,6 +1049,13 @@ $('homeBtn').addEventListener('click', goHome);
 $('areaChip').addEventListener('click', () => findArea(''));
 $('hFinder').addEventListener('click', () => findArea(''));
 $('ctaSend').addEventListener('click', () => openSos(null));
+$('hcSend').addEventListener('click', () => openSos(null));
+// The location message and the demo are in the banner, which may be scrolled away: bring them into view when shown.
+$('hcNear').addEventListener('click', () => locate().then(() => { if (!$('locMsg').hidden) $('homeMsgs').scrollIntoView({ block: 'center' }); }));
+$('hcArea').addEventListener('click', openMyArea);
+// The header's height changes with the language, text size and window width; the sticky sidebar sits just below it (#103).
+new ResizeObserver(([e]) => document.documentElement.style.setProperty('--header-h', `${Math.ceil(e.target.getBoundingClientRect().height)}px`))
+  .observe(document.querySelector('header.site'));
 $('changeBtn').addEventListener('click', () => findArea(''));
 $('langBtn').addEventListener('click', () => {
   lang = lang === 'bn' ? 'en' : 'bn';
