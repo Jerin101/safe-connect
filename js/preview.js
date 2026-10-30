@@ -904,7 +904,6 @@ function saveNumbers() { openSos(null, false, () => { $('peopleBox').open = true
 
 const SITE = {
   repo: 'https://github.com/Jerin101/safe-connect',
-  report: 'https://github.com/Jerin101/safe-connect/issues/new?labels=data-gap&title=Wrong%20number',
 };
 const P = () => LANG[lang].page;
 const MORE_ICONS = {
@@ -990,7 +989,7 @@ function renderFooter() {
   $('footGrid').replaceChildren(brand,
     col(sT, [call, textBtn(s[1], () => openSos(null)), textBtn(s[2], locate), textBtn(s[3], () => findArea(''))]),
     col(aT, [textBtn(a[0], () => findArea('noakhali')), textBtn(a[1], () => findArea('coxsbazar')), textBtn(a[2], () => openQuick('chowmuhani')), textBtn(a[3], () => openQuick('inani'))]),
-    col(iT, [textBtn(i[0], () => go('about')), textBtn(i[1], () => go('faq')), extLink(i[2], SITE.report), textBtn(i[3], () => openFaq('source'))]),
+    col(iT, [textBtn(i[0], () => go('about')), textBtn(i[1], () => go('faq')), textBtn(i[2], () => findArea('')), textBtn(i[3], () => openFaq('source'))]),
     help);
   const nav = el('nav'); nav.setAttribute('aria-label', 'Footer');
   const tests = el('a', null, f.bottom[3]); tests.href = 'tests/search-test.html';
@@ -1080,7 +1079,7 @@ function renderDuo() {
     const badge = el('span', `badge-ic ${cls}`); badge.append(svg(GP_ICONS[ic]));
     c.append(d, badge); return c;
   };
-  $('duoCards').replaceChildren(card(ic1, 'c-violet', t1, p1, primaryBtn(b1, saveNumbers)), card(ic2, 'c-amber', t2, p2, primaryBtn(b2, null, SITE.report)));
+  $('duoCards').replaceChildren(card(ic1, 'c-violet', t1, p1, primaryBtn(b1, saveNumbers)), card(ic2, 'c-amber', t2, p2, primaryBtn(b2, () => findArea(''))));
 }
 function renderHelp() {
   $('helpTitle').textContent = P().helpTitle;
@@ -1090,7 +1089,7 @@ function renderHelp() {
     if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else { b.type = 'button'; b.addEventListener('click', fn); }
     const c = el('span', 'circle'); c.append(svg(GP_ICONS[ic])); b.append(c, el('span', null, label)); return b;
   };
-  $('helpRow').replaceChildren(item(q, 'question', () => go('faq')), item(src, 'db', () => openFaq('source')), item(priv, 'lock', () => openFaq('privacy')), item(rep, 'flag', null, SITE.report));
+  $('helpRow').replaceChildren(item(q, 'question', () => go('faq')), item(src, 'db', () => openFaq('source')), item(priv, 'lock', () => openFaq('privacy')), item(rep, 'flag', () => findArea('')));
 }
 // Weak-network band: only what works today gets a tick; the rest says "coming soon" (DESIGN.md §2).
 function renderNet() {
@@ -1165,7 +1164,7 @@ function setText() {
   document.documentElement.lang = lang;
   $('langBtn').textContent = s.lang;
   $('hello1').textContent = s.hello1; $('hello2').textContent = s.hello2;
-  $('lead').textContent = s.lead; $('h999Text').textContent = s.h999;
+  $('lead').textContent = s.lead; $('coverage').textContent = s.coverage; $('h999Text').textContent = s.h999;
   $('quickEyebrow').textContent = s.quickEyebrow; $('quickTitle').textContent = s.quickTitle; $('quickText').textContent = s.quickText;
   districtOptions($('distSel'), s.distAll);
   $('call999Title').textContent = s.call999; $('call999Sub').textContent = s.call999Sub;
