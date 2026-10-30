@@ -8,30 +8,30 @@
       "explain": "While this site is open on your screen, it checks where you are and shows the numbers for that area. Your location stays on this phone and is never sent anywhere; only the area name is saved. You can turn it off any time.",
       "allow": "Yes, turn on",
       "notNow": "Not now",
-      "denied": "Location is blocked for this site, so your area will not update by itself. You can choose your area by hand.",
+      "denied": "Location is blocked for this site, so your area will not update by itself. You can still choose it with \"Find area\".",
       "unavailable": "Could not find your location right now. Your last area stays; it will try again.",
       "timeout": "Finding your location took too long. Your last area stays; it will try again.",
-      "unsupported": "This browser cannot find your location. You can choose your area by hand.",
+      "unsupported": "This browser cannot find your location. You can still choose it with \"Find area\".",
       "changed": "Your area changed: {n}",
       "found": "Your area: {n}",
       "otherArea": "Automatic area is on: your area comes from GPS. To change it, turn the switch off.",
       "toSwitch": "Go to the switch",
       "firstFor": "Call these first: {n}",
-      "noArea": "Your area",
-      "noAreaText": "Choose your area once, and its police station and local numbers will show here.",
+      "noArea": "My area",
+      "noAreaText": "Use \"Find area\" once, and that area's police station and local numbers will show here.",
       "allNumbers": "All numbers for this area"
     },
     "lang": "বাং",
     "hello1": "Need help?",
     "hello2": "Stay calm. The official numbers for your area are right here.",
     "h999": "999",
-    "lead": "Police station, chairman, village police and hospital numbers for your union. All from official government websites; the sources are re-checked every week.",
+    "lead": "Police station, chairman, village police and hospital numbers for the unions of Noakhali and Cox's Bazar. All from official government websites; the sources are re-checked every week.",
     "distAll": "All districts",
     "stats": [
       "official numbers",
       "unions and towns",
       "upazilas",
-      "last checked"
+      "sources re-checked"
     ],
     "quickEyebrow": "Quick go",
     "quickTitle": "Known places",
@@ -65,7 +65,7 @@
     "noMatch": "This name is not in our list yet. You can still get help:",
     "didYouMean": "Similar names",
     "noExact": "Not found with this exact spelling. Is it one of these?",
-    "tellUs": "If your place is missing, tell us with \"Report a wrong number\" below (needs a GitHub account).",
+    "tellUs": "If your place is missing, type your upazila. You will get its police station and UNO numbers.",
     "pickUpazila": "Pick your upazila. Its police station and UNO numbers are there.",
     "kinds": {
       "municipality": "town",
@@ -89,7 +89,7 @@
     "change": "Change area",
     "town": "town",
     "wholeUpazila": "whole upazila",
-    "shareTitle": "Send your location to family",
+    "shareTitle": "Send location",
     "shareText": "One tap sends a message with a map link. You can also tell 999 this location.",
     "shareMsg": "I am in danger. My location: {link}",
     "copy": "Copy",
@@ -104,7 +104,7 @@
     "call": "Call",
     "ward": "Ward",
     "source": "Official source",
-    "checked": "Checked",
+    "checked": "Source checked",
     "what": {
       "emergency": "Emergency",
       "police": "Police station",
@@ -139,10 +139,10 @@
     "credit": "Map data: upazila boundaries and union/town centre points from the Bangladesh Bureau of Statistics (BBS) via OCHA HDX (CC BY-IGO). Where BBS names do not match, the tools can add OpenStreetMap points (© OpenStreetMap contributors, ODbL).",
     "testsLink": "Search tests (for developers)",
     "foot1": "All numbers come from official *.gov.bd websites. Each number links to its source. In danger, call 999 first.",
-    "sosBtn": "Send my location to family",
+    "sosBtn": "Send location",
     "sosBtnSubNone": "No login · save one number once",
     "sosBtnSub": "One tap · SMS works without internet",
-    "sosTitle": "Send my location to family",
+    "sosTitle": "Send location",
     "sit": "What happened?",
     "loc": "Your location",
     "send": "Send to",
@@ -218,7 +218,8 @@
     "msgrFailed": "Messenger did not open. Send an SMS, or copy the message and paste it in another app.",
     "msgrHint": "Messenger sends only the map link, not your message. Choose the person in Messenger.",
     "copiedPaste": "Message copied. Paste it in any app and send it.",
-    "copyFailed": "Could not copy. Press and hold the text in the message box and copy it yourself."
+    "copyFailed": "Could not copy. Press and hold the text in the message box and copy it yourself.",
+    "coverage": "Area numbers are only for Noakhali and Cox's Bazar for now. 999 and the national numbers work everywhere."
   },
   "page": {
     "greet": {
@@ -254,9 +255,9 @@
     },
     "iconSend": "Send location",
     "iconSendSub": "to family",
-    "iconNear": "Help near me",
+    "iconNear": "Find help near me",
     "iconNearSub": "police station & chairman",
-    "iconSrc": "Official source and check date of these numbers",
+    "iconSrc": "Official source of these numbers and the date the source was checked",
     "findTitle": "Which area are you in?",
     "findText": "Type your village, union, town or upazila, in Bangla or English, any spelling.",
     "guideTitle": "What happened?",
@@ -294,7 +295,7 @@
       [
         "flag",
         "Found a wrong number?",
-        "Tell us (needs a GitHub account). We check it against the official source and fix it if it is wrong.",
+        "On an area page, every number has \"Report a wrong number\" (you need to sign in). We check it against the official source and fix it if it is wrong.",
         "Report a wrong number"
       ]
     ],
@@ -325,10 +326,10 @@
       ]
     ],
     "head": {
-      "chipEmpty": "Choose your area",
+      "chipEmpty": "Find area",
       "chipSub": "Noakhali and Cox's Bazar",
       "cta": "Send location",
-      "search": "Search your area",
+      "search": "Find area",
       "home": "SafeConnect home",
       "navLabel": "Main menu",
       "langLabel": "Change language: English / বাংলা",
@@ -384,12 +385,12 @@
         [
           "source",
           "Where do the numbers come from?",
-          "From the official websites (*.gov.bd) of districts, upazilas, unions and municipalities. Each number shows its source link and check date."
+          "From the official websites (*.gov.bd) of districts, upazilas, unions and municipalities. Each number shows its source link and the date the source was checked."
         ],
         [
           "wrong",
           "What if a number is wrong?",
-          "Tell us with \"Report a wrong number\" below. We fix it against the official source. In an emergency, call 999 first."
+          "On an area page, tap \"Report a wrong number\" under the number (you need to sign in). We check it against the official source and fix it if it is wrong. In an emergency, call 999 first."
         ],
         [
           "offline",
@@ -435,7 +436,7 @@
           "About",
           "Questions",
           "Report a wrong number",
-          "Sources and checks"
+          "Sources"
         ]
       ],
       "helpTitle": "Need a little help?",
@@ -477,7 +478,7 @@
       "volunteerTag": "Soon",
       "admin": "Only for the SafeConnect team, to keep the numbers correct.",
       "noteB": "No sign-in needed:",
-      "note": "999, sending your location to family, \"Find help near me\", area search and every number."
+      "note": "999, sending your location, \"Find help near me\", area search and every number."
     }
   },
   "auth": {
@@ -588,7 +589,7 @@
       "add": "Add",
       "sms": "SMS",
       "syncTitle": "Keep a copy in my account",
-      "syncText": "Off: your people's names, relations and numbers stay only on this phone. On: a copy is kept in your account, so you get them on a new phone too. Saved areas are not copied. Turning it off deletes the copy in your account.",
+      "syncText": "Off: your family's names, relations and numbers stay only on this phone. On: a copy is kept in your account, so you get them on a new phone too. Saved areas are not copied. Turning it off deletes the copy in your account.",
       "syncOn": "A copy of your numbers is now in your account.",
       "syncOff": "The copy in your account was deleted. The numbers are still on this phone.",
       "syncRestored": "The numbers from your account were added to this phone.",
@@ -596,7 +597,7 @@
       "syncErr": "The copy in your account could not be changed. Please try again in a little while.",
       "placesNone": "No area saved yet. Open your area once, then save it here.",
       "saveLast": "Save: {place}",
-      "findArea": "Find an area",
+      "findArea": "Find area",
       "open": "Open",
       "maxPlaces": "You can save up to 5 areas.",
       "reportsEmpty": "No reports yet. To report a wrong number, open your area and tap \"Report a wrong number\" under the number.",
@@ -675,13 +676,13 @@
     },
     "signOut": "Sign out",
     "outTitle": "Sign out?",
-    "outText": "Your people's numbers and saved areas stay on this phone, unless you tick the box below. \"Call 999\", \"Send my location to family\" and \"Find help near me\" keep working after you sign out.",
+    "outText": "Your family's numbers and saved areas stay on this phone, unless you tick the box below. \"Call 999\", \"Send location\" and \"Find help near me\" keep working after you sign out.",
     "outYes": "Sign out",
     "outNo": "Cancel",
-    "outRemove": "Also remove my people's numbers and saved areas from this phone",
+    "outRemove": "Also remove my family's numbers and saved areas from this phone",
     "outSync": "The copy of your numbers in your account stays. To delete it, turn off \"Keep a copy in my account\" before you sign out.",
-    "outRemoved": "Signed out. Your people's numbers and saved areas were removed from this phone. \"Call 999\", \"Send my location to family\" and \"Find help near me\" still work as before.",
-    "outDone": "Signed out. \"Call 999\", \"Send my location to family\" and \"Find help near me\" still work as before.",
+    "outRemoved": "Signed out. Your family's numbers and saved areas were removed from this phone. \"Call 999\", \"Send location\" and \"Find help near me\" still work as before.",
+    "outDone": "Signed out. \"Call 999\", \"Send location\" and \"Find help near me\" still work as before.",
     "reset": {
       "pageTitle": "New password",
       "title": "Set a new password",
