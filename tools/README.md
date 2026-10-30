@@ -19,3 +19,22 @@ Python 3, standard library only. Run them from this `tools` folder. They wait be
 | `collect_locations.py`, `fill_locations.py`, `build_locations.py` | Map points and upazila boundaries for GPS → area (BBS boundaries via OCHA HDX, OpenStreetMap) | ~15 min |
 
 Full refresh order and details: `docs/DATA_REPORT.md`. Raw `*_raw.json` files are working files and are not committed.
+
+## Where the output goes
+
+Every script takes the output path as an argument. Run from `tools/`, keep the raw working files one folder up (not committed) and write the finished files into `data/`:
+
+```
+python collect_contacts.py ..\contacts_raw.json                  # raw file, not committed
+python build_contacts.py ..\contacts_raw.json ..\union_pages_raw.json ..\data ..\municipalities_raw.json
+python build_areas.py ..\areas_raw.json ..\data\areas_bangladesh.json
+python verify_sources.py ..\data                                 # writes data\verify_report.json
+python spot_check.py ..\data                                     # writes data\spot_check_40.csv
+python validate_data.py ..\data                                  # must say 0 errors
+```
+
+Without a path, a script writes into the current folder (`tools/`). Move nothing by hand: run it again with the right path. Full order: `docs/DATA_REPORT.md`.
+
+## Officer pages have no date
+
+Union pages show a "last updated" date, so those records keep it in `source_last_updated` (and get the flag `source_older_than_2_years` when it is old). Officer pages (police, UNO, hospital, fire…) show no date, so `source_last_updated` stays empty for officer records. The site then shows the "checked on" date instead: the last `verify_sources.py` check (`script_check.on`), otherwise the date the page was downloaded (`retrieved_on`).
