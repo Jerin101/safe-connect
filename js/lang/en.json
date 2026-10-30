@@ -435,7 +435,9 @@
       "more": "Next numbers"
     },
     "rail": {
-      "label": "Keep on your phone and filters",
+      "label": "Emergency help and filters",
+      "helpTitle": "Emergency help",
+      "myArea": "My area",
       "appTitle": "Keep it on your phone",
       "appText": "Open this address in your phone's browser, then tap \"Add to Home screen\" in the menu. After one visit, the numbers work without internet.",
       "fTitle": "Filters",
