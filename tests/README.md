@@ -23,3 +23,17 @@ has to confirm (for example Hasan Hat) gets `"pending": "why"`; it is shown but 
 
 Before a pull request that changes `js/data.js`, `data/villages.json` or `data/aliases.json`: open the test page and
 check that it says **0 failed**.
+
+## Auto location (issue #105)
+
+`autoloc-test.mjs` drives the Chrome (or Edge) already on this computer through its DevTools port, with a fake
+position and fake location permission. No packages to install.
+
+**Run:** `python -m http.server 8000` in the project folder, then in a second terminal `node tests/autoloc-test.mjs`.
+It must end with **ALL OK**. Optional: `SHOTS=<folder>` saves 360 px screenshots, `CHROME=<path>` picks the browser.
+
+It checks: off by default and no location call when off; the explanation comes before the browser asks; on → the
+area is set on open and the header chip, sidebar card and home list show it; walking across a union line changes
+the area with a toast and never leaves the page; moves under 300 m are ignored; a hidden tab stops the watch;
+no coordinates are saved; "blocked" turns the switch off and the area can still be chosen by hand; reduced motion;
+offline; 360 px in bn/en and night/day.

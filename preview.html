@@ -82,6 +82,19 @@
   .welcome h2 { font-size: 1.08rem; }
   .welcome ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; color: var(--muted); font-size: 0.94rem; }
   .welcome .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .welcome h3 { font-size: 1.08rem; }
+  /* My area on home (issue #105) */
+  .myarea { display: grid; gap: 12px; align-content: start; }
+  .myarea:empty { display: none; }   /* page shown before the data has loaded */
+  .myarea .linkbtn { justify-self: start; min-height: 44px; }
+  .myarea .muted { color: var(--muted); }
+  .myarea > .btn { justify-self: start; }
+  .auto-box { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+  .auto-box > :not(.switch) { margin-inline: 16px; }
+  .auto-box > :last-child:not(.switch) { margin-bottom: 14px; }
+  .auto-box .switch { border-bottom: 0; }
+  .auto-ask { display: grid; gap: 10px; color: var(--ink-2); font-size: 0.94rem; }
+  .auto-ask .row, .wcard .auto-ask .row { display: flex; gap: 8px; flex-wrap: wrap; }
   .calm { color: var(--muted); font-size: 0.92rem; margin-top: -4px; }
 
   /* the three big actions: 999 first; one under the other on phones, side by side from 720 px (DESIGN.md §3b) */
@@ -485,6 +498,9 @@
             <div class="home-msgs" id="homeMsgs"><p class="msg" id="locMsg" role="status" hidden></p><div class="demo" id="demo" hidden><p id="demoText"></p><div class="chips" id="demoChips"></div></div></div>
           </div>
         </section>
+
+        <!-- My area (issue #105): "Call these first" for the last area, and the opt-in auto location switch; filled by js/preview.js. -->
+        <section class="row-sec myarea" id="myArea" aria-labelledby="myAreaTitle" data-pages="home"></section>
 
         <section class="row-sec icons" aria-labelledby="numbersTitle" data-pages="home numbers">
           <div class="row-head">
