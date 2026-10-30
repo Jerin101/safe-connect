@@ -1015,25 +1015,26 @@ const GP_ICONS = {
 // Quiet single-colour tiles; only 999's tile is soft red (DESIGN.md §3).
 const ICON_ROW = [['national-emergency-999', 'phone', 'soft-red'], ['fire-service-102', 'fire', ''], ['health-call-centre-16263', 'health', ''],
   ['women-children-violence-109', 'woman', ''], ['child-helpline-1098', 'child', ''], ['tourist-police-helpline', 'bag', ''], ['info-service-333', 'info', '']];
-// Numbers that appear inside card text (situation cards); listed with their sources too.
-const TEXT_NUMBERS = ['disaster-warning-1090'];
 function iconCircle(path, cls) { const c = el('span', cls ? `circle ${cls}` : 'circle'); c.append(svg(path)); return c; }
-// Round icon row: national numbers from data/national_hotlines.json (tap = call), plus "send location" and "help near me".
+// All national numbers from data/national_hotlines.json as an open grid (tap = call); the most used first, with
+// a short name; the others with their official name. No actions in it: those are the big buttons (#108).
 // Under it, the official source and check date of each number (DESIGN.md §5).
+// Only icons that mean the same thing; any other number gets the plain "i".
+const CATEGORY_ICON = { fire: 'fire', health: 'health', women_children: 'woman', tourist_police: 'bag' };
 function renderIconRow() {
   const items = [], shown = [];
   if (data) {
-    for (const [id, ic, cls] of ICON_ROW) {
+    const first = ICON_ROW.map(([id]) => id);
+    const rest = data.national.filter((n) => !first.includes(n.id)).map((n) => [n.id, CATEGORY_ICON[n.category] || 'info', '']);
+    for (const [id, ic, cls] of [...ICON_ROW, ...rest]) {
       const n = data.national.find((x) => x.id === id);
       if (!n || !withPhone(n)) continue;
+      const name = P().icons[id] || (lang === 'en' ? n.name_en : n.name_bn);
       const a = el('a', 'icon-item'); a.href = `tel:${n.phones[0]}`;
-      a.append(iconCircle(GP_ICONS[ic], cls), el('b', null, P().icons[id]), el('small', null, digits(n.phones[0])));
+      a.append(iconCircle(GP_ICONS[ic], cls), el('b', null, name), el('small', null, digits(n.phones[0])));
       items.push(a); shown.push(n);
     }
-    for (const id of TEXT_NUMBERS) { const n = data.national.find((x) => x.id === id); if (n && withPhone(n)) shown.push(n); }
   }
-  const act = (label, sub, ic, cls, fn) => { const b = el('button', 'icon-item'); b.type = 'button'; b.append(iconCircle(GP_ICONS[ic], cls), el('b', null, label), el('small', null, sub)); b.addEventListener('click', fn); return b; };
-  items.splice(1, 0, act(P().iconSend, P().iconSendSub, 'send', '', () => openSos(null)), act(P().iconNear, P().iconNearSub, 'pin', '', () => locate()));
   $('iconRow').replaceChildren(...items);
   $('iconSrc').hidden = !shown.length;
   if ($('main').dataset.page === 'numbers') $('iconSrc').open = true;   // the numbers page shows the sources open
@@ -1041,7 +1042,7 @@ function renderIconRow() {
   $('iconSrcList').replaceChildren(...shown.map((n) => {
     const line = el('p', 'src');
     const a = el('a', null, `${t().source} ↗`); a.href = n.source_url; a.target = '_blank'; a.rel = 'noopener';
-    line.append(`${P().icons[n.id]} (${digits(n.phones[0])}): `, a, ` · ${t().checked} ${fmtDate(n.checked_on)}`);
+    line.append(`${P().icons[n.id] || (lang === 'en' ? n.name_en : n.name_bn)} (${digits(n.phones[0])}): `, a, ` · ${t().checked} ${fmtDate(n.checked_on)}`);
     return line;
   }));
 }
@@ -1063,9 +1064,11 @@ function renderGuides() {
     const c = el('article', 'card');
     const body = el('div', 'body');
     body.append(el('h3', null, title), el('p', null, text.includes('{fire}') ? (n ? fill(text, n) : P().guideStormNoNumbers) : text), primaryBtn(btn, actions[act]));
-    const top = el('div', 'art'); top.setAttribute('aria-hidden', 'true');
-    const ic = el('span', 'ico'); ic.append(svg(artIcon[art] || GP_ICONS.info)); top.append(ic);
-    c.append(top, body);
+    const head = el('div', 'head');
+    const ic = el('span', 'ico'); ic.setAttribute('aria-hidden', 'true'); ic.append(svg(artIcon[art] || GP_ICONS.info));
+    head.append(ic, body.firstChild);                    // the icon sits beside the title, no empty picture box (#108)
+    body.prepend(head);
+    c.append(body);
     return c;
   }));
 }
@@ -1123,12 +1126,6 @@ function renderRoles() {
   }));
   $('rolesNote').replaceChildren(el('b', null, r.noteB), document.createTextNode(r.note));
 }
-// Arrows beside the numbers row: scroll by hand only, never by themselves (DESIGN.md §3b).
-function scrollRow(dir) {
-  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  $('iconRow').scrollBy({ left: dir * 260, behavior: calm ? 'auto' : 'smooth' });
-}
-
 // Warm opening (DESIGN.md §2): greeting by time of day, trust ticks, a one-time welcome that never covers 999.
 function renderWarm() {
   const h = new Date().getHours();
@@ -1155,7 +1152,10 @@ function renderPage() {
   renderRail(); renderRoles(); renderMyArea();
   $('findTitle').textContent = P().findTitle; $('numbersTitle').textContent = P().titles.numbers; $('findText').textContent = P().findText;
   $('numRowTitle').textContent = P().numRow.title;
-  $('rowBack').setAttribute('aria-label', P().numRow.back); $('rowMore').setAttribute('aria-label', P().numRow.more);
+  // End of home: About and Questions are their own pages (#108).
+  const link = (label, page) => { const a = el('a', 'btn', label); a.href = `#/${page}`; return a; };
+  $('moreLinks').setAttribute('aria-label', P().foot.info[0]);
+  $('moreLinks').replaceChildren(link(P().nav.about, 'about'), link(P().nav.faq, 'faq'));
 }
 
 /* ---------- text ---------- */
@@ -1190,8 +1190,6 @@ $('areaInput').addEventListener('input', renderSuggest);
 $('distSel').addEventListener('change', () => setDistrict($('distSel').value));
 $('railDist').addEventListener('change', () => setDistrict($('railDist').value));
 $('fReset').addEventListener('click', () => setDistrict(''));
-$('rowBack').addEventListener('click', () => scrollRow(-1));
-$('rowMore').addEventListener('click', () => scrollRow(1));
 $('backBtn').addEventListener('click', goHome);
 $('homeBtn').addEventListener('click', goHome);
 $('areaChip').addEventListener('click', () => findArea(''));
