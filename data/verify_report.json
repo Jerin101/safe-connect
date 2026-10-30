@@ -1,16 +1,65 @@
 {
- "checked_on": "2026-10-22",
- "removed": [],
+ "checked_on": "2026-10-30",
+ "removed": [
+  {
+   "file": "contacts_coxsbazar.json",
+   "id": "fd52da2b29",
+   "name_bn": "ডলার ত্রিপুরা (সংযুক্ত)",
+   "source_url": "https://fireservice.coxsbazar.gov.bd/pages/officers"
+  },
+  {
+   "file": "contacts_coxsbazar.json",
+   "id": "94b2791d7f",
+   "name_bn": "জামিন মিয়া (সংযুক্ত)",
+   "source_url": "https://fireservice.coxsbazar.gov.bd/pages/officers"
+  },
+  {
+   "file": "contacts_coxsbazar.json",
+   "id": "3103a8a1ce",
+   "name_bn": "মোঃ আজমল হোসেন",
+   "source_url": "https://coxsreg.touristpolice.gov.bd/pages/officers"
+  },
+  {
+   "file": "contacts_coxsbazar.json",
+   "id": "f7fad5f1f3",
+   "name_bn": "দেবেশ চন্দ্র দাস",
+   "source_url": "https://pio.sadar.coxsbazar.gov.bd/pages/officers"
+  },
+  {
+   "file": "contacts_noakhali.json",
+   "id": "d594dbea0f",
+   "name_bn": "মোহাম্মদ নুরুন নবী",
+   "source_url": "https://dss.subarnachar.noakhali.gov.bd/pages/officers"
+  },
+  {
+   "file": "contacts_noakhali.json",
+   "id": "36dc2b0fea",
+   "name_bn": "মোহাম্মদ ফাহাদ বিন হোসাইন",
+   "source_url": "https://charkingup.noakhali.gov.bd/pages/officers"
+  },
+  {
+   "file": "contacts_noakhali.json",
+   "id": "acd98005cc",
+   "name_bn": "নাজমুল হাছান",
+   "source_url": "https://amanullapurup.noakhali.gov.bd/pages/officers"
+  }
+ ],
  "counts": {
   "contacts_coxsbazar.json": {
-   "ok": 1299,
+   "ok": 1295,
    "name_text_differs": 2,
-   "removed": 0,
+   "removed": 4,
    "page_unreachable_kept": 0
   },
   "contacts_noakhali.json": {
-   "ok": 1642,
+   "ok": 1639,
    "name_text_differs": 2,
+   "removed": 3,
+   "page_unreachable_kept": 0
+  },
+  "manual_additions.json": {
+   "ok": 4,
+   "name_text_differs": 0,
    "removed": 0,
    "page_unreachable_kept": 0
   }

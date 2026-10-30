@@ -28,7 +28,102 @@
    "status": "collected_from_official_page",
    "flags": [],
    "script_check": {
-    "on": "2026-10-21",
+    "on": "2026-10-30",
+    "result": "ok"
+   }
+  },
+  {
+   "id": "manual-fire-ukhia-so",
+   "level": "district",
+   "category": "fire",
+   "district": "Cox's Bazar",
+   "upazila_en": null,
+   "upazila_bn": null,
+   "union_en": null,
+   "union_bn": null,
+   "municipality_bn": null,
+   "office_bn": "ফায়ার সার্ভিস ও সিভিল ডিফেন্স,কক্সবাজার",
+   "office_domain": "fireservice.coxsbazar.gov.bd",
+   "name_bn": "সাইদুল ইসলাম",
+   "designation_bn": "স্টেশন অফিসার",
+   "ward_no": null,
+   "phones": [
+    "01911739121",
+    "01901021627"
+   ],
+   "email": "ukhia.cox@fireservice.gov.bd",
+   "key_contact": true,
+   "source_url": "https://fireservice.coxsbazar.gov.bd/pages/officers",
+   "source_last_updated": null,
+   "source_quote_bn": "সাইদুল ইসলাম | স্টেশন অফিসার | ukhia.cox@fireservice.gov.bd | ০১৯০১-০২১৬২৭ | ০১৯১১-৭৩৯১২১",
+   "retrieved_on": "2026-10-30",
+   "status": "collected_from_official_page",
+   "flags": [],
+   "script_check": {
+    "on": "2026-10-30",
+    "result": "ok"
+   }
+  },
+  {
+   "id": "manual-fire-teknaf-so",
+   "level": "district",
+   "category": "fire",
+   "district": "Cox's Bazar",
+   "upazila_en": null,
+   "upazila_bn": null,
+   "union_en": null,
+   "union_bn": null,
+   "municipality_bn": null,
+   "office_bn": "ফায়ার সার্ভিস ও সিভিল ডিফেন্স,কক্সবাজার",
+   "office_domain": "fireservice.coxsbazar.gov.bd",
+   "name_bn": "মোঃ কামরুজ্জামান সুমন",
+   "designation_bn": "স্টেশন অফিসার",
+   "ward_no": null,
+   "phones": [
+    "01717184780",
+    "01901021629"
+   ],
+   "email": "tek.cox@fireservice.gov.bd",
+   "key_contact": true,
+   "source_url": "https://fireservice.coxsbazar.gov.bd/pages/officers",
+   "source_last_updated": null,
+   "source_quote_bn": "মোঃ কামরুজ্জামান সুমন | স্টেশন অফিসার | tek.cox@fireservice.gov.bd | ০১৯০১-০২১৬২৯ | ০১৭১৭-১৮৪৭৮০",
+   "retrieved_on": "2026-10-30",
+   "status": "collected_from_official_page",
+   "flags": [],
+   "script_check": {
+    "on": "2026-10-30",
+    "result": "ok"
+   }
+  },
+  {
+   "id": "manual-tourist-police-sp",
+   "level": "regional",
+   "category": "tourist_police",
+   "district": "Cox's Bazar",
+   "upazila_en": null,
+   "upazila_bn": null,
+   "union_en": null,
+   "union_bn": null,
+   "municipality_bn": null,
+   "office_bn": "ট্যুরিস্ট পুলিশ, কক্সবাজার রিজিয়ন",
+   "office_domain": "coxsreg.touristpolice.gov.bd",
+   "name_bn": "জনাব নিশাত এ্যঞ্জেলা",
+   "designation_bn": "পুলিশ সুপার",
+   "ward_no": null,
+   "phones": [
+    "01320158995"
+   ],
+   "email": "touristpolice.coxbazar@gmail.com",
+   "key_contact": true,
+   "source_url": "https://coxsreg.touristpolice.gov.bd/pages/officers",
+   "source_last_updated": null,
+   "source_quote_bn": "জনাব নিশাত এ্যঞ্জেলা | পুলিশ সুপার | ট্যুরিস্ট পুলিশ, কক্সবাজার রিজিয়ন। | ০১৩২০১৫৮৯৯৫",
+   "retrieved_on": "2026-10-30",
+   "status": "collected_from_official_page",
+   "flags": [],
+   "script_check": {
+    "on": "2026-10-30",
     "result": "ok"
    }
   }
