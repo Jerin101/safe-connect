@@ -210,6 +210,7 @@ function renderArea() {
   const note = p.placeId && data.docs[p.district].places.find((x) => x.id === p.placeId);
   $('placeNote').hidden = !note;
   if (note) $('placeNote').textContent = note.how_to_report_bn;
+  renderAutoNote();
 
   // share
   $('share').hidden = !current.pos;
@@ -493,12 +494,26 @@ function autoFix(pos) {
   const old = lastPlace();
   if (place.outside || (old && samePlace(old, place))) return;
   store.set('sc-last', JSON.stringify(place));
-  renderRecent(); renderMyArea();                     // header chip, sidebar card, home list; never leaves the page
-  showToast(fill(t().auto.changed, { n: placeTitle(place) }));
+  renderRecent(); renderMyArea(); renderAutoNote();   // header chip, sidebar card, home list, area note; never leaves the page
+  showToast(fill(old ? t().auto.changed : t().auto.found, { n: placeTitle(place) }));   // "changed" only for a real change
 }
-// Redraw every place that shows the switch, then move focus where the person expects it.
+// Area page: auto location is on and the person is looking at another area by hand (#99).
+function renderAutoNote() {
+  const p = current?.place, mine = lastPlace(), a = t().auto;
+  const show = !!(p && !p.outside && mine && autoLoc.isOn() && !samePlace(mine, p));
+  $('autoNote').hidden = !show;
+  if (!show) return;
+  $('autoNoteText').textContent = a.otherArea;
+  $('autoNoteBtn').textContent = a.toSwitch;
+}
+// Opens home and puts focus on the switch.
+function goToSwitch() {
+  go('', { after: () => { const sw = $('homeAutoSw'); if (sw) { sw.scrollIntoView({ block: 'center' }); sw.focus({ preventScroll: true }); } } });
+}
+// Redraw every place that shows the switch (and the area-page note), then move focus where the person expects it.
 function autoChanged() {
   const f = autoFocus; autoFocus = '';
+  renderAutoNote();                     // e.g. the browser blocked location: the setting is off, so the note goes
   Object.entries(autoRedraw).forEach(([prefix, redraw]) => { if (prefix === 'home' || $(`${prefix}AutoSw`)) redraw(); });   // Settings only while shown
   if (f && $(f)) $(f).focus();
 }
@@ -1187,6 +1202,7 @@ $('hcSend').addEventListener('click', () => openSos(null));
 // The location message and the demo are in the banner, which may be scrolled away: bring them into view when shown.
 $('hcNear').addEventListener('click', () => locate().then(() => { if (!$('locMsg').hidden) $('homeMsgs').scrollIntoView({ block: 'center' }); }));
 $('hcArea').addEventListener('click', openMyArea);
+$('autoNoteBtn').addEventListener('click', goToSwitch);
 // The header's height changes with the language, text size and window width; the sticky sidebar sits just below it (#103).
 new ResizeObserver(([e]) => document.documentElement.style.setProperty('--header-h', `${Math.ceil(e.target.getBoundingClientRect().height)}px`))
   .observe(document.querySelector('header.site'));

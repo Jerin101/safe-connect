@@ -81,7 +81,8 @@ async function open({ w = 1280, h = 800, lang = 'bn', theme = 'light', store = {
   await ev(`localStorage.clear(); ${Object.entries(items).map(([k, v]) => `localStorage.setItem(${JSON.stringify(k)}, ${JSON.stringify(v)});`).join(' ')} true`);
   await ev('window.__old = true');                           // so the checks below never read the page being left
   await page.send('Page.navigate', { url: PAGE + hash });
-  await waitFor('!window.__old && document.getElementById("homeAutoSw")');
+  if (hash) await page.send('Page.reload');                   // a new #hash alone does not load the page again
+  if (!await waitFor('!window.__old && document.getElementById("homeAutoSw")')) throw new Error(`page did not load: ${PAGE + hash}`);
 }
 async function waitFor(expr, ms = 8000) {
   for (let t = 0; t < ms; t += 100) { if (await ev(`!!(${expr})`)) return true; await wait(100); }
@@ -131,6 +132,8 @@ geo = await ev('__geo');
 check('switch: explanation shown before the browser is asked', await ev(`!!document.querySelector('#myArea .auto-ask') && document.activeElement.id === 'homeAutoYes'`) && geo.get === 0, JSON.stringify(geo));
 await ev(`document.getElementById('homeAutoYes').click(); true`);
 check('ON + granted: area set from the position', await waitFor(`(JSON.parse(localStorage.getItem('sc-last') || 'null') || {}).area?.bn === ${JSON.stringify(A.bn)}`));
+const firstToast = await ev(`document.getElementById('toast').textContent`);
+check('first position: "your area", not "changed"', firstToast.startsWith('আপনার এলাকা:') && !firstToast.includes('বদলেছে'), firstToast);
 check('ON: switch shows on', await ev(`document.getElementById('homeAutoSw').checked && localStorage.getItem('sc-autoloc') === '1'`));
 
 // 3. Every page open: area found again, header chip, sidebar card and home list updated, still on home.
@@ -172,11 +175,21 @@ await ev(`location.hash = '#/area/coxsbazar/ukhia'; true`);
 await waitFor(`location.hash === '#/area/coxsbazar/ukhia' && !document.getElementById('area').hidden`);
 await wait(500);
 check('opening another area by hand keeps the auto area', (await last()).area?.bn === A.bn);
+check('other area: page works and shows the auto-location note', await ev(`!document.getElementById('autoNote').hidden && document.getElementById('autoNoteText').textContent.includes('GPS') && document.querySelectorAll('#firstList .first-row').length >= 2`));
+check('the note sits under the call list', await ev(`!!(document.getElementById('firstList').compareDocumentPosition(document.getElementById('autoNote')) & Node.DOCUMENT_POSITION_FOLLOWING)`));
+await ev(`document.getElementById('langBtn').click(); true`);
+check('language switch: the note stays, in English', await waitFor(`document.getElementById('autoNoteText').textContent.startsWith('Automatic area is on') && !document.getElementById('autoNote').hidden`));
+await ev(`document.getElementById('langBtn').click(); true`);
+await waitFor(`document.documentElement.lang === 'bn'`);
 await ev('window.__old = true');
 await page.send('Page.reload');
 await waitFor(`!window.__old && !document.getElementById('area').hidden`);
 await wait(2500);
 check('reloading that area link: same auto area, no "changed" note', (await last()).area?.bn === A.bn && await ev(`document.getElementById('toast').hidden && location.hash === '#/area/coxsbazar/ukhia'`));
+await ev(`document.getElementById('autoNoteBtn').click(); true`);
+check('"Go to the switch" opens home with focus on the switch', await waitFor(`location.hash === '' || location.hash === '#/'`) && await waitFor(`document.activeElement?.id === 'homeAutoSw'`));
+await ev(`document.getElementById('myAreaAll').click(); true`);
+check('own area page: no auto-location note', await waitFor(`!document.getElementById('area').hidden && location.hash.startsWith('#/area/noakhali')`) && await ev(`document.getElementById('autoNote').hidden`));
 
 // 5d. Screen readers hear the explanation with "Yes".
 await open({ store: { 'sc-autoloc-asked': '1' } });
@@ -212,6 +225,18 @@ check('denied: "Choose your area" opens the area finder', await waitFor(`locatio
 await open({ store: { 'sc-autoloc': '1', 'sc-autoloc-asked': '1' } });
 geo = await ev('__geo');
 check('on but blocked later: no location call, switch off', await waitFor(`localStorage.getItem('sc-autoloc') === '0' && !document.getElementById('homeAutoSw').checked`) && geo.watch === 0, JSON.stringify(geo));
+
+// Same, while looking at another area: the "auto location is on" note must go too.
+const savedArea = JSON.stringify({ district: 'noakhali', upazila: 'Begumganj', area: null });
+await open({ store: { 'sc-autoloc': '1', 'sc-autoloc-asked': '1', 'sc-last': savedArea }, hash: '#/area/coxsbazar/ukhia' });
+await waitFor(`!document.getElementById('area').hidden`);
+check('blocked while on another area: setting off, note hidden', await waitFor(`localStorage.getItem('sc-autoloc') === '0' && document.getElementById('autoNote').hidden`));
+// Auto location off: the note never shows on another area.
+await permission('granted');
+await open({ store: { 'sc-autoloc-asked': '1', 'sc-last': savedArea }, hash: '#/area/coxsbazar/ukhia' });
+await waitFor(`!document.getElementById('area').hidden`);
+await wait(1500);
+check('auto off: no note on another area', await ev(`document.getElementById('autoNote').hidden`));
 
 // 9. Reduced motion: the toast does not slide in.
 await page.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
