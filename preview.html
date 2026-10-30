@@ -37,6 +37,9 @@
   .hc-btn span { display: grid; min-width: 0; }
   .hc-btn small { color: var(--muted); font-weight: 400; font-size: 0.8rem; overflow-wrap: anywhere; }
   @media (max-width: 1059px) { .helpcard { display: none; } }
+  /* phones: the district menu is inside "Find area"; the sidebar is only for wide screens (#108) */
+  @media (max-width: 1059px) { .rail { display: none; } }
+  .morelinks { display: flex; flex-wrap: wrap; gap: 10px; }
   /* "Keep it on your phone" card: the short address (no QR image yet); only on wide screens. */
   .appcard { display: grid; justify-items: center; gap: 8px; text-align: center; border-radius: 18px; padding: 20px 18px; background: var(--tint); border: 1px solid var(--line); }
   .appcard .app-ic { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: var(--surface); color: var(--accent); }
@@ -154,20 +157,17 @@
   .row-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
   .row-head h2 { font-size: clamp(1.35rem, 3vw, 1.75rem); }
   .row-head .soft { color: var(--muted); margin-top: 4px; }
-  .row-arrows { display: flex; gap: 8px; flex: none; }
-  .arrowbtn { width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); display: grid; place-items: center; cursor: pointer; color: var(--ink); }
-  .arrowbtn svg { width: 18px; height: 18px; }
   /* national numbers: quiet tiles that scroll sideways only by hand or with the arrows; only 999's tile is soft red (DESIGN.md §3) */
-  .icon-row { display: grid; grid-auto-flow: column; grid-auto-columns: 112px; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; padding: 4px 2px 8px; }
-  .icon-item { scroll-snap-align: start; display: grid; justify-items: center; align-content: start; gap: 8px; text-align: center; padding: 4px; border-radius: 16px; text-decoration: none; color: var(--ink);
-    background: none; border: 0; cursor: pointer; }
-  .icon-item .circle { width: 104px; height: 104px; border-radius: 18px; display: grid; place-items: center; background: var(--surface-2); color: var(--ink-2); }
-  .icon-item:hover .circle { background: var(--tint); color: var(--accent); }
+  /* all national numbers as an open grid, no carousel (#108): compact rows, two side by side on a phone */
+  .icon-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 132px), 1fr)); gap: 8px; padding: 4px 0 8px; }
+  .icon-item { display: grid; grid-template-columns: 40px minmax(0, 1fr); grid-template-rows: auto auto; gap: 6px 10px; align-items: center; align-content: center; padding: 8px; border-radius: 14px;
+    border: 1px solid var(--line); background: var(--surface); text-decoration: none; color: var(--ink); min-height: 44px; }
+  .icon-item:hover { border-color: var(--accent); }
+  .icon-item .circle { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); color: var(--ink-2); }
   .icon-item .circle.soft-red { background: var(--danger-soft); color: var(--red-ink); }
-  .icon-item .circle svg { width: 38px; height: 38px; }
-  .icon-item b { font-size: 0.92rem; font-weight: 700; line-height: 1.3; color: var(--link); }
-  .icon-item small { font-size: 0.86rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-  @media (max-width: 430px) { .icon-row { grid-auto-columns: 92px; gap: 10px; } .icon-item .circle { width: 84px; height: 84px; } .icon-item .circle svg { width: 32px; height: 32px; } }
+  .icon-item .circle svg { width: 20px; height: 20px; }
+  .icon-item b { font-size: 0.86rem; font-weight: 700; line-height: 1.3; color: var(--link); overflow-wrap: anywhere; }
+  .icon-item small { grid-column: 1 / -1; font-size: 0.92rem; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }   /* the number gets the full width: never cut */
   .c-violet { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); }
   .c-amber { background: linear-gradient(140deg, var(--amber-1), var(--amber-2)); color: var(--amber-ink); }
 
@@ -210,11 +210,12 @@
   .chip[aria-pressed="true"] { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); border-color: transparent; font-weight: 600; }
   /* ---------- cards (v3): a soft tinted top with one line icon, the text under it ---------- */
   .grid-3 { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
-  .card { display: grid; grid-template-rows: auto 1fr; min-width: 0; }
-  .card .art { height: 140px; border-radius: var(--r); position: relative; background: radial-gradient(90% 120% at 100% 0%, var(--tint-2), transparent 70%), var(--tint); }
-  .card .art .ico { position: absolute; left: 16px; top: 16px; width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: var(--surface); color: var(--accent); }
-  .card .art .ico svg { width: 26px; height: 26px; }
-  .card .body { padding: 14px 4px 4px; display: grid; gap: 8px; align-content: start; }
+  /* situation cards: the icon sits beside the title; no empty picture box (#108) */
+  .card { display: grid; min-width: 0; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 16px; }
+  .card .head { display: flex; align-items: center; gap: 12px; }
+  .card .ico { width: 44px; height: 44px; flex: none; border-radius: 14px; display: grid; place-items: center; background: var(--tint); color: var(--accent); }
+  .card .ico svg { width: 22px; height: 22px; }
+  .card .body { display: grid; gap: 8px; align-content: start; }
   .card h3 { font-size: 1.1rem; }
   .card p { color: var(--muted); font-size: 0.95rem; }
   .card .btn-primary { margin-top: 6px; }
@@ -510,10 +511,6 @@
           <div class="row-head">
             <h1 class="page-title" id="numbersTitle" tabindex="-1" data-pages="numbers"></h1>
             <h2 id="numRowTitle" data-pages="home"></h2>
-            <div class="row-arrows">
-              <button class="arrowbtn" id="rowBack" type="button" data-dir="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m15.4 6.4-1.4-1.4-7 7 7 7 1.4-1.4L9.8 12z"/></svg></button>
-              <button class="arrowbtn" id="rowMore" type="button" data-dir="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m8.6 17.6 1.4 1.4 7-7-7-7-1.4 1.4 5.6 5.6z"/></svg></button>
-            </div>
           </div>
           <div class="icon-row" id="iconRow"></div>
           <details class="cat icon-src" id="iconSrc" hidden>
@@ -560,9 +557,12 @@
           <div class="grid-3" id="guideCards"></div>
         </section>
 
-        <section class="row-sec" aria-label="Prepare" data-pages="home guide">
+        <section class="row-sec" aria-label="Prepare" data-pages="guide">
           <div class="duo" id="duoCards"></div>
         </section>
+
+        <!-- About and questions have their own pages (#108): home only links to them. -->
+        <nav class="morelinks" id="moreLinks" aria-label="More" data-pages="home"></nav>
       </div>
 
       <!-- Sidebar: on wide screens on the left (CSS), on phones under the feed. -->
@@ -613,21 +613,21 @@
       </div></div>
     </section>
 
-    <section class="section tint" id="about" aria-labelledby="aboutTitle" data-pages="home about">
+    <section class="section tint" id="about" aria-labelledby="aboutTitle" data-pages="about">
       <div class="wrap about">
         <div class="intro"><p class="eyebrow" id="aboutEyebrow"></p><h2 id="aboutTitle" tabindex="-1"></h2><p id="aboutText"></p><a class="more-link" id="aboutMore" href="#/about" data-pages="home"></a></div>
         <div class="points" id="points"></div>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="helpTitle" data-pages="home faq">
+    <section class="section" aria-labelledby="helpTitle" data-pages="faq">
       <div class="wrap">
         <div class="section-title"><h2 id="helpTitle"></h2></div>
         <div class="help-row" id="helpRow"></div>
       </div>
     </section>
 
-    <section class="feature" aria-labelledby="netTitle" data-pages="home about">
+    <section class="feature" aria-labelledby="netTitle" data-pages="about">
       <div class="scene" aria-hidden="true">
         <div class="stars"></div><div class="orb"></div>
         <svg class="hills" viewBox="0 0 1200 200" preserveAspectRatio="none">
@@ -640,7 +640,7 @@
       </div>
     </section>
 
-    <section class="section tint" id="faq" aria-labelledby="faqTitle" data-pages="home faq">
+    <section class="section tint" id="faq" aria-labelledby="faqTitle" data-pages="faq">
       <div class="wrap faq">
         <div class="faq-head"><p class="eyebrow" id="faqEyebrow"></p><h2 id="faqTitle" tabindex="-1"></h2><a class="more-link" id="faqMore" href="#/faq" data-pages="home"></a></div>
         <div class="faq-list" id="faqList"></div>
