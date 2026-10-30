@@ -115,12 +115,19 @@ const [A, B] = await ev(`(async () => {
 })()`);
 check('found two neighbouring unions to walk between', !!(A && B), A && B ? `${A.bn} -> ${B.bn}` : 'none');
 
-// 1. OFF (default): no geolocation call at all, the one-time question is shown, the switch is off.
+// 1. OFF (default): no geolocation call at all, no question before the first "Find help near me" tap (#108), switch off.
 await moveTo(A);
-await open();
+await open({ store: { 'sc-welcomed': '0' } });
 await wait(2500);
 let geo = await ev('__geo');
 check('OFF: no geolocation call on open', geo.get === 0 && geo.watch === 0, JSON.stringify(geo));
+check('first visit: welcome shown, no auto-location question yet', await ev(`!document.getElementById('welcome').hidden && !document.getElementById('askAutoYes')`));
+// The first "Find help near me" tap closes the welcome; back on home, the question is there (never both at once).
+await ev(`document.getElementById('locateBtn').click(); true`);
+await waitFor(`location.hash.startsWith('#/area')`);
+await ev(`location.hash = '#/'; true`);
+check('after the first near-me tap: question shown, welcome gone', await waitFor(`!!document.getElementById('askAutoYes') && document.getElementById('welcome').hidden`));
+await open({ store: { 'sc-near-tapped': '1' } });
 check('OFF: one-time question on home', await ev(`!!document.getElementById('askAutoYes')`));
 check('OFF: switch shows off', await ev(`document.getElementById('homeAutoSw').checked === false`));
 
@@ -139,7 +146,7 @@ check('ON: switch shows on', await ev(`document.getElementById('homeAutoSw').che
 // 3. Every page open: area found again, header chip, sidebar card and home list updated, still on home.
 await open({ store: { 'sc-autoloc': '1', 'sc-autoloc-asked': '1' } });
 check('ON + granted: area set on page open', await waitFor(`(JSON.parse(localStorage.getItem('sc-last') || 'null') || {}).area?.bn === ${JSON.stringify(A.bn)}`));
-const shown = await ev(`[document.getElementById('areaChipT').textContent, document.getElementById('hcAreaS').textContent, document.getElementById('myAreaTitle').textContent, document.querySelectorAll('#myArea .first-row').length, location.hash]`);
+const shown = await ev(`[document.getElementById('areaChipT').textContent, document.getElementById('hcAreaT').textContent, document.getElementById('myAreaTitle').textContent, document.querySelectorAll('#myArea .first-row').length, location.hash]`);
 check('chip, sidebar card and home list show the area', shown[0] && shown[0] === shown[1] && shown[2].includes(shown[0]) && shown[3] >= 2 && shown[4] === '', JSON.stringify(shown));
 check('first-call list starts with 999', await ev(`document.querySelector('#myArea .first-row a[href^="tel:"]')?.getAttribute('href') === 'tel:999'`));
 geo = await ev('__geo');
@@ -195,7 +202,7 @@ check('own area page: no auto-location note', await waitFor(`!document.getElemen
 await open({ store: { 'sc-autoloc-asked': '1' } });
 await ev(`document.getElementById('homeAutoSw').click(); true`);
 check('"Yes" is described by the explanation', await ev(`(() => { const y = document.getElementById('homeAutoYes'); const d = document.getElementById(y.getAttribute('aria-describedby')); return !!d && d.textContent.length > 40; })()`));
-await open();
+await open({ store: { 'sc-near-tapped': '1' } });
 check('one-time "Yes" is described by the explanation', await ev(`document.getElementById(document.getElementById('askAutoYes').getAttribute('aria-describedby'))?.textContent.length > 40`));
 await open({ store: { 'sc-autoloc': '1', 'sc-autoloc-asked': '1' } });
 await waitFor('__geo.active === 1');

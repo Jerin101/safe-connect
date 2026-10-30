@@ -395,10 +395,13 @@ function renderChip() {
   let last = null;
   try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
   const h = P().head;
-  const name = last && data && data.docs[last.district] ? placeTitle(last) : h.chipEmpty;
+  const known = !!(last && data && data.docs[last.district]);
+  const name = known ? placeTitle(last) : h.chipEmpty;
   $('areaChipT').textContent = name;
   $('areaChipS').textContent = h.chipSub;
-  $('hcAreaS').textContent = name;    // "My area" in the sidebar's emergency card
+  // Sidebar "My area" card (#108): the area's name, and what a tap does
+  $('hcAreaT').textContent = name;
+  $('hcAreaS').textContent = known ? t().auto.allNumbers : '';
 }
 // Sidebar "My area": opens the last area, or the area finder when none is saved yet.
 function openMyArea() {
@@ -455,6 +458,9 @@ function fillDemo(box, textEl, chipsEl, onPick) {
 }
 function showDemo() { fillDemo($('demo'), $('demoText'), $('demoChips'), applyPosition); }
 async function locate() {
+  if (store.get('sc-near-tapped') !== '1') {          // first tap: the welcome has done its job; auto location may be offered now (#108)
+    store.set('sc-near-tapped', '1'); store.set('sc-welcomed', '1'); $('welcome').hidden = true; renderMyArea();
+  }
   if ($('main').dataset.page !== 'home') go('');   // the location messages and the demo are on home
   const btn = $('locateBtn');
   btn.setAttribute('aria-busy', 'true');
@@ -573,7 +579,8 @@ function renderMyArea() {
   const keep = box.contains(document.activeElement) ? document.activeElement.id : '';
   const a = t().auto, p = lastPlace();
   const kids = [];
-  if (store.get('sc-autoloc-asked') !== '1' && !autoLoc.isOn() && !autoAsking) {
+  // The question comes only after the first "Find help near me" tap, never together with the welcome (#108).
+  if (store.get('sc-near-tapped') === '1' && store.get('sc-autoloc-asked') !== '1' && !autoLoc.isOn() && !autoAsking) {
     const card = el('div', 'welcome');
     const yes = el('button', 'btn violet', a.allow); yes.type = 'button'; yes.id = 'askAutoYes';
     yes.addEventListener('click', () => { autoFocus = 'homeAutoSw'; enableAuto(); });
@@ -1104,9 +1111,7 @@ function renderNet() {
 function renderRail() {
   const r = P().rail;
   $('rail').setAttribute('aria-label', r.label);
-  $('hcTitle').textContent = r.helpTitle;
-  $('hc999T').textContent = t().call999; $('hcSendT').textContent = P().head.cta; $('hcNearT').textContent = t().locate;
-  $('hcAreaT').textContent = r.myArea;
+  $('hcTitle').textContent = r.myArea;
   $('appTitle').textContent = r.appTitle; $('appText').textContent = r.appText;
   $('fTitle').textContent = r.fTitle; $('fDist').textContent = r.fDist; $('fNote').textContent = r.fNote; $('fReset').textContent = r.fReset;
   districtOptions($('railDist'), t().distAll);
@@ -1140,10 +1145,8 @@ function renderWarm() {
   const close = () => { store.set('sc-welcomed', '1'); w.hidden = true; };
   const ok = el('button', 'btn', P().welcomeOk); ok.type = 'button';
   ok.addEventListener('click', close);
-  const save = el('button', 'btn violet', P().welcomeSave); save.type = 'button';
-  save.addEventListener('click', () => { close(); saveNumbers(); });
   const ol = el('ol'); P().welcomeSteps.forEach((x) => ol.append(el('li', null, x)));
-  const row = el('div', 'row'); row.append(save, ok);
+  const row = el('div', 'row'); row.append(ok);   // "save numbers" lives on the Send location page (#108)
   const title = el('h2', null, P().welcomeTitle); title.id = 'welcomeTitle';
   w.replaceChildren(title, ol, row);
 }
@@ -1195,9 +1198,6 @@ $('homeBtn').addEventListener('click', goHome);
 $('areaChip').addEventListener('click', () => findArea(''));
 $('hFinder').addEventListener('click', () => findArea(''));
 $('ctaSend').addEventListener('click', () => openSos(null));
-$('hcSend').addEventListener('click', () => openSos(null));
-// The location message and the demo are in the banner, which may be scrolled away: bring them into view when shown.
-$('hcNear').addEventListener('click', () => locate().then(() => { if (!$('locMsg').hidden) $('homeMsgs').scrollIntoView({ block: 'center' }); }));
 $('hcArea').addEventListener('click', openMyArea);
 $('autoNoteBtn').addEventListener('click', goToSwitch);
 // The header's height changes with the language, text size and window width; the sticky sidebar sits just below it (#103).
