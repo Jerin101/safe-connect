@@ -32,8 +32,6 @@
     border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); font: inherit; font-weight: 600; font-size: 0.95rem; text-align: left; text-decoration: none; cursor: pointer; }
   .hc-btn:hover { border-color: var(--accent); }
   .hc-btn svg { width: 20px; height: 20px; flex: none; color: var(--accent); }
-  .hc-btn.red { background: var(--danger); color: var(--danger-ink); border-color: transparent; font-weight: 800; }
-  .hc-btn.red svg { color: var(--danger-ink); }
   .hc-btn span { display: grid; min-width: 0; }
   .hc-btn small { color: var(--muted); font-weight: 400; font-size: 0.8rem; overflow-wrap: anywhere; }
   @media (max-width: 1059px) { .helpcard { display: none; } }
@@ -328,6 +326,9 @@
 
   /* about */
   .about { display: grid; gap: 22px; }
+  .about > .stats { grid-column: 1 / -1; margin-top: 0; }   /* moved here from home (#108) */
+  .about > .appcard { grid-column: 1 / -1; justify-self: start; max-width: 380px; }
+  .roles-sec { margin-top: 28px; }
   @media (min-width: 860px) { .about { grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: start; } }
   .about h2 { font-size: clamp(1.4rem, 3.6vw, 1.85rem); }
   .about .intro { display: grid; gap: 10px; }
@@ -549,7 +550,6 @@
         <section class="row-sec" aria-labelledby="quickTitle" data-pages="home area">
           <div class="row-head"><div><p class="eyebrow" id="quickEyebrow" hidden></p><h2 id="quickTitle"></h2><p class="soft" id="quickText"></p></div></div>
           <div class="places" id="places"></div>
-          <div class="stats glass" id="stats"></div>
         </section>
 
         <section class="row-sec" aria-labelledby="guideTitle" data-pages="home guide">
@@ -567,21 +567,9 @@
 
       <!-- Sidebar: on wide screens on the left (CSS), on phones under the feed. -->
       <aside class="rail" id="rail" data-pages="home">
-        <!-- Emergency help (issue #103): only on wide screens, where the feed's big buttons scroll away. -->
+        <!-- Sidebar (#108): only "My area" and the filter; 999, Send location and Find help near me are in the header and the hero. -->
         <section class="helpcard" aria-labelledby="hcTitle">
           <h2 id="hcTitle"></h2>
-          <a class="hc-btn red" id="hc999" href="tel:999">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>
-            <span id="hc999T"></span>
-          </a>
-          <button class="hc-btn" id="hcSend" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2.5 11.2 20.6 3.4c.8-.34 1.6.46 1.26 1.26L14.1 22.8c-.37.86-1.62.78-1.87-.12l-1.9-6.98-6.98-1.9c-.9-.25-.98-1.5-.12-1.87Zm8.7 3.2 1.3 4.8 5.5-12.8-6.8 8Zm-1.2-1.2 8-6.8-12.8 5.5 4.8 1.3Z"/></svg>
-            <span id="hcSendT"></span>
-          </button>
-          <button class="hc-btn" id="hcNear" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
-            <span id="hcNearT"></span>
-          </button>
           <button class="hc-btn" id="hcArea" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z"/></svg>
             <span><b id="hcAreaT"></b><small id="hcAreaS"></small></span>
@@ -593,30 +581,21 @@
           <p class="fnote" id="fNote"></p>
           <button class="linkbtn" id="fReset" type="button"></button>
         </section>
+      </aside>
+    </div>
+
+    <section class="section tint" id="about" aria-labelledby="aboutTitle" data-pages="about">
+      <div class="wrap about">
+        <div class="intro"><p class="eyebrow" id="aboutEyebrow"></p><h2 id="aboutTitle" tabindex="-1"></h2><p id="aboutText"></p><a class="more-link" id="aboutMore" href="#/about" data-pages="home"></a></div>
+        <div class="points" id="points"></div>
+        <!-- Moved from home (#108): the numbers in short, and how to keep the site on a phone. -->
+        <div class="stats glass" id="stats"></div>
         <section class="appcard" aria-labelledby="appTitle">
           <span class="app-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 3v13h10V5H7Zm5 14.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/></svg></span>
           <b id="appTitle"></b>
           <small id="appText"></small>
           <a class="app-url" id="appUrl" href="https://jerin101.github.io/safe-connect/">jerin101.github.io/safe-connect</a>
         </section>
-      </aside>
-    </div>
-
-    <section class="section" id="rolesSec" aria-labelledby="rolesTitle" data-pages="home">
-      <div class="wrap"><div class="roles">
-        <div class="roles-top">
-          <div class="roles-head"><p class="eyebrow" id="rolesEyebrow"></p><h2 id="rolesTitle"><span id="rolesT1"></span><span class="soft" id="rolesT2"></span></h2><p id="rolesText"></p></div>
-          <button class="btn violet" id="rolesSignin" type="button"></button>
-        </div>
-        <div class="roles-grid" id="rolesGrid"></div>
-        <p class="roles-note" id="rolesNote"></p>
-      </div></div>
-    </section>
-
-    <section class="section tint" id="about" aria-labelledby="aboutTitle" data-pages="about">
-      <div class="wrap about">
-        <div class="intro"><p class="eyebrow" id="aboutEyebrow"></p><h2 id="aboutTitle" tabindex="-1"></h2><p id="aboutText"></p><a class="more-link" id="aboutMore" href="#/about" data-pages="home"></a></div>
-        <div class="points" id="points"></div>
       </div>
     </section>
 
@@ -730,6 +709,15 @@
     <p class="offline-note" id="acctOffline" role="status" hidden></p>
     <p class="msg" id="acctMsg" role="alert" hidden></p>
     <div><button class="btn violet" id="acctGo" type="button"></button></div>
+    <!-- The three roles explain the account, so they live here, not on home (#108). -->
+    <section class="roles-sec" id="rolesSec" aria-labelledby="rolesTitle"><div class="roles">
+        <div class="roles-top">
+          <div class="roles-head"><p class="eyebrow" id="rolesEyebrow"></p><h2 id="rolesTitle"><span id="rolesT1"></span><span class="soft" id="rolesT2"></span></h2><p id="rolesText"></p></div>
+          <button class="btn violet" id="rolesSignin" type="button"></button>
+        </div>
+        <div class="roles-grid" id="rolesGrid"></div>
+        <p class="roles-note" id="rolesNote"></p>
+      </div></section>
   </div>
 
   <!-- SIGN IN (P45, issue #73): a modal over the current page. 999 comes first, then help without signing in, then the options. Built by js/auth.js. -->
