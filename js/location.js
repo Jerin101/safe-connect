@@ -39,7 +39,7 @@ export function getPosition({ timeout = 15000 } = {}) {
   });
 }
 
-function distanceKm(a, b) {
+export function distanceKm(a, b) {
   const rad = (d) => (d * Math.PI) / 180;
   const dLat = rad(b.lat - a.lat);
   const dLon = rad(b.lon - a.lon);

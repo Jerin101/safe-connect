@@ -1,7 +1,8 @@
 // Logic for preview.html: the portal design (issues #38, #42; rules in docs/DESIGN.md). The real site (index.html, pages/) is built in P20-P36.
-// Location is read only after a tap (CLAUDE.md rule 5). The area search lives in data.js (issue #36).
+// Location is read only after a tap, or when the person turned on auto location (CLAUDE.md rule 5, issue #105). The area search lives in data.js (issue #36).
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
+import { createAutoLoc } from './autoloc.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS } from './reports.js';
 
@@ -179,6 +180,24 @@ function firstRow(what, r, red = false) {
   return row;
 }
 
+// "Call these first": 999, then the police, then the local leader (area page and home, #105).
+function firstRows(p, groups) {
+  const rows = [];
+  const nat = (id) => data.national.find((n) => n.id === id);
+  rows.push(firstRow(t().what.emergency, nat('national-emergency-999'), true));
+  if (groups) {
+    const g = (id) => groups.find((x) => x.id === id);
+    const pick = (id) => (g(id)?.items || []).find((r) => withPhone(r) && r.kind !== 'national');
+    const police = pick('police');
+    if (police) rows.push(firstRow(t().what.police, police));
+    if (p.area && pick('tourist_police') && p.district === 'coxsbazar') rows.push(firstRow(t().what.tourist_police, nat('tourist-police-helpline')));
+    const local = p.area?.type === 'municipality' ? pick('town') : pick('local');
+    if (local) rows.push(firstRow(p.area?.type === 'municipality' ? t().what.town : t().what.local, local));
+    else { const uno = pick('administration'); if (uno) rows.push(firstRow(t().what.administration, uno)); }
+  }
+  return rows;
+}
+
 function renderArea() {
   const p = current.place;
   const groups = p.outside ? null : areaContacts(data, p);
@@ -207,21 +226,7 @@ function renderArea() {
     $('shareBtns').replaceChildren(fam, wa, sms, copy, map);
   }
 
-  // call these first
-  const first = $('firstList');
-  first.replaceChildren();
-  const nat = (id) => data.national.find((n) => n.id === id);
-  first.append(firstRow(t().what.emergency, nat('national-emergency-999'), true));
-  if (groups) {
-    const g = (id) => groups.find((x) => x.id === id);
-    const pick = (id) => (g(id)?.items || []).find((r) => withPhone(r) && r.kind !== 'national');
-    const police = pick('police');
-    if (police) first.append(firstRow(t().what.police, police));
-    if (p.area && pick('tourist_police') && p.district === 'coxsbazar') first.append(firstRow(t().what.tourist_police, nat('tourist-police-helpline')));
-    const local = p.area?.type === 'municipality' ? pick('town') : pick('local');
-    if (local) first.append(firstRow(p.area?.type === 'municipality' ? t().what.town : t().what.local, local));
-    else { const uno = pick('administration'); if (uno) first.append(firstRow(t().what.administration, uno)); }
-  }
+  $('firstList').replaceChildren(...firstRows(p, groups));
 
   // more help
   const more = $('moreList');
@@ -264,7 +269,8 @@ function showView(name) {
 function openArea(place, pos) { go(areaPath(place), { place, pos }); }
 function showArea(place, pos) {
   current = { place, pos };
-  if (!place.outside) store.set('sc-last', JSON.stringify(place));
+  // While auto location is on, the saved area is where the person is: looking at another area does not replace it (#105).
+  if (!place.outside && (!autoLoc.isOn() || !store.get('sc-last'))) store.set('sc-last', JSON.stringify(place));
   renderChip();
   renderArea();
   showView('area');
@@ -462,6 +468,134 @@ async function locate() {
   } finally {
     btn.removeAttribute('aria-busy');
   }
+}
+
+/* ---------- auto location, opt-in (issue #105) ---------- */
+// Only the area is saved ("sc-last", as before); the position stays in memory (lastFix) for "Send location".
+let autoMsg = '';                 // last problem to show under the switch: 'denied' | 'unavailable' | 'timeout' | 'unsupported'
+let autoAsking = false;           // the explanation is open, before the browser asks
+let autoFocus = '';               // id to focus after the next redraw
+const autoRedraw = {};            // prefix -> redraw function of each place that shows the switch (home, workspace)
+const autoLoc = createAutoLoc({
+  store,
+  onPosition: (pos) => { lastFix = { pos, at: pos.at }; },   // memory only, for "Send location"
+  onFix: autoFix,
+  onError: (code) => { autoMsg = code; autoChanged(); },
+});
+function lastPlace() {
+  try { const p = JSON.parse(store.get('sc-last') || 'null'); return p && data && data.docs[p.district] ? p : null; } catch { return null; }
+}
+const samePlace = (a, b) => a.district === b.district && a.upazila === b.upazila && (a.area?.bn || '') === (b.area?.bn || '');
+function autoFix(pos) {
+  if (autoMsg) { autoMsg = ''; autoChanged(); }
+  if (!data) return;
+  const place = resolvePlace(pos);
+  const old = lastPlace();
+  if (place.outside || (old && samePlace(old, place))) return;
+  store.set('sc-last', JSON.stringify(place));
+  renderRecent(); renderMyArea();                     // header chip, sidebar card, home list; never leaves the page
+  showToast(fill(t().auto.changed, { n: placeTitle(place) }));
+}
+// Redraw every place that shows the switch, then move focus where the person expects it.
+function autoChanged() {
+  const f = autoFocus; autoFocus = '';
+  Object.entries(autoRedraw).forEach(([prefix, redraw]) => { if (prefix === 'home' || $(`${prefix}AutoSw`)) redraw(); });   // Settings only while shown
+  if (f && $(f)) $(f).focus();
+}
+function enableAuto() {
+  store.set('sc-autoloc-asked', '1');
+  autoAsking = false; autoMsg = '';
+  autoLoc.turnOn();
+  autoChanged();
+}
+// The switch, the explanation before the browser asks, and any problem; the same on home and in Settings.
+function autoSwitch(prefix, redraw) {
+  autoRedraw[prefix] = redraw;
+  const a = t().auto, on = autoLoc.isOn();
+  const row = el('div', 'switch');
+  const txt = el('div');
+  const label = el('label', null, a.title); label.htmlFor = `${prefix}AutoSw`;
+  const help = el('small', null, on ? a.helpOn : a.helpOff); help.id = `${prefix}AutoHelp`;
+  txt.append(label, help);
+  const sw = el('input', 'toggle');
+  sw.type = 'checkbox'; sw.id = `${prefix}AutoSw`; sw.setAttribute('role', 'switch'); sw.setAttribute('aria-describedby', help.id);
+  sw.checked = on;
+  sw.addEventListener('change', () => {
+    if (sw.checked) { sw.checked = false; autoAsking = true; autoFocus = `${prefix}AutoYes`; }   // explain first
+    else { autoLoc.turnOff(); autoMsg = ''; autoFocus = sw.id; }
+    autoChanged();
+  });
+  row.append(txt, sw);
+  const out = [row];
+  if (autoAsking && !on) {
+    const ask = el('div', 'auto-ask');
+    const yes = el('button', 'btn violet', a.allow); yes.type = 'button'; yes.id = `${prefix}AutoYes`;
+    yes.addEventListener('click', () => { autoFocus = sw.id; enableAuto(); });
+    const no = el('button', 'btn', a.notNow); no.type = 'button';
+    no.addEventListener('click', () => { autoAsking = false; autoFocus = sw.id; autoChanged(); });
+    const btns = el('div', 'row'); btns.append(yes, no);
+    const why = el('p', null, a.explain); why.id = `${prefix}AutoWhy`;
+    yes.setAttribute('aria-describedby', why.id);       // screen readers read the explanation with "Yes"
+    ask.append(why, btns);
+    out.push(ask);
+  }
+  if (autoMsg) {
+    const m = el('p', autoMsg === 'denied' || autoMsg === 'unsupported' ? 'offline-note' : 'si-note', a[autoMsg] || a.unavailable);
+    m.setAttribute('role', 'status');
+    out.push(m);
+    if (autoMsg === 'denied' || autoMsg === 'unsupported') {
+      const pick = el('button', 'btn', P().head.chipEmpty); pick.type = 'button';
+      pick.addEventListener('click', () => findArea(''));
+      out.push(pick);
+    }
+  }
+  return out;
+}
+// Home: one-time question, then "Call these first" for the last area (or how to choose one), and the switch.
+function renderMyArea() {
+  const box = $('myArea');
+  if (!data) { box.replaceChildren(); return; }        // empty = not shown (CSS), until the data is here
+  const keep = box.contains(document.activeElement) ? document.activeElement.id : '';
+  const a = t().auto, p = lastPlace();
+  const kids = [];
+  if (store.get('sc-autoloc-asked') !== '1' && !autoLoc.isOn() && !autoAsking) {
+    const card = el('div', 'welcome');
+    const yes = el('button', 'btn violet', a.allow); yes.type = 'button'; yes.id = 'askAutoYes';
+    yes.addEventListener('click', () => { autoFocus = 'homeAutoSw'; enableAuto(); });
+    const no = el('button', 'btn', a.notNow); no.type = 'button'; no.id = 'askAutoNo';
+    no.addEventListener('click', () => { store.set('sc-autoloc-asked', '1'); autoFocus = 'homeAutoSw'; autoChanged(); });
+    const btns = el('div', 'row'); btns.append(yes, no);
+    const why = el('p', null, a.explain); why.id = 'askAutoWhy';
+    yes.setAttribute('aria-describedby', why.id);
+    card.append(el('h3', null, a.askTitle), why, btns);
+    kids.push(card);
+  }
+  const head = el('div', 'row-head');
+  const h = el('h2', null, p ? fill(a.firstFor, { n: placeTitle(p) }) : a.noArea); h.id = 'myAreaTitle';
+  head.append(h);
+  kids.push(head);
+  if (p) {
+    const list = el('div', 'first');
+    list.append(...firstRows(p, areaContacts(data, p)));
+    const all = el('button', 'linkbtn', a.allNumbers); all.type = 'button'; all.id = 'myAreaAll';
+    all.addEventListener('click', () => openArea(p, null));
+    kids.push(list, all);
+  } else {
+    const pick = el('button', 'btn', P().head.chipEmpty); pick.type = 'button'; pick.id = 'myAreaPick';
+    pick.addEventListener('click', () => findArea(''));
+    kids.push(el('p', 'muted', a.noAreaText), pick);
+  }
+  const sw = el('div', 'auto-box'); sw.append(...autoSwitch('home', renderMyArea));
+  kids.push(sw);
+  box.replaceChildren(...kids);
+  if (keep && $(keep)) $(keep).focus();
+}
+let toastTimer = 0;
+function showToast(text) {
+  const x = $('toast');
+  x.textContent = text; x.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { x.hidden = true; }, 6000);
 }
 
 /* ---------- send location to family (no login) ---------- */
@@ -1004,7 +1138,7 @@ function renderWarm() {
 }
 function renderPage() {
   renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
-  renderRail(); renderRoles();
+  renderRail(); renderRoles(); renderMyArea();
   $('findTitle').textContent = P().findTitle; $('numbersTitle').textContent = P().titles.numbers; $('findText').textContent = P().findText;
   $('numRowTitle').textContent = P().numRow.title;
   $('rowBack').setAttribute('aria-label', P().numRow.back); $('rowMore').setAttribute('aria-label', P().numRow.more);
@@ -1080,6 +1214,7 @@ const auth = initAuth({
   $, el, store, fill, digits, lang: () => lang, texts: () => LANG[lang], showView, goHome, openSos, locate, go,
   people: { get: getPeople, set: setPeople, norm: normPhone, changed: () => { renderHomeSos(); if (!$('sos').hidden) { renderPeople(); renderSend(); } } },
   placeName: (p) => (data && data.docs[p.district] ? { title: placeTitle(p), sub: placeSub(p) } : null),
+  autoSwitch,                           // Settings shows the same auto-location switch as home (#105)
   openArea: (p) => openArea(p, null),
   // Reports (P18, issue #79): the record a report is about, looked up in data/ on this phone.
   findRecord: (dkey, id) => (data && data.docs[dkey] ? data.docs[dkey].records.find((r) => r.id === id) || null : null),
@@ -1094,7 +1229,8 @@ if (!isPlace()) route();
 try {
   [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
   areaIndex = buildAreaIndex(data);
-  renderRecent(); renderStats(); renderPlaces(); renderIconRow(); renderGuides();
+  renderRecent(); renderStats(); renderPlaces(); renderIconRow(); renderGuides(); renderMyArea();
+  autoLoc.resume();                     // only when the person turned it on and the browser allows it
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);
 }

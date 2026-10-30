@@ -213,7 +213,7 @@ The app's **"Report a lost/stolen item"** helper builds a GD-ready text: date, t
 4. Show the coordinates + a map link, so the user can tell 999 or family exactly where they are.
 5. If the union is unsure (near a border, or no point), show the **whole upazila** and let the user pick the union.
 
-Location is read only when the user taps (CLAUDE.md rule 5), and the lookup happens on the phone.
+Location is read only when the user taps, or while the user has turned on "Update my area automatically" (off by default; CLAUDE.md rule 5), and the lookup happens on the phone.
 
 ## 10. Backend: Firebase Spark + volunteer service
 

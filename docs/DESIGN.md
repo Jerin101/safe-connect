@@ -73,7 +73,7 @@ Build each part from its own issue in milestone v1.0.
 - Every service works without signing in; sign-in pages always show 999 and send location first.
 - A search never ends empty: similar names → upazila buttons → "Find help near me" + 999.
 - Every number shows its official source link and check date.
-- Location is read only after the person taps; family numbers stay on the phone.
+- Location is read only after the person taps, or while "Update my area automatically" is on (off by default; turning it on explains first, then the browser asks). Only the area name is saved, never the position; the area changes with a small note and never moves the person away from the page they are on. Family numbers stay on the phone.
 - Works at 360 px width, in night and day, in Bangla and English, with keyboard and screen reader.
 
 ## 6. Check before every PR that changes the page

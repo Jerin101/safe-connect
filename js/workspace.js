@@ -465,6 +465,7 @@ const SECTION = {
     lang.lang = ctx.lang() === 'bn' ? 'en' : 'bn';
     const theme = button(dark ? w.themeToDay : w.themeToNight, 'btn sm', () => { ctx.$('themeBtn').click(); render(); $('wsThemeBtn')?.focus(); }, 'wsThemeBtn');
     return [card(w.nav.settings, [settingRow(w.langTitle, w.langNow, lang), settingRow(w.themeTitle, dark ? w.themeNight : w.themeDay, theme)]),
+      card(ctx.texts().ui.auto.title, ctx.autoSwitch('ws', render)),   // auto location (#105): on this phone only, like on home
       card(w.syncTitle, syncSwitch())];
   },
 };

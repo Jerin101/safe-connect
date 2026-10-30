@@ -1,5 +1,23 @@
 {
   "ui": {
+    "auto": {
+      "title": "Update my area automatically",
+      "helpOff": "Off. Your area changes only when you choose it.",
+      "helpOn": "On. Your location stays on this phone; only the area name is saved.",
+      "askTitle": "Update your area automatically?",
+      "explain": "While this site is open on your screen, it checks where you are and shows the numbers for that area. Your location stays on this phone and is never sent anywhere; only the area name is saved. You can turn it off any time.",
+      "allow": "Yes, turn on",
+      "notNow": "Not now",
+      "denied": "Location is blocked for this site, so your area will not update by itself. You can choose your area by hand.",
+      "unavailable": "Could not find your location right now. Your last area stays; it will try again.",
+      "timeout": "Finding your location took too long. Your last area stays; it will try again.",
+      "unsupported": "This browser cannot find your location. You can choose your area by hand.",
+      "changed": "Your area changed: {n}",
+      "firstFor": "Call these first: {n}",
+      "noArea": "Your area",
+      "noAreaText": "Choose your area once, and its police station and local numbers will show here.",
+      "allNumbers": "All numbers for this area"
+    },
     "lang": "বাং",
     "hello1": "Need help?",
     "hello2": "Stay calm. The official numbers for your area are right here.",
@@ -378,7 +396,7 @@
         [
           "privacy",
           "Where does my data go?",
-          "Nowhere. Your family's numbers and last area stay in your phone's browser. Your location is sent only when you send it."
+          "Nowhere. Your family's numbers and last area stay in your phone's browser. Your location is sent only when you send it. If you turn on \"Update my area automatically\", your location is checked on this phone only, and only the area name is saved."
         ],
         [
           "districts",
