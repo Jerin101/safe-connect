@@ -762,7 +762,7 @@
     },
     "verify": "Please verify your email. To send a report, tap the link we emailed you, then tap \"Send report\" again. Signing in with Google needs no verification.",
     "resend": "Send the verification email again",
-    "resent": "Email sent. Check your inbox (and spam).",
+    "resent": "Email sent. Check your inbox and spam folder.",
     "limitWait": "You sent a report a moment ago. Please try again in one minute.",
     "limitDay": "No more reports can be sent today. Please try again tomorrow. In an emergency, call 999."
   },
