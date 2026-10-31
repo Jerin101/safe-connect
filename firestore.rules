@@ -96,35 +96,37 @@ service cloud.firestore {
     }
 
     // ---------- wrong-number reports ----------
-    // Limits (security audit M1, issue #117): only a verified email (Google sign-in is verified), at most
-    // 10 per rolling 24 hours and one per minute. Each new report is written in one batch with
-    // reportLimits/{uid}, and each side checks the other, so the limit cannot be skipped.
+    // Limits (security audit M1, issue #117): a report needs a verified email (Google sign-in is verified), and
+    // at most 10 per person per day (UTC day number) with 60 s between two. The report and limits/{uid} are written
+    // in one batch and each checks the other (getAfter), so a report without a correct counter update fails, and the
+    // counter cannot be lowered, reset or moved to another day. Admins are exempt.
     function verified() { return request.auth.token.get('email_verified', false) == true; }
-    function limitsAfter() { return getAfter(/databases/$(database)/documents/reportLimits/$(request.auth.uid)).data; }
+    function today() { return int(request.time.toMillis() / 86400000); }
+    function limitsAfter() { return getAfter(/databases/$(database)/documents/limits/$(request.auth.uid)).data; }
 
-    match /reportLimits/{uid} {
+    match /limits/{uid} {
       allow read: if isMe(uid);
       allow create, update: if isMe(uid) && verified()
-        && incoming().keys().hasOnly(['windowStart', 'count', 'last', 'lastReport'])
-        && incoming().last == request.time
+        && incoming().keys().hasOnly(['day', 'count', 'lastAt', 'lastReport'])
+        && incoming().day == today()
+        && incoming().lastAt == request.time
+        && incoming().count is int && incoming().count <= 10
         && incoming().lastReport is string
-        // the report it points to is new, belongs to this person and is created in this same batch
+        // it points to a new report of this person, created in this same batch
         && !exists(/databases/$(database)/documents/reports/$(incoming().lastReport))
         && existsAfter(/databases/$(database)/documents/reports/$(incoming().lastReport))
         && getAfter(/databases/$(database)/documents/reports/$(incoming().lastReport)).data.uid == uid
         && (resource == null
-          ? (incoming().windowStart == request.time && incoming().count == 1)
-          : (request.time >= resource.data.last + duration.value(60, 's')
-            && (request.time < resource.data.windowStart + duration.value(24, 'h')
-              ? (incoming().windowStart == resource.data.windowStart && incoming().count == resource.data.count + 1 && incoming().count <= 10)
-              : (incoming().windowStart == request.time && incoming().count == 1))));
+          ? incoming().count == 1
+          : (request.time >= resource.data.lastAt + duration.value(60, 's')
+            && incoming().count == (resource.data.day == today() ? resource.data.count + 1 : 1)));
       allow delete: if false;
     }
 
     match /reports/{reportId} {
       allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
-      allow create: if signedIn() && verified()
-        && limitsAfter().lastReport == reportId && limitsAfter().last == request.time
+      allow create: if signedIn()
+        && (isAdmin() || (verified() && limitsAfter().lastReport == reportId && limitsAfter().lastAt == request.time))
         && incoming().keys().hasOnly(['uid', 'recordId', 'district', 'area', 'problem', 'note', 'status', 'createdAt', 'updatedAt'])
         && incoming().uid == request.auth.uid
         && incoming().status == 'open'

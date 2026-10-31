@@ -109,27 +109,28 @@ export async function deleteFamily(uid) {
 const millis = (t) => (t && typeof t.toMillis === 'function' ? t.toMillis() : null);
 const asReport = (d) => { const x = d.data(); return { id: d.id, ...x, createdAt: millis(x.createdAt), updatedAt: millis(x.updatedAt) }; };
 const newest = (a, b) => (b.createdAt || 0) - (a.createdAt || 0);
-// The report and the person's limit document are written together; firestore.rules check both (issue #117):
-// 10 reports per 24 hours, one per minute. A refusal we can predict gets its own code, so the window can say why.
-export const REPORT_LIMIT = { perDay: 10, gapMs: 60000, windowMs: 24 * 3600000 };
+// The report and limits/{uid} are written in one batch; firestore.rules check both (issue #117): at most 10 per
+// day (UTC day number, as in the rules) and 60 s between two. A limit we can predict gets its own code, so the window
+// can say why. Admins are exempt: for them the report alone is accepted.
+export const REPORT_LIMIT = { perDay: 10, gapMs: 60000 };
+const dayNumber = (ms) => Math.floor(ms / 86400000);
 export async function sendReport(fields) {
   const ref = doc(collection(db, 'reports'));
-  const limRef = doc(db, 'reportLimits', fields.uid);
+  const report = { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
+  const limRef = doc(db, 'limits', fields.uid);
   const snap = await getDoc(limRef);
   const old = snap.exists() ? snap.data() : null;
-  const now = Date.now();
-  const lim = { last: serverTimestamp(), lastReport: ref.id, windowStart: serverTimestamp(), count: 1 };
-  if (old) {
-    const last = millis(old.last), start = millis(old.windowStart);
-    if (last && now < last + REPORT_LIMIT.gapMs) throw Object.assign(new Error('wait'), { code: 'limit-wait' });
-    if (start && now < start + REPORT_LIMIT.windowMs) {
-      if (old.count >= REPORT_LIMIT.perDay) throw Object.assign(new Error('day'), { code: 'limit-day' });
-      lim.windowStart = old.windowStart; lim.count = old.count + 1;
-    }
+  const now = Date.now(), today = dayNumber(now);
+  let code = null;
+  if (old && millis(old.lastAt) && now < millis(old.lastAt) + REPORT_LIMIT.gapMs) code = 'limit-wait';
+  else if (old && old.day === today && old.count >= REPORT_LIMIT.perDay) code = 'limit-day';
+  if (code) {
+    try { await setDoc(ref, report); return ref.id; }               // works only for an admin
+    catch { throw Object.assign(new Error(code), { code }); }
   }
   const batch = writeBatch(db);
-  batch.set(ref, { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-  batch.set(limRef, lim);
+  batch.set(ref, report);
+  batch.set(limRef, { day: today, count: old && old.day === today ? old.count + 1 : 1, lastAt: serverTimestamp(), lastReport: ref.id });
   await batch.commit();
   return ref.id;
 }
