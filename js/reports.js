@@ -106,6 +106,8 @@ function stepCheck() {
   if (!online) { const m = ctx.el('p', 'offline-note', r.offline); m.setAttribute('role', 'status'); out.push(m); }
   else if (!ctx.knownUser()) out.push(ctx.el('p', 'si-note', r.signNeeded));
   if (draft.err) { const m = ctx.el('p', 'err', r[draft.err]); m.setAttribute('role', 'alert'); out.push(m); }
+  // Email not verified yet (issue #117): a button sends the verification email again.
+  if (draft.err === 'verify' && draft.fb) out.push(button(draft.resent ? r.resent : r.resend, 'btn', resend, 'repResend'));
   const send = button(draft.busy ? ctx.texts().auth.wait : r.send, 'btn violet', trySend, 'repSend');
   send.disabled = !online || draft.busy;
   out.push(actions(button(r.back, 'btn', () => go(1)), send));
@@ -154,15 +156,25 @@ async function send({ fb, user }) {
   const fields = reportFields(user.uid, draft);
   if (!fields) { draft.busy = false; draft.err = 'err'; render(); return; }
   try {
+    // Reports need a verified email (Google sign-in is verified); limits: 10 per 24 hours, one per minute (issue #117).
+    if (!(await fb.isVerified())) { draft.busy = false; draft.err = 'verify'; draft.fb = fb; render(); return; }
     await fb.sendReport(fields);
     draft.busy = false; draft.step = STEPS;
     ctx.reportSent();
     render();
     $('repTitle').focus({ preventScroll: true });
-  } catch {
-    draft.busy = false; draft.err = 'err';
-    if (draft) render();
+  } catch (e) {
+    if (!draft) return;
+    draft.busy = false;
+    draft.err = e && e.code === 'limit-wait' ? 'limitWait' : e && e.code === 'limit-day' ? 'limitDay' : 'err';
+    render();
   }
+}
+async function resend() {
+  if (!draft || !draft.fb) return;
+  try { await draft.fb.resendVerify(); draft.resent = true; } catch { draft.err = 'err'; }
+  render();
+  $('repResend')?.focus();
 }
 function toMine() { close(false); ctx.openMine(); }
 

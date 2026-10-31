@@ -5,7 +5,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {
   getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
+  createUserWithEmailAndPassword, sendEmailVerification, reload, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {
   getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, writeBatch, query, where, orderBy, limit,
@@ -25,7 +25,23 @@ export const currentUser = async () => { await auth.authStateReady(); return aut
 // Popup only: a redirect breaks on phones, because github.io and firebaseapp.com are different sites.
 export const signInGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
 export const signInEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
-export const createAccount = (email, password) => createUserWithEmailAndPassword(auth, email, password);
+// A new email account gets a verification email at once: reports need a verified email (issue #117).
+export const createAccount = async (email, password) => {
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  try { await sendEmailVerification(cred.user); } catch { /* the report window can send it again */ }
+  return cred;
+};
+export const resendVerify = () => sendEmailVerification(auth.currentUser);
+// Has this person verified their email (maybe in another tab)? Refreshes the sign-in token so the rules see it too.
+export async function isVerified() {
+  const u = auth.currentUser;
+  if (!u) return false;
+  if (u.emailVerified) return true;
+  await reload(u);
+  if (!auth.currentUser.emailVerified) return false;
+  await auth.currentUser.getIdToken(true);
+  return true;
+}
 // The link in the reset email opens the "action URL" set in the Firebase console, not an address in this code.
 // TODO (NEEDS JERIN, issue #74): Firebase console -> Authentication -> Templates -> Password reset -> "Customize action URL"
 // -> https://jerin101.github.io/safe-connect/reset.html . Until then the email opens Firebase's own default page.
@@ -93,9 +109,28 @@ export async function deleteFamily(uid) {
 const millis = (t) => (t && typeof t.toMillis === 'function' ? t.toMillis() : null);
 const asReport = (d) => { const x = d.data(); return { id: d.id, ...x, createdAt: millis(x.createdAt), updatedAt: millis(x.updatedAt) }; };
 const newest = (a, b) => (b.createdAt || 0) - (a.createdAt || 0);
+// The report and the person's limit document are written together; firestore.rules check both (issue #117):
+// 10 reports per 24 hours, one per minute. A refusal we can predict gets its own code, so the window can say why.
+export const REPORT_LIMIT = { perDay: 10, gapMs: 60000, windowMs: 24 * 3600000 };
 export async function sendReport(fields) {
   const ref = doc(collection(db, 'reports'));
-  await setDoc(ref, { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  const limRef = doc(db, 'reportLimits', fields.uid);
+  const snap = await getDoc(limRef);
+  const old = snap.exists() ? snap.data() : null;
+  const now = Date.now();
+  const lim = { last: serverTimestamp(), lastReport: ref.id, windowStart: serverTimestamp(), count: 1 };
+  if (old) {
+    const last = millis(old.last), start = millis(old.windowStart);
+    if (last && now < last + REPORT_LIMIT.gapMs) throw Object.assign(new Error('wait'), { code: 'limit-wait' });
+    if (start && now < start + REPORT_LIMIT.windowMs) {
+      if (old.count >= REPORT_LIMIT.perDay) throw Object.assign(new Error('day'), { code: 'limit-day' });
+      lim.windowStart = old.windowStart; lim.count = old.count + 1;
+    }
+  }
+  const batch = writeBatch(db);
+  batch.set(ref, { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  batch.set(limRef, lim);
+  await batch.commit();
   return ref.id;
 }
 // The person's own reports: the only list query the rules allow a user (uid == their own uid). Sorted here, so no index is needed.
