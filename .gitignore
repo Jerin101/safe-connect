@@ -14,6 +14,11 @@ Thumbs.db
 .env
 .env.*
 *serviceAccount*.json
+*-firebase-adminsdk-*.json
+*.pem
+*.key
+# public CA certificate the data tools need (not a secret)
+!tools/certs/*.pem
 firebase-debug.log
 
 # personal Claude Code settings (shared agents in .claude/agents/ stay committed)
