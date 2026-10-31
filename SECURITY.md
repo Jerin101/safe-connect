@@ -2,8 +2,9 @@
 
 ## Reporting a problem
 
-If you find a security problem in SafeConnect, please do not open a public issue. Use GitHub's
-**Report a vulnerability** button on the repository's **Security** tab (private vulnerability reporting).
+If you find a security problem in SafeConnect, please do not describe it in a public issue. If the repository's
+**Security** tab shows a **Report a vulnerability** button, use it (private reporting). If it does not, open an
+issue that only says "I have a security report" (no details), and we will contact you.
 In an emergency, call **999** first.
 
 ## Firebase web API key
