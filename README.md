@@ -70,7 +70,14 @@ Every number comes from an official Bangladesh government website, and the exact
 
 *(Available after the first frontend tasks are merged.)* Open the folder in VS Code → right-click `index.html` → **Open with Live Server**.
 
-Developer tests (not linked from the site): [`tests/search-test.html`](tests/search-test.html) for the area search and `node tests/autoloc-test.mjs` for auto location. See [`tests/README.md`](tests/README.md).
+## Testing
+
+- **Developer tests** (not linked from the site): [`tests/search-test.html`](tests/search-test.html) for the area search and `node tests/autoloc-test.mjs` for auto location. See [`tests/README.md`](tests/README.md).
+- **UI/UX test reports** (phone 360 px and laptop 1366 px, light and dark, বাংলা and English, offline, axe-core):
+  - [30 Oct 2026, before (v19)](docs/testing/2026-10-30-ui-ux/): 22 problems found, with marked screenshots.
+  - [31 Oct 2026, after (v23)](docs/testing/2026-10-31-ui-ux-after/): all 22 fixed in the UI clarity pass (#108); before/after screenshots.
+
+  The report scripts use Playwright, which is not part of the project (`package.json` stays as it is); they test the live site.
 
 ## License
 
