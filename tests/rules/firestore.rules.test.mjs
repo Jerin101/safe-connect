@@ -558,7 +558,8 @@ describe('report limits (issue #117)', () => {
     const id = () => doc(collection(f, 'reports')).id;
     let r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(1, r)));                           // reset
     r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(4, r)));                               // lower
-    r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(1, r, today() + 1)));                  // another day
+    r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(6, r, today() + 1)));                  // another day (right count)
+    r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(1, r, today() + 1)));                  // another day, reset
     r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(6, r, today(), new Date())));          // browser time
     await assertFails(updateDoc(doc(f, 'limits', KARIM), { count: 0 }));                                                // the counter alone
     await assertFails(deleteDoc(doc(f, 'limits', KARIM)));

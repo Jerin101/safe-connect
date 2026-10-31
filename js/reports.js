@@ -107,7 +107,11 @@ function stepCheck() {
   else if (!ctx.knownUser()) out.push(ctx.el('p', 'si-note', r.signNeeded));
   if (draft.err) { const m = ctx.el('p', 'err', r[draft.err]); m.setAttribute('role', 'alert'); out.push(m); }
   // Email not verified yet (issue #117): a button sends the verification email again.
-  if (draft.err === 'verify' && draft.fb) out.push(button(draft.resent ? r.resent : r.resend, 'btn', resend, 'repResend'));
+  if (draft.err === 'verify' && draft.fb) {
+    out.push(button(r.resend, 'btn', resend, 'repResend'));
+    const st = ctx.el('p', 'si-note', draft.resent === true ? r.resent : draft.resent === false ? r.err : '');
+    st.setAttribute('role', 'status'); out.push(st);
+  }
   const send = button(draft.busy ? ctx.texts().auth.wait : r.send, 'btn violet', trySend, 'repSend');
   send.disabled = !online || draft.busy;
   out.push(actions(button(r.back, 'btn', () => go(1)), send));
@@ -156,7 +160,7 @@ async function send({ fb, user }) {
   const fields = reportFields(user.uid, draft);
   if (!fields) { draft.busy = false; draft.err = 'err'; render(); return; }
   try {
-    // Reports need a verified email (Google sign-in is verified); limits: 10 per 24 hours, one per minute (issue #117).
+    // Reports need a verified email (Google sign-in is verified); limits: 10 per UTC day, one per minute (issue #117).
     if (!(await fb.isVerified())) { draft.busy = false; draft.err = 'verify'; draft.fb = fb; render(); return; }
     await fb.sendReport(fields);
     draft.busy = false; draft.step = STEPS;
@@ -172,7 +176,7 @@ async function send({ fb, user }) {
 }
 async function resend() {
   if (!draft || !draft.fb) return;
-  try { await draft.fb.resendVerify(); draft.resent = true; } catch { draft.err = 'err'; }
+  try { await draft.fb.resendVerify(); draft.resent = true; } catch { draft.resent = false; }   // keep the verify instructions
   render();
   $('repResend')?.focus();
 }

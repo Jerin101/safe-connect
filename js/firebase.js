@@ -33,14 +33,14 @@ export const createAccount = async (email, password) => {
 };
 export const resendVerify = () => sendEmailVerification(auth.currentUser);
 // Has this person verified their email (maybe in another tab)? Refreshes the sign-in token so the rules see it too.
+// The rules read the token's email_verified claim, which can be older than the user object after a reload.
 export async function isVerified() {
   const u = auth.currentUser;
   if (!u) return false;
-  if (u.emailVerified) return true;
+  if ((await u.getIdTokenResult()).claims.email_verified) return true;
   await reload(u);
   if (!auth.currentUser.emailVerified) return false;
-  await auth.currentUser.getIdToken(true);
-  return true;
+  return !!(await auth.currentUser.getIdTokenResult(true)).claims.email_verified;
 }
 // The link in the reset email opens the "action URL" set in the Firebase console, not an address in this code.
 // TODO (NEEDS JERIN, issue #74): Firebase console -> Authentication -> Templates -> Password reset -> "Customize action URL"
