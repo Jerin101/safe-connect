@@ -135,12 +135,22 @@ function reportLink(r) {
   b.addEventListener('click', () => auth.report(r, { district: p.district, area, areaLabel: [placeTitle(p), placeSub(p)].filter(Boolean).join(', ') }, b));
   return b;
 }
+// English mode: the post's English name from the fixed list in js/lang/en.json "posts"; the office after a comma
+// ("অফিসার ইনচার্জ, বেগমগঞ্জ মডেল থানা") stays as the source wrote it, and a post not on the list stays in Bangla (#108).
+function post(r) {
+  const d = r.designation_bn;
+  if (lang !== 'en' || !d) return d;
+  const posts = LANG.en.posts || {}, full = d.normalize('NFC').trim();
+  if (posts[full]) return posts[full];
+  const [head, ...rest] = full.split(',');
+  return posts[head.trim()] ? [posts[head.trim()], ...rest].join(',') : d;
+}
 function personRow(r) {
   const row = el('div', 'person');
   const info = el('div');
   const nm = r.kind === 'national' && lang === 'en' ? r.name_en : r.name_bn;
-  info.append(el('span', 'name', nm || r.designation_bn || r.office_bn || '—'));   // some pages give no name or post
-  const role = [nm && r.designation_bn !== nm ? r.designation_bn : '', r.office_bn].filter(Boolean).join(' · ');
+  info.append(el('span', 'name', nm || post(r) || r.office_bn || '—'));   // some pages give no name or post
+  const role = [nm && r.designation_bn !== nm ? post(r) : '', r.office_bn].filter(Boolean).join(' · ');
   if (role && r.kind !== 'national') info.append(el('span', 'role', role));
   const tags = el('div', 'tags');
   if (r.ward_no) tags.append(el('span', 'tag', `${t().ward} ${digits(r.ward_no)}`));
@@ -164,7 +174,7 @@ function firstRow(what, r, red = false) {
   const row = el('div', 'first-row glass');
   const info = el('div');
   info.append(el('span', 'what', what));
-  const who = r.kind === 'national' ? (lang === 'en' ? r.name_en : r.name_bn) : [r.name_bn, r.designation_bn].filter(Boolean).join(', ');
+  const who = r.kind === 'national' ? (lang === 'en' ? r.name_en : r.name_bn) : [r.name_bn, post(r)].filter(Boolean).join(', ');
   info.append(el('span', 'who', who));
   const tags = flagTags(r);
   if (tags.children.length) info.append(tags);
@@ -262,6 +272,14 @@ function renderArea() {
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see preview.html).
 function showView(name) {
   for (const view of ['home', 'area', 'sos', 'acct', 'ws']) $(view).hidden = name !== view;
+  // One sidebar for home and the area page (#108): it moves with the view; CSS shows it only on wide screens.
+  const rail = $('rail');
+  // After the content (999 first for keyboards and screen readers); CSS puts it on the left.
+  if (name === 'area' && rail.parentElement !== $('area')) { $('area').append(rail); rail.hidden = false; }
+  if (name === 'home') {
+    if (rail.parentElement === $('area')) $('home').querySelector('.shell').append(rail);
+    rail.hidden = !rail.dataset.pages.split(' ').includes($('main').dataset.page);   // only on home, never on numbers, guide, about…
+  }
   const v = $(name);
   v.classList.remove('page-in'); void v.offsetWidth; v.classList.add('page-in');   // restart the fade
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' });

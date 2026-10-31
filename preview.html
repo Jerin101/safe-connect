@@ -276,6 +276,13 @@
   .call small { font-weight: 600; font-size: 0.78rem; }
   .call.red { background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: var(--on-color); }
   .more { display: grid; gap: 10px; }
+  .area-main { display: grid; gap: 20px; min-width: 0; align-content: start; }
+  #area > .rail .filter { display: none; }   /* the filter only changes home and the search list, so it is not shown here */
+  @media (min-width: 1060px) {
+    main > .wrap.page#area { max-width: 1120px; grid-template-columns: 280px minmax(0, 1fr); gap: 32px; align-items: start; }
+    .area-main { grid-column: 2; grid-row: 1; }
+    #area > .rail { grid-column: 1; grid-row: 1; position: sticky; top: calc(var(--header-h) + 16px); max-height: calc(100vh - var(--header-h) - 32px); overflow-y: auto; scrollbar-width: thin; padding: 4px; margin: -4px; }
+  }
   details.cat { border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
   details.cat > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 14px 16px; font-weight: 600; }
   details.cat > summary::-webkit-details-marker { display: none; }
@@ -636,6 +643,8 @@
 
   <!-- AREA -->
   <div class="wrap page" id="area" hidden>
+    <!-- Wide screens: the home sidebar (My area, filter) is moved in here by js/preview.js, so both pages share one layout (#108). -->
+    <div class="area-main">
     <div class="page-top"><button class="back" id="backBtn" type="button"></button></div>
     <section class="here glass" aria-labelledby="placeName">
       <p class="label" id="youAreIn"></p>
@@ -661,6 +670,7 @@
       <h2 id="moreTitle"></h2>
       <div class="more" id="moreList"></div>
     </section>
+    </div>
   </div>
 
   <!-- SEND LOCATION -->
