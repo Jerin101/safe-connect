@@ -79,6 +79,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 a { color: var(--link); }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
+/* Headings get focus from the router for screen readers; the ring shows only for keyboard focus (#108). */
+[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 h1, h2, h3 { margin: 0; line-height: 1.25; font-weight: 700; text-wrap: balance; }
 p { margin: 0; }
@@ -96,7 +98,7 @@ p { margin: 0; }
 header.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 8; background: var(--bg); border-bottom: 1px solid var(--line);
   box-shadow: 0 2px 10px color-mix(in srgb, var(--line) 40%, transparent); }
 .bar1 { display: flex; align-items: center; gap: 14px; padding-block: 12px; }
-.logo { display: flex; align-items: center; gap: 9px; flex: none; background: none; border: 0; padding: 0; cursor: pointer; font-weight: 800; font-size: 1.25rem; color: var(--ink); }
+.logo { display: flex; align-items: center; gap: 9px; flex: none; min-height: 44px; min-width: 44px; background: none; border: 0; padding: 0; cursor: pointer; font-weight: 800; font-size: 1.25rem; color: var(--ink); }
 .logo svg { width: 28px; height: 28px; flex: none; }
 .mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none; background: var(--accent); color: var(--accent-ink); }
 .mark svg { width: 20px; height: 20px; }
@@ -108,19 +110,28 @@ header.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 8; 
 .areachip b { font-weight: 700; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .areachip small { color: var(--muted); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .top-actions { order: 2; display: flex; gap: 8px; justify-content: flex-end; align-items: center; min-width: 0; }
-.hpill { border-radius: 10px; border: 1px solid var(--line-2); background: var(--surface); min-height: 40px; padding: 7px 14px; font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none;
+.hpill { border-radius: 10px; border: 1px solid var(--line-2); background: var(--surface); min-height: 44px; min-width: 44px; justify-content: center; padding: 7px 14px; font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none;
   color: var(--ink); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; min-width: 0; }
 .h999 { flex: none; min-height: 44px; min-width: 44px; justify-content: center; background: var(--danger); color: var(--danger-ink); border-color: transparent; font-weight: 800; }
 .h999 svg { width: 15px; height: 15px; }
 .hpill.acct { border: 1.5px solid var(--ink); background: transparent; font-weight: 700; }
 .acct .acct-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .hpill.cta { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 700; }
-.hpill.lang { flex: none; border-color: transparent; background: transparent; }
-.round { flex: none; width: 40px; height: 40px; padding: 0; justify-content: center; border-color: transparent; background: var(--surface-2); border-radius: 50%; }
+.hpill.lang { flex: none; min-width: 44px; border-color: transparent; background: transparent; }
+.round { flex: none; width: 44px; height: 44px; padding: 0; justify-content: center; border-color: transparent; background: var(--surface-2); border-radius: 50%; }
 .round svg { width: 17px; height: 17px; }
 .bar2 { display: flex; align-items: center; gap: 16px; }
 .tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
 .tabs::-webkit-scrollbar { display: none; }
+/* More tabs to the side: the edge fades out, and an arrow shows which way (#108; set by js/preview.js). */
+.tabs[data-more~="end"] { mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); }
+.tabs[data-more~="start"] { mask-image: linear-gradient(to left, #000 calc(100% - 48px), transparent); }
+.tabs[data-more~="start"][data-more~="end"] { mask-image: linear-gradient(to right, transparent, #000 48px, #000 calc(100% - 48px), transparent); }
+.tabs-wrap { position: relative; display: flex; flex: 1; min-width: 0; }
+.tabs-more { display: none; position: absolute; top: 50%; translate: 0 -50%; width: 44px; height: 44px; border: 0; padding: 0; background: none; color: var(--ink); cursor: pointer; }
+.tabs-more svg { width: 20px; height: 20px; }
+.tabs-more.end { right: 0; } .tabs-more.start { left: 0; }
+.tabs[data-more~="end"] ~ .tabs-more.end, .tabs[data-more~="start"] ~ .tabs-more.start { display: grid; place-items: center; }
 .tabs button { flex: none; display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; border-bottom: 3px solid transparent; border-radius: 0; padding: 12px 12px 11px;
   color: var(--muted); font-weight: 700; font-size: 0.95rem; cursor: pointer; white-space: nowrap; }
 .tabs button:hover { color: var(--ink); }
@@ -131,10 +142,21 @@ header.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 8; 
 .hfinder svg { width: 20px; height: 20px; flex: none; }
 .hfinder span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 1060px) { .hpill.cta { display: none; } }
-@media (max-width: 760px) { .areachip, .hfinder { display: none; } .bar1 { justify-content: space-between; } .tabs button { padding: 10px 10px 9px; font-size: 0.9rem; } }
+@media (max-width: 760px) { .hfinder { display: none; } .bar1 { justify-content: space-between; } .tabs button { padding: 10px 10px 9px; font-size: 0.9rem; }
+  /* phones (#108): the area chip stays, short: only the name, cut with … when long */
+  .areachip { flex: 1 1 0; margin: 0; padding: 4px 4px; gap: 4px; min-height: 44px; border-radius: 10px; } .areachip small, .areachip .chev { display: none; } .areachip > svg { width: 18px; height: 18px; }
+  /* the full name stays for screen readers; the short one shows on one line, with … if still too long */
+  #areaChipT { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .areachip span { flex: 1 1 0; }
+  .areachip .chip-short { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.86rem; } }
+.chip-short { display: none; }
 /* Small phones: the logo keeps only its mark, and on the smallest the account button keeps only its icon, so 999 always keeps its place. */
-@media (max-width: 430px) { .logo .logo-text { display: none; } .hpill { padding: 6px 10px; } .bar1 { gap: 8px; padding-block: 10px; } .top-actions { gap: 5px; } }
-@media (max-width: 345px) { .acct { width: 40px; padding: 0; justify-content: center; } .acct .acct-text { display: none; } }
+@media (max-width: 430px) { .hpill.round#themeBtn { display: none; } .hpill { padding: 6px 8px; } .hpill.lang { padding: 6px 4px; } .bar1 { gap: 8px; padding-block: 10px; } .top-actions { gap: 5px; }
+  .acct { width: 44px; padding: 0; justify-content: center; } .acct .acct-text { display: none; } }
+@media (max-width: 400px) { .logo .logo-text { display: none; } }
+@media (max-width: 340px) { .areachip > svg { display: none; } }   /* smallest phones: the name gets the room */
+/* Phones: the area name needs the room more than the logo; "Home" is the first tab, so the logo button steps aside (#108). */
+@media (max-width: 430px) { .logo { display: none; } }
 
 /* ---------- shared parts used by more than one page ---------- */
 .offline-wrap { padding-block: 10px 0; }
@@ -144,7 +166,7 @@ header.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 8; 
 main > .wrap.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; padding-block: 20px 40px; max-width: 860px; }
 .page-top { display: grid; gap: 10px; }
 .back { justify-self: start; display: inline-flex; gap: 6px; align-items: center; border-radius: 999px; padding: 6px 14px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink); font-weight: 600; cursor: pointer; }
-.btn { border-radius: 999px; padding: 7px 16px; font-weight: 600; font-size: 0.92rem; cursor: pointer; text-decoration: none; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
+.btn { min-height: 44px; border-radius: 999px; padding: 7px 16px; font-weight: 600; font-size: 0.92rem; cursor: pointer; text-decoration: none; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
 .btn.violet { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); color: var(--on-color); border-color: transparent; }
 .tag { font-size: 0.75rem; font-weight: 600; border-radius: 6px; padding: 0 7px; background: var(--surface-2); color: var(--muted); }
 .tag.warn { background: var(--warn-bg); color: var(--warn); }
@@ -311,9 +333,11 @@ main > .wrap.ws { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22p
 .switch > div { display: grid; gap: 2px; min-width: 0; }
 .switch label, .switch b { font-weight: 600; }
 .switch small { color: var(--muted); font-size: 0.84rem; }
-.toggle { appearance: none; width: 48px; height: 28px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line-2); position: relative; cursor: pointer; flex: none; margin: 0; }
-.toggle::after { content: ""; position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; border-radius: 50%; background: var(--muted); transition: left 0.15s; }
-.toggle:checked { background: var(--accent); border-color: transparent; }
+/* The track looks 48 x 28; the clear 8 px border makes the tap area 64 x 44 (#108). */
+.toggle { appearance: none; box-sizing: content-box; width: 48px; height: 28px; border-radius: 999px; background: var(--surface-2); background-clip: padding-box; border: 8px solid transparent;
+  box-shadow: inset 0 0 0 1px var(--line-2); position: relative; cursor: pointer; flex: none; margin: -8px; }
+.toggle::after { content: ""; position: absolute; top: 5px; left: 5px; width: 18px; height: 18px; border-radius: 50%; background: var(--muted); transition: left 0.15s; }
+.toggle:checked { background: var(--accent); background-clip: padding-box; box-shadow: none; }
 .toggle:checked::after { left: 25px; background: var(--accent-ink); }
 .toggle:disabled { opacity: 0.55; cursor: not-allowed; }
 .toggle:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }

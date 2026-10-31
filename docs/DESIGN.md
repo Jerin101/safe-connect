@@ -23,7 +23,8 @@ a one-time welcome for first visitors (3 short steps, closes with "বুঝে�
 Never block the screen with a welcome, pop-up or loading splash: 999 must be one tap away from the first second.
 
 ## 3. Page order (portal layout)
-1. Two-row header: logo · **999 button (always visible, every page)** · EN/বাং · night/day. Second row: menu (scrolls sideways on phones).
+1. Two-row header: logo · **999 button (always visible, every page)** · EN/বাংলা · night/day. Second row: menu (scrolls sideways on phones; the active tab is always in view, and the edge fades with an arrow where more tabs are hidden).
+   On phones (≤ 430 px) the header shows the **current area (short name, one line)** instead of the logo, and night/day moves to the footer; "হোম" is the first tab (#108).
 2. Banner: greeting · "বিপদে আছেন?" · calm line · the 3 big actions: **999** (red), **প্রিয়জনকে লোকেশন পাঠান** (violet), **আমার কাছের সাহায্য** (soft violet). Visible without scrolling on a 360 px phone. On wide screens, the signal ring panel sits beside the text.
 3. National numbers row: one bordered row of quiet single-colour tiles (only 999's tile is soft red), numbers from `data/national_hotlines.json` (tap = call), plus "লোকেশন পাঠান" and "কাছের সাহায্য".
 4. Search band: "আপনার এলাকা কোথায়?" + one search box (any spelling, Bangla or English).

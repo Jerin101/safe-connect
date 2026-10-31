@@ -287,7 +287,7 @@ function goHome() {
 // #/guide · #/about · #/faq · #/account. Anything else opens home. The home sections carry data-pages="..."
 // in preview.html: each page shows the sections that list its name, so no content or id is copied.
 const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account'];
-const HEADING = { home: 'hello', numbers: 'numbersTitle', area: 'findTitle', guide: 'guideTitle', about: 'aboutTitle', faq: 'faqTitle' };
+const HEADING = { home: 'hello', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
 let firstRoute = true;       // the first page after loading does not move focus
 let routeMsg = false;        // the "area not found" line is showing
@@ -398,6 +398,9 @@ function renderChip() {
   const known = !!(last && data && data.docs[last.district]);
   const name = known ? placeTitle(last) : h.chipEmpty;
   $('areaChipT').textContent = name;
+  // Phones show a short name: "Ukhia", not "Ukhia (whole upazila)"; "জালিয়াপালং", not "জালিয়াপালং ইউনিয়ন" (#108).
+  $('areaChipShort').textContent = known ? name.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+(ইউনিয়ন|পৌরসভা|union|municipality|pourashava)$/i, '') : name;
+  $('areaChip').title = name;
   $('areaChipS').textContent = h.chipSub;
   // Sidebar "My area" card (#108): the area's name, and what a tap does
   $('hcAreaT').textContent = name;
@@ -955,6 +958,19 @@ function markTab() {
   $('nav').querySelectorAll('button').forEach((b) => {
     if (b.dataset.key === activeTab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   });
+  const cur = $('nav').querySelector('[aria-current]');
+  if (cur) {                                          // bring the active tab into view (phones show only a few, #108)
+    const nav = $('nav'), left = cur.offsetLeft - (nav.clientWidth - cur.offsetWidth) / 2;
+    nav.scrollTo({ left: Math.max(0, left), behavior: 'auto' });
+  }
+  tabsMore();
+}
+// Which sides of the tab row have more tabs hidden: CSS fades that edge and shows an arrow.
+function tabsMore() {
+  const n = $('nav'), more = [];
+  if (n.scrollLeft > 4) more.push('start');
+  if (n.scrollLeft + n.clientWidth < n.scrollWidth - 4) more.push('end');
+  n.dataset.more = more.join(' ');
 }
 // Header texts and labels (row 1 and the search pill in row 2).
 function renderHead() {
@@ -999,9 +1015,10 @@ function renderFooter() {
     col(iT, [textBtn(i[0], () => go('about')), textBtn(i[1], () => go('faq')), textBtn(i[2], () => findArea('')), textBtn(i[3], () => openFaq('source'))]),
     help);
   const nav = el('nav'); nav.setAttribute('aria-label', 'Footer');
-  const tests = el('a', null, f.bottom[3]); tests.href = 'tests/search-test.html';
-  nav.append(textBtn(f.bottom[0], () => openFaq('privacy')), textBtn(f.bottom[1], () => openFaq('source')), extLink(f.bottom[2], SITE.repo), tests);
-  $('footBottom').replaceChildren(el('span', null, f.copy), nav, el('p', 'credit', f.credit));
+  nav.append(textBtn(f.bottom[0], () => openFaq('privacy')), textBtn(f.bottom[1], () => openFaq('source')), extLink(f.bottom[2], SITE.repo));   // the search test is linked from README only (#108)
+  // Phones: night / day lives here, so the header has room for the area name (#108); wide screens keep it in the header.
+  const theme = el('button', 'btn foot-theme', P().head.themeLabel); theme.type = 'button'; theme.addEventListener('click', toggleTheme);
+  $('footBottom').replaceChildren(el('span', null, f.copy), nav, theme, el('p', 'credit', f.credit));
 }
 const GP_ICONS = {
   phone: 'M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z',
@@ -1121,7 +1138,7 @@ const ROLES = ['user', 'volunteer', 'admin'];
 function renderRoles() {
   const r = P().roles, names = LANG[lang].auth.roles;
   $('rolesEyebrow').textContent = r.eyebrow; $('rolesT1').textContent = r.t1; $('rolesT2').textContent = r.t2; $('rolesText').textContent = r.text;
-  $('rolesSignin').textContent = r.signIn;
+  $('rolesSignin').textContent = r.signIn; $('rolesSignin').hidden = true;   // #/account has its own sign-in button right above (#108)
   $('rolesGrid').replaceChildren(...ROLES.map((key) => {
     const d = el('div', 'role');
     const h = el('h3'); const i = el('span', 'ico'); i.append(svg(ROLE_ICON[key])); h.append(i, names[key].name);
@@ -1153,7 +1170,7 @@ function renderWarm() {
 function renderPage() {
   renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
   renderRail(); renderRoles(); renderMyArea();
-  $('findTitle').textContent = P().findTitle; $('numbersTitle').textContent = P().titles.numbers; $('findText').textContent = P().findText;
+  $('findTitle').textContent = P().findTitle; $('areaPageTitle').textContent = P().titles.area; $('guidePageTitle').textContent = P().titles.guide; $('numbersTitle').textContent = P().titles.numbers; $('findText').textContent = P().findText;
   $('numRowTitle').textContent = P().numRow.title;
   // End of home: About and Questions are their own pages (#108).
   const link = (label, page) => { const a = el('a', 'btn', label); a.href = `#/${page}`; return a; };
@@ -1197,6 +1214,11 @@ $('backBtn').addEventListener('click', goHome);
 $('homeBtn').addEventListener('click', goHome);
 $('areaChip').addEventListener('click', () => findArea(''));
 $('hFinder').addEventListener('click', () => findArea(''));
+$('nav').addEventListener('scroll', tabsMore, { passive: true });
+window.addEventListener('resize', markTab);      // keeps the active tab in view and the edge hints right
+const calmScroll = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
+$('tabsMore').addEventListener('click', () => $('nav').scrollBy({ left: 160, behavior: calmScroll() }));
+$('tabsBack').addEventListener('click', () => $('nav').scrollBy({ left: -160, behavior: calmScroll() }));
 $('ctaSend').addEventListener('click', () => openSos(null));
 $('hcArea').addEventListener('click', openMyArea);
 $('autoNoteBtn').addEventListener('click', goToSwitch);
@@ -1214,11 +1236,12 @@ $('langBtn').addEventListener('click', () => {
   auth.setText();
   setTitle();
 });
-$('themeBtn').addEventListener('click', () => {
+function toggleTheme() {
   const root = document.documentElement;
   const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
   root.dataset.theme = dark ? 'light' : 'dark';
-});
+}
+$('themeBtn').addEventListener('click', toggleTheme);
 
 setText();
 // Sign-in (P45, #73): the account button, the sign-in modal and #/account; help never waits for it.

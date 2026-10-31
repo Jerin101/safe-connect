@@ -70,6 +70,8 @@ Every number comes from an official Bangladesh government website, and the exact
 
 *(Available after the first frontend tasks are merged.)* Open the folder in VS Code → right-click `index.html` → **Open with Live Server**.
 
+Developer tests (not linked from the site): [`tests/search-test.html`](tests/search-test.html) for the area search and `node tests/autoloc-test.mjs` for auto location. See [`tests/README.md`](tests/README.md).
+
 ## License
 
 MIT. See [`LICENSE`](LICENSE).

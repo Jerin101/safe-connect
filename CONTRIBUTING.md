@@ -33,7 +33,8 @@ Two people build SafeConnect: **jerin101** (lead: data and backend) and **tasmin
 - Text shown to people lives in `js/lang/bn.json` and `js/lang/en.json`.
 - Use `textContent` for data, never `innerHTML`.
 - Test at phone width (360 px), in both languages and both themes.
-- Privacy: without login, nothing leaves the phone. Read the location only when the user taps SOS or "Use my location". Never log or upload personal data.
+- Privacy: without login, nothing leaves the phone. Read the location only when the user taps SOS or "Find help near me", or when they turned on "Update my area automatically" (off by default). Never log or upload personal data.
+- Tests (not linked from the site): run `python -m http.server 8000`, then open `http://localhost:8000/tests/search-test.html` (area search, must say 0 failed) and run `node tests/autoloc-test.mjs` (auto location, must say ALL OK). Details: `tests/README.md`.
 - Python tools: standard library only, a delay between requests to government servers, UTF-8 everywhere.
 - Never turn off certificate checking (`verify=False`, `-k`, etc.).
 

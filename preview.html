@@ -164,7 +164,7 @@
   .icon-item .circle { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); color: var(--ink-2); }
   .icon-item .circle.soft-red { background: var(--danger-soft); color: var(--red-ink); }
   .icon-item .circle svg { width: 20px; height: 20px; }
-  .icon-item b { font-size: 0.86rem; font-weight: 700; line-height: 1.3; color: var(--link); overflow-wrap: anywhere; }
+  .icon-item b { font-size: 0.86rem; font-weight: 700; line-height: 1.3; color: var(--link); overflow-wrap: break-word; hyphens: auto; }
   .icon-item small { grid-column: 1 / -1; font-size: 0.92rem; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }   /* the number gets the full width: never cut */
   .c-violet { background: linear-gradient(140deg, var(--violet-1), var(--violet-2)); }
   .c-amber { background: linear-gradient(140deg, var(--amber-1), var(--amber-2)); color: var(--amber-ink); }
@@ -382,7 +382,7 @@
   .foot-brand small { color: var(--foot-muted); font-size: 0.86rem; }
   .foot-col { display: grid; gap: 9px; align-content: start; min-width: 0; }
   .foot-col h3 { font-size: 0.98rem; margin-bottom: 4px; }
-  .foot-col button, .foot-col a { justify-self: start; background: none; border: 0; padding: 0; color: var(--foot-muted); font-size: 0.94rem; cursor: pointer; text-decoration: none; text-align: left; }
+  .foot-col button, .foot-col a { justify-self: start; display: inline-flex; align-items: center; min-height: 44px; background: none; border: 0; padding: 0; color: var(--foot-muted); font-size: 0.94rem; cursor: pointer; text-decoration: none; text-align: left; }
   .foot-col button:hover, .foot-col a:hover { color: var(--foot-ink); }
   .foot-help { grid-column: 1 / -1; }
   @media (min-width: 900px) { .foot-help { grid-column: auto; } }
@@ -390,8 +390,10 @@
   .foot-help a { color: var(--link); }
   .foot-bottom { border-top: 1px solid var(--foot-line); padding-top: 16px; display: flex; flex-wrap: wrap; gap: 10px 22px; justify-content: space-between; color: var(--foot-muted); font-size: 0.82rem; }
   .foot-bottom nav { display: flex; flex-wrap: wrap; gap: 6px 18px; }
-  .foot-bottom a, .foot-bottom button { color: var(--foot-muted); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: none; font-size: 0.82rem; }
-  .credit { flex-basis: 100%; font-size: 0.78rem; opacity: 0.85; }
+  .foot-bottom a, .foot-bottom button { color: var(--foot-muted); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: none; font-size: 0.82rem; display: inline-flex; align-items: center; min-height: 44px; }
+  .foot-bottom .foot-theme { display: none; }
+  @media (max-width: 430px) { .foot-bottom .foot-theme { display: inline-flex; } }
+  .credit { flex-basis: 100%; font-size: 0.78rem; color: var(--foot-muted); }
   @media (prefers-reduced-motion: reduce) { details.cat > summary::after { transition: none; } }
   /* our additions: no inline styles, source line on call rows */
   .people-body { padding: 8px 16px 16px; gap: 10px; }
@@ -422,7 +424,7 @@
   .role .tag { justify-self: start; }
   .roles-note { padding: 14px 24px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 0.9rem; }
   .roles-note b { color: var(--ink); margin-right: 6px; }
-  .more-link { justify-self: start; color: var(--link); font-weight: 700; text-decoration: none; }
+  .more-link { justify-self: start; display: inline-flex; align-items: center; min-height: 44px; color: var(--link); font-weight: 700; text-decoration: none; }
   .more-link:hover { text-decoration: underline; }
   .more-link::after { content: " →"; content: " →" / ""; }
   .section-title .more-link { justify-self: center; }
@@ -456,12 +458,17 @@
     <!-- Shown in the middle by CSS order; placed last so 999 is the first control after the logo. -->
     <button class="areachip" id="areaChip" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
-      <span><b id="areaChipT"></b><small id="areaChipS"></small></span>
+      <span><b id="areaChipT"></b><b class="chip-short" id="areaChipShort" aria-hidden="true"></b><small id="areaChipS"></small></span>
       <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m7 10 5 5 5-5z"/></svg>
     </button>
   </div>
   <div class="wrap bar2">
+    <div class="tabs-wrap">
     <nav class="tabs" id="nav" aria-label="Main"></nav>
+    <!-- Arrows that show more tabs are hidden to the side (#108): touch and mouse only; keyboard users reach every tab with Tab. -->
+    <button class="tabs-more start" id="tabsBack" type="button" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m15.4 6.4-1.4-1.4-7 7 7 7 1.4-1.4L9.8 12z"/></svg></button>
+    <button class="tabs-more end" id="tabsMore" type="button" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m8.6 17.6 1.4 1.4 7-7-7-7-1.4 1.4 5.6 5.6z"/></svg></button>
+    </div>
     <button class="hfinder" id="hFinder" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.8 4.8-1.4 1.4-4.8-4.8A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
       <span id="hFinderText"></span>
@@ -523,7 +530,7 @@
         <section class="row-sec findcard" id="findSec" aria-labelledby="findTitle" data-pages="home area">
           <div class="search-band">
             <div>
-              <div class="intro"><h2 id="findTitle" tabindex="-1"></h2><p id="findText"></p></div>
+              <div class="intro"><h1 class="page-title" id="areaPageTitle" tabindex="-1" data-pages="area"></h1><h2 id="findTitle" data-pages="home"></h2><p id="findText"></p></div>
               <div class="finder">
                 <label class="searchbar" for="areaInput">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.8 4.8-1.4 1.4-4.8-4.8A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
@@ -553,7 +560,7 @@
         </section>
 
         <section class="row-sec" aria-labelledby="guideTitle" data-pages="home guide">
-          <div class="row-head"><div><h2 id="guideTitle" tabindex="-1"></h2><p class="soft" id="guideText"></p></div><a class="more-link" id="guideMore" href="#/guide" data-pages="home"></a></div>
+          <div class="row-head"><div><h1 class="page-title" id="guidePageTitle" tabindex="-1" data-pages="guide"></h1><h2 id="guideTitle" data-pages="home"></h2><p class="soft" id="guideText"></p></div><a class="more-link" id="guideMore" href="#/guide" data-pages="home"></a></div>
           <div class="grid-3" id="guideCards"></div>
         </section>
 
@@ -586,7 +593,7 @@
 
     <section class="section tint" id="about" aria-labelledby="aboutTitle" data-pages="about">
       <div class="wrap about">
-        <div class="intro"><p class="eyebrow" id="aboutEyebrow"></p><h2 id="aboutTitle" tabindex="-1"></h2><p id="aboutText"></p><a class="more-link" id="aboutMore" href="#/about" data-pages="home"></a></div>
+        <div class="intro"><p class="eyebrow" id="aboutEyebrow"></p><h1 class="page-title" id="aboutTitle" tabindex="-1"></h1><p id="aboutText"></p><a class="more-link" id="aboutMore" href="#/about" data-pages="home"></a></div>
         <div class="points" id="points"></div>
         <!-- Moved from home (#108): the numbers in short, and how to keep the site on a phone. -->
         <div class="stats glass" id="stats"></div>
@@ -621,7 +628,7 @@
 
     <section class="section tint" id="faq" aria-labelledby="faqTitle" data-pages="faq">
       <div class="wrap faq">
-        <div class="faq-head"><p class="eyebrow" id="faqEyebrow"></p><h2 id="faqTitle" tabindex="-1"></h2><a class="more-link" id="faqMore" href="#/faq" data-pages="home"></a></div>
+        <div class="faq-head"><p class="eyebrow" id="faqEyebrow"></p><h1 class="page-title" id="faqTitle" tabindex="-1"></h1><a class="more-link" id="faqMore" href="#/faq" data-pages="home"></a></div>
         <div class="faq-list" id="faqList"></div>
       </div>
     </section>
