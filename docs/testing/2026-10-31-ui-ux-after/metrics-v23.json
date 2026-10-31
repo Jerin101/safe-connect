@@ -1,0 +1,814 @@
+{
+ "phone/light/#/": {
+  "docH": 5326,
+  "screens": 7.2,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "A 81x18",
+   "উৎস 25x44"
+  ],
+  "tinyText": [
+   "11.2px: ☀"
+  ],
+  "h1": [
+   "বিপদে আছেন?\nশান্ত থাকুন। আপনার"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": true
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 5,
+   "কাছের সাহায্য": 3,
+   "৯৯৯": 8
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/light/#/numbers": {
+  "docH": 3441,
+  "screens": 4.7,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "সরকারি উৎস ↗ 81x18",
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "জরুরি নম্বর"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 2,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 6
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/light/#/area": {
+  "docH": 2102,
+  "screens": 2.8,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "এলাকা খুঁজুন"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 2,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/light/#/send": {
+  "docH": 2764,
+  "screens": 3.7,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "লোকেশন পাঠান"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 3,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/light/#/guide": {
+  "docH": 2519,
+  "screens": 3.4,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "কী হয়েছে?"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 4,
+   "কাছের সাহায্য": 2,
+   "৯৯৯": 3
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/light/#/about": {
+  "docH": 2712,
+  "screens": 3.7,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "SafeConnect কী?"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 3,
+   "কাছের সাহায্য": 2,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/light/#/faq": {
+  "docH": 2121,
+  "screens": 2.9,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "যা জানতে চান"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 2,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/light/#/account": {
+  "docH": 2417,
+  "screens": 3.3,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "আমার অ্যাকাউন্ট"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 5,
+   "কাছের সাহায্য": 3,
+   "৯৯৯": 5
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/dark/#/": {
+  "docH": 5326,
+  "screens": 7.2,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "A 81x18",
+   "উৎস 25x44"
+  ],
+  "tinyText": [
+   "11.2px: ☀"
+  ],
+  "h1": [
+   "বিপদে আছেন?\nশান্ত থাকুন। আপনার"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": true
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 5,
+   "কাছের সাহায্য": 3,
+   "৯৯৯": 8
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/dark/#/numbers": {
+  "docH": 3441,
+  "screens": 4.7,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "সরকারি উৎস ↗ 81x18",
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "জরুরি নম্বর"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 2,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 6
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/dark/#/area": {
+  "docH": 2102,
+  "screens": 2.8,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "এলাকা খুঁজুন"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 2,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/dark/#/send": {
+  "docH": 2764,
+  "screens": 3.7,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "লোকেশন পাঠান"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 3,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/dark/#/guide": {
+  "docH": 2519,
+  "screens": 3.4,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "কী হয়েছে?"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 4,
+   "কাছের সাহায্য": 2,
+   "৯৯৯": 3
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/dark/#/about": {
+  "docH": 2712,
+  "screens": 3.7,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "SafeConnect কী?"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 3,
+   "কাছের সাহায্য": 2,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/dark/#/faq": {
+  "docH": 2121,
+  "screens": 2.9,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "যা জানতে চান"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 2,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "phone/dark/#/account": {
+  "docH": 2417,
+  "screens": 3.3,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "আমার অ্যাকাউন্ট"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 5,
+   "কাছের সাহায্য": 3,
+   "৯৯৯": 5
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/light/#/": {
+  "docH": 3262,
+  "screens": 4.2,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "A 81x18",
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "বিপদে আছেন?\nশান্ত থাকুন। আপনার"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": true
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 6,
+   "কাছের সাহায্য": 3,
+   "৯৯৯": 8
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/light/#/numbers": {
+  "docH": 1630,
+  "screens": 2.1,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "সরকারি উৎস ↗ 81x18",
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "জরুরি নম্বর"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 3,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 6
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/light/#/area": {
+  "docH": 1086,
+  "screens": 1.4,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "এলাকা খুঁজুন"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 3,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/light/#/send": {
+  "docH": 1819,
+  "screens": 2.4,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "লোকেশন পাঠান"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 4,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/light/#/guide": {
+  "docH": 1142,
+  "screens": 1.5,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "কী হয়েছে?"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": true
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 5,
+   "কাছের সাহায্য": 2,
+   "৯৯৯": 3
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/light/#/about": {
+  "docH": 1844,
+  "screens": 2.4,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "SafeConnect কী?"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 4,
+   "কাছের সাহায্য": 2,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/light/#/faq": {
+  "docH": 1298,
+  "screens": 1.7,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "যা জানতে চান"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 3,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/light/#/account": {
+  "docH": 1329,
+  "screens": 1.7,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "আমার অ্যাকাউন্ট"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 6,
+   "কাছের সাহায্য": 3,
+   "৯৯৯": 5
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/dark/#/": {
+  "docH": 3262,
+  "screens": 4.2,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "A 81x18",
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "বিপদে আছেন?\nশান্ত থাকুন। আপনার"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": true
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 6,
+   "কাছের সাহায্য": 3,
+   "৯৯৯": 8
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/dark/#/numbers": {
+  "docH": 1630,
+  "screens": 2.1,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "সরকারি উৎস ↗ 81x18",
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "জরুরি নম্বর"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 3,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 6
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/dark/#/area": {
+  "docH": 1086,
+  "screens": 1.4,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "এলাকা খুঁজুন"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 3,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/dark/#/send": {
+  "docH": 1819,
+  "screens": 2.4,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "লোকেশন পাঠান"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 4,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/dark/#/guide": {
+  "docH": 1142,
+  "screens": 1.5,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "কী হয়েছে?"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": true
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 5,
+   "কাছের সাহায্য": 2,
+   "৯৯৯": 3
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/dark/#/about": {
+  "docH": 1844,
+  "screens": 2.4,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "SafeConnect কী?"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 4,
+   "কাছের সাহায্য": 2,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/dark/#/faq": {
+  "docH": 1298,
+  "screens": 1.7,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "যা জানতে চান"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 3,
+   "কাছের সাহায্য": 1,
+   "৯৯৯": 2
+  },
+  "axe": [],
+  "errors": []
+ },
+ "laptop/dark/#/account": {
+  "docH": 1329,
+  "screens": 1.7,
+  "hScroll": false,
+  "wide": [],
+  "smallTap": [
+   "উৎস 25x44"
+  ],
+  "tinyText": [],
+  "h1": [
+   "আমার অ্যাকাউন্ট"
+  ],
+  "fold": {
+   "call999": true,
+   "send": true,
+   "near": false
+  },
+  "repeats": {
+   "লোকেশন পাঠান": 6,
+   "কাছের সাহায্য": 3,
+   "৯৯৯": 5
+  },
+  "axe": [],
+  "errors": []
+ }
+}
