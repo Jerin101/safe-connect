@@ -118,8 +118,9 @@ export async function sendReport(fields) {
   const ref = doc(collection(db, 'reports'));
   const report = { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
   const limRef = doc(db, 'limits', fields.uid);
-  const snap = await getDoc(limRef);
-  const old = snap.exists() ? snap.data() : null;
+  let old = null;
+  try { const snap = await getDoc(limRef); old = snap.exists() ? snap.data() : null; }
+  catch { /* the live rules may not know limits/ yet: treat as no counter */ }
   const now = Date.now(), today = dayNumber(now);
   let code = null;
   if (old && millis(old.lastAt) && now < millis(old.lastAt) + REPORT_LIMIT.gapMs) code = 'limit-wait';
@@ -131,7 +132,13 @@ export async function sendReport(fields) {
   const batch = writeBatch(db);
   batch.set(ref, report);
   batch.set(limRef, { day: today, count: old && old.day === today ? old.count + 1 : 1, lastAt: serverTimestamp(), lastReport: ref.id });
-  await batch.commit();
+  try { await batch.commit(); }
+  catch (e) {
+    // Until the new firestore.rules are deployed, the live rules refuse limits/: send the report alone, as before.
+    // With the new rules this works only for admins, so the limits cannot be skipped.
+    if (e && e.code === 'permission-denied') { await setDoc(ref, report); return ref.id; }
+    throw e;
+  }
   return ref.id;
 }
 // The person's own reports: the only list query the rules allow a user (uid == their own uid). Sorted here, so no index is needed.
