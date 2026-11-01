@@ -5,7 +5,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {
   getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
+  createUserWithEmailAndPassword, sendEmailVerification, reload, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {
   getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, writeBatch, query, where, orderBy, limit,
@@ -25,7 +25,23 @@ export const currentUser = async () => { await auth.authStateReady(); return aut
 // Popup only: a redirect breaks on phones, because github.io and firebaseapp.com are different sites.
 export const signInGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
 export const signInEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
-export const createAccount = (email, password) => createUserWithEmailAndPassword(auth, email, password);
+// A new email account gets a verification email at once: reports need a verified email (issue #117).
+export const createAccount = async (email, password) => {
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  try { await sendEmailVerification(cred.user); } catch { /* the report window can send it again */ }
+  return cred;
+};
+export const resendVerify = () => sendEmailVerification(auth.currentUser);
+// Has this person verified their email (maybe in another tab)? Refreshes the sign-in token so the rules see it too.
+// The rules read the token's email_verified claim, which can be older than the user object after a reload.
+export async function isVerified() {
+  const u = auth.currentUser;
+  if (!u) return false;
+  if ((await u.getIdTokenResult()).claims.email_verified) return true;
+  await reload(u);
+  if (!auth.currentUser.emailVerified) return false;
+  return !!(await auth.currentUser.getIdTokenResult(true)).claims.email_verified;
+}
 // The link in the reset email opens the "action URL" set in the Firebase console, not an address in this code.
 // TODO (NEEDS JERIN, issue #74): Firebase console -> Authentication -> Templates -> Password reset -> "Customize action URL"
 // -> https://jerin101.github.io/safe-connect/reset.html . Until then the email opens Firebase's own default page.
@@ -93,9 +109,36 @@ export async function deleteFamily(uid) {
 const millis = (t) => (t && typeof t.toMillis === 'function' ? t.toMillis() : null);
 const asReport = (d) => { const x = d.data(); return { id: d.id, ...x, createdAt: millis(x.createdAt), updatedAt: millis(x.updatedAt) }; };
 const newest = (a, b) => (b.createdAt || 0) - (a.createdAt || 0);
+// The report and limits/{uid} are written in one batch; firestore.rules check both (issue #117): at most 10 per
+// day (UTC day number, as in the rules) and 60 s between two. A limit we can predict gets its own code, so the window
+// can say why. Admins are exempt: for them the report alone is accepted.
+export const REPORT_LIMIT = { perDay: 10, gapMs: 60000 };
+const dayNumber = (ms) => Math.floor(ms / 86400000);
 export async function sendReport(fields) {
   const ref = doc(collection(db, 'reports'));
-  await setDoc(ref, { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  const report = { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
+  const limRef = doc(db, 'limits', fields.uid);
+  let old = null;
+  try { const snap = await getDoc(limRef); old = snap.exists() ? snap.data() : null; }
+  catch { /* the live rules may not know limits/ yet: treat as no counter */ }
+  const now = Date.now(), today = dayNumber(now);
+  let code = null;
+  if (old && millis(old.lastAt) && now < millis(old.lastAt) + REPORT_LIMIT.gapMs) code = 'limit-wait';
+  else if (old && old.day === today && old.count >= REPORT_LIMIT.perDay) code = 'limit-day';
+  if (code) {
+    try { await setDoc(ref, report); return ref.id; }               // works only for an admin
+    catch { throw Object.assign(new Error(code), { code }); }
+  }
+  const batch = writeBatch(db);
+  batch.set(ref, report);
+  batch.set(limRef, { day: today, count: old && old.day === today ? old.count + 1 : 1, lastAt: serverTimestamp(), lastReport: ref.id });
+  try { await batch.commit(); }
+  catch (e) {
+    // Until the new firestore.rules are deployed, the live rules refuse limits/: send the report alone, as before.
+    // With the new rules this works only for admins, so the limits cannot be skipped.
+    if (e && e.code === 'permission-denied') { await setDoc(ref, report); return ref.id; }
+    throw e;
+  }
   return ref.id;
 }
 // The person's own reports: the only list query the rules allow a user (uid == their own uid). Sorted here, so no index is needed.

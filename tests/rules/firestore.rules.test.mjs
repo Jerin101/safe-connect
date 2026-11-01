@@ -16,7 +16,9 @@ const KARIM = 'karim-uid';
 const VOL = 'vol-uid';
 let env;
 
-const db = (uid) => (uid ? env.authenticatedContext(uid, { email: `${uid}@example.com` }) : env.unauthenticatedContext()).firestore();
+// Test accounts have a verified email (like Google sign-in); dbUnverified is a new email account that has not clicked the link yet.
+const db = (uid) => (uid ? env.authenticatedContext(uid, { email: `${uid}@example.com`, email_verified: true }) : env.unauthenticatedContext()).firestore();
+const dbUnverified = (uid) => env.authenticatedContext(uid, { email: `${uid}@example.com`, email_verified: false }).firestore();
 
 before(async () => {
   env = await initializeTestEnvironment({
@@ -42,6 +44,30 @@ beforeEach(async () => {
 const newProfile = (uid, role = 'user') => ({ name: 'Test', email: `${uid}@example.com`, lang: 'bn', createdAt: serverTimestamp(), role });
 const newReport = (uid, extra = {}) => ({ uid, recordId: 'noakhali-up-123', district: 'noakhali', area: 'Sharifpur', problem: 'off', note: 'tried twice', status: 'open',
   createdAt: serverTimestamp(), updatedAt: serverTimestamp(), ...extra });
+// Issue #117: a report goes out in one batch with limits/{uid}, exactly as js/firebase.js sendReport does.
+const today = () => Math.floor(Date.now() / 86400000);
+async function readLimits(uid) {
+  let d = null;
+  await env.withSecurityRulesDisabled(async (ctx) => { const x = await getDoc(doc(ctx.firestore(), 'limits', uid)); d = x.exists() ? x.data() : null; });
+  return d;
+}
+async function sendWithLimits(f, uid, data, id = null, limitsOverride = null) {
+  const ref = id ? doc(f, 'reports', id) : doc(collection(f, 'reports'));
+  const old = await readLimits(uid);
+  const lim = limitsOverride || { day: today(), count: old && old.day === today() ? old.count + 1 : 1, lastAt: serverTimestamp(), lastReport: ref.id };
+  const b = writeBatch(f);
+  b.set(ref, data);
+  b.set(doc(f, 'limits', uid), lim);
+  return b.commit();
+}
+// Pretend a minute has passed since the last report (the rules use the server's clock).
+async function aMinuteLater(uid, patch = {}) {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    const r = doc(ctx.firestore(), 'limits', uid);
+    const x = await getDoc(r);
+    if (x.exists()) await setDoc(r, { ...x.data(), lastAt: new Date(Date.now() - 120000), ...patch });
+  });
+}
 const auditEntry = (actorUid, action, entity, entityId) => ({ actorUid, action, entity, entityId, at: serverTimestamp(), meta: {} });
 
 describe('signed out', () => {
@@ -205,16 +231,16 @@ describe('saved places', () => {
 
 describe('wrong-number reports', () => {
   test('a user can send a report as themselves', async () => {
-    await assertSucceeds(setDoc(doc(db(KARIM), 'reports', 'r2'), newReport(KARIM)));
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM), 'r2'));
   });
   test('a report cannot pretend to come from someone else', async () => {
-    await assertFails(setDoc(doc(db(KARIM), 'reports', 'r2'), newReport(RINA)));
+    await assertFails(sendWithLimits(db(KARIM), KARIM, newReport(RINA), 'r2'));
   });
   test('a new report cannot start as "fixed"', async () => {
-    await assertFails(setDoc(doc(db(KARIM), 'reports', 'r2'), newReport(KARIM, { status: 'fixed' })));
+    await assertFails(sendWithLimits(db(KARIM), KARIM, newReport(KARIM, { status: 'fixed' }), 'r2'));
   });
   test('a very long note is refused', async () => {
-    await assertFails(setDoc(doc(db(KARIM), 'reports', 'r2'), newReport(KARIM, { note: 'x'.repeat(501) })));
+    await assertFails(sendWithLimits(db(KARIM), KARIM, newReport(KARIM, { note: 'x'.repeat(501) }), 'r2'));
   });
   test('the reporter and admins can read it, other users cannot', async () => {
     await assertSucceeds(getDoc(doc(db(RINA), 'reports', 'r1')));
@@ -281,26 +307,28 @@ describe('report form and lists (issue #79)', () => {
     assert.equal([...reportFields(KARIM, { ...draft, note: 'ক'.repeat(NOTE_MAX + 50) }).note].length, NOTE_MAX);
   });
   test('the exact report the site sends is accepted (with and without note and area)', async () => {
-    await assertSucceeds(setDoc(doc(collection(db(KARIM), 'reports')), written(KARIM)));
-    await assertSucceeds(setDoc(doc(collection(db(KARIM), 'reports')), written(KARIM, { ...draft, note: '', area: '' })));
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, written(KARIM)));
+    await aMinuteLater(KARIM);
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, written(KARIM, { ...draft, note: '', area: '' })));
   });
   test('the longest Bangla note and area the site allows are accepted', async () => {
     const long = { ...draft, note: 'ক্ষ'.repeat(NOTE_MAX), area: 'ক'.repeat(200) };
-    await assertSucceeds(setDoc(doc(collection(db(KARIM), 'reports')), written(KARIM, long)));
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, written(KARIM, long)));
   });
   test('every problem choice is accepted, in both districts', async () => {
     for (const problem of PROBLEMS) for (const district of REPORT_DISTRICTS) {
-      await assertSucceeds(setDoc(doc(collection(db(KARIM), 'reports')), written(KARIM, { ...draft, problem, district })));
+      await aMinuteLater(KARIM, { count: 0 });   // a fresh count: the 10-a-day limit is not what this test checks
+      await assertSucceeds(sendWithLimits(db(KARIM), KARIM, written(KARIM, { ...draft, problem, district })));
     }
   });
   test('wrong shapes are refused: extra fields, unknown problem, other district, browser time, signed out', async () => {
-    const f = db(KARIM); const ref = () => doc(collection(f, 'reports'));
-    await assertFails(setDoc(ref(), { ...written(KARIM), phone: '01712345678' }));
-    await assertFails(setDoc(ref(), { ...written(KARIM), address: 'house 1' }));
-    await assertFails(setDoc(ref(), { ...written(KARIM), problem: 'missing' }));
-    await assertFails(setDoc(ref(), { ...written(KARIM), district: 'dhaka' }));
-    await assertFails(setDoc(ref(), { ...written(KARIM), createdAt: new Date() }));
-    await assertFails(setDoc(ref(), { ...written(KARIM), recordId: 7 }));
+    const f = db(KARIM); const send = (data) => sendWithLimits(f, KARIM, data);
+    await assertFails(send({ ...written(KARIM), phone: '01712345678' }));
+    await assertFails(send({ ...written(KARIM), address: 'house 1' }));
+    await assertFails(send({ ...written(KARIM), problem: 'missing' }));
+    await assertFails(send({ ...written(KARIM), district: 'dhaka' }));
+    await assertFails(send({ ...written(KARIM), createdAt: new Date() }));
+    await assertFails(send({ ...written(KARIM), recordId: 7 }));
     await assertFails(setDoc(doc(collection(db(null), 'reports')), written('nobody')));
   });
   test('"My reports": a user can list only their own reports', async () => {
@@ -495,5 +523,68 @@ describe('admin workspace: audit log (issue #65)', () => {
     b.set(doc(f, 'audit', 'e1'), { actorUid: ADMIN, action: 'ROLE_CHANGED', entity: 'users', entityId: KARIM, at: serverTimestamp(), meta: { from: 'user', to: 'volunteer' } });
     b.update(doc(f, 'users', KARIM), { role: 'volunteer', lastAuditId: 'e1' });
     await assertFails(b.commit());
+  });
+});
+
+// Issue #117 (security audit M1): verified email, at most 10 a day, 60 s between two; admins are exempt.
+describe('report limits (issue #117)', () => {
+  const lim = (count, r, day = today(), lastAt = serverTimestamp()) => ({ day, count, lastAt, lastReport: r });
+  test('an unverified email account cannot send a report', async () => {
+    await assertFails(sendWithLimits(dbUnverified(KARIM), KARIM, newReport(KARIM)));
+  });
+  test('a verified account can send one, and the counter starts at 1', async () => {
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM)));
+    assert.equal((await readLimits(KARIM)).count, 1);
+  });
+  test('a report without the counter update is refused', async () => {
+    await assertFails(setDoc(doc(collection(db(KARIM), 'reports')), newReport(KARIM)));
+  });
+  test('two reports within 60 seconds: the second is refused', async () => {
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM)));
+    await assertFails(sendWithLimits(db(KARIM), KARIM, newReport(KARIM)));
+  });
+  test('ten reports in a day are fine, the eleventh is refused', async () => {
+    for (let i = 1; i <= 10; i++) {
+      await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM)));
+      await aMinuteLater(KARIM);
+    }
+    assert.equal((await readLimits(KARIM)).count, 10);
+    await assertFails(sendWithLimits(db(KARIM), KARIM, newReport(KARIM)));
+  });
+  test('the counter cannot be lowered, reset or moved to another day', async () => {
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM)));
+    await aMinuteLater(KARIM, { count: 5 });
+    const f = db(KARIM);
+    const id = () => doc(collection(f, 'reports')).id;
+    let r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(1, r)));                           // reset
+    r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(4, r)));                               // lower
+    r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(6, r, today() + 1)));                  // another day (right count)
+    r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(1, r, today() + 1)));                  // another day, reset
+    r = id(); await assertFails(sendWithLimits(f, KARIM, newReport(KARIM), r, lim(6, r, today(), new Date())));          // browser time
+    await assertFails(updateDoc(doc(f, 'limits', KARIM), { count: 0 }));                                                // the counter alone
+    await assertFails(deleteDoc(doc(f, 'limits', KARIM)));
+    await assertSucceeds(sendWithLimits(f, KARIM, newReport(KARIM)));                                                   // the honest +1
+    assert.equal((await readLimits(KARIM)).count, 6);
+  });
+  test('a new day starts at 1 again', async () => {
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM)));
+    await aMinuteLater(KARIM, { day: today() - 1, count: 10 });
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM)));
+    assert.equal((await readLimits(KARIM)).count, 1);
+  });
+  test('the counter must point to a new report of this person', async () => {
+    const f = db(KARIM);
+    const b = writeBatch(f);
+    b.set(doc(f, 'limits', KARIM), lim(1, 'r1'));   // r1 is Rina's old report
+    await assertFails(b.commit());
+  });
+  test('an admin is exempt: reports without the counter are accepted', async () => {
+    await assertSucceeds(setDoc(doc(collection(db(ADMIN), 'reports')), newReport(ADMIN)));
+    await assertSucceeds(setDoc(doc(collection(db(ADMIN), 'reports')), newReport(ADMIN)));
+  });
+  test('only the owner can read their counter', async () => {
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM)));
+    await assertSucceeds(getDoc(doc(db(KARIM), 'limits', KARIM)));
+    await assertFails(getDoc(doc(db(RINA), 'limits', KARIM)));
   });
 });
