@@ -135,15 +135,15 @@ function reportLink(r) {
   b.addEventListener('click', () => auth.report(r, { district: p.district, area, areaLabel: [placeTitle(p), placeSub(p)].filter(Boolean).join(', ') }, b));
   return b;
 }
-// English mode: the post's English name from the fixed list in js/lang/en.json "posts"; the office after a comma
-// ("অফিসার ইনচার্জ, বেগমগঞ্জ মডেল থানা") stays as the source wrote it, and a post not on the list stays in Bangla (#108).
+// English mode: the post's English name from the fixed list in js/lang/en.json "posts". Each comma-separated part
+// on the list is translated ("পুলিশ পরিদর্শক(নিঃ), অফিসার ইনচার্জ, হাতিয়া থানা" -> "Inspector (Unarmed), Officer-in-Charge (OC),
+// হাতিয়া থানা"); stations, districts and names stay as the source wrote them; nothing is guessed (#108, #113).
 function post(r) {
   const d = r.designation_bn;
   if (lang !== 'en' || !d) return d;
   const posts = LANG.en.posts || {}, full = d.normalize('NFC').trim();
   if (posts[full]) return posts[full];
-  const [head, ...rest] = full.split(',');
-  return posts[head.trim()] ? [posts[head.trim()], ...rest].join(',') : d;
+  return full.split(',').map((part) => posts[part.trim()] || part.trim()).join(', ');
 }
 function personRow(r) {
   const row = el('div', 'person');
