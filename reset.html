@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Content-Security-Policy (issue #121; GitHub Pages cannot send it as a header). Any new outside resource
+     (a script, font, image or API) must be added here and in the other page, or the browser blocks it. See docs/DESIGN.md. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self'; font-src 'self'; img-src 'self' https://lh3.googleusercontent.com; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com; frame-src https://safeconnect-67d83.firebaseapp.com https://accounts.google.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <!-- The address holds a one-time code from the reset email: never send it to another site as the "referrer". -->
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
