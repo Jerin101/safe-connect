@@ -10,9 +10,10 @@ const AREA_MAX = 80;
 const ID_MAX = 120;
 
 const cut = (s, n) => [...String(s || '').trim()].slice(0, n).join('');
-// A Bangladeshi mobile number anywhere in a text: English or Bangla digits, spaces or dashes between digits,
-// with or without +88. Notes must not carry phone numbers (CLAUDE.md rule 5); firestore.rules use the same pattern (issue #123).
-const PHONE_IN_TEXT = /[0০][- ]*[1১][- ]*[3-9৩-৯](?:[- ]*[0-9০-৯]){8}/u;
+// A Bangladeshi mobile number anywhere in a text: English or Bangla digits; spaces, dashes, dots, slashes or brackets
+// between digits; with or without +88 / 88; not part of a longer digit string (years like "2019 2020", account numbers).
+// Notes must not carry phone numbers (CLAUDE.md rule 5); firestore.rules noPhone() uses the same pattern (issue #123).
+const PHONE_IN_TEXT = /(?<![0-9০-৯])(?:\+?[8৮][8৮][- \u00a0./()\u2013]*)?[0০][- \u00a0./()\u2013]*[1১][- \u00a0./()\u2013]*[3-9৩-৯](?:[- \u00a0./()\u2013]*[0-9০-৯]){8}(?![0-9০-৯])/u;
 export const hasPhone = (text) => PHONE_IN_TEXT.test(String(text || ''));
 
 // The new report, with exactly the fields firestore.rules allow (js/firebase.js adds createdAt and updatedAt).
@@ -98,7 +99,7 @@ function stepProblem() {
   const field = ctx.el('label', 'field');
   const ta = document.createElement('textarea');
   ta.id = 'repNote'; ta.rows = 3; ta.maxLength = NOTE_MAX; ta.value = draft.note; ta.placeholder = r.notePh;
-  ta.setAttribute('aria-describedby', 'repNoteHint');
+  ta.setAttribute('aria-describedby', draft.err === 'notePhone' ? 'repNoteHint repErr' : 'repNoteHint');
   ta.addEventListener('input', () => { draft.note = ta.value; });
   const hint = ctx.el('small', null, ctx.fill(r.noteHint, { n: ctx.digits(NOTE_MAX) })); hint.id = 'repNoteHint';
   field.append(ctx.el('span', null, r.noteLabel), ta, hint);
@@ -147,7 +148,7 @@ function render() {
 }
 function go(step) {
   if (step === 2 && !PROBLEMS.includes(draft.problem)) { draft.err = 'pick'; render(); dlg().querySelector('input[name="repProblem"]')?.focus(); return; }
-  if (step === 3 && hasPhone(draft.note)) { draft.err = 'notePhone'; render(); $('repNote')?.focus(); return; }   // issue #123
+  if (step === 2 && hasPhone(draft.note)) { draft.err = 'notePhone'; render(); $('repNote')?.focus(); return; }   // issue #123
   draft.step = step; draft.err = null;
   render();
   $('repTitle').focus({ preventScroll: true });
