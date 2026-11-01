@@ -16,6 +16,9 @@ service cloud.firestore {
     function changed() { return incoming().diff(resource.data).affectedKeys(); }
     function shortText(v, max) { return v is string && v.size() <= max; }
     function bdMobile(v) { return v is string && v.matches('^01[3-9][0-9]{8}$'); }
+    // A Bangladeshi mobile number anywhere in a text, English or Bangla digits, spaces or dashes between digits
+    // (a +88 / 88 in front is caught too, the number is still inside). Same pattern as js/reports.js (issue #123).
+    function noPhone(v) { return !v.matches('(?s).*[0০][- ]*[1১][- ]*[3-9৩-৯]([- ]*[0-9০-৯]){8}.*'); }
 
     // An admin change must carry lastAuditId, and that audit entry must be created
     // in the same batch, by this admin, about this exact document and action.
@@ -135,6 +138,7 @@ service cloud.firestore {
         && shortText(incoming().get('area', ''), 80)
         && incoming().problem in ['off', 'other_person', 'changed', 'other']
         && shortText(incoming().get('note', ''), 500)
+        && noPhone(incoming().get('note', ''))
         && incoming().createdAt == request.time
         && incoming().updatedAt == request.time;
       // Only an admin moves the status, always with an audit entry.

@@ -10,6 +10,10 @@ const AREA_MAX = 80;
 const ID_MAX = 120;
 
 const cut = (s, n) => [...String(s || '').trim()].slice(0, n).join('');
+// A Bangladeshi mobile number anywhere in a text: English or Bangla digits, spaces or dashes between digits,
+// with or without +88. Notes must not carry phone numbers (CLAUDE.md rule 5); firestore.rules use the same pattern (issue #123).
+const PHONE_IN_TEXT = /[0০][- ]*[1১][- ]*[3-9৩-৯](?:[- ]*[0-9০-৯]){8}/u;
+export const hasPhone = (text) => PHONE_IN_TEXT.test(String(text || ''));
 
 // The new report, with exactly the fields firestore.rules allow (js/firebase.js adds createdAt and updatedAt).
 // No name, phone number or address of the person: only who sent it (uid), which record, and what is wrong.
@@ -21,6 +25,7 @@ export function reportFields(uid, draft) {
   const area = cut(draft.area, AREA_MAX);
   if (area) d.area = area;
   const note = cut(draft.note, NOTE_MAX);
+  if (hasPhone(note)) return null;
   if (note) d.note = note;
   return d;
 }
@@ -142,6 +147,7 @@ function render() {
 }
 function go(step) {
   if (step === 2 && !PROBLEMS.includes(draft.problem)) { draft.err = 'pick'; render(); dlg().querySelector('input[name="repProblem"]')?.focus(); return; }
+  if (step === 3 && hasPhone(draft.note)) { draft.err = 'notePhone'; render(); $('repNote')?.focus(); return; }   // issue #123
   draft.step = step; draft.err = null;
   render();
   $('repTitle').focus({ preventScroll: true });
