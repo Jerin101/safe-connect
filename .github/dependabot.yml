@@ -1,0 +1,10 @@
+# Dependabot (issue #125): once a week, open a pull request when a GitHub Action we use has a new version.
+# Actions are pinned to a full commit SHA (with the version in a comment); Dependabot updates both.
+# Every such PR still needs the normal review: tests green and tester GO before merging.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
