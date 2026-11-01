@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: "3.12"
 
@@ -42,9 +42,12 @@ jobs:
               f.write("\n".join(lines) + "\n")
           removed = report["removed"]
           if removed:
+              # Text from government pages goes inside a code block: no markdown, no links, no @mentions (issue #125).
+              safe = lambda t: str(t or "").replace("`", "'").replace("@", "@​").replace("\n", " ")
               body = "\n".join(lines + ["", f"**{len(removed)} records: a phone number is no longer on the official page.**",
-                                        "Open each page, check the number, then fix it with the tools in `tools/` or `data/manual_additions.json`.", ""]
-                               + [f"- [ ] `{r['file']}` · `{r['id']}` · {r['name_bn'] or '(no name)'} · {r['source_url']}" for r in removed])
+                                        "Open each page, check the number, then fix it with the tools in `tools/` or `data/manual_additions.json`.", "", "```text"]
+                               + [f"{safe(r['file'])} | {safe(r['id'])} | {safe(r['name_bn']) or '(no name)'} | {safe(r['source_url'])}" for r in removed]
+                               + ["```"])
               with open("/tmp/issue.md", "w", encoding="utf-8") as f:
                   f.write(body)
               subprocess.run(["gh", "issue", "create", "--label", "data-gap",
