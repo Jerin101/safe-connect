@@ -19,7 +19,7 @@ service cloud.firestore {
     // A Bangladeshi mobile number anywhere in a text: English or Bangla digits; spaces, dashes, dots, slashes or
     // brackets between digits; with or without +88 / 88. Not part of a longer digit string (years, account numbers).
     // Same pattern as js/reports.js PHONE_IN_TEXT (issue #123).
-    function noPhone(v) { return !v.matches('(?s)(.*[^0-9০-৯+])?(\\+?[8৮][8৮][- \\x{00A0}./()\\x{2013}]*)?[0০][- \\x{00A0}./()\\x{2013}]*[1১][- \\x{00A0}./()\\x{2013}]*[3-9৩-৯]([- \\x{00A0}./()\\x{2013}]*[0-9০-৯]){8}([^0-9০-৯].*)?'); }
+    function noPhone(v) { return !v.matches('(?s)(.*[^0-9০-৯])?(\\+?[8৮][8৮][- \\x{00A0}./()\\x{2013}]*)?[0০][- \\x{00A0}./()\\x{2013}]*[1১][- \\x{00A0}./()\\x{2013}]*[3-9৩-৯]([- \\x{00A0}./()\\x{2013}]*[0-9০-৯]){8}([^0-9০-৯].*)?'); }
 
     // An admin change must carry lastAuditId, and that audit entry must be created
     // in the same batch, by this admin, about this exact document and action.
