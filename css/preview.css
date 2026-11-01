@@ -434,4 +434,3 @@
     .page-in { animation: page-in var(--fade) ease-out; }
     @keyframes page-in { from { opacity: 0; } }
   }
-
