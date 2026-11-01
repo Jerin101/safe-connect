@@ -403,6 +403,11 @@
           "Nowhere. Your family's numbers and last area stay in your phone's browser. Your location is sent only when you send it. If you turn on \"Update my area automatically\", your location is checked on this phone only, and only the area name is saved."
         ],
         [
+          "shared",
+          "What if I use someone else's phone, or a phone the family shares?",
+          "Your family's numbers and saved areas stay only on this phone, so anyone who uses the phone can see them. To delete a number, tap \"Remove\" next to it on the \"Send location\" page. If you signed in on someone else's phone, tick \"Also remove my family's numbers and saved areas from this phone\" when you sign out. Calling 999 works as before."
+        ],
+        [
           "districts",
           "When will other districts come?",
           "Noakhali and Cox's Bazar now. More districts come step by step once their data is checked. National numbers like 999, 109 and 333 work everywhere."
