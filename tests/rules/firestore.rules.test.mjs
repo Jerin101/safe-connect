@@ -6,7 +6,7 @@ import { after, before, beforeEach, describe, test } from 'node:test';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import assert from 'node:assert/strict';
 import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, where, orderBy, limit } from 'firebase/firestore';
-import { reportFields, auditFields, PROBLEMS, REPORT_DISTRICTS, NOTE_MAX } from '../../js/reports.js';
+import { reportFields, auditFields, hasPhone, PROBLEMS, REPORT_DISTRICTS, NOTE_MAX } from '../../js/reports.js';
 import { roleAuditFields, SITE_ROLES } from '../../js/admin.js';
 
 const ADMIN = 'admin-uid';
@@ -586,5 +586,33 @@ describe('report limits (issue #117)', () => {
     await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM)));
     await assertSucceeds(getDoc(doc(db(KARIM), 'limits', KARIM)));
     await assertFails(getDoc(doc(db(RINA), 'limits', KARIM)));
+  });
+});
+
+// Issue #123 (security audit L3): no mobile numbers in report notes (personal data).
+describe('no phone numbers in report notes (issue #123)', () => {
+  const PHONES = ['01712345678', '01712-345678', '0171 234 5678', '+8801712345678', '88 01712-345678', '০১৭১২৩৪৫৬৭৮', '০১৭১২ ৩৪৫৬৭৮', '০১৭১২-৩৪৫৬৭৮',
+    'call him on 01812345678 please', 'নম্বর ০১৯১১-২২২৩৩৩ এ ফোন দিন', 'line one\n01712345678',
+    '017.1234.5678', '01712/345678', '(017) 1234-5678', '01712–345678', '01712\u00a0345678', '+880 1712345678', '৮৮০১৭১২৩৪৫৬৭৮', '০১7১২345৬৭৮', '+01712345678', 'a+01712345678'];
+  const FINE = ['tried three times yesterday', 'গতকাল তিনবার চেষ্টা করেছি', 'tried at 10:30, 11:45', '999', 'room 0123', '01212345678', '12345678901', 'ওয়ার্ড ৫, ২০২৬',
+    '2019 2020 2021', '২০১৯ ২০২০ ২০২১', '2019-2020-2021', 'account 0101300012345', 'landline 0321-61234', '02-9551234', 'NID 19901234567890123'];
+  test('the site finds every mobile number form, and nothing in ordinary notes', () => {
+    for (const t of PHONES) assert.equal(hasPhone(t), true, t);
+    for (const t of FINE) assert.equal(hasPhone(t), false, t);
+  });
+  test('the site does not build a report whose note has a number', () => {
+    assert.equal(reportFields(KARIM, { recordId: 'x1', district: 'noakhali', problem: 'off', note: 'ফোন ০১৭১২ ৩৪৫৬৭৮' }), null);
+  });
+  test('the rules refuse a note with a mobile number, in every form', async () => {
+    for (const note of PHONES) {
+      await aMinuteLater(KARIM, { count: 0 });
+      await assertFails(sendWithLimits(db(KARIM), KARIM, newReport(KARIM, { note })));
+    }
+  });
+  test('the rules accept ordinary notes', async () => {
+    for (const note of FINE) {
+      await aMinuteLater(KARIM, { count: 0 });
+      await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM, { note })));
+    }
   });
 });

@@ -764,7 +764,8 @@
     "resend": "Send the verification email again",
     "resent": "Email sent. Check your inbox and spam folder.",
     "limitWait": "You sent a report a moment ago. Please try again in one minute.",
-    "limitDay": "No more reports can be sent today. Please try again tomorrow. In an emergency, call 999."
+    "limitDay": "No more reports can be sent today. Please try again tomorrow. In an emergency, call 999.",
+    "notePhone": "Please do not write a mobile number here; this keeps everyone's details safe. Even if you know the new number, there is no need to write it: we check against the official source. Remove the number and try again."
   },
   "posts": {
     "ইউনিয়ন পরিষদের মেম্বার": "UP Member",
