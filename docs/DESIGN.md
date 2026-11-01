@@ -64,6 +64,7 @@ Build each part from its own issue in milestone v1.0.
 - **Cards and corners:** one look for all cards. 12 px corners on small parts, slightly rounder cards, as in the reference page.
 - **One signature element: the "signal ring"** (a soft location ping) on the home banner and the sign-in page. Nothing else animates.
 - **Motion:** turn all motion off when the phone asks for less motion (`prefers-reduced-motion: reduce`).
+- **Content-Security-Policy** (issue #121): preview.html and reset.html allow only our own files, Firebase (gstatic), the Google sign-in popup and the four Firebase APIs. No inline styles or scripts. Any new outside resource (e.g. a map for বিপদ বার্তা, a font, an image host) must be added to the CSP `<meta>` in both pages, or the browser blocks it.
 - No other company's logo, colours, photos or text.
   Exception: sign-in buttons may show the provider's official logo exactly as the provider's
   branding guidelines say (the multicolour Google 'G', not recoloured, not stretched).
