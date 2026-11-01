@@ -142,8 +142,9 @@ function post(r) {
   const d = r.designation_bn;
   if (lang !== 'en' || !d) return d;
   const posts = LANG.en.posts || {}, full = d.normalize('NFC').trim();
-  if (posts[full]) return posts[full];
-  return full.split(',').map((part) => posts[part.trim()] || part.trim()).join(', ');
+  const en = (k) => (Object.hasOwn(posts, k) ? posts[k] : null);   // only the list's own entries, never "constructor" etc.
+  if (en(full)) return en(full);
+  return full.split(',').map((part) => en(part.trim()) || part.trim()).join(', ');
 }
 function personRow(r) {
   const row = el('div', 'person');
