@@ -146,7 +146,7 @@
   .row-head .soft { color: var(--muted); margin-top: 4px; }
   /* national numbers: quiet tiles that scroll sideways only by hand or with the arrows; only 999's tile is soft red (DESIGN.md §3) */
   /* all national numbers as an open grid, no carousel (#108): compact rows, two side by side on a phone */
-  .icon-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 132px), 1fr)); gap: 8px; padding: 4px 0 8px; }
+  .icon-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, max(132px, calc(12rem - 60px))), 1fr)); gap: 8px; padding: 4px 0 8px; }   /* 132 px at normal text, wider with large text so an 11-digit number always fits (#113) */
   .icon-item { display: grid; grid-template-columns: 40px minmax(0, 1fr); grid-template-rows: auto auto; gap: 6px 10px; align-items: center; align-content: center; padding: 8px; border-radius: 14px;
     border: 1px solid var(--line); background: var(--surface); text-decoration: none; color: var(--ink); min-height: 44px; }
   .icon-item:hover { border-color: var(--accent); }

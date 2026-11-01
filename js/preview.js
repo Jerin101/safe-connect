@@ -144,7 +144,9 @@ function post(r) {
   const posts = LANG.en.posts || {}, full = d.normalize('NFC').trim();
   const en = (k) => (Object.hasOwn(posts, k) ? posts[k] : null);   // only the list's own entries, never "constructor" etc.
   if (en(full)) return en(full);
-  return full.split(',').map((part) => en(part.trim()) || part.trim()).join(', ');
+  const parts = full.split(',');
+  if (!parts.some((part) => en(part.trim()))) return d;              // nothing on the list: exactly as the source wrote it
+  return parts.map((part) => (en(part.trim()) ? part.replace(part.trim(), en(part.trim())) : part)).join(',');
 }
 function personRow(r) {
   const row = el('div', 'person');
