@@ -37,3 +37,9 @@ area is set on open and the header chip, sidebar card and home list show it; wal
 the area with a toast and never leaves the page; moves under 300 m are ignored; a hidden tab stops the watch;
 no coordinates are saved; "blocked" turns the switch off and the area can still be chosen by hand; reduced motion;
 offline; 360 px in bn/en and night/day.
+
+## বিপদ বার্তা (issue #134)
+
+`bipod-test.mjs`: the help link, the link parser (broken, cut-off, future and outside-Bangladesh links), the SMS text (bn/en, inside and outside our data, no location) and SMS part counts.
+
+**Run:** `node --test tests/bipod-test.mjs` (no browser, no internet).
