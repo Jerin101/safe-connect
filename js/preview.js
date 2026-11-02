@@ -1,4 +1,4 @@
-// Logic for preview.html: the portal design (issues #38, #42; rules in docs/DESIGN.md). The real site (index.html, pages/) is built in P20-P36.
+// Logic for the site (index.html; it was preview.html until #141): the portal design (issues #38, #42; rules in docs/DESIGN.md).
 // Location is read only after a tap, or when the person turned on auto location (CLAUDE.md rule 5, issue #105). The area search lives in data.js (issue #36).
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
@@ -274,7 +274,7 @@ function renderArea() {
 }
 
 /* ---------- views ---------- */
-// Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see preview.html).
+// Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see index.html).
 function showView(name) {
   for (const view of ['home', 'area', 'sos', 'help', 'acct', 'ws']) $(view).hidden = name !== view;
   // One sidebar for home and the area page (#108): it moves with the view; CSS shows it only on wide screens.
@@ -305,10 +305,10 @@ function goHome() {
   go('');
 }
 
-/* ---------- pages (issue #71): hash addresses inside preview.html, so they also work offline ---------- */
+/* ---------- pages (issue #71): hash addresses inside index.html, so they also work offline ---------- */
 // #/ home · #/numbers · #/area (search) · #/area/<district>/<upazila>[/<union or town>[/<place id>]] · #/send
 // #/guide · #/about · #/faq · #/account · #/help/<lat>,<lng>,<time>[,<situation>] (বিপদ বার্তা, #134). Anything else opens home. The home sections carry data-pages="..."
-// in preview.html: each page shows the sections that list its name, so no content or id is copied.
+// in index.html: each page shows the sections that list its name, so no content or id is copied.
 const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help'];
 const HEADING = { home: 'hello', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once

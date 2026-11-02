@@ -8,5 +8,5 @@ Saved inside the project so the site makes no request to Google Fonts and works 
 | `noto-sans-bengali-wght.woff2` | Noto Sans Bengali (variable, weights 100–900) | Bangla | SIL OFL 1.1, `OFL-NotoSansBengali.txt` |
 
 Source: Fontsource packages `@fontsource-variable/manrope@5.3.0` and `@fontsource-variable/noto-sans-bengali@5.3.0`
-(the same fonts as Google Fonts), downloaded from cdn.jsdelivr.net. The `@font-face` rules are at the top of `preview.html`.
+(the same fonts as Google Fonts), downloaded from cdn.jsdelivr.net. The `@font-face` rules are at the top of `index.html`.
 The OFL allows using and sharing these fonts for free; keep the licence files next to them.

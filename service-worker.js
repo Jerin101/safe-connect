@@ -1,14 +1,15 @@
 // SafeConnect offline app (P34). After one visit with internet, the site opens with no internet.
 // Change VERSION whenever a file in FILES changes in a way that must reach every phone at once
 // (new data, a new page or script): the old cache is then deleted and everything is saved again.
-const VERSION = 'v29-2026-11-02';
+const VERSION = 'v30-2026-11-02';
 const CACHE = `safeconnect-${VERSION}`;
 
 // Every page, script, data file, font and icon the site needs (paths relative to this file).
 const FILES = [
   './',
   'index.html',
-  'preview.html',
+  'preview.html',            // old address: sends old links and installed apps on to ./ (#141)
+  'js/old-link.js',
   'reset.html',
   'css/base.css',
   'css/preview.css',
@@ -87,6 +88,6 @@ async function fromCache(event, req) {
   const res = await fresh;
   if (res) return res;
   // Offline and not saved: open the main page instead of a browser error.
-  if (req.mode === 'navigate') return (await cache.match('preview.html')) || Response.error();
+  if (req.mode === 'navigate') return (await cache.match('index.html')) || Response.error();
   return Response.error();
 }
