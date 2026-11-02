@@ -39,7 +39,7 @@ test('parser: broken, cut-off, future and outside links', () => {
 test('SMS (bn): situation, area, police, call 999 first, link', () => {
   const link = helpLink(HATIYA, AT, 'followed');
   const sms = buildSms({ texts: texts('bn'), situation: LANG.bn.sits.followed[1], area: 'হাতিয়া, নোয়াখালী', police: '01320101478', link });
-  assert.equal(sms, `জরুরি! কেউ আমার পিছু নিয়েছে, আমি ভয় পাচ্ছি।\nএলাকা: হাতিয়া, নোয়াখালী\nআগে ৯৯৯-এ কল করো। থানা: 01320101478\nলোকেশন: ${link}`);
+  assert.equal(sms, `জরুরি! কেউ আমার পিছু নিয়েছে, আমি ভয় পাচ্ছি।\nএলাকা: হাতিয়া, নোয়াখালী\nআগে 999-এ কল করো। থানা: 01320101478\nলোকেশন: ${link}`);
   assert.equal(smsParts(sms).unicode, true);
 });
 
@@ -55,7 +55,7 @@ test('SMS (en): short and in plain letters (fewer parts)', () => {
 test('SMS outside our data: no area, no police, 999 only', () => {
   const sms = buildSms({ texts: texts('bn'), situation: LANG.bn.sits.danger[1], link: helpLink({ lat: 23.8103, lon: 90.4125 }, AT) });
   assert.equal(sms.split('\n').length, 3);
-  assert.equal(sms.split('\n')[1], 'আগে ৯৯৯-এ কল করো।');
+  assert.equal(sms.split('\n')[1], 'আগে 999-এ কল করো।');
 });
 
 test('SMS without a location: asks to be called, no link', () => {

@@ -169,12 +169,7 @@
         "I am lost."
       ]
     },
-    "urgent": "URGENT!",
-    "area": "My area: {n}.",
-    "mapLine": "Map: {l}",
     "noLoc": "I could not get my location. Call me now.",
-    "timeLine": "Time: {x}",
-    "sign": "(sent from SafeConnect)",
     "offline": "No internet. Numbers, area search and SMS still work.",
     "locIdle": "Location not taken yet. To send it, tap the button below.",
     "locBtn": "Get my location",
@@ -223,11 +218,11 @@
     "bipod": {
       "btn": "Send danger message",
       "safeBtn": "Send safe message",
-      "btnSub": "SMS to your {n} saved people",
+      "btnSub": "SMS to your saved people ({n})",
       "btnSubIos": "SMS to {n} first",
       "btnNone": "Save your people's numbers first",
       "hint": "The button opens your messages app with the message ready. Tap Send there. SafeConnect never sends anything itself.",
-      "iosHint": "On iPhone you can send to one person at a time: send to the others from the list below.",
+      "iosHint": "On iPhone you can send to one person at a time. Send to the others from the list below.",
       "agoNow": "The messages app was just opened. Check that you tapped Send.",
       "ago": "The messages app was last opened {n} min ago. Check that you tapped Send.",
       "again": "Send new location",
@@ -250,8 +245,8 @@
       "sayNoLoc": "Once we have your location, it shows here. Until then, say which upazila and district you are in.",
       "addr": "{u} upazila, {d} district. Coordinates: {lat}, {lon}.",
       "addrOutside": "Coordinates: {lat}, {lon}.",
-      "helpTitle": "Help link",
-      "ageNow": "Location from just now",
+      "helpTitle": "Danger message location",
+      "ageNow": "Location taken just now",
       "age": "Location from {n} min ago",
       "ageHours": "Location from {h} h ago; they may be somewhere else now",
       "where": "Where they are",
@@ -265,8 +260,8 @@
       "sPolice": "Police station",
       "sHealth": "Health complex",
       "sUno": "UNO",
-      "badBroken": "This link doesn't open properly; maybe the SMS didn't bring the whole link. Don't wait: call 999 and call the person who sent it.",
-      "badOutside": "The location in this link is outside Bangladesh. Don't wait: call 999 and call the person who sent it.",
+      "badBroken": "This link doesn't open properly; maybe the SMS didn't bring the whole link. Don't wait: call 999, then call the person who sent it.",
+      "badOutside": "The location in this link is outside Bangladesh. Don't wait: call 999, then call the person who sent it.",
       "call999": "Emergency",
       "national": "National emergency numbers",
       "helpPrivacy": "This page reads the location only from the link; nothing is saved anywhere."
@@ -404,7 +399,7 @@
       "about": "About",
       "faq": "Questions",
       "account": "Account",
-      "help": "Help link"
+      "help": "Danger message location"
     },
     "seeMore": "See more",
     "notFound": "We could not find the area in this link. Type its name below to search.",

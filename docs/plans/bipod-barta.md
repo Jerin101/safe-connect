@@ -8,7 +8,7 @@ A person in danger taps one big red button. Their phone's messages app opens wit
 - the situation
 - the area
 - the area's police number
-- "call 999 first"
+- "call 999 first" ("আগে 999-এ কল করো", with normal digits so phones make it tappable)
 - a link
 
 The family opens the link and gets a calm page: where the person is, a map link, what to read out to 999, and the local numbers to call.
@@ -52,7 +52,7 @@ The example is Hatiya, situation "followed". The police number is the first Hati
 ```
 জরুরি! কেউ আমার পিছু নিয়েছে, আমি ভয় পাচ্ছি।
 এলাকা: হাতিয়া, নোয়াখালী
-আগে ৯৯৯-এ কল করো। থানা: 01320111137
+আগে 999-এ কল করো। থানা: 01320111137
 লোকেশন: https://jerin101.github.io/safe-connect/preview.html#/help/22.29580,91.10660,1793624400,followed
 ```
 
@@ -69,7 +69,7 @@ Location: https://jerin101.github.io/safe-connect/preview.html#/help/22.29580,91
 
 | Case | Bangla | English |
 |---|---|---|
-| Outside our two districts | situation + "আগে ৯৯৯-এ কল করো।" + link (no area, no police) | situation + "Call 999 first." + link |
+| Outside our two districts | situation + "আগে 999-এ কল করো।" + link (no area, no police) | situation + "Call 999 first." + link |
 | No location yet | situation + area/police if known + "আমার লোকেশন পাওয়া যায়নি, এখনই আমাকে ফোন করো।" | "… I could not get my location. Call me now." |
 | District police only | "পুলিশ: {police}" | "Police: {police}" |
 | Safe | "আমি এখন নিরাপদ, চিন্তা কোরো না।" | "I am safe now, don't worry." |
@@ -94,8 +94,9 @@ Location: https://jerin101.github.io/safe-connect/preview.html#/help/22.29580,91
 
 ### Questions for the review (Jerin + Claude chat)
 
-1. **Bangla digits in the SMS.** "৯৯৯" is written in Bangla digits, as the queue asked, but some phones only make **normal digits** tappable. Should it be "999-এ কল করো"? The police number already uses normal digits, so it is tappable.
-2. **Tone.** The SMS uses "তুমি" forms ("কল করো") because it goes to family. The pages use "আপনি".
-3. **Dropped lines.** "(SafeConnect থেকে পাঠানো)" and the time line from the old message are dropped to save SMS parts; the help page shows the time. OK?
+1. **Digits in the SMS** (bangla-reviewer: use "999"). The SMS now says "আগে 999-এ কল করো।" with normal digits, because messages apps reliably make "999" tappable but not "৯৯৯". The pages keep "৯৯৯" in Bangla mode. OK?
+2. **Tone** (bangla-reviewer: keep). The SMS uses "তুমি" forms ("কল করো") because it goes to family, like the existing "এখনই আমাকে ফোন করো". The pages use "আপনি".
+3. **Dropped lines** (bangla-reviewer: OK). "(SafeConnect থেকে পাঠানো)" and the time line are dropped to save SMS parts: the phone stamps the arrival time, and the help page shows how old the location is. Their unused texts were removed.
+6. **iPhone.** We assume an iPhone opens an SMS for one person at a time (as the queue says), so the big button opens it for the first person. Please check on a real iPhone whether a group SMS opens.
 4. **Shorter link.** A shorter link would save 1 Bangla SMS part, for example a short custom domain later (zero budget: GitHub Pages only for now).
 5. **"থানা" label.** We use "থানা" when the upazila has its own police record. Some upazilas have more than one police station; we take the first record in the data.
