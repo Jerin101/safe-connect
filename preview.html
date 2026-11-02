@@ -246,6 +246,15 @@
       <button class="back" id="sosBack" type="button"></button>
       <h1 class="page-title" id="sosTitle" tabindex="-1"></h1>
     </div>
+    <!-- বিপদ বার্তা (#134): opens the messages app with the message ready; the site never sends anything itself. -->
+    <section class="bipod">
+      <a class="bipod-btn" id="bipodBtn"><span id="bipodLabel"></span><small id="bipodSub"></small></a>
+      <p class="privacy" id="bipodHint"></p>
+      <div class="bipod-after" id="bipodAfter" role="status" aria-live="polite" hidden>
+        <p id="bipodAgo"></p>
+        <div class="tools"><button class="btn" id="bipodAgain" type="button"></button><button class="btn" id="bipodSafe" type="button"></button></div>
+      </div>
+    </section>
     <section class="panel glass" aria-labelledby="sitTitle">
       <h2 id="sitTitle"></h2>
       <div class="chips" id="situations"></div>
@@ -255,6 +264,10 @@
       <p class="locline" id="sosLoc" role="status"></p>
       <button class="btn violet locbtn" id="sosLocBtn" type="button" hidden></button>
       <div class="demo" id="sosDemo" hidden><p id="sosDemoText"></p><div class="chips" id="sosDemoChips"></div></div>
+    </section>
+    <section class="panel glass say999" aria-labelledby="say999Title">
+      <h2 id="say999Title"></h2>
+      <p class="say" id="say999Text"></p>
     </section>
     <section class="panel glass" aria-labelledby="sendTitle">
       <h2 id="sendTitle"></h2>
@@ -266,7 +279,9 @@
     </section>
     <section class="panel glass" aria-labelledby="msgTitle">
       <label for="sosMsg"><h2 id="msgTitle"></h2></label>
-      <textarea id="sosMsg" rows="4"></textarea>
+      <textarea id="sosMsg" rows="5"></textarea>
+      <p class="privacy" id="smsParts"></p>
+      <label class="check" id="smsEnBox" hidden><input type="checkbox" id="smsEn"><span id="smsEnLabel"></span></label>
     </section>
     <details class="cat" id="peopleBox">
       <summary><span id="peopleTitle"></span><span class="count" id="peopleCount"></span></summary>
@@ -284,6 +299,37 @@
         <p class="privacy" id="privacy"></p>
       </div>
     </details>
+  </div>
+
+  <!-- HELP PAGE FOR THE FAMILY (#/help/<lat>,<lng>,<time>[,<situation>], বিপদ বার্তা #134): everything comes from the address. -->
+  <div class="wrap page" id="help" hidden>
+    <div class="page-top">
+      <button class="back" id="helpBack" type="button"></button>
+      <h1 class="page-title" id="helpPageTitle" tabindex="-1"></h1>
+    </div>
+    <div id="helpOk">
+      <p class="help-age" id="helpAge" role="status"></p>
+      <section class="panel glass" aria-labelledby="helpWhereTitle">
+        <h2 id="helpWhereTitle"></h2>
+        <p class="help-sit" id="helpSit"></p>
+        <p class="help-place" id="helpPlace"></p>
+        <p class="help-coords" id="helpCoords"></p>
+        <a class="btn violet" id="helpMap" target="_blank" rel="noopener"></a>
+      </section>
+      <section class="panel glass say999" aria-labelledby="helpReadTitle">
+        <h2 id="helpReadTitle"></h2>
+        <p class="say" id="helpRead"></p>
+      </section>
+      <section class="panel glass" aria-labelledby="helpStepsTitle">
+        <h2 id="helpStepsTitle"></h2>
+        <div class="help-steps" id="helpSteps"></div>
+      </section>
+    </div>
+    <section class="panel glass" id="helpBad" hidden>
+      <p class="help-bad" id="helpBadText" role="alert"></p>
+      <div class="help-steps" id="helpBadLinks"></div>
+    </section>
+    <p class="privacy" id="helpPrivacy"></p>
   </div>
 
   <!-- ACCOUNT PAGE (#/account, issue #73): opening the address never loads Firebase; a tap on the button does. -->

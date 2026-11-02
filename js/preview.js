@@ -5,6 +5,7 @@ import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.j
 import { createAutoLoc } from './autoloc.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS } from './reports.js';
+import { helpLink, parseHelp, buildSms, smsParts, minutesAgo } from './bipod.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -193,14 +194,15 @@ function firstRow(what, r, red = false) {
   return row;
 }
 
+// The first local number of a contact group (not a national hotline), or undefined.
+const pickContact = (groups, id) => (groups.find((x) => x.id === id)?.items || []).find((r) => withPhone(r) && r.kind !== 'national');
 // "Call these first": 999, then the police, then the local leader (area page and home, #105).
 function firstRows(p, groups) {
   const rows = [];
   const nat = (id) => data.national.find((n) => n.id === id);
   rows.push(firstRow(t().what.emergency, nat('national-emergency-999'), true));
   if (groups) {
-    const g = (id) => groups.find((x) => x.id === id);
-    const pick = (id) => (g(id)?.items || []).find((r) => withPhone(r) && r.kind !== 'national');
+    const pick = (id) => pickContact(groups, id);
     const police = pick('police');
     if (police) rows.push(firstRow(t().what.police, police));
     if (p.area && pick('tourist_police') && p.district === 'coxsbazar') rows.push(firstRow(t().what.tourist_police, nat('tourist-police-helpline')));
@@ -274,7 +276,7 @@ function renderArea() {
 /* ---------- views ---------- */
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see preview.html).
 function showView(name) {
-  for (const view of ['home', 'area', 'sos', 'acct', 'ws']) $(view).hidden = name !== view;
+  for (const view of ['home', 'area', 'sos', 'help', 'acct', 'ws']) $(view).hidden = name !== view;
   // One sidebar for home and the area page (#108): it moves with the view; CSS shows it only on wide screens.
   const rail = $('rail');
   // After the content (999 first for keyboards and screen readers); CSS puts it on the left.
@@ -305,9 +307,9 @@ function goHome() {
 
 /* ---------- pages (issue #71): hash addresses inside preview.html, so they also work offline ---------- */
 // #/ home · #/numbers · #/area (search) · #/area/<district>/<upazila>[/<union or town>[/<place id>]] · #/send
-// #/guide · #/about · #/faq · #/account. Anything else opens home. The home sections carry data-pages="..."
+// #/guide · #/about · #/faq · #/account · #/help/<lat>,<lng>,<time>[,<situation>] (বিপদ বার্তা, #134). Anything else opens home. The home sections carry data-pages="..."
 // in preview.html: each page shows the sections that list its name, so no content or id is copied.
-const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account'];
+const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help'];
 const HEADING = { home: 'hello', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
 let firstRoute = true;       // the first page after loading does not move focus
@@ -399,6 +401,12 @@ async function route() {
     $('main').dataset.page = 'send';
     showSos(intent?.pos || null, Boolean(intent?.ask));
     finish('send', titleOf('send'), 'sosTitle', intent);
+    return;
+  }
+  if (name === 'help') {
+    $('main').dataset.page = 'help';
+    showHelp(rest[0]);
+    finish(null, titleOf('help'), 'helpPageTitle', intent);
     return;
   }
   if (name === 'account') {
@@ -646,7 +654,7 @@ function showToast(text) {
 
 /* ---------- send location to family (no login) ---------- */
 let lastFix = null;          // { pos, at }
-let sos = { situation: 'danger', pos: null, place: null, state: 'idle', edited: false };
+let sos = { situation: 'danger', pos: null, at: 0, place: null, state: 'idle', edited: false, safe: false, short: false, openedAt: 0 };
 const toAscii = (s) => String(s).replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
 function normPhone(raw) {
   let d = toAscii(raw).replace(/\D/g, '');
@@ -669,14 +677,29 @@ function renderHomeSos() {
   sub.append(chips);
 }
 
+// বিপদ বার্তা (#134): situation, area, the area's police number, "call 999 first" and the help link.
+// The short English version (Bangla mode only) fits in fewer SMS.
+const smsLang = () => (sos.short && lang === 'bn' ? 'en' : lang);
+function areaText(place, l) {
+  if (!place || place.outside) return '';
+  const d = districtOf(place.district);
+  return l === 'bn' ? `${upazilaName(place.district, place.upazila)}, ${d.bn}` : `${place.upazila}, ${d.en}`;
+}
+function policeOf(place) {
+  if (!place || place.outside || !data) return null;
+  const g = areaContacts(data, place).find((x) => x.id === 'police');
+  const r = g && pickContact([g], 'police');
+  return r ? { phone: r.phones[0], district: Boolean(g.fallback) } : null;
+}
 function sosMessage() {
-  const s = t();
-  const lines = [`${s.urgent} ${s.sits[sos.situation][1]}`];
-  if (sos.place && !sos.place.outside) lines.push(fill(s.area, { n: `${placeTitle(sos.place)}, ${placeSub(sos.place)}` }));
-  lines.push(sos.pos ? fill(s.mapLine, { l: mapsLink(sos.pos) }) : s.noLoc);
-  const time = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', { hour: 'numeric', minute: '2-digit' }).format(new Date());
-  lines.push(`${fill(s.timeLine, { x: time })} ${s.sign}`);
-  return lines.join('\n');
+  const s = LANG[smsLang()].ui;
+  if (sos.safe) return s.bipod.safeMsg;
+  const place = sos.place && !sos.place.outside ? sos.place : null;
+  const police = policeOf(place);
+  const texts = { ...s.bipod.sms, noLoc: s.noLoc };
+  if (police?.district) texts.police = texts.policeDistrict;
+  return buildSms({ texts, situation: s.sits[sos.situation][1], area: areaText(place, smsLang()), police: police?.phone || '',
+    link: sos.pos ? helpLink(sos.pos, sos.at, sos.situation) : '' });
 }
 function refreshMessage() { if (!sos.edited) $('sosMsg').value = sosMessage(); renderSend(); }
 
@@ -704,9 +727,9 @@ function renderLoc() {
   } else if (sos.pos) { line.classList.add('ok'); line.textContent = t().outsideLoc; }
   else { line.classList.add('bad'); line.textContent = `${sos.error === 'denied' ? t().sosDenied : t().sosNoLoc} ${t().noLocYet}`; }
 }
-function setSosPos(pos) {
-  sos.pos = pos; sos.place = resolvePlace(pos); sos.state = 'done';
-  lastFix = { pos, at: Date.now() };
+function setSosPos(pos, at = Date.now()) {
+  sos.pos = pos; sos.at = at; sos.place = resolvePlace(pos); sos.state = 'done';
+  lastFix = { pos, at };
   $('sosDemo').hidden = true;
   renderLoc(); refreshMessage();
 }
@@ -779,6 +802,7 @@ function renderSend() {
     info.append(el('b', null, who), el('span', 'num', digits(p.phone)));
     const sendRow = el('div', 'send-row');
     const sms = el('a', 'send'); sms.href = `sms:${p.phone}?&body=${encodeURIComponent(body())}`;
+    sms.addEventListener('click', markOpened);
     sms.append(document.createTextNode(t().sms), el('small', null, t().smsNoNet));
     const call = el('a', 'send alt', t().call); call.href = `tel:${p.phone}`;
     const wa = appButton(t().wa, `whatsapp://send?phone=88${p.phone}&text=${encodeURIComponent(body())}`,
@@ -801,6 +825,7 @@ function renderSend() {
   if (people.length > 1) {
     const all = el('a', 'btn', fill(t().smsAll, { n: digits(people.length) }));
     all.href = `sms:${people.map((p) => p.phone).join(',')}?&body=${encodeURIComponent(body())}`;
+    all.addEventListener('click', markOpened);
     tools.append(all);
   }
   const copy = el('button', 'btn', t().copyMsg); copy.type = 'button';
@@ -808,7 +833,53 @@ function renderSend() {
   const other = el('button', 'btn', t().other); other.type = 'button';
   other.addEventListener('click', shareMessage);
   tools.append(copy, other);
+  renderBipod();
 }
+// The big red button (#134): Android opens one SMS to everyone; iPhone takes one person at a time,
+// so it opens the first and the list below has the others. It only opens the messages app.
+const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent);
+function renderBipod() {
+  const b = t().bipod, people = getPeople(), btn = $('bipodBtn');
+  const ios = isIOS() && people.length > 1;
+  btn.classList.toggle('safe', sos.safe);
+  $('bipodLabel').textContent = sos.safe ? b.safeBtn : b.btn;
+  if (people.length) {
+    const to = isIOS() ? people.slice(0, 1) : people;
+    btn.href = `sms:${to.map((p) => p.phone).join(',')}?&body=${encodeURIComponent($('sosMsg').value)}`;
+    $('bipodSub').textContent = ios ? fill(b.btnSubIos, { n: people[0].rel || people[0].name }) : fill(b.btnSub, { n: digits(people.length) });
+  } else {
+    btn.href = '#/send';
+    $('bipodSub').textContent = b.btnNone;
+  }
+  $('bipodHint').textContent = ios ? `${b.hint} ${b.iosHint}` : b.hint;
+  $('smsParts').textContent = fill(b.parts, { n: digits(smsParts($('sosMsg').value).parts) });
+  $('smsEnBox').hidden = lang !== 'bn' || sos.safe;
+  $('smsEnLabel').textContent = b.shortEn;
+  $('smsEn').checked = sos.short;
+  $('say999Title').textContent = b.say999Title;
+  $('say999Text').textContent = sayText(sos.place, sos.pos, 'say');
+  renderOpened();
+}
+// "What to tell 999" (sender, 'say') or the address the family reads out ('addr').
+function sayText(place, pos, kind) {
+  const b = t().bipod;
+  if (!pos) return b.sayNoLoc;
+  const lat = digits(pos.lat.toFixed(5)), lon = digits(pos.lon.toFixed(5));
+  if (!place || place.outside) return fill(kind === 'say' ? b.sayOutside : b.addrOutside, { lat, lon });
+  const d = districtOf(place.district);
+  return fill(b[kind], { d: lang === 'bn' ? d.bn : d.en, u: upazilaName(place.district, place.upazila), lat, lon });
+}
+// After a tap: when the messages app was last opened (we never know whether the SMS was sent).
+function markOpened() { sos.openedAt = Date.now(); renderOpened(); }
+function renderOpened() {
+  const b = t().bipod, n = minutesAgo(sos.openedAt);
+  $('bipodAfter').hidden = !sos.openedAt;
+  if (!sos.openedAt) return;
+  $('bipodAgo').textContent = n ? fill(b.ago, { n: digits(n) }) : b.agoNow;
+  $('bipodAgain').textContent = b.again;
+  $('bipodSafe').textContent = sos.safe ? b.backToDanger : b.safe;
+}
+setInterval(() => { if (!$('sos').hidden && sos.openedAt) renderOpened(); }, 30000);
 function renderPeople() {
   const people = getPeople();
   $('peopleCount').textContent = digits(people.length);
@@ -827,11 +898,12 @@ function renderPeople() {
 // Opening #/send by Back, reload or a link never asks for location: only a tap does.
 function openSos(pos, askLocation = true, after = null) { go('send', { pos, ask: askLocation, after }); }
 function showSos(pos, askLocation) {
-  sos = { situation: sos.situation || 'danger', pos: null, place: null, state: 'idle', edited: false, error: null };
+  sos = { situation: sos.situation || 'danger', pos: null, at: 0, place: null, state: 'idle', edited: false, error: null,
+    safe: false, short: sos.short, openedAt: sos.openedAt };
   renderSituations(); renderPeople();
   showView('sos');
   const fresh = pos || (lastFix && Date.now() - lastFix.at < 120000 ? lastFix.pos : null);
-  if (fresh) { setSosPos(fresh); return; }
+  if (fresh) { setSosPos(fresh, lastFix && lastFix.pos === fresh ? lastFix.at : Date.now()); return; }
   if (askLocation) { requestSosLocation(); return; }
   renderLoc(); refreshMessage();
 }
@@ -850,6 +922,58 @@ $('sosLocBtn').addEventListener('click', requestSosLocation);
 $('sosBtn').addEventListener('click', () => openSos(null));
 $('sosBack').addEventListener('click', goHome);
 $('sosMsg').addEventListener('input', () => { sos.edited = true; renderSend(); });
+$('bipodBtn').addEventListener('click', (e) => {
+  if (getPeople().length) { markOpened(); return; }
+  e.preventDefault();
+  $('peopleBox').open = true; $('peopleBox').scrollIntoView({ block: 'start' }); $('pName').focus({ preventScroll: true });
+});
+$('bipodAgain').addEventListener('click', () => { sos.safe = false; sos.edited = false; requestSosLocation(); $('bipodBtn').focus(); });
+$('bipodSafe').addEventListener('click', () => { sos.safe = !sos.safe; sos.edited = false; refreshMessage(); $('bipodBtn').focus(); });
+$('smsEn').addEventListener('change', () => { sos.short = $('smsEn').checked; sos.edited = false; refreshMessage(); });
+
+/* ---------- help page for the family (#/help/..., #134): read from the address only; nothing is stored or sent ---------- */
+function showHelp(arg) {
+  const b = t().bipod, h = parseHelp(arg);
+  showView('help');
+  $('helpBack').textContent = t().back; $('helpPageTitle').textContent = b.helpTitle;
+  $('helpPrivacy').textContent = b.helpPrivacy;
+  $('helpOk').hidden = !h.ok; $('helpBad').hidden = h.ok;
+  const nat999 = data?.national.find((n) => n.id === 'national-emergency-999');
+  const call999 = () => (nat999 ? firstRow(b.call999, nat999, true) : callLink('999', b.call999, true));
+  if (!h.ok) {
+    $('helpBadText').textContent = h.reason === 'outside' ? b.badOutside : b.badBroken;
+    const more = el('a', 'btn', b.national); more.href = '#/numbers';
+    $('helpBadLinks').replaceChildren(call999(), more);
+    return;
+  }
+  const pos = { lat: h.lat, lon: h.lon };
+  const place = data ? resolvePlace(pos) : { outside: true };   // no data: coordinates and 999 still show
+  const n = minutesAgo(h.at);
+  $('helpAge').textContent = n < 1 ? b.ageNow : n < 60 ? fill(b.age, { n: digits(n) }) : fill(b.ageHours, { h: digits(Math.floor(n / 60)) });
+  $('helpAge').classList.toggle('old', n >= 60);
+  $('helpWhereTitle').textContent = b.where;
+  $('helpSit').hidden = !h.situation;
+  $('helpSit').textContent = h.situation ? fill(b.sitLine, { s: t().sits[h.situation][0] }) : '';
+  $('helpPlace').textContent = place.outside ? b.outsideData : `${placeTitle(place)}, ${placeSub(place)}`;
+  $('helpCoords').replaceChildren(svg(ICONS.pin), el('span', null, fill(b.coords, { lat: digits(h.lat.toFixed(5)), lon: digits(h.lon.toFixed(5)) })));
+  const map = $('helpMap'); map.href = mapsLink(pos); map.textContent = `${b.map} ↗`;
+  $('helpReadTitle').textContent = b.readTitle; $('helpRead').textContent = sayText(place, pos, 'addr');
+  $('helpStepsTitle').textContent = b.steps;
+  const groups = place.outside ? [] : areaContacts(data, place);
+  const steps = [[b.s999, null]];
+  for (const [label, id] of [[b.sPolice, 'police'], [b.sHealth, 'health'], [b.sUno, 'administration']]) {
+    const r = pickContact(groups, id);
+    if (r) steps.push([label, r]);
+  }
+  $('helpSteps').replaceChildren(...steps.map(([label, r], i) => {
+    const what = `${digits(i + 1)}. ${label}`;
+    if (r) return firstRow(what, r);
+    const row = call999(); const w = row.querySelector('.what'); if (w) w.textContent = what;
+    return row;
+  }));
+  if (place.outside) { const more = el('a', 'btn', b.national); more.href = '#/numbers'; $('helpSteps').append(more); }
+}
+$('helpBack').addEventListener('click', goHome);
 $('addForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const err = $('formErr');
@@ -1253,6 +1377,7 @@ $('langBtn').addEventListener('click', () => {
   setText();
   if (!$('demo').hidden) showDemo();
   if (data) { renderRecent(); renderSuggest(); renderStats(); renderPlaces(); if (current) renderArea(); }
+  if (!$('help').hidden) showHelp(readHash()[1]);
   if (!$('sos').hidden) { renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
   auth.setText();
   setTitle();
@@ -1281,7 +1406,7 @@ const auth = initAuth({
 // Pages: show the page in the address now; an area address waits for the data it needs.
 history.scrollRestoration = 'manual';
 window.addEventListener('hashchange', () => route());
-const isPlace = () => readHash()[0] === 'area' && readHash().length > 1;
+const isPlace = () => ['area', 'help'].includes(readHash()[0]) && readHash().length > 1;   // these wait for the data
 if (!isPlace()) route();
 try {
   [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
