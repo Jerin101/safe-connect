@@ -45,12 +45,14 @@ const FILES = [
   'icons/apple-touch-icon.png',
 ];
 
-// Install: save all files. They were just downloaded by the page, so the browser can reuse its copy
-// (no second download on a slow network); the background update in `fromCache` keeps them fresh.
+// Install: save all files. Each one is checked with the server first ("no-cache"): an unchanged file costs only a
+// tiny "not modified" answer, so a slow network does not download everything twice, but a stale copy from the
+// browser's own cache (e.g. the old start page of v29) can never be saved (#141).
+const fresh = (url) => new Request(url, { cache: 'no-cache', credentials: 'same-origin' });
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => cache.addAll(FILES))
+      .then((cache) => cache.addAll(FILES.map(fresh)))
       .then(() => self.skipWaiting()),
   );
 });
@@ -78,14 +80,14 @@ async function fromCache(event, req) {
   const cached = await cache.match(req, { ignoreSearch: true });
   // Save under the address without "?..." so a one-time code (e.g. reset.html?oobCode=...) is never stored.
   const key = new URL(req.url); key.search = '';
-  const fresh = fetch(req)
+  const update = fetch(fresh(req.url))      // checked with the server, never a stale browser copy (#141)
     .then((res) => { if (res.ok) cache.put(key.href, res.clone()); return res; })
     .catch(() => null);
   if (cached) {
-    event.waitUntil(fresh);   // update quietly in the background
+    event.waitUntil(update);   // update quietly in the background
     return cached;
   }
-  const res = await fresh;
+  const res = await update;
   if (res) return res;
   // Offline and not saved: open the main page instead of a browser error.
   if (req.mode === 'navigate') return (await cache.match('index.html')) || Response.error();
