@@ -33,7 +33,7 @@ The family opens the link and gets a calm page: where the person is, a map link,
 | 2 | "ছোট ইংরেজি বার্তা পাঠান (কম SMS লাগে)" checkbox (Bangla mode only) and the SMS part count under the message | `#/send` |
 | 3 | "৯৯৯-কে যা বলবেন" card, large text | `#/send` |
 | 4 | After a tap: "শেষবার মেসেজ অ্যাপ খোলা হয়েছিল X মিনিট আগে" with two buttons: "নতুন লোকেশন পাঠান" (asks for the location again and rebuilds the message) and "আমি এখন নিরাপদ" (turns the button green and switches the message to the safe text for the same people) | `#/send` |
-| 5 | Help page for the family: age of the location (warns after 1 hour), situation, area, coordinates with a pin, Google Maps link, "৯৯৯-কে এই ঠিকানা পড়ে শোনান", then call steps: 1. ৯৯৯, 2. থানা, 3. স্বাস্থ্য কমপ্লেক্স, 4. ইউএনও. For the situation "কেউ পিছু নিয়েছে" a warning comes first: "ফোন করার আগে মেসেজ করুন। ফোন বাজলে বিপদ বাড়তে পারে। সরাসরি 999-এ কল করুন।" A broken link, a cut-off link or a link outside Bangladesh shows a calm message with ৯৯৯ and the national numbers. | `#/help/...` |
+| 5 | Help page for the family: age of the location (warns after 1 hour), situation, area, coordinates with a pin, Google Maps link, "৯৯৯-কে এই ঠিকানা পড়ে শোনান", then call steps: 1. ৯৯৯, 2. থানা, 3. স্বাস্থ্য কমপ্লেক্স, 4. ইউএনও. For the situation "কেউ পিছু নিয়েছে" a warning comes first: "ফোন করার আগে মেসেজ করুন। ফোন বাজলে বিপদ বাড়তে পারে। সরাসরি ৯৯৯-এ কল করুন।" A broken link, a cut-off link or a link outside Bangladesh shows a calm message with ৯৯৯ and the national numbers. | `#/help/...` |
 | 7 | Tests: link maker and parser, SMS text (bn/en, inside/outside our data, no location), SMS part counts, the police choice on the real data | `tests/bipod-test.mjs` (`node --test`) |
 
 ## Step 2 (later)
