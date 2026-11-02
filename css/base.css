@@ -97,24 +97,26 @@ p { margin: 0; }
 /* 999 is the first control after the logo and is never hidden; the other parts shrink or hide first. */
 header.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 8; background: var(--bg); border-bottom: 1px solid var(--line);
   box-shadow: 0 2px 10px color-mix(in srgb, var(--line) 40%, transparent); }
-.bar1 { display: flex; align-items: center; gap: 14px; padding-block: 12px; }
+/* With large text the first row may wrap (area chip on its own line) instead of overlapping or scrolling sideways (#113). */
+.bar1 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding-block: 12px; }
 .logo { display: flex; align-items: center; gap: 9px; flex: none; min-height: 44px; min-width: 44px; background: none; border: 0; padding: 0; cursor: pointer; font-weight: 800; font-size: 1.25rem; color: var(--ink); }
 .logo svg { width: 28px; height: 28px; flex: none; }
 .mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none; background: var(--accent); color: var(--accent-ink); }
 .mark svg { width: 20px; height: 20px; }
-.areachip { order: 1; display: flex; align-items: center; gap: 8px; margin: 0 auto; min-width: 0; max-width: 360px; background: none; border: 0; cursor: pointer; color: var(--ink); text-align: left; padding: 6px 10px; border-radius: 10px; }
+.areachip { order: 1; display: flex; flex: 1 1 11rem; min-height: 44px; align-items: center; gap: 8px; margin: 0 auto; min-width: min(100%, 11rem); max-width: 360px; background: none; border: 0; cursor: pointer; color: var(--ink); text-align: left; padding: 6px 10px; border-radius: 10px; }
 .areachip:hover { background: var(--surface-2); }
 .areachip > svg { width: 22px; height: 22px; flex: none; }
 .areachip .chev { width: 18px; height: 18px; color: var(--muted); }
-.areachip span { display: grid; min-width: 0; line-height: 1.25; }
+.areachip span { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; line-height: 1.25; }
 .areachip b { font-weight: 700; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .areachip small { color: var(--muted); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .top-actions { order: 2; display: flex; gap: 8px; justify-content: flex-end; align-items: center; min-width: 0; }
+.top-actions > * { flex-shrink: 0; }   /* 999, sign in, language, night/day keep their 44 px */
 .hpill { border-radius: 10px; border: 1px solid var(--line-2); background: var(--surface); min-height: 44px; min-width: 44px; justify-content: center; padding: 7px 14px; font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none;
   color: var(--ink); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; min-width: 0; }
 .h999 { flex: none; min-height: 44px; min-width: 44px; justify-content: center; background: var(--danger); color: var(--danger-ink); border-color: transparent; font-weight: 800; }
 .h999 svg { width: 15px; height: 15px; }
-.hpill.acct { border: 1.5px solid var(--ink); background: transparent; font-weight: 700; }
+.hpill.acct { min-width: 44px; border: 1.5px solid var(--ink); background: transparent; font-weight: 700; }
 .acct .acct-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .hpill.cta { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 700; }
 .hpill.lang { flex: none; min-width: 44px; border-color: transparent; background: transparent; }
@@ -144,7 +146,7 @@ header.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 8; 
 @media (max-width: 1060px) { .hpill.cta { display: none; } }
 @media (max-width: 760px) { .hfinder { display: none; } .bar1 { justify-content: space-between; } .tabs button { padding: 10px 10px 9px; font-size: 0.9rem; }
   /* phones (#108): the area chip stays, short: only the name, cut with … when long */
-  .areachip { flex: 1 1 0; margin: 0; padding: 4px 4px; gap: 4px; min-height: 44px; border-radius: 10px; } .areachip small, .areachip .chev { display: none; } .areachip > svg { width: 18px; height: 18px; }
+  .areachip { flex: 1 1 0; min-width: 44px; margin: 0; padding: 4px 4px; gap: 4px; min-height: 44px; border-radius: 10px; } .areachip small, .areachip .chev { display: none; } .areachip > svg { width: 18px; height: 18px; }
   /* the full name stays for screen readers; the short one shows on one line, with … if still too long */
   #areaChipT { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .areachip span { flex: 1 1 0; }
