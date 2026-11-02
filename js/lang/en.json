@@ -169,7 +169,7 @@
         "I am lost."
       ]
     },
-    "noLoc": "I could not get my location. Call me now.",
+    "noLoc": "I could not get my location. Text me; if I don't answer, call 999.",
     "offline": "No internet. Numbers, area search and SMS still work.",
     "locIdle": "Location not taken yet. To send it, tap the button below.",
     "locBtn": "Get my location",
@@ -264,7 +264,8 @@
       "badOutside": "The location in this link is outside Bangladesh. Don't wait: call 999, then call the person who sent it.",
       "call999": "Emergency",
       "national": "National emergency numbers",
-      "helpPrivacy": "This page reads the location only from the link; nothing is saved anywhere."
+      "helpPrivacy": "This page reads the location only from the link; nothing is saved anywhere.",
+      "followedWarn": "Text before you call; a ringing phone can make it worse. Call 999 directly."
     }
   },
   "page": {

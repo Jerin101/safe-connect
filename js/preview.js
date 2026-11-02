@@ -5,7 +5,7 @@ import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.j
 import { createAutoLoc } from './autoloc.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS } from './reports.js';
-import { helpLink, parseHelp, buildSms, smsParts, minutesAgo } from './bipod.js';
+import { helpLink, parseHelp, buildSms, smsParts, minutesAgo, pickPolice } from './bipod.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -688,8 +688,8 @@ function areaText(place, l) {
 function policeOf(place) {
   if (!place || place.outside || !data) return null;
   const g = areaContacts(data, place).find((x) => x.id === 'police');
-  const r = g && pickContact([g], 'police');
-  return r ? { phone: r.phones[0], district: Boolean(g.fallback) } : null;
+  const p = g && pickPolice(g.items);
+  return p ? { phone: p.record.phones[0], thana: p.thana && !g.fallback } : null;
 }
 function sosMessage() {
   const s = LANG[smsLang()].ui;
@@ -697,7 +697,7 @@ function sosMessage() {
   const place = sos.place && !sos.place.outside ? sos.place : null;
   const police = policeOf(place);
   const texts = { ...s.bipod.sms, noLoc: s.noLoc };
-  if (police?.district) texts.police = texts.policeDistrict;
+  if (police && !police.thana) texts.police = texts.policeDistrict;   // "পুলিশ:" unless it is the thana's OC
   return buildSms({ texts, situation: s.sits[sos.situation][1], area: areaText(place, smsLang()), police: police?.phone || '',
     link: sos.pos ? helpLink(sos.pos, sos.at, sos.situation) : '' });
 }
@@ -952,6 +952,8 @@ function showHelp(arg) {
   $('helpAge').textContent = n < 1 ? b.ageNow : n < 60 ? fill(b.age, { n: digits(n) }) : fill(b.ageHours, { h: digits(Math.floor(n / 60)) });
   $('helpAge').classList.toggle('old', n >= 60);
   $('helpWhereTitle').textContent = b.where;
+  $('helpFollowed').hidden = h.situation !== 'followed';            // a ringing phone can make it worse (#143)
+  $('helpFollowed').textContent = b.followedWarn;
   $('helpSit').hidden = !h.situation;
   $('helpSit').textContent = h.situation ? fill(b.sitLine, { s: t().sits[h.situation][0] }) : '';
   $('helpPlace').textContent = place.outside ? b.outsideData : `${placeTitle(place)}, ${placeSub(place)}`;
