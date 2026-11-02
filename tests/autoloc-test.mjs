@@ -5,7 +5,7 @@
 //      node tests/autoloc-test.mjs
 // Options: BASE=http://127.0.0.1:8000/  CHROME="C:\path\to\chrome.exe"  SHOTS=<folder for screenshots>
 import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, statfsSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -22,8 +22,16 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const pageErrors = [];             // uncaught errors on the page; any one fails the test
 
 /* ---------- Chrome ---------- */
+// Each run makes a Chrome profile (tens of MB) in the temp folder. Leftover profiles once filled the disk,
+// so the run stops when less than 5 GB is free, and the profile is removed whenever the script exits, even after an error.
+const { bavail, bsize } = statfsSync(tmpdir());
+if (bavail * bsize < 5e9) { console.error(`Only ${(bavail * bsize / 1e9).toFixed(1)} GB free in ${tmpdir()}; free some space first.`); process.exit(2); }
 const profile = mkdtempSync(join(tmpdir(), 'sc-autoloc-'));
 const chrome = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${PORT}`, `--user-data-dir=${profile}`, '--no-first-run', 'about:blank'], { stdio: 'ignore' });
+process.on('exit', () => {
+  try { chrome.kill(); } catch {}
+  try { rmSync(profile, { recursive: true, force: true, maxRetries: 20, retryDelay: 250 }); } catch { console.error(`Could not remove ${profile}; delete it by hand.`); }
+});
 let version = null;
 for (let i = 0; i < 50 && !version; i++) { await wait(200); version = await fetch(`http://127.0.0.1:${PORT}/json/version`).then((r) => r.json()).catch(() => null); }
 if (!version) throw new Error('Chrome did not start');
@@ -279,7 +287,4 @@ for (const [lang, theme] of [['bn', 'light'], ['en', 'dark'], ['bn', 'dark'], ['
 check('no errors on the page', !pageErrors.length, pageErrors.slice(0, 3).join(' | '));
 console.log(failed ?`\n${failed} failed` : '\nALL OK');
 page.close(); browser.close();
-chrome.kill();
-await wait(500);
-try { rmSync(profile, { recursive: true, force: true }); } catch { /* Chrome may still hold a file; the system cleans its temp folder */ }
-process.exit(failed ? 1 : 0);
+process.exit(failed ? 1 : 0);   // the exit handler stops Chrome and removes the profile
