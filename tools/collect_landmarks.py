@@ -27,7 +27,8 @@ MAX_PER_PAGE = 120
 # A name must say WHERE it is, not only what it is: at least one word besides these (#157).
 GENERIC_WORDS = set(N(w) for w in "সরকারি সরকারী বেসরকারি প্রাথমিক উচ্চ নিম্ন মাধ্যমিক বিদ্যালয় বিদ্যালয় স্কুল বালিকা বালক কেন্দ্রীয় জামে মসজিদ বাজার হাট "
                     "মাদ্রাসা মাদরাসা দাখিল আলিম ফাজিল কামিল এবতেদায়ী হাফেজিয়া নূরানী কওমী কলেজ ডিগ্রী ডিগ্রি মহাবিদ্যালয় ঘাট হাসপাতাল ক্লিনিক এন্ড অ্যান্ড ও".split())
-NEGATIVE = re.compile(N(r"নেই|নাই|নয়|নাহি|ওয়ার্ড|ওয়ার্ড|[0-9০-৯]"))                    # also counts like "১১টি"
+# Prose, headings and negatives, never a name ("কোন ধরনের বাজার বসে না", "সরকারি কলেজসমূহ", "… নীতিমালা"; tester #158).
+NEGATIVE = re.compile(N(r"নেই|নাই|নয়|নাহি|ওয়ার্ড|ওয়ার্ড|[0-9০-৯]|না$|বসে|সমূহ|সমুহ|নিম্নরূপ|নীতিমালা|ব্যবস্থা|তালিকা|চাইলে|দেখতে|প্রতি |সপ্তাহ|ইউনিয়নে|ইউনিয়ন$|সকল|সবগুলো|বিশ্ববিদ্যালয়|জন্য|এবং"))
 
 
 def fetch(url, cache):
@@ -82,7 +83,8 @@ def main(data, cache_path=None):
         out = {"note": "Landmarks named on the official union portals (হাট-বাজার and শিক্ষা প্রতিষ্ঠান pages), for the area search only: "
                        "a landmark leads to its union. Only names that say what they are were kept. No phone numbers. "
                        "Collected by tools/collect_landmarks.py; each entry keeps its source_url.",
-               "fields": "name_bn, name_en, type, village_bn, union_bn, upazila_en, source_url, source_last_updated, added_by, added_on",
+               "fields": "name_bn, name_en, type, village_bn, union_bn, upazila_en, source_url, source_last_updated, added_by, added_on. "
+                         "Names that appear on the pages of more than one union (copied template lists) are left out.",
                "district": doc["district"], "retrieved_on": today, "landmarks": [], "unions_without_pages": 0}
         seen = set()
         for u in doc["unions"]:
@@ -107,6 +109,15 @@ def main(data, cache_path=None):
             print(f"{got:3d}  {u['union_bn']}", flush=True)
             if cache_path:
                 save_json(cache_path, cache)
+        # The same name on the pages of several unions is a copied template list, not their own places (tester #158):
+        # it is dropped everywhere, so no landmark points to a wrong union. A union's own name is not a landmark either.
+        unions_of = {}
+        for x in out["landmarks"]:
+            unions_of.setdefault(x["name_bn"], set()).add(x["union_bn"])
+        own = {N(u["union_bn"]) for u in doc["unions"]} | {N(u["union_bn"]).replace(N(" ইউনিয়ন"), "") for u in doc["unions"]}
+        before = len(out["landmarks"])
+        out["landmarks"] = [x for x in out["landmarks"] if len(unions_of[x["name_bn"]]) == 1 and x["name_bn"] not in own]
+        out["dropped_copied_or_own_names"] = before - len(out["landmarks"])
         path = os.path.join(data, "landmarks", f"{key}.json")
         with open(path, "w", encoding="utf-8") as f:            # one landmark per line: small, still readable in a diff
             f.write(json.dumps({k: v for k, v in out.items() if k != "landmarks"}, ensure_ascii=False)[:-1] + ',\n "landmarks": [\n')

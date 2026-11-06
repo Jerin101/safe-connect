@@ -115,12 +115,15 @@ def check_landmarks(f):
         if c.startswith("contacts_") and c.endswith(".json"):
             for u in load(c).get("unions", []):
                 unions.add((u.get("upazila_en"), u.get("union_bn")))
+    seen = set()
     for i, x in enumerate(d.get("landmarks", [])):
         rid = x.get("name_bn") or f"row {i}"
         if not x.get("name_bn"): err(f, rid, "name_bn missing")
         if x.get("type") not in LANDMARK_TYPES: err(f, rid, f"unknown type {x.get('type')!r}")
         if (x.get("upazila_en"), x.get("union_bn")) not in unions: err(f, rid, f"union {x.get('union_bn')!r} in {x.get('upazila_en')!r} is not in the contact data")
-        if not OFFICIAL.match(x.get("source_url") or "") and not (x.get("source") or "").startswith("local name"): err(f, rid, "needs an official https source_url or a local source")
+        if not OFFICIAL.match(x.get("source_url") or ""): err(f, rid, "needs an official https source_url (local names go to aliases.json)")
+        if (x.get("name_bn"), x.get("union_bn")) in seen: err(f, rid, "duplicate row")
+        seen.add((x.get("name_bn"), x.get("union_bn")))
         if not x.get("added_by") or not x.get("added_on"): err(f, rid, "added_by and added_on are needed")
         if any(re.search(r"01[3-9][0-9]{8}", str(v)) for v in x.values()): err(f, rid, "no phone numbers in this file")
 
