@@ -40,7 +40,9 @@ async function connect(url) {
   let id = 0; const waiting = new Map(); const listeners = [];
   ws.addEventListener('message', (m) => { const d = JSON.parse(m.data); if (waiting.has(d.id)) { waiting.get(d.id)(d.result || {}); waiting.delete(d.id); } else listeners.forEach((f) => f(d)); });
   return { on: (f) => listeners.push(f), close: () => ws.close(),
-    send: (method, params = {}) => new Promise((r) => { const i = ++id; waiting.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); }) };
+    // 15 s per request: a page that stops answering is reported as a failed case instead of hanging the run.
+    send: (method, params = {}) => Promise.race([new Promise((r) => { const i = ++id; waiting.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); }),
+      new Promise((r) => { const t = setTimeout(() => r({}), 15000); t.unref(); })]) };
 }
 let version = null;
 for (let i = 0; i < 50 && !version; i++) { await wait(200); version = await fetch(`http://127.0.0.1:${PORT}/json/version`).then((r) => r.json()).catch(() => null); }
