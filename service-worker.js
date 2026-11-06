@@ -48,11 +48,13 @@ const FILES = [
 // Install: save all files. Each one is checked with the server first ("no-cache"): an unchanged file costs only a
 // tiny "not modified" answer, so a slow network does not download everything twice, but a stale copy from the
 // browser's own cache (e.g. the old start page of v29) can never be saved (#141).
-const fresh = (url) => new Request(url, { cache: 'no-cache', credentials: 'same-origin' });
+// redirect: a page load keeps its own mode ('manual'), so an address that redirects (a folder without its final /)
+// still opens; the browser does not accept a followed redirect as a page (#141).
+const fresh = (url, redirect = 'follow') => new Request(url, { cache: 'no-cache', credentials: 'same-origin', redirect });
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => cache.addAll(FILES.map(fresh)))
+      .then((cache) => cache.addAll(FILES.map((f) => fresh(f))))
       .then(() => self.skipWaiting()),
   );
 });
@@ -80,7 +82,7 @@ async function fromCache(event, req) {
   const cached = await cache.match(req, { ignoreSearch: true });
   // Save under the address without "?..." so a one-time code (e.g. reset.html?oobCode=...) is never stored.
   const key = new URL(req.url); key.search = '';
-  const update = fetch(fresh(req.url))      // checked with the server, never a stale browser copy (#141)
+  const update = fetch(fresh(req.url, req.redirect))      // checked with the server, never a stale browser copy (#141)
     .then((res) => { if (res.ok) cache.put(key.href, res.clone()); return res; })
     .catch(() => null);
   if (cached) {
