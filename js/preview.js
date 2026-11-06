@@ -67,7 +67,8 @@ function itemLabel(h) {
   else if (h.place.area) title = areaName(h.place.area);
   else title = upazilaName(p.district, p.upazila);
   if (h.kind === 'village') p.label = `${h.village} (${kindWord})`;
-  const village = h.kind === 'local' && h.named?.village_bn ? `${h.named.village_bn}, ` : '';   // "ধর্মপুর, নিয়াজপুর ইউনিয়ন, …"
+  // The village is known only in Bangla; English leaves it out rather than mixing scripts (#149).
+  const village = h.kind === 'local' && h.named?.village_bn && lang === 'bn' ? `${h.named.village_bn}, ` : '';   // "ধর্মপুর, নিয়াজপুর ইউনিয়ন, …"
   const where = (h.kind === 'village' || h.kind === 'local') && h.place.area ? `${village}${areaName(h.place.area)}, ` : '';
   const ward = h.ward ? ` · ${t().ward} ${digits(h.ward)}` : '';
   return { p, title: `${title} (${kindWord})`, sub: where + placeSub(p) + ward };
