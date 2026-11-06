@@ -354,22 +354,28 @@ function matchName(index, q, { district = '' } = {}) {
 // Filler words say nothing about the place; common place words never match on their own.
 const words = (list) => new Set(list.map((w) => norm(w).toLowerCase()));
 const FILLER = words(['জেলা', 'উপজেলা', 'থানা', 'ইউনিয়ন', 'পৌরসভা', 'গ্রাম', 'এর', 'কাছে', 'কাছাকাছি', 'পাশে', 'er', 'kache', 'kase', 'kachhe',
-  'near', 'nearby', 'zila', 'zilla', 'district', 'upazila', 'upozila', 'thana', 'union', 'village', 'gram', 'pourashava', 'municipality']);
+  'near', 'nearby', 'zila', 'zilla', 'district', 'upazila', 'upozila', 'thana', 'union', 'village', 'gram', 'pourashava', 'municipality',
+  'police', 'station', 'ps', 'পুলিশ', 'স্টেশন']);
 const COMMON = words(['বাজার', 'bazar', 'bajar', 'হাট', 'hat', 'পাড়া', 'para', 'চর', 'char', 'স্কুল', 'school', 'skul']);
-const CTX_RANK = { district: 0, upazila: 1, thana: 1, municipality: 2, union: 3 };   // "noakhali" = the district, not the town
+const CTX_RANK = { district: 0, upazila: 1, thana: 1, municipality: 2, union: 3 };   // how precise a context is
 const ctxCache = new WeakMap();
-// Every name that can be context: districts, upazilas, towns and unions, by their sound key.
+// Every name that can be context, by sound key and by exact text, with EVERY place of that name
+// (two unions can share a name: নরোত্তমপুর in Begumganj and in Kabirhat).
 function contextKeys(index) {
   if (ctxCache.has(index)) return ctxCache.get(index);
   const map = new Map();
-  const put = (k, item) => { if (k && (!map.has(k) || CTX_RANK[item.kind] < CTX_RANK[map.get(k).kind])) map.set(k, item); };
+  const put = (k, item) => { if (!k) return; if (!map.has(k)) map.set(k, []); if (!map.get(k).includes(item)) map.get(k).push(item); };
   const text = (n) => `=${norm(n).toLowerCase()}`;            // exact names, for short ones like "হাতিয়া" (sound key "ht")
   const strong = (k) => (k.replace('@', '').length >= 3 ? k : '');
-  for (const d of DISTRICTS) for (const n of [d.bn, d.en]) { const it = { kind: 'district', place: { district: d.key, upazila: null, area: null } }; put(strong(soundKey(n)), it); put(text(n), it); }
+  for (const d of DISTRICTS) {
+    const it = { kind: 'district', place: { district: d.key, upazila: null, area: null } };
+    for (const n of [d.bn, d.en]) { put(strong(soundKey(n)), it); put(text(n), it); }
+  }
   for (const item of index) if (item.kind in CTX_RANK) { for (const k of item.fullKeys) put(strong(k), item); for (const n of item.names) put(text(n), item); }
   ctxCache.set(index, map);
   return map;
 }
+// Is this place inside that area? A thana counts as its upazila.
 export function inContext(item, ctx) {
   const a = item.place, c = ctx.place;
   if (a.district !== c.district) return false;
@@ -377,39 +383,60 @@ export function inContext(item, ctx) {
   if (a.upazila !== c.upazila) return false;
   return ctx.kind === 'upazila' || ctx.kind === 'thana' || a.area?.bn === c.area?.bn;
 }
-// Split what the person typed: context (the district, upazila or union words), the place name, and filler.
+// Split what the person typed: area words (each with all the places of that name), the place name, and filler.
 export function understand(index, q) {
   const all = norm(q).toLowerCase().replace(/[,،।;]/g, ' ').split(/\s+/).filter(Boolean);
   const keys = contextKeys(index);
   const used = new Array(all.length).fill(false);
-  let context = null;
+  const runs = [];                                                      // [[candidates of one area word], …]
   for (let i = 0; i < all.length; i++) {
     for (let n = Math.min(3, all.length - i); n >= 1; n--) {               // the longest name first: "নোয়াখালী সদর", then "নোয়াখালী"
       const run = all.slice(i, i + n);
       if (run.some((w) => FILLER.has(w)) || (n === 1 && COMMON.has(run[0]))) continue;
+      // a word with almost no sound of its own ("Noannoi" -> "n") must not melt into a longer name ("… Noakhali Sadar")
+      if (n > 1 && run.some((w) => wordKey(w).replace('@', '').length < 2)) continue;
       const said = run.join(' ');
       const key = soundKey(said);
-      const hit = keys.get(`=${said}`) || (key.replace('@', '').length >= 3 && keys.get(key));
-      if (!hit) continue;
-      if (!context || CTX_RANK[hit.kind] > CTX_RANK[context.kind]) context = hit;   // the most precise one wins
+      // exact text and sound together: an English name can be spelled oddly in the data ("Narottampurup1")
+      const hit = [...new Set([...(keys.get(`=${said}`) || []), ...((key.replace('@', '').length >= 3 && keys.get(key)) || [])])];
+      if (!hit.length) continue;
+      runs.push(hit);
       for (let j = i; j < i + n; j++) used[j] = true;
       i += n - 1;
       break;
     }
   }
+  // Context = the places of the most precise area word that fit every other area word typed:
+  // "narottampur kabirhat" -> Narottampur union in Kabirhat only. If nothing fits, the broader word alone.
+  let context = [];
+  if (runs.length) {
+    const rank = (c) => Math.max(...c.map((x) => CTX_RANK[x.kind]));
+    const order = [...runs].sort((a, b) => rank(b) - rank(a));
+    const fits = (x) => order.every((c) => c === order[0] || c.some((y) => y === x || inContext(x, y)));
+    context = order[0].filter(fits);
+    if (!context.length) context = order[order.length - 1];
+  }
   const rest = all.filter((w, i) => !used[i] && !FILLER.has(w));
-  return { context, place: rest.join(' '), onlyCommon: rest.length > 0 && rest.every((w) => COMMON.has(w)) };
+  return { context, runs: runs.length, place: rest.join(' '), onlyCommon: rest.length > 0 && rest.every((w) => COMMON.has(w)) };
 }
 
 // { hits, close, context?, missing? } for what the person typed (#151).
 export function findAreas(index, q, opts = {}) {
-  const { context, place, onlyCommon } = understand(index, q);
-  if (!context) return onlyCommon ? { hits: [], close: [] } : matchName(index, place || q, opts);   // "bazar" alone is no place
-  if (!place) return context.kind === 'district' ? matchName(index, q, opts) : { hits: [context], close: [] };   // only area names: "hatiya noakhali"
-  if (onlyCommon) return { hits: [], close: [], context, missing: place };
+  const { context, runs, place, onlyCommon } = understand(index, q);
+  if (!context.length) return onlyCommon ? { hits: [], close: [] } : matchName(index, place || q, opts);   // "bazar" alone is no place
+  if (!place) {
+    // Only area words. One word ("begumganj", "char jabbar"): the normal search, so the upazila, its union and the
+    // thana all show. Several ("narottampur kabirhat"): the places that fit all of them, then the normal results.
+    const r = matchName(index, q, opts);
+    if (runs < 2) return r.hits.length ? r : { hits: context.filter((c) => c.kind !== 'district'), close: r.close };
+    const best = context.filter((c) => c.kind !== 'district');
+    const rest = r.hits.filter((h) => !best.includes(h) && context.some((c) => inContext(h, c)));
+    return best.length || rest.length ? { hits: [...best, ...rest], close: [] } : r;
+  }
+  if (onlyCommon) return { hits: [], close: [], context: context[0], missing: place };
   const r = matchName(index, place, opts);
-  const inside = r.hits.filter((h) => inContext(h, context));
-  if (!inside.length && !r.hits.length) return { hits: [], close: r.close, context, missing: place };
+  const inside = r.hits.filter((h) => context.some((c) => inContext(h, c)));
+  if (!inside.length && !r.hits.length) return { hits: [], close: r.close, context: context[0], missing: place };
   return { hits: [...inside, ...r.hits.filter((h) => !inside.includes(h))], close: r.close };
 }
 
