@@ -458,7 +458,8 @@ function renderChip() {
   // Phones show a short name: "Ukhia", not "Ukhia (whole upazila)"; "জালিয়াপালং", not "জালিয়াপালং ইউনিয়ন" (#108).
   const short = known ? name.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+(ইউনিয়ন|পৌরসভা|union|municipality|pourashava)$/i, '') : name;
   // Pin = just found here; bookmark + "সেভ করা:" = an area saved earlier or searched (#147).
-  const saved = (n) => (known && !found ? fill(t().savedChip, { n }) : n);
+  // With "এলাকা মনে রাখবেন না" on, nothing is kept, so the chip does not say "সেভ করা".
+  const saved = (n) => (known && !found && remembers() ? fill(t().savedChip, { n }) : n);
   $('areaChipT').textContent = saved(name);
   $('areaChipShort').textContent = saved(short);
   $('areaChip').querySelector('svg:not(.chev) path').setAttribute('d', CHIP_ICON[known && !found ? 'saved' : 'pin']);
