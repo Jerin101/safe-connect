@@ -1,4 +1,4 @@
-// Logic for preview.html: the portal design (issues #38, #42; rules in docs/DESIGN.md). The real site (index.html, pages/) is built in P20-P36.
+// Logic for the site (index.html; it was preview.html until #141): the portal design (issues #38, #42; rules in docs/DESIGN.md).
 // Location is read only after a tap, or when the person turned on auto location (CLAUDE.md rule 5, issue #105). The area search lives in data.js (issue #36).
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
@@ -278,7 +278,7 @@ function renderArea() {
 }
 
 /* ---------- views ---------- */
-// Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see preview.html).
+// Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see index.html).
 function showView(name) {
   for (const view of ['home', 'area', 'sos', 'help', 'acct', 'ws']) $(view).hidden = name !== view;
   // One sidebar for home and the area page (#108): it moves with the view; CSS shows it only on wide screens.
@@ -293,12 +293,37 @@ function showView(name) {
   v.classList.remove('page-in'); void v.offsetWidth; v.classList.add('page-in');   // restart the fade
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 }
+/* ---------- saved area (#147): the last area on this phone, name only, never coordinates ---------- */
+// sc-last = { district, upazila, area, [placeId, label], src: 'loc' | 'auto' | 'saved', on: <time it was opened> }.
+// With "এলাকা মনে রাখবেন না" on, the area lives only in memory and is gone after a reload.
+const NO_AREA = 'sc-no-area';
+let memLast = null;
+const remembers = () => store.get(NO_AREA) !== '1';
+function getLast() {
+  if (!remembers()) return memLast;
+  try { return JSON.parse(store.get('sc-last') || 'null'); } catch { return null; }
+}
+function saveLast(place, src) {
+  const { pos, ...name } = place;                 // never a position, only the area's names and ids
+  memLast = { ...name, src, on: Date.now() };
+  if (remembers()) store.set('sc-last', JSON.stringify(memLast));
+}
+function clearLast() { memLast = null; try { localStorage.removeItem('sc-last'); } catch {} }
+// The pin only for an area just found by location (or while auto location is on); otherwise it is a saved area.
+const justFound = (p) => Boolean(p && ((p.src === 'auto' && autoLoc.isOn()) || (p.src === 'loc' && Date.now() - p.on < 3600000)));
+function daysAgo(on) {
+  if (!on) return '';
+  const day = (t) => Math.floor((t - new Date(t).getTimezoneOffset() * 60000) / 86400000);   // local calendar days
+  const n = Math.max(0, day(Date.now()) - day(on));
+  return n === 0 ? t().today : fill(n === 1 ? t().dayAgo : t().daysAgo, { x: digits(n) });
+}
+
 // Opening an area = going to its address (#/area/...); the router then calls showArea.
 function openArea(place, pos) { go(areaPath(place), { place, pos }); }
 function showArea(place, pos) {
   current = { place, pos };
   // While auto location is on, the saved area is where the person is: looking at another area does not replace it (#105).
-  if (!place.outside && (!autoLoc.isOn() || !store.get('sc-last'))) store.set('sc-last', JSON.stringify(place));
+  if (!place.outside && (!autoLoc.isOn() || !getLast())) saveLast(place, pos ? 'loc' : 'saved');
   renderChip();
   renderArea();
   showView('area');
@@ -309,10 +334,10 @@ function goHome() {
   go('');
 }
 
-/* ---------- pages (issue #71): hash addresses inside preview.html, so they also work offline ---------- */
+/* ---------- pages (issue #71): hash addresses inside index.html, so they also work offline ---------- */
 // #/ home · #/numbers · #/area (search) · #/area/<district>/<upazila>[/<union or town>[/<place id>]] · #/send
 // #/guide · #/about · #/faq · #/account · #/help/<lat>,<lng>,<time>[,<situation>] (বিপদ বার্তা, #134). Anything else opens home. The home sections carry data-pages="..."
-// in preview.html: each page shows the sections that list its name, so no content or id is copied.
+// in index.html: each page shows the sections that list its name, so no content or id is copied.
 const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help'];
 const HEADING = { home: 'hello', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
@@ -424,16 +449,26 @@ async function route() {
   finish(name, titleOf(name), HEADING[name], intent);
 }
 // Header area chip: the last opened area (saved on this phone only), or "choose your area".
+const CHIP_ICON = {
+  pin: 'M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z',
+  saved: 'M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z',
+};
 function renderChip() {
-  let last = null;
-  try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
+  const last = getLast();
   const h = P().head;
   const known = !!(last && data && data.docs[last.district]);
+  const found = known && justFound(last);
   const name = known ? placeTitle(last) : h.chipEmpty;
-  $('areaChipT').textContent = name;
   // Phones show a short name: "Ukhia", not "Ukhia (whole upazila)"; "জালিয়াপালং", not "জালিয়াপালং ইউনিয়ন" (#108).
-  $('areaChipShort').textContent = known ? name.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+(ইউনিয়ন|পৌরসভা|union|municipality|pourashava)$/i, '') : name;
-  $('areaChip').title = name;
+  const short = known ? name.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+(ইউনিয়ন|পৌরসভা|union|municipality|pourashava)$/i, '') : name;
+  // Pin = just found here; bookmark + "সেভ করা:" = an area saved earlier or searched (#147).
+  // With "এলাকা মনে রাখবেন না" on, nothing is kept, so the chip does not say "সেভ করা".
+  const saved = (n) => (known && !found && remembers() ? fill(t().savedChip, { n }) : n);
+  $('areaChipT').textContent = saved(name);
+  $('areaChipShort').textContent = saved(short);
+  $('areaChip').querySelector('svg:not(.chev) path').setAttribute('d', CHIP_ICON[known && !found ? 'saved' : 'pin']);
+  $('areaChip').dataset.kind = known ? (found ? 'found' : 'saved') : 'none';
+  $('areaChip').title = saved(name);
   $('areaChipS').textContent = h.chipSub;
   // Sidebar "My area" card (#108): the area's name, and what a tap does
   $('hcAreaT').textContent = name;
@@ -441,20 +476,40 @@ function renderChip() {
 }
 // Sidebar "My area": opens the last area, or the area finder when none is saved yet.
 function openMyArea() {
-  let last = null;
-  try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
+  const last = getLast();
   if (last && data && data.docs[last.district]) openArea(last, null); else findArea('');
 }
 function renderRecent() {
   renderChip();
-  let last = null;
-  try { last = JSON.parse(store.get('sc-last') || 'null'); } catch {}
-  const b = $('recentBtn');
-  if (!last || !data || !data.docs[last.district]) { b.hidden = true; return; }   // home can open before the data is loaded
-  b.textContent = fill(t().recent, { n: placeTitle(last) });
+  const last = getLast();
+  const b = $('recentBtn'), x = $('recentClear');
+  $('noAreaLabel').textContent = t().noArea;
+  $('noArea').checked = !remembers();
+  if (!last || !data || !data.docs[last.district]) { b.hidden = true; x.hidden = true; return; }   // home can open before the data is loaded
+  const ago = daysAgo(last.on);
+  b.textContent = ago ? fill(t().recentAgo, { n: placeTitle(last), d: ago }) : fill(t().recent, { n: placeTitle(last) });
   b.onclick = () => openArea(last, null);
   b.hidden = false;
+  x.textContent = t().clearArea; x.setAttribute('aria-label', t().clearAreaLabel);
+  x.hidden = false;
 }
+$('recentClear').addEventListener('click', () => {
+  clearLast();
+  renderRecent(); renderMyArea(); renderAutoNote();
+  showToast(t().areaCleared);
+  $('areaInput').focus({ preventScroll: true });
+});
+$('noArea').addEventListener('change', () => {
+  if ($('noArea').checked) {
+    const keep = getLast();                       // this visit still knows it; nothing stays on the phone
+    store.set(NO_AREA, '1'); try { localStorage.removeItem('sc-last'); } catch {}
+    memLast = keep;
+  } else {
+    try { localStorage.removeItem(NO_AREA); } catch {}
+    if (memLast) store.set('sc-last', JSON.stringify(memLast));
+  }
+  renderRecent();
+});
 
 /* ---------- location ---------- */
 function msg(text) { $('locMsg').textContent = text; $('locMsg').hidden = !text; }
@@ -526,7 +581,8 @@ const autoLoc = createAutoLoc({
   onError: (code) => { autoMsg = code; autoChanged(); },
 });
 function lastPlace() {
-  try { const p = JSON.parse(store.get('sc-last') || 'null'); return p && data && data.docs[p.district] ? p : null; } catch { return null; }
+  const p = getLast();
+  return p && data && data.docs[p.district] ? p : null;
 }
 const samePlace = (a, b) => a.district === b.district && a.upazila === b.upazila && (a.area?.bn || '') === (b.area?.bn || '');
 function autoFix(pos) {
@@ -535,7 +591,7 @@ function autoFix(pos) {
   const place = resolvePlace(pos);
   const old = lastPlace();
   if (place.outside || (old && samePlace(old, place))) return;
-  store.set('sc-last', JSON.stringify(place));
+  saveLast(place, 'auto');
   renderRecent(); renderMyArea(); renderAutoNote();   // header chip, sidebar card, home list, area note; never leaves the page
   showToast(fill(old ? t().auto.changed : t().auto.found, { n: placeTitle(place) }));   // "changed" only for a real change
 }
