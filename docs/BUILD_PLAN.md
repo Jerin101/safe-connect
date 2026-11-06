@@ -48,7 +48,7 @@ safeconnect/
 ├── docs/                   ← BUILD_PLAN.md, FEATURES.md, PROJECT_PLAN.md, ISSUES.md, COVERAGE.md, DATA_REPORT.md, DATA_GAPS.md
 ├── .claude/agents/         ← 6 agents
 ├── .github/                ← workflows/validate.yml, workflows/pages.yml, issue + PR templates
-├── manifest.json  service-worker.js  preview.html (data test page)
+├── manifest.json  service-worker.js  preview.html (old address, sends on to index.html)
 ├── CLAUDE.md  README.md  CONTRIBUTING.md  LICENSE
 └── .gitignore              ← *_raw.json, __pycache__/, secret files
 ```

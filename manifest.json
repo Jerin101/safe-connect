@@ -5,7 +5,7 @@
   "lang": "bn",
   "dir": "ltr",
   "id": "./",
-  "start_url": "./preview.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
