@@ -176,6 +176,8 @@
   .searchbar svg { width: 20px; height: 20px; flex: none; color: var(--muted); margin-left: 8px; }
   .searchbar input { flex: 1; min-width: 0; border: 0; background: none; padding: 10px 0; font-size: 1.05rem; outline: none; }
   .searchbar select { min-height: 44px; border: 0; border-radius: 9px; background: var(--accent); color: var(--accent-ink); padding: 10px 12px; font-weight: 700; font-size: 0.92rem; max-width: 44%; cursor: pointer; }
+  /* Phones (#145): the text field gets the whole first row, the district menu its own row below, so the hint is never cut. */
+  @media (max-width: 599px) { .searchbar { flex-wrap: wrap; } .searchbar input { flex: 1 1 0; } .searchbar select { flex: 1 1 100%; max-width: none; } }
   .hint { color: var(--muted); font-size: 0.9rem; }
   .suggest { list-style: none; margin: 0; padding: 6px; display: grid; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
   .suggest button { width: 100%; text-align: left; background: none; border: 0; border-radius: 10px; padding: 10px 12px; cursor: pointer; display: grid; color: var(--ink); }
