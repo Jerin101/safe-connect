@@ -277,7 +277,8 @@
     "clearArea": "✕ Remove",
     "clearAreaLabel": "Remove the last area",
     "noArea": "Don't remember my area",
-    "areaCleared": "Last area removed."
+    "areaCleared": "Last area removed.",
+    "elsewhere": "Nothing with this name in {c}. It is in these other places:"
   },
   "page": {
     "greet": {

@@ -63,6 +63,13 @@
   {"q": "নরোত্তমপুর বেগমগঞ্জ", "expect": "the other one (#151 review)", "first": {"kind": "union", "upazila": "Begumganj"}},
   {"q": "mohammadpur chatkhil", "expect": "a union + its upazila (#151 review)", "first": {"kind": "union", "upazila": "Chatkhil"}},
   {"q": "begumganj union", "expect": "the union, not only the upazila (#151 review)", "first": {"kind": "union", "upazila": "Begumganj"}},
-  {"q": "char jabbar", "expect": "the union with its contacts (#151 review)", "first": {"kind": "union", "upazila": "Subarnachar"}}
+  {"q": "char jabbar", "expect": "the union with its contacts (#151 review)", "first": {"kind": "union", "upazila": "Subarnachar"}},
+  {"q": "uttar barghop", "expect": "a village that contains a union name stays one place (#151 review 2)", "first": {"kind": "village", "upazila": "Kutubdia"}},
+  {"q": "পশ্চিম পালংখালী", "expect": "the village, not a split (#151 review 2)", "first": {"kind": "village", "upazila": "Ukhia"}},
+  {"q": "shahporir dwip teknaf", "expect": "never another district (#151 review 2)", "first": {"kind": "village", "upazila": "Teknaf"}},
+  {"q": "shahporir dwip", "expect": "English, ব-ফলা as w (#151 review 2)", "first": {"kind": "village", "upazila": "Teknaf"}},
+  {"q": "বাজার পাড়া", "expect": "a village named only with common words (#151 review 2)", "first": {"kind": "village"}},
+  {"q": "হাজী পাড়া", "expect": "exact village before a same-sounding union (#151 review 2)", "first": {"kind": "village"}},
+  {"q": "pekua union", "expect": "the kind word decides (#151 review 2)", "first": {"kind": "union", "upazila": "Pekua"}}
  ]
 }
