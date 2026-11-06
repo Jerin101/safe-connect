@@ -59,7 +59,7 @@ The example is Hatiya, situation "followed". The police number is Hatiya thana's
 ### English (also the short version offered in Bangla mode)
 
 ```
-URGENT! Someone is following me and I am scared.
+URGENT! Someone is following me.
 Area: Hatiya, Noakhali
 Call 999 first. Police station: 01320111137
 Location: https://jerin101.github.io/safe-connect/#/help/22.29580,91.10660,1793624400,followed
