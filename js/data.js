@@ -188,7 +188,8 @@ const GENERIC = new RegExp(`(${norm('ইউনিয়ন|পৌরসভা|�
   + 'municipality|upazila|upozila|\\bzila\\b|\\bdistrict\\b|\\bgram\\b|\\bvillage\\b|\\btown\\b)', 'gi');
 
 // Bangla letters to plain Latin letters (য় is a vowel sound; ড় ঢ় sound like র; ক্ষ like ক).
-const bnToLatin = (w, withVowels) => w.replace(/য়/g, withVowels ? 'y' : '').replace(/[ডঢ]়/g, 'র').replace(/ক্ষ/g, 'ক')
+// ব-ফলা (্ব) after a consonant is spoken as w or not at all: "দ্বীপ" = "dwip", not "dbip" (#151 review).
+const bnToLatin = (w, withVowels) => w.replace(/(?<=[ক-হ])্ব/g, '').replace(/য়/g, withVowels ? 'y' : '').replace(/[ডঢ]়/g, 'র').replace(/ক্ষ/g, 'ক')
   .replace(/[ঀ-৿]/g, (ch) => BN_LAT[ch] ?? (withVowels ? BN_VOWEL[ch] ?? '' : ''));
 
 export function wordKey(w) {
@@ -347,7 +348,8 @@ function matchName(index, q, { district = '' } = {}) {
   const close = uniq.filter((x) => x.sc > 4);
   // A clear slip in a long name ("kasehmbazar"): one letter off, and nothing else that close, counts as the place (#151).
   if (!hits.length && close[0]?.sc === 6 && key.replace('@', '').length >= 6 && !(close[1]?.sc <= 6)) hits.push(close.shift());
-  return { hits: hits.slice(0, 8).map((x) => x.item), close: close.slice(0, 3).map((x) => x.item) };
+  const top = hits.slice(0, 8);
+  return { hits: top.map((x) => x.item), close: close.slice(0, 3).map((x) => x.item), scores: new Map(top.map((x) => [x.item, x.sc])) };
 }
 
 /* ---------- query understanding (#151) ---------- */
@@ -356,7 +358,7 @@ const words = (list) => new Set(list.map((w) => norm(w).toLowerCase()));
 const FILLER = words(['জেলা', 'উপজেলা', 'থানা', 'ইউনিয়ন', 'পৌরসভা', 'গ্রাম', 'এর', 'কাছে', 'কাছাকাছি', 'পাশে', 'er', 'kache', 'kase', 'kachhe',
   'near', 'nearby', 'zila', 'zilla', 'district', 'upazila', 'upozila', 'thana', 'union', 'village', 'gram', 'pourashava', 'municipality',
   'police', 'station', 'ps', 'পুলিশ', 'স্টেশন']);
-const COMMON = words(['বাজার', 'bazar', 'bajar', 'হাট', 'hat', 'পাড়া', 'para', 'চর', 'char', 'স্কুল', 'school', 'skul']);
+const COMMON = words(['বাজার', 'bazar', 'bajar', 'হাট', 'hat', 'পাড়া', 'para', 'চর', 'char', 'স্কুল', 'school', 'skul', 'দ্বীপ', 'dwip', 'dip', 'island']);
 const CTX_RANK = { district: 0, upazila: 1, thana: 1, municipality: 2, union: 3 };   // how precise a context is
 const ctxCache = new WeakMap();
 // Every name that can be context, by sound key and by exact text, with EVERY place of that name
@@ -400,44 +402,93 @@ export function understand(index, q) {
       // exact text and sound together: an English name can be spelled oddly in the data ("Narottampurup1")
       const hit = [...new Set([...(keys.get(`=${said}`) || []), ...((key.replace('@', '').length >= 3 && keys.get(key)) || [])])];
       if (!hit.length) continue;
-      runs.push(hit);
+      runs.push(Object.assign(hit, { at: Array.from({ length: n }, (_, j) => i + j) }));
       for (let j = i; j < i + n; j++) used[j] = true;
       i += n - 1;
       break;
     }
   }
-  // Context = the places of the most precise area word that fit every other area word typed:
-  // "narottampur kabirhat" -> Narottampur union in Kabirhat only. If nothing fits, the broader word alone.
-  let context = [];
-  if (runs.length) {
-    const rank = (c) => Math.max(...c.map((x) => CTX_RANK[x.kind]));
-    const order = [...runs].sort((a, b) => rank(b) - rank(a));
-    const fits = (x) => order.every((c) => c === order[0] || c.some((y) => y === x || inContext(x, y)));
-    context = order[0].filter(fits);
-    if (!context.length) context = order[order.length - 1];
-  }
   const rest = all.filter((w, i) => !used[i] && !FILLER.has(w));
-  return { context, runs: runs.length, place: rest.join(' '), onlyCommon: rest.length > 0 && rest.every((w) => COMMON.has(w)) };
+  return { all, runs, context: contextOf(runs), place: rest.join(' '), onlyCommon: rest.length > 0 && rest.every((w) => COMMON.has(w)) };
+}
+// Context = the places of the most precise area word that fit every other area word typed:
+// "narottampur kabirhat" -> Narottampur union in Kabirhat only. If nothing fits, the broadest word alone.
+function contextOf(runs) {
+  if (!runs.length) return [];
+  const rank = (c) => Math.max(...c.map((x) => CTX_RANK[x.kind]));
+  const order = [...runs].sort((a, b) => rank(b) - rank(a));
+  const fits = (x) => order.every((c) => c === order[0] || c.some((y) => y === x || inContext(x, y)));
+  const ctx = order[0].filter(fits);
+  return ctx.length ? ctx : order[order.length - 1];
 }
 
-// { hits, close, context?, missing? } for what the person typed (#151).
+// A kind word in the query ("… ইউনিয়ন", "pekua union", "noakhali pourashava") puts results of that kind first.
+const KIND_WORDS = [['union', ['ইউনিয়ন', 'union', 'up']], ['municipality', ['পৌরসভা', 'পৌর', 'pourashava', 'paurashava', 'municipality', 'town']],
+  ['upazila', ['উপজেলা', 'upazila', 'upozila']], ['thana', ['থানা', 'thana', 'police', 'station']]]
+  .map(([kind, list]) => [kind, new Set(list.map((w) => norm(w).toLowerCase()))]);
+// { hits, close, context?, missing?, elsewhere? } for what the person typed (#151).
 export function findAreas(index, q, opts = {}) {
-  const { context, runs, place, onlyCommon } = understand(index, q);
-  if (!context.length) return onlyCommon ? { hits: [], close: [] } : matchName(index, place || q, opts);   // "bazar" alone is no place
+  const r = findAreasRaw(index, q, opts);
+  const said = norm(q).toLowerCase().replace(/[,،।;]/g, ' ').split(/\s+/);
+  const want = KIND_WORDS.find(([, ws]) => said.some((w) => ws.has(w)))?.[0];
+  if (!want || r.hits.length < 2) return r;
+  return { ...r, hits: [...r.hits.filter((h) => h.kind === want), ...r.hits.filter((h) => h.kind !== want)] };
+}
+function findAreasRaw(index, q, opts = {}) {
+  const { all, runs, context, place, onlyCommon } = understand(index, q);
+  const words = all.filter((w) => !FILLER.has(w));
+  const exactly = (r) => r.hits.filter((h) => (h.names || []).some((n) => norm(n).toLowerCase() === words.join(' ')));
+  if (!context.length) {
+    if (!onlyCommon) return matchName(index, place || q, opts);
+    // "bazar" alone is no place; but a place NAMED only with such words ("বাজার পাড়া") is found when written exactly
+    return words.length > 1 ? { hits: exactly(matchName(index, words.join(' '), opts)), close: [] } : { hits: [], close: [] };
+  }
+  // 1) The whole text as one name first: a village like "উত্তর বড়ঘোপ" or "পশ্চিম পালংখালী" contains an area word,
+  //    but it is still one place (#151 review). Whole-name matches (text or the full sound) win over any split.
+  const whole = matchName(index, words.join(' '), opts);
+  const weak = words.some((w) => wordKey(w).replace('@', '').length < 2);   // "Noannoi": its sound melts into the next word
+  const wholeHits = whole.hits.filter((h) => whole.scores.get(h) <= (weak ? 2 : 3));
+  if (wholeHits.length) {
+    // the better match first (exact text before same sound); inside the area words only breaks a tie
+    const inside = (h) => (context.some((c) => inContext(h, c)) ? 0 : 1);
+    const ranked = [...wholeHits].sort((x, y) => whole.scores.get(x) - whole.scores.get(y) || inside(x) - inside(y));
+    return { hits: [...ranked, ...whole.hits.filter((h) => !ranked.includes(h))], close: whole.close };
+  }
   if (!place) {
     // Only area words. One word ("begumganj", "char jabbar"): the normal search, so the upazila, its union and the
     // thana all show. Several ("narottampur kabirhat"): the places that fit all of them, then the normal results.
     const r = matchName(index, q, opts);
-    if (runs < 2) return r.hits.length ? r : { hits: context.filter((c) => c.kind !== 'district'), close: r.close };
+    if (runs.length < 2) return r.hits.length ? r : { hits: context.filter((c) => c.kind !== 'district'), close: r.close };
     const best = context.filter((c) => c.kind !== 'district');
     const rest = r.hits.filter((h) => !best.includes(h) && context.some((c) => inContext(h, c)));
     return best.length || rest.length ? { hits: [...best, ...rest], close: [] } : r;
   }
-  if (onlyCommon) return { hits: [], close: [], context: context[0], missing: place };
-  const r = matchName(index, place, opts);
-  const inside = r.hits.filter((h) => context.some((c) => inContext(h, c)));
-  if (!inside.length && !r.hits.length) return { hits: [], close: r.close, context: context[0], missing: place };
-  return { hits: [...inside, ...r.hits.filter((h) => !inside.includes(h))], close: r.close };
+  // (only common words left, e.g. "dwip": the retry below gives the area words back before saying "not found")
+  // 2) Split: the place inside the area words. If it is not there, the most precise area word may be part of the
+  //    place's own name ("shahporir dwip teknaf": "shahporir" is not the union সাহাপুর): give it back and try again.
+  let active = [...runs];
+  let first = null, last = null;
+  while (active.length) {
+    const ctx = contextOf(active);
+    const used = new Set(active.flatMap((r) => r.at));
+    const name = all.filter((w, i) => !used.has(i) && !FILLER.has(w)).join(' ');
+    if (!name || name.split(' ').every((w) => COMMON.has(w))) { if (name && !last) last = { ctx, name }; } else {
+      const r = matchName(index, name, opts);
+      const inside = r.hits.filter((h) => ctx.some((c) => inContext(h, c)));
+      if (inside.length) return { hits: [...inside, ...r.hits.filter((h) => !inside.includes(h))], close: r.close };
+      if (!first && r.hits.length) first = { r, ctx, name };
+      if (!last || !r.hits.length) last = last || { ctx, name };
+    }
+    const rank = (c) => Math.max(...c.map((x) => CTX_RANK[x.kind]));
+    active = [...active].sort((a, b) => rank(b) - rank(a)).slice(1);   // drop the most precise area word
+  }
+  // 3) Nothing inside the area: say so. Places of that name elsewhere come with a note, never as if they were there;
+  //    if nothing anywhere, "<নাম> পাইনি, তবে <এলাকা> পেয়েছি" with the area that is left after giving words back.
+  if (first) return { hits: first.r.hits, close: first.r.close, elsewhere: first.ctx[0] };
+  const all2 = matchName(index, words.join(' '), opts);            // "shahporir dwip": the whole text, no area
+  if (all2.hits.length) return all2;
+  if (last) return { hits: [], close: all2.close, context: last.ctx[0], missing: last.name };
+  return all2;
 }
 
 export function search(data, query, limit = 40) {

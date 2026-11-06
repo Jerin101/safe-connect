@@ -114,7 +114,11 @@
                 </label>
                 <p class="hint" id="areaHint"></p>
                 <ul class="suggest" id="suggest" hidden aria-live="polite"></ul>
-                <button class="btn recent" id="recentBtn" type="button" hidden></button>
+                <div class="recent-row">
+                  <button class="btn recent" id="recentBtn" type="button" hidden></button>
+                  <button class="linkbtn recent-clear" id="recentClear" type="button" hidden></button>
+                </div>
+                <label class="check no-area"><input type="checkbox" id="noArea"><span id="noAreaLabel"></span></label>
               </div>
               <p id="orText" hidden></p>
             </div>
