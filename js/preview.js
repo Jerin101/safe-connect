@@ -907,18 +907,19 @@ function showSos(pos, askLocation) {
   if (askLocation) { requestSosLocation(); return; }
   renderLoc(); refreshMessage();
 }
-async function requestSosLocation() {
+// fresh = true ("Send new location", #134): a new fix, never one the phone kept from earlier.
+async function requestSosLocation(fresh = false) {
   sos.state = 'getting'; sos.error = null;
   $('sosDemo').hidden = true;
   renderLoc(); refreshMessage();
-  try { setSosPos(await getPosition()); }
+  try { const pos = await getPosition(fresh ? { maximumAge: 0 } : {}); setSosPos(pos, pos.at || Date.now()); }
   catch (err) {
     sos.state = 'failed'; sos.error = err.code;
     renderLoc(); refreshMessage();
     fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos);
   }
 }
-$('sosLocBtn').addEventListener('click', requestSosLocation);
+$('sosLocBtn').addEventListener('click', () => requestSosLocation());
 $('sosBtn').addEventListener('click', () => openSos(null));
 $('sosBack').addEventListener('click', goHome);
 $('sosMsg').addEventListener('input', () => { sos.edited = true; renderSend(); });
@@ -927,7 +928,7 @@ $('bipodBtn').addEventListener('click', (e) => {
   e.preventDefault();
   $('peopleBox').open = true; $('peopleBox').scrollIntoView({ block: 'start' }); $('pName').focus({ preventScroll: true });
 });
-$('bipodAgain').addEventListener('click', () => { sos.safe = false; sos.edited = false; requestSosLocation(); $('bipodBtn').focus(); });
+$('bipodAgain').addEventListener('click', () => { sos.safe = false; sos.edited = false; requestSosLocation(true); $('bipodBtn').focus(); });
 $('bipodSafe').addEventListener('click', () => { sos.safe = !sos.safe; sos.edited = false; refreshMessage(); $('bipodBtn').focus(); });
 $('smsEn').addEventListener('change', () => { sos.short = $('smsEn').checked; sos.edited = false; refreshMessage(); });
 
