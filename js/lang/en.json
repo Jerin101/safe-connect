@@ -265,7 +265,16 @@
       "call999": "Emergency",
       "national": "National emergency numbers",
       "helpPrivacy": "This page reads the location only from the link; nothing is saved anywhere."
-    }
+    },
+    "savedChip": "Saved: {n}",
+    "recentAgo": "Last area: {n} · {d}",
+    "today": "today",
+    "dayAgo": "{x} day ago",
+    "daysAgo": "{x} days ago",
+    "clearArea": "✕ Remove",
+    "clearAreaLabel": "Remove the last area",
+    "noArea": "Don't remember my area",
+    "areaCleared": "Last area removed."
   },
   "page": {
     "greet": {

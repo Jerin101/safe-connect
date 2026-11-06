@@ -295,11 +295,21 @@ export function scoreItem(item, s, key) {
     if (k === key) take(5);
     else if (key.length >= 3) {
       const d = editDistance(key, k);
-      if (d <= Math.max(1, Math.floor(key.length / 3))) take(5 + d);
+      if (d > Math.max(1, Math.floor(key.length / 3))) continue;
+      const a = stripCommon(key), b = stripCommon(k);
+      const common = a !== key || b !== k;
+      if (common && (Math.min(a.length, b.length) < 3 ? a !== b : editDistance(a, b) > Math.max(1, Math.floor(a.length / 3)))) continue;
+      take(5 + d);
     }
   }
   return best;
 }
+
+// Common place words (bazar, hat, para, char, school): a close spelling must match on the rest of the name too,
+// so "kasehmbazar" never suggests "কক্সবাজার" just because both end in "bazar" (#145). "গ্রাম/gram" is already dropped.
+const COMMON_KEYS = [...new Set(['বাজার', 'bazar', 'bajar', 'হাট', 'hat', 'পাড়া', 'para', 'চর', 'char', 'স্কুল', 'school', 'skul'].map(soundKey))]
+  .sort((a, b) => b.length - a.length);
+const stripCommon = (k) => { const c = COMMON_KEYS.find((x) => k.length > x.length && k.endsWith(x)); return c ? k.slice(0, -c.length) : k; };
 
 const KIND_ORDER = { municipality: 0, local: 1, place: 1, union: 2, village: 3, upazila: 4 };
 

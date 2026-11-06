@@ -43,3 +43,18 @@ offline; 360 px in bn/en and night/day.
 `bipod-test.mjs`: the help link, the link parser (broken, cut-off, future and outside-Bangladesh links), the SMS text (bn/en, inside and outside our data, no location) and SMS part counts.
 
 **Run:** `node --test tests/bipod-test.mjs` (no browser, no internet).
+
+## Width sweep (issue #145)
+
+`width-sweep.mjs` opens the main pages (home, an area, area search, send, numbers, a help link) at every width from
+320 to 1024 px in 10 px steps plus real phone widths (360, 375, 390, 393, 412, 430, 440, 480, 768, 820, 1024, 1366),
+in Bangla and English, light and dark, signed out and signed in, at 100 % and 130 % text. It reports sideways scroll,
+overlapping header controls, clipped text, empty buttons, header targets under 44 px and a search box too narrow
+for its hint. Every UI pull request must pass it.
+
+- **Signed in** = the `sc-signed-in` flag; on page load the header shows exactly what a signed-in person sees.
+- **130 % text** = the root font size set to 130 %, the way Android's font size setting scales a web page's text.
+
+**Run:** `python -m http.server 8000` in the project folder, then `node tests/width-sweep.mjs` (about 10 minutes).
+Options: `BASE=http://127.0.0.1:8000/`, `PAGES="#/,#/send"`, `WIDTHS=360,412`. In Git Bash put `MSYS_NO_PATHCONV=1`
+in front when `PAGES` has `#/...`. It stops if less than 5 GB is free, and always removes its temporary Chrome profile.
