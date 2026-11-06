@@ -25,6 +25,7 @@ function check(c, r) {
   if (c.not_anywhere && [...r.hits, ...r.close].some((i) => N(name(i)).includes(N(c.not_anywhere)))) return false;
   if (c.no_match && r.hits.length) return false;
   if (c.no_similar && r.close.length) return false;
+  if (c.context && (r.hits.length || !r.context || (r.context.place.upazila || r.context.place.district) !== c.context)) return false;
   return true;
 }
 

@@ -66,7 +66,9 @@ export function upazilas(doc) {
   const seen = new Map();
   for (const u of doc.unions) seen.set(u.upazila_en, norm(u.upazila_bn));
   for (const r of doc.records) if (r.upazila_en && !seen.has(r.upazila_en)) seen.set(r.upazila_en, norm(r.upazila_bn));
-  return [...seen].map(([en, bn]) => ({ en, bn })).sort((a, b) => a.en.localeCompare(b.en));
+  // Sadar upazilas are always "… সদর", never just the district's name ("নোয়াখালী সদর", #151; the data says "নোয়াখালী").
+  const sadar = (en, bn) => (/ Sadar$/.test(en) && !bn.includes(norm('সদর')) ? `${bn} ${norm('সদর')}` : bn);
+  return [...seen].map(([en, bn]) => ({ en, bn: sadar(en, bn) })).sort((a, b) => a.en.localeCompare(b.en));
 }
 
 // Unions and municipalities (towns) inside one upazila.
@@ -238,13 +240,15 @@ export function areaIndex(data) {
     item.keys = [...new Set(parts.map(soundKey).filter((k) => k.length >= 2))];       // whole names and single words
     item.fullKeys = [...new Set(names.map(soundKey).filter((k) => k.length >= 2))];   // whole names only
     item.vowels = names.map(vowelForm);
+    item.names = names;
     items.push(item);
   };
   for (const d of DISTRICTS) {
     const doc = data.docs[d.key];
     if (!doc) continue;
     const ups = upazilas(doc);
-    const upByBn = new Map(ups.map((u) => [norm(u.bn), u.en]));
+    // Village and place lists name the upazila as the data does ("নোয়াখালী"), the site says "নোয়াখালী সদর": both lead to it.
+    const upByBn = new Map(ups.flatMap((u) => [[norm(u.bn), u.en], [norm(u.bn.replace(/\s*সদর$/, '')), u.en]]));
     const areaOf = (upz, type, bn) => localAreas(doc, upz).find((a) => a.type === type && a.bn === norm(bn));
     for (const u of ups) {
       add({ kind: 'upazila', place: { district: d.key, upazila: u.en, area: null } }, [u.bn, u.en]);
@@ -313,8 +317,8 @@ const stripCommon = (k) => { const c = COMMON_KEYS.find((x) => k.length > x.leng
 
 const KIND_ORDER = { municipality: 0, local: 1, place: 1, union: 2, village: 3, upazila: 4 };
 
-// { hits: real matches (best first), close: similar names } for what the person typed.
-export function findAreas(index, q, { district = '' } = {}) {
+// { hits: real matches (best first), close: similar names } for one place name.
+function matchName(index, q, { district = '' } = {}) {
   const s = norm(q).toLowerCase().trim();
   if (s.length < 2) return { hits: [], close: [] };
   const key = soundKey(s);
@@ -333,7 +337,74 @@ export function findAreas(index, q, { district = '' } = {}) {
     seen.add(k);
     return true;
   });
-  return { hits: uniq.filter((x) => x.sc <= 4).slice(0, 8).map((x) => x.item), close: uniq.filter((x) => x.sc > 4).slice(0, 3).map((x) => x.item) };
+  const hits = uniq.filter((x) => x.sc <= 4);
+  const close = uniq.filter((x) => x.sc > 4);
+  // A clear slip in a long name ("kasehmbazar"): one letter off, and nothing else that close, counts as the place (#151).
+  if (!hits.length && close[0]?.sc === 6 && key.replace('@', '').length >= 6 && !(close[1]?.sc <= 6)) hits.push(close.shift());
+  return { hits: hits.slice(0, 8).map((x) => x.item), close: close.slice(0, 3).map((x) => x.item) };
+}
+
+/* ---------- query understanding (#151) ---------- */
+// Filler words say nothing about the place; common place words never match on their own.
+const words = (list) => new Set(list.map((w) => norm(w).toLowerCase()));
+const FILLER = words(['জেলা', 'উপজেলা', 'থানা', 'ইউনিয়ন', 'পৌরসভা', 'গ্রাম', 'এর', 'কাছে', 'কাছাকাছি', 'পাশে', 'er', 'kache', 'kase', 'kachhe',
+  'near', 'nearby', 'zila', 'zilla', 'district', 'upazila', 'upozila', 'thana', 'union', 'village', 'gram', 'pourashava', 'municipality']);
+const COMMON = words(['বাজার', 'bazar', 'bajar', 'হাট', 'hat', 'পাড়া', 'para', 'চর', 'char', 'স্কুল', 'school', 'skul']);
+const CTX_RANK = { district: 0, upazila: 1, municipality: 2, union: 3 };   // "noakhali" = the district, not the town
+const ctxCache = new WeakMap();
+// Every name that can be context: districts, upazilas, towns and unions, by their sound key.
+function contextKeys(index) {
+  if (ctxCache.has(index)) return ctxCache.get(index);
+  const map = new Map();
+  const put = (k, item) => { if (k && (!map.has(k) || CTX_RANK[item.kind] < CTX_RANK[map.get(k).kind])) map.set(k, item); };
+  const text = (n) => `=${norm(n).toLowerCase()}`;            // exact names, for short ones like "হাতিয়া" (sound key "ht")
+  const strong = (k) => (k.replace('@', '').length >= 3 ? k : '');
+  for (const d of DISTRICTS) for (const n of [d.bn, d.en]) { const it = { kind: 'district', place: { district: d.key, upazila: null, area: null } }; put(strong(soundKey(n)), it); put(text(n), it); }
+  for (const item of index) if (item.kind in CTX_RANK) { for (const k of item.fullKeys) put(strong(k), item); for (const n of item.names) put(text(n), item); }
+  ctxCache.set(index, map);
+  return map;
+}
+export function inContext(item, ctx) {
+  const a = item.place, c = ctx.place;
+  if (a.district !== c.district) return false;
+  if (ctx.kind === 'district') return true;
+  if (a.upazila !== c.upazila) return false;
+  return ctx.kind === 'upazila' || a.area?.bn === c.area?.bn;
+}
+// Split what the person typed: context (the district, upazila or union words), the place name, and filler.
+export function understand(index, q) {
+  const all = norm(q).toLowerCase().replace(/[,،।;]/g, ' ').split(/\s+/).filter(Boolean);
+  const keys = contextKeys(index);
+  const used = new Array(all.length).fill(false);
+  let context = null;
+  for (let i = 0; i < all.length; i++) {
+    for (let n = Math.min(3, all.length - i); n >= 1; n--) {               // the longest name first: "নোয়াখালী সদর", then "নোয়াখালী"
+      const run = all.slice(i, i + n);
+      if (run.some((w) => FILLER.has(w)) || (n === 1 && COMMON.has(run[0]))) continue;
+      const said = run.join(' ');
+      const key = soundKey(said);
+      const hit = keys.get(`=${said}`) || (key.replace('@', '').length >= 3 && keys.get(key));
+      if (!hit) continue;
+      if (!context || CTX_RANK[hit.kind] > CTX_RANK[context.kind]) context = hit;   // the most precise one wins
+      for (let j = i; j < i + n; j++) used[j] = true;
+      i += n - 1;
+      break;
+    }
+  }
+  const rest = all.filter((w, i) => !used[i] && !FILLER.has(w));
+  return { context, place: rest.join(' '), onlyCommon: rest.length > 0 && rest.every((w) => COMMON.has(w)) };
+}
+
+// { hits, close, context?, missing? } for what the person typed (#151).
+export function findAreas(index, q, opts = {}) {
+  const { context, place, onlyCommon } = understand(index, q);
+  if (!context) return onlyCommon ? { hits: [], close: [] } : matchName(index, place || q, opts);   // "bazar" alone is no place
+  if (!place) return context.kind === 'district' ? matchName(index, q, opts) : { hits: [context], close: [] };   // only area names: "hatiya noakhali"
+  if (onlyCommon) return { hits: [], close: [], context, missing: place };
+  const r = matchName(index, place, opts);
+  const inside = r.hits.filter((h) => inContext(h, context));
+  if (!inside.length && !r.hits.length) return { hits: [], close: r.close, context, missing: place };
+  return { hits: [...inside, ...r.hits.filter((h) => !inside.includes(h))], close: r.close };
 }
 
 export function search(data, query, limit = 40) {

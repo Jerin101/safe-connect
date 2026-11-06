@@ -266,7 +266,9 @@
       "call999": "Emergency",
       "national": "National emergency numbers",
       "helpPrivacy": "This page reads the location only from the link; nothing is saved anywhere."
-    }
+    },
+    "notFoundBut": "Didn't find {n}, but found {c}.",
+    "openContext": "See the numbers for {c}"
   },
   "page": {
     "greet": {

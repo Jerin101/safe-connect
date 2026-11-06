@@ -87,17 +87,29 @@ function renderSuggest() {
   const box = $('suggest');
   if (norm(q).length < 2) { box.hidden = true; return; }
   const only = $('distSel').value;
-  const { hits, close } = findAreas(areaIndex, q, { district: only });
+  const { hits, close, context, missing } = findAreas(areaIndex, q, { district: only });
   if (hits.length) { box.replaceChildren(...hits.map(suggestButton)); box.hidden = false; return; }
-  // Never a dead end: similar names, then the upazila list, then GPS and 999.
+  // Never a dead end: the area the person named (#151), similar names, then the upazila list, then GPS and 999.
   const s = t();
-  const parts = [el('li', 'none', close.length ? s.noExact : s.noMatch)];
+  const parts = [];
+  if (context) {
+    const name = context.kind === 'district' ? (lang === 'bn' ? districtOf(context.place.district).bn : districtOf(context.place.district).en)
+      : context.place.area ? `${areaName(context.place.area)}, ${upazilaName(context.place.district, context.place.upazila)}` : upazilaName(context.place.district, context.place.upazila);
+    parts.push(el('li', 'none', fill(s.notFoundBut, { n: missing, c: name })));
+    if (context.kind !== 'district') {
+      const li = el('li');
+      const go = el('button', 'btn violet ctx-open', fill(s.openContext, { c: name })); go.type = 'button';
+      go.addEventListener('click', () => openArea({ ...context.place }, null));
+      li.append(go); parts.push(li);
+    }
+  } else parts.push(el('li', 'none', close.length ? s.noExact : s.noMatch));
   if (close.length) { parts.push(el('li', 'group', s.didYouMean)); close.forEach((h) => parts.push(suggestButton(h))); }
   const ups = el('li', 'fallback-box');
   ups.append(el('p', null, s.pickUpazila));
   const chips = el('div', 'chips');
+  const pick = only || (context ? context.place.district : '');   // a named district shows only its upazilas
   for (const d of DISTRICTS) {
-    if (only && d.key !== only) continue;
+    if (pick && d.key !== pick) continue;
     const doc = data.docs[d.key]; if (!doc) continue;
     for (const u of upazilas(doc)) {
       const c = el('button', 'chip', lang === 'bn' ? u.bn : u.en); c.type = 'button';
