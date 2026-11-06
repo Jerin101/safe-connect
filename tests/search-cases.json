@@ -30,6 +30,9 @@
   {"q": "chowmuhani", "expect": "Chowmuhani town first", "first": {"kind": "municipality"}, "first_contains": "চৌমুহনী"},
   {"q": "coxs bazar", "expect": "Cox's Bazar first", "first_contains": "কক্সবাজার"},
   {"q": "cox's bazar", "expect": "Cox's Bazar first", "first_contains": "কক্সবাজার"},
+  {"q": "kasehmbazar", "expect": "not Cox's Bazar just because both end in bazar (#145)", "not_anywhere": "কক্সবাজার"},
+  {"q": "kashembazar", "expect": "not Cox's Bazar just because both end in bazar (#145)", "not_anywhere": "কক্সবাজার"},
+  {"q": "coxbajar", "expect": "Cox's Bazar still found with a spelling slip", "first_contains": "কক্সবাজার"},
   {"q": "hatiya", "expect": "Hatiya upazila first", "first": {"kind": "upazila", "upazila": "Hatiya"}},
   {"q": "inani", "expect": "Inani beach first", "first": {"kind": "place"}, "first_contains": "ইনানী", "needs": "places"},
 
