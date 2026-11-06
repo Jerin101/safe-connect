@@ -25,7 +25,7 @@ let lang = okLang(params.get('lang')) || okLang(store.get('sc-lang')) || 'bn';
 function signInHref() {
   const c = params.get('continueUrl');
   if (c) { try { const u = new URL(c, location.href); if (u.origin === location.origin) return u.href; } catch {} }
-  return 'preview.html#/account';
+  return './#/account';
 }
 
 // Texts from js/lang/*.json, loaded when needed.
@@ -77,9 +77,9 @@ function mask(address) {
 function link(text, href, cls) { const a = el('a', cls, text); a.href = href; return a; }
 function linksFor() {
   const r = R();
-  const home = link(r.home, 'preview.html', 'btn');
+  const home = link(r.home, './', 'btn');
   if (state === 'done') return [link(r.goSignIn, signInHref(), 'btn violet')];
-  if (state === 'bad') return MODE === 'resetPassword' ? [link(r.newLink, 'preview.html#/account', 'btn violet'), home] : [home];
+  if (state === 'bad') return MODE === 'resetPassword' ? [link(r.newLink, './#/account', 'btn violet'), home] : [home];
   if (state === 'error') {
     const again = el('button', 'btn violet', r.retry); again.type = 'button';
     again.disabled = !navigator.onLine;

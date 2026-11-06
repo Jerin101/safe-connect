@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const BASE = process.env.BASE || 'http://127.0.0.1:8000/';
-const PAGE = `${BASE}preview.html`;
+const PAGE = BASE;   // the site is index.html (#141)
 const ORIGIN = new URL(BASE).origin;
 const CHROME = process.env.CHROME || [
   'C:/Program Files/Google/Chrome/Application/chrome.exe',

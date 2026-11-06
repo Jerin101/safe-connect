@@ -2,7 +2,7 @@
 
 ## Summary (2 Nov 2026)
 
-**Live:** https://jerin101.github.io/safe-connect/preview.html, service worker **`v28-2026-11-02`**. That is `main` at `3114067` (after PR #135), and all checks on `main` are green.
+**Live:** https://jerin101.github.io/safe-connect/ (was …/preview.html until #141; the old address still works), service worker **`v28-2026-11-02`**. That is `main` at `3114067` (after PR #135), and all checks on `main` are green.
 
 **Firestore rules and indexes:** deployed today from `main` at **`1274fd9`**, after `npm run test:rules` passed **83/83** on that commit. The report limits (M1) and the phone-number check in notes (L3) now apply on the live site.
 

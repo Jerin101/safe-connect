@@ -1,5 +1,5 @@
 /* SafeConnect shared styles (P21, issue #69): colours (day and night), fonts, base, header, buttons,
-   messages, form fields and the sign-in parts. Used by preview.html; page-only styles stay in each page.
+   messages, form fields and the sign-in parts. Used by index.html; page-only styles stay in each page.
    Colours and sizes only as variables (CLAUDE.md). Paths are relative to this file (css/). */
 /* Fonts saved inside the project (fonts/, SIL OFL 1.1): no request to Google, and they work offline. */
 @font-face { font-family: "Manrope"; font-style: normal; font-display: swap; font-weight: 200 800;

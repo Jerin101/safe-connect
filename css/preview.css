@@ -1,4 +1,4 @@
-/* Styles for preview.html (moved out of the page for the Content-Security-Policy, issue #121: no inline styles).
+/* Styles for the site, index.html (moved out of the page for the Content-Security-Policy, issue #121: no inline styles).
    Shared colours, fonts, header, buttons and sign-in parts are in css/base.css. */
   /* Page-only styles; shared colours, fonts, header, buttons and sign-in parts are in css/base.css. */
   /* ---------- home shell (v3, issue #72): sidebar on wide screens + feed of rows ---------- */
