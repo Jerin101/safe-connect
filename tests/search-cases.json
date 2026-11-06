@@ -58,6 +58,12 @@
   {"q": "অচেনা বাজার নোয়াখালী সদর", "expect": "not found, but নোয়াখালী সদর (#151)", "context": "Noakhali Sadar"},
   {"q": "bazar", "expect": "a common word alone is no place (#151)", "no_match": true},
   {"q": "হাট", "expect": "a common word alone is no place (#151)", "no_match": true},
-  {"q": "hatiya noakhali", "expect": "an upazila with its district still opens the upazila (#151)", "first_contains": "হাতিয়া"}
+  {"q": "hatiya noakhali", "expect": "an upazila with its district still opens the upazila (#151)", "first_contains": "হাতিয়া"},
+  {"q": "sudharam", "expect": "a thana name leads to its upazila: নোয়াখালী সদর (#153)", "first": {"kind": "thana", "upazila": "Noakhali Sadar"}},
+  {"q": "সুধারাম থানা", "expect": "Bangla, with the word থানা (#153)", "first": {"kind": "thana", "upazila": "Noakhali Sadar"}},
+  {"q": "কাশেম বাজার সুধারাম থানা", "expect": "place + thana as context (#153)", "first_contains": "কাশেম বাজার"},
+  {"q": "charjabbar", "expect": "চরজব্বর (thana and union) -> Subarnachar (#153)", "first": {"upazila": "Subarnachar"}},
+  {"q": "bhasanchar thana", "expect": "ভাসানচর থানা -> Hatiya (#153)", "first": {"kind": "thana", "upazila": "Hatiya"}},
+  {"q": "অচেনা বাজার সুধারাম", "expect": "not found, but the thana's upazila (#153)", "context": "Noakhali Sadar"}
  ]
 }
