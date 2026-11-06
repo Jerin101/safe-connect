@@ -276,7 +276,33 @@
       "helpPrivacy": "This page reads the location only from the link; nothing is saved anywhere."
     },
     "notFoundBut": "Didn't find {n}, but found {c}.",
-    "openContext": "See the numbers for {c}"
+    "openContext": "See the numbers for {c}",
+    "locateBig": "📍 Find by location",
+    "locateBigSub": "Works for every village",
+    "stepTitle": "Step by step: pick the upazila or thana",
+    "stepUnion": "{u}: pick the union or town",
+    "stepBack": "Another upazila",
+    "askTitle": "Ask us to add the place",
+    "askText": "The name is not on our list. An admin adds it only after checking an official list or confirming it locally. No number changes.",
+    "askPlaceLabel": "Place name",
+    "askUpazila": "Upazila",
+    "askPick": "Choose",
+    "askUnion": "Union or town (if you know it)",
+    "askUnionNone": "Don't know",
+    "askSend": "Send request",
+    "askSending": "Sending…",
+    "askSignin": "Sending needs a sign-in. Your name and phone number are not part of the request.",
+    "askMsg": {
+      "sent": "Thank you! Your request was sent. Once checked, the name will show in the search.",
+      "need": "Please give the place name and the upazila.",
+      "phone": "Please don't put a phone number in the place name.",
+      "verify": "Please verify your email first (the link is in your inbox), then send again.",
+      "limitWait": "Please wait a minute, then send again.",
+      "limitDay": "No more requests today. Please try again tomorrow.",
+      "offline": "No internet. Send again when you are online.",
+      "invalid": "Please check the place name and the upazila.",
+      "err": "Could not send. Please try again a little later."
+    }
   },
   "page": {
     "greet": {
@@ -800,7 +826,8 @@
       "off": "The number is off, or the call does not go through",
       "other_person": "Someone else answers",
       "changed": "The number has changed",
-      "other": "Another problem"
+      "other": "Another problem",
+      "missing_place": "Asked to add a place"
     },
     "pick": "Please choose what is wrong.",
     "noteLabel": "Anything else? (optional)",

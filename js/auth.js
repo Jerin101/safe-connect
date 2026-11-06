@@ -375,6 +375,7 @@ export function initAuth(helpers) {
     },
     // "Report a wrong number" on a contact row (js/preview.js). Opens the form; nothing is loaded or sent yet.
     report(record, info, from) { rep.open(record, info, from); },
+    askPlace(draft, from, done) { rep.askPlace(draft, from, done); },   // missing place (#159)
     setText() {
       renderButton();
       rep.setText();

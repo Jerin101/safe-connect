@@ -6,7 +6,7 @@ import { after, before, beforeEach, describe, test } from 'node:test';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import assert from 'node:assert/strict';
 import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, where, orderBy, limit } from 'firebase/firestore';
-import { reportFields, auditFields, hasPhone, PROBLEMS, REPORT_DISTRICTS, NOTE_MAX } from '../../js/reports.js';
+import { reportFields, auditFields, hasPhone, PROBLEMS, REPORT_DISTRICTS, NOTE_MAX, missingFields } from '../../js/reports.js';
 import { roleAuditFields, SITE_ROLES } from '../../js/admin.js';
 
 const ADMIN = 'admin-uid';
@@ -614,5 +614,44 @@ describe('no phone numbers in report notes (issue #123)', () => {
       await aMinuteLater(KARIM, { count: 0 });
       await assertSucceeds(sendWithLimits(db(KARIM), KARIM, newReport(KARIM, { note })));
     }
+  });
+});
+
+// "জায়গাটা যোগ করতে বলুন" (#159): a missing place, with the same limits as every report.
+const missing = (uid, extra = {}) => ({ ...missingFields(uid, { district: 'noakhali', place: 'কাশেম বাজার', upazila: 'Noakhali Sadar', union: 'নিয়াজপুর ইউনিয়ন' }),
+  createdAt: serverTimestamp(), updatedAt: serverTimestamp(), ...extra });
+describe('missing-place requests (#159)', () => {
+  test('a verified user can ask to add a place, in one batch with the limits', async () => {
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, missing(KARIM)));
+  });
+  test('without the limits counter, or with an unverified email, it is refused', async () => {
+    await assertFails(setDoc(doc(db(KARIM), 'reports', 'm1'), missing(KARIM)));
+    await assertFails(sendWithLimits(dbUnverified(KARIM), KARIM, missing(KARIM)));
+  });
+  test('a phone number in the place name or union is refused (also by missingFields)', async () => {
+    await assertFails(sendWithLimits(db(KARIM), KARIM, missing(KARIM, { place: 'বাজার ০১৭১২-৩৪৫৬৭৮' })));
+    await assertFails(sendWithLimits(db(KARIM), KARIM, missing(KARIM, { union: 'call 01712345678' })));
+    assert.equal(missingFields(KARIM, { district: 'noakhali', place: 'বাজার 01712345678', upazila: 'Hatiya' }), null);
+  });
+  test('it needs a place and an upazila, short texts only, and the fixed record id', async () => {
+    await assertFails(sendWithLimits(db(KARIM), KARIM, missing(KARIM, { place: 'x' })));
+    await assertFails(sendWithLimits(db(KARIM), KARIM, missing(KARIM, { upazila: '' })));
+    await assertFails(sendWithLimits(db(KARIM), KARIM, missing(KARIM, { place: 'ক'.repeat(81) })));
+    await assertFails(sendWithLimits(db(KARIM), KARIM, missing(KARIM, { recordId: 'noakhali-up-123' })));
+  });
+  test('a wrong-number report cannot carry the new fields', async () => {
+    await assertFails(sendWithLimits(db(KARIM), KARIM, newReport(KARIM, { place: 'কাশেম বাজার' })));
+  });
+  test('it counts against the same 10-a-day limit', async () => {
+    await assertSucceeds(sendWithLimits(db(RINA), RINA, missing(RINA)));
+    await aMinuteLater(RINA, { count: 10 });
+    await assertFails(sendWithLimits(db(RINA), RINA, missing(RINA)));
+  });
+  test('only the sender and admins can read it', async () => {
+    const ref = doc(collection(db(KARIM), 'reports'));
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, missing(KARIM), ref.id));
+    await assertSucceeds(getDoc(doc(db(KARIM), 'reports', ref.id)));
+    await assertSucceeds(getDoc(doc(db(ADMIN), 'reports', ref.id)));
+    await assertFails(getDoc(doc(db(RINA), 'reports', ref.id)));
   });
 });
