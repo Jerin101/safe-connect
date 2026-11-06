@@ -269,7 +269,17 @@
       "helpPrivacy": "This page reads the location only from the link; nothing is saved anywhere."
     },
     "notFoundBut": "Didn't find {n}, but found {c}.",
-    "openContext": "See the numbers for {c}"
+    "openContext": "See the numbers for {c}",
+    "savedChip": "Saved: {n}",
+    "recentAgo": "Last area: {n} · {d}",
+    "today": "today",
+    "dayAgo": "{x} day ago",
+    "daysAgo": "{x} days ago",
+    "clearArea": "✕ Remove",
+    "clearAreaLabel": "Remove the last area",
+    "noArea": "Don't remember my area",
+    "areaCleared": "Last area removed.",
+    "elsewhere": "Nothing with this name in {c}. It is in these other places:"
   },
   "page": {
     "greet": {
