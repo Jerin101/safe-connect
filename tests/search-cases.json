@@ -69,6 +69,8 @@
   {"q": "নরোত্তমপুর বেগমগঞ্জ", "expect": "the other one (#151 review)", "first": {"kind": "union", "upazila": "Begumganj"}},
   {"q": "mohammadpur chatkhil", "expect": "a union + its upazila (#151 review)", "first": {"kind": "union", "upazila": "Chatkhil"}},
   {"q": "begumganj union", "expect": "the union, not only the upazila (#151 review)", "first": {"kind": "union", "upazila": "Begumganj"}},
-  {"q": "char jabbar", "expect": "the union with its contacts (#151 review)", "first": {"kind": "union", "upazila": "Subarnachar"}}
+  {"q": "char jabbar", "expect": "the union with its contacts (#151 review)", "first": {"kind": "union", "upazila": "Subarnachar"}},
+  {"q": "তেলিপুকুর বাজার", "expect": "a bazar from the official union pages leads to its union (#157)", "first": {"kind": "landmark", "upazila": "Senbagh"}},
+  {"q": "মোহাম্মদপুর ইউনিয়ন", "expect": "landmarks never push a union out of the results (#157)", "first": {"kind": "union"}}
  ]
 }

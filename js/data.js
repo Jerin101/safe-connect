@@ -31,6 +31,8 @@ export async function loadAll(base = 'data/') {
     getJSON(`${base}thanas.json`).catch(() => ({ thanas: [] })),         // thana -> upazila, official sources (#153, optional)
     ...DISTRICTS.map((d) => getJSON(base + d.file).catch(() => null)),
   ]);
+  // Landmarks from the official union pages (bazars, schools, …; #157), optional: the search works without them.
+  const marks = await Promise.all(DISTRICTS.map((d) => getJSON(`${base}landmarks/${d.key}.json`).catch(() => ({ landmarks: [] }))));
   const docs = {};
   const missing = [];
   DISTRICTS.forEach((d, i) => {
@@ -38,6 +40,7 @@ export async function loadAll(base = 'data/') {
     if (!doc) { missing.push(d.key); return; }
     doc.records = doc.records.concat(manual.records.filter((r) => r.district === doc.district));
     doc.places = (manual.places || []).filter((p) => p.district === doc.district);
+    doc.landmarks = marks[i].landmarks || [];
     for (const r of doc.records) r._text = searchText(r, d);
     docs[d.key] = doc;
   });
@@ -259,6 +262,10 @@ export function areaIndex(data) {
       const upz = upByBn.get(norm(p.upazila_bn));
       if (upz) add({ kind: 'place', place: { district: d.key, upazila: upz, area: { type: 'union', bn: norm(p.union_bn) }, placeId: p.id }, named: p }, [p.name_bn, p.name_en]);
     }
+    for (const lm of doc.landmarks || []) {                // a landmark leads to its union (#157)
+      const area = areaOf(lm.upazila_en, 'union', lm.union_bn);
+      if (area) add({ kind: 'landmark', place: { district: d.key, upazila: lm.upazila_en, area }, named: lm }, [lm.name_bn, lm.name_en || '']);
+    }
     for (const th of (data.thanas || []).filter((x) => x.district === doc.district)) {
       if (!ups.some((u) => u.en === th.upazila_en)) continue;
       const core = norm(th.name_bn).replace(new RegExp(`\\s*(${norm('মডেল')}\\s*)?${norm('থানা')}$`), '');
@@ -321,7 +328,7 @@ const COMMON_KEYS = [...new Set(['বাজার', 'bazar', 'bajar', 'হাট
   .sort((a, b) => b.length - a.length);
 const stripCommon = (k) => { const c = COMMON_KEYS.find((x) => k.length > x.length && k.endsWith(x)); return c ? k.slice(0, -c.length) : k; };
 
-const KIND_ORDER = { municipality: 0, local: 1, place: 1, union: 2, village: 3, upazila: 4, thana: 4 };
+const KIND_ORDER = { municipality: 0, local: 1, place: 1, union: 2, village: 3, landmark: 3, upazila: 4, thana: 4 };
 
 // { hits: real matches (best first), close: similar names } for one place name.
 function matchName(index, q, { district = '' } = {}) {
@@ -343,10 +350,15 @@ function matchName(index, q, { district = '' } = {}) {
     seen.add(k);
     return true;
   });
-  const hits = uniq.filter((x) => x.sc <= 4);
-  const close = uniq.filter((x) => x.sc > 4);
+  // Landmarks only fill the places left after everything else (#157): they never push out a union, town or village.
+  const lmLast = (list) => [...list.filter((x) => x.item.kind !== 'landmark'), ...list.filter((x) => x.item.kind === 'landmark')];
+  const hits = lmLast(uniq.filter((x) => x.sc <= 4));
+  const close = lmLast(uniq.filter((x) => x.sc > 4));
   // A clear slip in a long name ("kasehmbazar"): one letter off, and nothing else that close, counts as the place (#151).
-  if (!hits.length && close[0]?.sc === 6 && key.replace('@', '').length >= 6 && !(close[1]?.sc <= 6)) hits.push(close.shift());
+  // (the same name in the same union twice, e.g. a local name that is also an official landmark, is one candidate)
+  const sameName = (a, b) => a && b && norm(a.item.named?.name_bn || a.item.village || '') === norm(b.item.named?.name_bn || b.item.village || '') && a.item.place.area?.bn === b.item.place.area?.bn;
+  const rivals = close.slice(1).filter((x) => x.sc <= 6 && !sameName(x, close[0]));
+  if (!hits.length && close[0]?.sc === 6 && key.replace('@', '').length >= 6 && !rivals.length) hits.push(close.shift());
   return { hits: hits.slice(0, 8).map((x) => x.item), close: close.slice(0, 3).map((x) => x.item) };
 }
 
