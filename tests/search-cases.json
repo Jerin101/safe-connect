@@ -58,6 +58,11 @@
   {"q": "অচেনা বাজার নোয়াখালী সদর", "expect": "not found, but নোয়াখালী সদর (#151)", "context": "Noakhali Sadar"},
   {"q": "bazar", "expect": "a common word alone is no place (#151)", "no_match": true},
   {"q": "হাট", "expect": "a common word alone is no place (#151)", "no_match": true},
-  {"q": "hatiya noakhali", "expect": "an upazila with its district still opens the upazila (#151)", "first_contains": "হাতিয়া"}
+  {"q": "hatiya noakhali", "expect": "an upazila with its district still opens the upazila (#151)", "first_contains": "হাতিয়া"},
+  {"q": "narottampur kabirhat", "expect": "a union + its upazila: the union in that upazila, not the same name elsewhere (#151 review)", "first": {"kind": "union", "upazila": "Kabirhat"}},
+  {"q": "নরোত্তমপুর বেগমগঞ্জ", "expect": "the other one (#151 review)", "first": {"kind": "union", "upazila": "Begumganj"}},
+  {"q": "mohammadpur chatkhil", "expect": "a union + its upazila (#151 review)", "first": {"kind": "union", "upazila": "Chatkhil"}},
+  {"q": "begumganj union", "expect": "the union, not only the upazila (#151 review)", "first": {"kind": "union", "upazila": "Begumganj"}},
+  {"q": "char jabbar", "expect": "the union with its contacts (#151 review)", "first": {"kind": "union", "upazila": "Subarnachar"}}
  ]
 }
