@@ -64,6 +64,11 @@
   {"q": "কাশেম বাজার সুধারাম থানা", "expect": "place + thana as context (#153)", "first_contains": "কাশেম বাজার"},
   {"q": "charjabbar", "expect": "চরজব্বর (thana and union) -> Subarnachar (#153)", "first": {"upazila": "Subarnachar"}},
   {"q": "bhasanchar thana", "expect": "ভাসানচর থানা -> Hatiya (#153)", "first": {"kind": "thana", "upazila": "Hatiya"}},
-  {"q": "অচেনা বাজার সুধারাম", "expect": "not found, but the thana's upazila (#153)", "context": "Noakhali Sadar"}
+  {"q": "অচেনা বাজার সুধারাম", "expect": "not found, but the thana's upazila (#153)", "context": "Noakhali Sadar"},
+  {"q": "narottampur kabirhat", "expect": "a union + its upazila: the union in that upazila, not the same name elsewhere (#151 review)", "first": {"kind": "union", "upazila": "Kabirhat"}},
+  {"q": "নরোত্তমপুর বেগমগঞ্জ", "expect": "the other one (#151 review)", "first": {"kind": "union", "upazila": "Begumganj"}},
+  {"q": "mohammadpur chatkhil", "expect": "a union + its upazila (#151 review)", "first": {"kind": "union", "upazila": "Chatkhil"}},
+  {"q": "begumganj union", "expect": "the union, not only the upazila (#151 review)", "first": {"kind": "union", "upazila": "Begumganj"}},
+  {"q": "char jabbar", "expect": "the union with its contacts (#151 review)", "first": {"kind": "union", "upazila": "Subarnachar"}}
  ]
 }
