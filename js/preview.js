@@ -467,7 +467,8 @@ function resolvePlace(pos) {
   }
   return place;
 }
-function applyPosition(pos) { lastFix = { pos, at: Date.now() }; openArea(resolvePlace(pos), pos); }
+// lastFix.at is the time the phone took the fix, so a help link made from it shows the real age (#143).
+function applyPosition(pos) { lastFix = { pos, at: pos.at || Date.now() }; openArea(resolvePlace(pos), pos); }
 function demoPicks() {
   if (!locations) return [];
   const picks = [

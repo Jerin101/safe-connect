@@ -50,7 +50,7 @@ The example is Hatiya, situation "followed". The police number is Hatiya thana's
 ### Bangla
 
 ```
-জরুরি! কেউ আমার পিছু নিয়েছে, আমি ভয় পাচ্ছি।
+জরুরি! কেউ আমার পিছু নিয়েছে।
 এলাকা: হাতিয়া, নোয়াখালী
 আগে 999-এ কল করো। থানা: 01320111137
 লোকেশন: https://jerin101.github.io/safe-connect/#/help/22.29580,91.10660,1793624400,followed
@@ -78,13 +78,13 @@ Location: https://jerin101.github.io/safe-connect/#/help/22.29580,91.10660,17936
 
 - Bangla is sent as Unicode: 70 characters fit one SMS, and a longer message is split into parts of 67.
 - English uses plain letters: 160 fit one SMS, and parts of 153.
-- The link alone is 84 characters. **Every Bangla message fits in 3 SMS.**
+- The link alone is 84 characters. **Every Bangla message fits in 3 SMS** in every upazila we cover, with its real police number and label (checked by `tests/bipod-test.mjs`; the longest is 199 of 201 characters, "বিপদে আছি" in Cox's Bazar Sadar). For that, two Bangla SMS sentences were shortened: "বিপদে আছি, এখনই সাহায্য দরকার।" and "কেউ আমার পিছু নিয়েছে।".
 - Counted with `smsParts()` in `js/bipod.js`:
 
 | Message (Hatiya, with link) | Bangla: chars → SMS | English: chars → SMS |
 |---|---|---|
-| বিপদে আছি / In danger | 196 → **3** | 203 → **2** |
-| কেউ পিছু নিয়েছে / Being followed | 200 → **3** | 210 → **2** |
+| বিপদে আছি / In danger | 192 → **3** | 203 → **2** |
+| কেউ পিছু নিয়েছে / Being followed | 184 → **3** | 210 → **2** |
 | দুর্ঘটনা / Accident | 183 → **3** | 188 → **2** |
 | অসুস্থ / Sick | 188 → **3** | 193 → **2** |
 | পথ হারিয়েছি / Lost | 179 → **3** | 180 → **2** |

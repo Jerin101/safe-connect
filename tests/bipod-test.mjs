@@ -39,7 +39,7 @@ test('parser: broken, cut-off, future and outside links', () => {
 test('SMS (bn): situation, area, police, call 999 first, link', () => {
   const link = helpLink(HATIYA, AT, 'followed');
   const sms = buildSms({ texts: texts('bn'), situation: LANG.bn.sits.followed[1], area: 'হাতিয়া, নোয়াখালী', police: '01320101478', link });
-  assert.equal(sms, `জরুরি! কেউ আমার পিছু নিয়েছে, আমি ভয় পাচ্ছি।\nএলাকা: হাতিয়া, নোয়াখালী\nআগে 999-এ কল করো। থানা: 01320101478\nলোকেশন: ${link}`);
+  assert.equal(sms, `জরুরি! কেউ আমার পিছু নিয়েছে।\nএলাকা: হাতিয়া, নোয়াখালী\nআগে 999-এ কল করো। থানা: 01320101478\nলোকেশন: ${link}`);
   assert.equal(smsParts(sms).unicode, true);
 });
 
@@ -131,4 +131,22 @@ test('new SMS texts: no-location asks for a message first; every Bangla message 
     const sms = buildSms({ texts: texts('bn'), situation: LANG.bn.sits[k][1], area: 'হাতিয়া, নোয়াখালী', police: '01320111137', link });
     assert.ok(smsParts(sms).parts <= 3, `${k}: ${smsParts(sms).length} chars`);
   }
+});
+
+test('every Bangla SMS fits in 3 parts: every upazila, every situation, with its real police number and label', async () => {
+  const { DISTRICTS, upazilas } = await import('../js/data.js');
+  const link = helpLink({ lat: 22.29580, lon: 91.10660 }, AT, 'followed');      // the longest link (5 decimals, 10-digit time, longest situation)
+  let n = 0;
+  for (const d of DISTRICTS) for (const u of upazilas(DATA.docs[d.key])) {
+    const g = areaContacts(DATA, { district: d.key, upazila: u.en, area: null }).find((x) => x.id === 'police');
+    const p = g && pickPolice(g.items);
+    const t = texts('bn');
+    if (p && !(p.thana && !g.fallback)) t.police = t.policeDistrict;
+    for (const k of Object.keys(LANG.bn.sits)) {
+      const sms = buildSms({ texts: t, situation: LANG.bn.sits[k][1], area: `${u.bn}, ${d.bn}`, police: p ? p.record.phones[0] : '', link });
+      assert.ok(smsParts(sms).parts <= 3, `${u.en} / ${k}: ${smsParts(sms).length} chars`);
+      n++;
+    }
+  }
+  assert.ok(n > 50, `only ${n} messages checked`);
 });
