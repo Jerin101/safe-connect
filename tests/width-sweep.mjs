@@ -108,6 +108,9 @@ for (const pg of PAGES) for (const lang of ['bn', 'en']) for (const signed of [f
   await ev(`localStorage.clear(); localStorage.setItem('sc-lang','${lang}'); localStorage.setItem('sc-welcomed','1');
     localStorage.setItem('sc-last', JSON.stringify({ district: 'noakhali', upazila: 'Begumganj', area: null }));
     ${signed ? "localStorage.setItem('sc-signed-in','1');" : ''} true`);
+  // A blank page first: from BASE to BASE#/... only the # part changes, the page would not reload and would keep
+  // the language and sign-in of the round before (tester, #146).
+  await page.send('Page.navigate', { url: 'about:blank' }); await wait(100);
   await page.send('Page.navigate', { url: BASE + pg }); await wait(300);
   // Wait until the page has drawn itself (page set, header texts filled), at most 15 s.
   for (let i = 0; i < 60; i++) {
