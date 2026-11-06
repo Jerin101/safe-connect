@@ -58,14 +58,17 @@ function itemLabel(h) {
   const p = { ...h.place };
   const named = h.named && (lang === 'bn' ? h.named.name_bn : h.named.name_en || h.named.name_bn);
   if (named) p.label = named;
-  const kindWord = (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
+  // A name the team added from local knowledge says so: "কাশেম বাজার (স্থানীয়ভাবে জানা নাম)" (#149); others show their type.
+  const teamName = h.kind === 'local' && /^local name, added by the team/.test(h.named?.source || '');
+  const kindWord = (teamName && t().kinds.known) || (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
   let title;
   if (h.kind === 'village') title = h.village;
   else if (named) title = named;
   else if (h.place.area) title = areaName(h.place.area);
   else title = upazilaName(p.district, p.upazila);
   if (h.kind === 'village') p.label = `${h.village} (${kindWord})`;
-  const where = (h.kind === 'village' || h.kind === 'local') && h.place.area ? `${areaName(h.place.area)}, ` : '';
+  const village = h.kind === 'local' && h.named?.village_bn ? `${h.named.village_bn}, ` : '';   // "ধর্মপুর, নিয়াজপুর ইউনিয়ন, …"
+  const where = (h.kind === 'village' || h.kind === 'local') && h.place.area ? `${village}${areaName(h.place.area)}, ` : '';
   const ward = h.ward ? ` · ${t().ward} ${digits(h.ward)}` : '';
   return { p, title: `${title} (${kindWord})`, sub: where + placeSub(p) + ward };
 }

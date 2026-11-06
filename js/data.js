@@ -258,7 +258,7 @@ export function areaIndex(data) {
       // A local name links to its union or town only when that was confirmed; otherwise to the whole upazila.
       const area = (a.municipality_bn && areaOf(a.upazila_en, 'municipality', a.municipality_bn))
         || (a.union_bn && areaOf(a.upazila_en, 'union', a.union_bn)) || null;
-      add({ kind: 'local', place: { district: d.key, upazila: a.upazila_en, area }, named: a }, [a.name_bn, a.name_en]);
+      add({ kind: 'local', place: { district: d.key, upazila: a.upazila_en, area }, named: a }, [a.name_bn, a.name_en, ...(a.also || [])]);   // other spellings too (#149)
     }
     const seen = new Set();
     const official = (data.villages || []).filter((v) => v.district === doc.district);
