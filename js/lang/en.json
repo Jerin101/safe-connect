@@ -302,7 +302,17 @@
       "offline": "No internet. Send again when you are online.",
       "invalid": "Please check the place name and the upazila.",
       "err": "Could not send. Please try again a little later."
-    }
+    },
+    "savedChip": "Saved: {n}",
+    "recentAgo": "Last area: {n} · {d}",
+    "today": "today",
+    "dayAgo": "{x} day ago",
+    "daysAgo": "{x} days ago",
+    "clearArea": "✕ Remove",
+    "clearAreaLabel": "Remove the last area",
+    "noArea": "Don't remember my area",
+    "areaCleared": "Last area removed.",
+    "elsewhere": "Nothing with this name in {c}. It is in these other places:"
   },
   "page": {
     "greet": {

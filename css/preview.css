@@ -182,6 +182,12 @@
   .ask-form { display: grid; gap: 10px; }
   .ask-form label { display: grid; gap: 4px; }
   .ask-form input, .ask-form select { min-height: 44px; }
+  /* saved area (#147): the previous area, a remove button, and the 'don't remember' setting */
+  .recent-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 10px; }
+  .recent-row .recent { margin: 0; }
+  .recent-clear { min-height: 44px; padding: 0 6px; }
+  .no-area { display: flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 4px; color: var(--muted); font-size: 0.92rem; cursor: pointer; }
+  .no-area input { width: 20px; height: 20px; flex: none; }
   .searchbar svg { width: 20px; height: 20px; flex: none; color: var(--muted); margin-left: 8px; }
   .searchbar input { flex: 1; min-width: 0; border: 0; background: none; padding: 10px 0; font-size: 1.05rem; outline: none; }
   .searchbar select { min-height: 44px; border: 0; border-radius: 9px; background: var(--accent); color: var(--accent-ink); padding: 10px 12px; font-weight: 700; font-size: 0.92rem; max-width: 44%; cursor: pointer; }
