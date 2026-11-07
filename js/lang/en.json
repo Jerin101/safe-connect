@@ -279,12 +279,12 @@
     "prepare": {
       "title": "Prepare ahead",
       "link": "Prepare ahead: turn on your phone's own SOS →",
-      "intro": "Most phones have their own Emergency SOS. When it is on, pressing a button a few times can send your location to your people, even without opening SafeConnect. Below are the official instructions of each company.",
+      "intro": "Most phones have their own Emergency SOS. When it is on, pressing a button a few times can send your location to your people, even without opening SafeConnect. On many phones this also calls the emergency number (999). Below are the official steps we found for each company.",
       "checkTitle": "Three things",
       "check": [
         "Turn on your phone's SOS (find your phone's company below).",
         "Save your people's numbers: in the phone's SOS and in SafeConnect.",
-        "Check once: see that the settings are right and tell your people."
+        "Check once: see that the settings are right, and tell your people."
       ],
       "warn": "Never test by calling 999 or by starting SOS. If an emergency call goes out by mistake, don't hang up: tell the operator it was a mistake.",
       "brandsTitle": "Your phone's company",
@@ -349,8 +349,8 @@
           "steps": []
         }
       },
-      "liveTitle": "Turn on live location in WhatsApp",
-      "liveWhy": "Our message sends your location once, at the moment you send it. WhatsApp and Google Maps keep sending it for the time you choose, even after you close SafeConnect.",
+      "liveTitle": "Turn on live location (WhatsApp or Google Maps)",
+      "liveWhy": "SafeConnect's message sends your location once, at the moment you send it. WhatsApp and Google Maps keep sending it for the time you choose, even after you close SafeConnect. This needs internet.",
       "liveOpen": "Open WhatsApp",
       "waTitle": "In WhatsApp",
       "waSteps": [

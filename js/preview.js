@@ -942,17 +942,17 @@ function sayText(place, pos, kind) {
 }
 // After a tap: when the messages app was last opened (we never know whether the SMS was sent).
 function markOpened() { sos.openedAt = Date.now(); renderOpened(); }
-function renderOpened() {
+function renderOpened(timer = false) {
   const b = t().bipod, n = minutesAgo(sos.openedAt);
   $('bipodAfter').hidden = !sos.openedAt;
   $('prepLink').textContent = t().prepare.link;
   if (!sos.openedAt) return;
-  renderLive();
+  if (!timer || !$('liveBody').contains(document.activeElement)) renderLive();   // the 30 s refresh must not take keyboard focus away
   $('bipodAgo').textContent = n ? fill(b.ago, { n: digits(n) }) : b.agoNow;
   $('bipodAgain').textContent = b.again;
   $('bipodSafe').textContent = sos.safe ? b.backToDanger : b.safe;
 }
-setInterval(() => { if (!$('sos').hidden && sos.openedAt) renderOpened(); }, 30000);
+setInterval(() => { if (!$('sos').hidden && sos.openedAt) renderOpened(true); }, 30000);
 function renderPeople() {
   const people = getPeople();
   $('peopleCount').textContent = digits(people.length);
@@ -1052,9 +1052,11 @@ function showHelp(arg) {
 $('helpBack').addEventListener('click', goHome);
 
 /* ---------- আগে থেকে প্রস্তুতি (#/prepare, #161): official help pages only, never a guessed menu ---------- */
-function showPrepare() {
+function showPrepare() { showView('prepare'); renderPrepare(); }
+// Also on a language change: same scroll position, the open brand cards stay open.
+function renderPrepare() {
   const p = t().prepare;
-  showView('prepare');
+  const open = new Set([...$('prepBrands').querySelectorAll('details[open]')].map((d) => d.dataset.brand));
   $('prepBack').textContent = t().back; $('prepTitle').textContent = p.title; $('prepIntro').textContent = p.intro;
   $('prepCheckTitle').textContent = p.checkTitle;
   $('prepCheck').replaceChildren(...p.check.map((x) => el('li', null, x)));
@@ -1064,6 +1066,7 @@ function showPrepare() {
   $('prepBrands').replaceChildren(...BRANDS.map((b) => {
     const text = p.brands[b.key];
     const card = el('details', 'cat prep-brand');
+    card.dataset.brand = b.key; card.open = open.has(b.key);
     card.append(el('summary', null, text.name));
     const body = el('div', 'cat-body');
     if (b.url && !b.unread) {
@@ -1089,10 +1092,14 @@ function renderLive() {
   const p = t().prepare, people = getPeople();
   $('liveTitle').textContent = p.liveTitle;
   const body = $('liveBody');
-  const wa = appButton(p.liveOpen, people.length ? `whatsapp://send?phone=88${people[0].phone}` : 'whatsapp://send', () => ifAppDidNotOpen(() => sendNote(t().waFailed)));
+  // "WhatsApp did not open" shows here in the box, where the person tapped (not in #sendNote far below)
+  const note = el('p', 'msg', sos.liveFailed ? t().waFailed : '');
+  note.hidden = !sos.liveFailed;
+  const wa = appButton(p.liveOpen, people.length ? `whatsapp://send?phone=88${people[0].phone}` : 'whatsapp://send',
+    () => ifAppDidNotOpen(() => { sos.liveFailed = true; note.textContent = t().waFailed; note.hidden = false; }));
   const steps = (list) => { const ol = el('ol'); ol.append(...list.map((x) => el('li', null, x))); return ol; };
   const src = (label, url) => { const s = el('p', 'src'); const a = el('a', null, `${label} ↗`); a.href = url; a.target = '_blank'; a.rel = 'noopener'; s.append(a, ` · ${t().checked} ${fmtDate(CHECKED)}`); return s; };
-  body.replaceChildren(el('p', null, p.liveWhy), wa, el('h3', null, p.waTitle), steps(p.waSteps), src(p.official, LIVE.whatsapp),
+  body.replaceChildren(el('p', null, p.liveWhy), wa, note, el('h3', null, p.waTitle), steps(p.waSteps), src(p.official, LIVE.whatsapp),
     el('h3', null, p.mapsTitle), steps(p.mapsSteps), src(p.official, LIVE.maps));
 }
 $('addForm').addEventListener('submit', (e) => {
@@ -1499,7 +1506,8 @@ $('langBtn').addEventListener('click', () => {
   if (!$('demo').hidden) showDemo();
   if (data) { renderRecent(); renderSuggest(); renderStats(); renderPlaces(); if (current) renderArea(); }
   if (!$('help').hidden) showHelp(readHash()[1]);
-  if (!$('sos').hidden) { renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
+  if (!$('prepare').hidden) renderPrepare();
+  if (!$('sos').hidden) { renderOpened(); renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
   auth.setText();
   setTitle();
 });
