@@ -76,7 +76,8 @@
       "local": "local name",
       "market and post office": "market and post office",
       "market": "market",
-      "post office": "post office"
+      "post office": "post office",
+      "known": "known locally"
     },
     "recent": "Last area: {n}",
     "denied": "Location is not allowed. Turn on location in your phone settings, or type your area below.",
@@ -267,6 +268,8 @@
       "helpPrivacy": "This page reads the location only from the link; nothing is saved anywhere.",
       "followedWarn": "Text before you call; a ringing phone can make it worse. Call 999 directly."
     },
+    "notFoundBut": "Didn't find {n}, but found {c}.",
+    "openContext": "See the numbers for {c}",
     "savedChip": "Saved: {n}",
     "recentAgo": "Last area: {n} · {d}",
     "today": "today",
@@ -276,6 +279,7 @@
     "clearAreaLabel": "Remove the last area",
     "noArea": "Don't remember my area",
     "areaCleared": "Last area removed.",
+    "elsewhere": "Nothing with this name in {c}. It is in these other places:",
     "prepare": {
       "title": "Prepare ahead",
       "link": "Prepare ahead: turn on your phone's own SOS →",
