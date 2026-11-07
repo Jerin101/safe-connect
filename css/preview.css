@@ -468,6 +468,15 @@
 .say999 .say { font-size: 1.25rem; line-height: 1.6; font-weight: 700; margin: 0; overflow-wrap: anywhere; }
 .check { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
 .check input { width: 22px; height: 22px; flex: none; }
+/* prepare page and live location (#161) */
+.prep-check { display: grid; gap: 6px; padding-left: 1.2rem; margin: 0; }
+.prep-brands { display: grid; gap: 8px; }
+.prep-brand ol, .live-body ol { display: grid; gap: 4px; padding-left: 1.2rem; margin: 0 0 8px; }
+.prep-link { display: inline-block; min-height: 44px; padding: 10px 0; }
+.live { margin-top: 8px; }
+.live summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 700; }
+.live-body { display: grid; gap: 8px; }
+.live-body h3 { margin: 6px 0 0; font-size: 1rem; }
 .help-warn { margin: 0 0 12px; padding: 12px 14px; border-radius: 12px; background: var(--danger-soft); color: var(--red-ink); font-weight: 700; font-size: 1.1rem; line-height: 1.5; }
 .help-age { font-weight: 700; font-size: 1.1rem; margin: 0 0 12px; }
 .help-age.old { color: var(--warn); }

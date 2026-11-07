@@ -257,7 +257,10 @@
       <div class="bipod-after" id="bipodAfter" role="status" aria-live="polite" hidden>
         <p id="bipodAgo"></p>
         <div class="tools"><button class="btn" id="bipodAgain" type="button"></button><button class="btn" id="bipodSafe" type="button"></button></div>
+        <!-- live location in WhatsApp or Google Maps (#161): they keep sending; our page sends the location once -->
+        <details class="live" id="liveBox"><summary id="liveTitle"></summary><div class="live-body" id="liveBody"></div></details>
       </div>
+      <a class="linkbtn prep-link" id="prepLink" href="#/prepare"></a>
     </section>
     <section class="panel glass" aria-labelledby="sitTitle">
       <h2 id="sitTitle"></h2>
@@ -335,6 +338,19 @@
       <div class="help-steps" id="helpBadLinks"></div>
     </section>
     <p class="privacy" id="helpPrivacy"></p>
+  </div>
+
+  <!-- PREPARE (#/prepare, issue #161): the phone's own Emergency SOS, from each company's official help page only. -->
+  <div class="wrap page" id="prepare" hidden>
+    <div class="page-top">
+      <button class="back" id="prepBack" type="button"></button>
+      <h1 class="page-title" id="prepTitle" tabindex="-1"></h1>
+    </div>
+    <p id="prepIntro"></p>
+    <section class="panel glass" aria-labelledby="prepCheckTitle"><h2 id="prepCheckTitle"></h2><ul class="prep-check" id="prepCheck"></ul></section>
+    <p class="help-warn" id="prepWarn" role="note"></p>
+    <section class="panel glass" aria-labelledby="prepBrandsTitle"><h2 id="prepBrandsTitle"></h2><div class="prep-brands" id="prepBrands"></div></section>
+    <p class="privacy" id="prepNote"></p>
   </div>
 
   <!-- ACCOUNT PAGE (#/account, issue #73): opening the address never loads Firebase; a tap on the button does. -->
