@@ -39,7 +39,7 @@ test('parser: broken, cut-off, future and outside links', () => {
 test('SMS (bn): situation, area, police, call 999 first, link', () => {
   const link = helpLink(HATIYA, AT, 'followed');
   const sms = buildSms({ texts: texts('bn'), situation: LANG.bn.sits.followed[1], area: 'হাতিয়া, নোয়াখালী', police: '01320101478', link });
-  assert.equal(sms, `জরুরি! কেউ আমার পিছু নিয়েছে, আমি ভয় পাচ্ছি।\nএলাকা: হাতিয়া, নোয়াখালী\nআগে 999-এ কল করো। থানা: 01320101478\nলোকেশন: ${link}`);
+  assert.equal(sms, `জরুরি! কেউ আমার পিছু নিয়েছে।\nএলাকা: হাতিয়া, নোয়াখালী\nআগে 999-এ কল করো। থানা: 01320101478\nলোকেশন: ${link}`);
   assert.equal(smsParts(sms).unicode, true);
 });
 
@@ -84,4 +84,69 @@ test('every situation has a short and a full text in both languages', () => {
     assert.equal(LANG[l].sits[k].length, 2);
     assert.ok(LANG[l].sits[k].every(Boolean));
   }
+});
+
+// Police number for the SMS (#143), on the real data: the thana's officer-in-charge, never an outpost.
+import { loadAll, localAreas, areaContacts } from '../js/data.js';
+import { pickPolice } from '../js/bipod.js';
+const realFetch = globalThis.fetch;
+globalThis.fetch = async (url) => { try { return { ok: true, json: async () => JSON.parse(readFileSync(url, 'utf8')) }; } catch { return { ok: false, status: 404 }; } };
+const DATA = await loadAll('data/');
+globalThis.fetch = realFetch;
+const police = (district, upazila, areaBn = null) => {
+  const doc = DATA.docs[district];
+  const area = areaBn ? localAreas(doc, upazila).find((a) => a.bn.includes(areaBn)) : null;
+  const g = areaContacts(DATA, { district, upazila, area }).find((x) => x.id === 'police');
+  return { g, p: pickPolice(g.items) };
+};
+
+test('SMS police: Begumganj gives the thana OC, also in Chowmuhani where an outpost is listed first', () => {
+  const whole = police('noakhali', 'Begumganj');
+  assert.equal(whole.p.thana, true);
+  assert.match(whole.p.record.designation_bn, /অফিসার ইনচার্জ/);
+  assert.equal(whole.p.record.phones[0], '01320111008');
+  const town = police('noakhali', 'Begumganj', 'চৌমুহনী');
+  assert.notEqual(town.g.items[0].phones[0], '01320111008', 'the outpost should be first in the list, or this test proves nothing');
+  assert.equal(town.p.record.phones[0], '01320111008');
+});
+
+test('SMS police: Hatiya and Ukhia give the thana OC; Cox\'s Bazar Sadar has none, so "পুলিশ:"', () => {
+  assert.deepEqual([police('noakhali', 'Hatiya').p.thana, police('noakhali', 'Hatiya').p.record.phones[0]], [true, '01320111137']);
+  assert.equal(police('coxsbazar', 'Ukhia').p.thana, true);
+  const sadar = police('coxsbazar', "Cox's Bazar Sadar");
+  assert.equal(sadar.p.thana, false);
+  assert.equal(sadar.p.record, sadar.g.items[0]);
+});
+
+test('pickPolice: empty or national-only lists give null', () => {
+  assert.equal(pickPolice([]), null);
+  assert.equal(pickPolice([{ kind: 'national', phones: ['999'] }]), null);
+});
+
+test('new SMS texts: no-location asks for a message first; every Bangla message with a link fits in 3 SMS', () => {
+  assert.equal(LANG.bn.noLoc, 'আমার লোকেশন পাওয়া যায়নি। আমাকে মেসেজ করো, উত্তর না পেলে 999-এ কল করো।');
+  assert.equal(LANG.en.noLoc, "I could not get my location. Text me; if I don't answer, call 999.");
+  const link = helpLink(HATIYA, AT, 'followed');
+  for (const k of Object.keys(LANG.bn.sits)) {
+    const sms = buildSms({ texts: texts('bn'), situation: LANG.bn.sits[k][1], area: 'হাতিয়া, নোয়াখালী', police: '01320111137', link });
+    assert.ok(smsParts(sms).parts <= 3, `${k}: ${smsParts(sms).length} chars`);
+  }
+});
+
+test('every Bangla SMS fits in 3 parts: every upazila, every situation, with its real police number and label', async () => {
+  const { DISTRICTS, upazilas } = await import('../js/data.js');
+  const link = helpLink({ lat: 22.29580, lon: 91.10660 }, AT, 'followed');      // the longest link (5 decimals, 10-digit time, longest situation)
+  let n = 0;
+  for (const d of DISTRICTS) for (const u of upazilas(DATA.docs[d.key])) {
+    const g = areaContacts(DATA, { district: d.key, upazila: u.en, area: null }).find((x) => x.id === 'police');
+    const p = g && pickPolice(g.items);
+    const t = texts('bn');
+    if (p && !(p.thana && !g.fallback)) t.police = t.policeDistrict;
+    for (const k of Object.keys(LANG.bn.sits)) {
+      const sms = buildSms({ texts: t, situation: LANG.bn.sits[k][1], area: `${u.bn}, ${d.bn}`, police: p ? p.record.phones[0] : '', link });
+      assert.ok(smsParts(sms).parts <= 3, `${u.en} / ${k}: ${smsParts(sms).length} chars`);
+      n++;
+    }
+  }
+  assert.ok(n > 50, `only ${n} messages checked`);
 });
