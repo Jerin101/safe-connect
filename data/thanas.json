@@ -47,7 +47,7 @@
    "name_en": null,
    "district": "Noakhali",
    "upazila_en": "Subarnachar",
-   "proof": "statement",
+   "proof": "portal",
    "source_url": "https://noakhali.police.gov.bd/content/143.html",
    "source_quote_bn": "চরজব্বর থানা … সুবর্ণচর উপজেলায় ৮টি ইউনিয়ন রয়েছে। সম্পূর্ণ উপজেলার প্রশাসনিক কার্যক্রম সুবর্ণচর থানার আওতাধীন।",
    "checked_on": "2026-11-06"
@@ -133,7 +133,7 @@
    "checked_on": "2026-11-06"
   },
   {
-   "name_bn": "টেকনাফ থানা",
+   "name_bn": "টেকনাফ মডেল থানা",
    "name_en": null,
    "district": "Cox's Bazar",
    "upazila_en": "Teknaf",
