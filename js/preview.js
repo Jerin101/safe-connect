@@ -6,6 +6,7 @@ import { createAutoLoc } from './autoloc.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS } from './reports.js';
 import { helpLink, parseHelp, buildSms, smsParts, minutesAgo, pickPolice } from './bipod.js';
+import { BRANDS, LIVE, CHECKED } from './prepare.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -323,7 +324,7 @@ function renderArea() {
 /* ---------- views ---------- */
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see index.html).
 function showView(name) {
-  for (const view of ['home', 'area', 'sos', 'help', 'acct', 'ws']) $(view).hidden = name !== view;
+  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws']) $(view).hidden = name !== view;
   // One sidebar for home and the area page (#108): it moves with the view; CSS shows it only on wide screens.
   const rail = $('rail');
   // After the content (999 first for keyboards and screen readers); CSS puts it on the left.
@@ -384,7 +385,7 @@ function goHome() {
 // #/ home · #/numbers · #/area (search) · #/area/<district>/<upazila>[/<union or town>[/<place id>]] · #/send
 // #/guide · #/about · #/faq · #/account · #/help/<lat>,<lng>,<time>[,<situation>] (বিপদ বার্তা, #134). Anything else opens home. The home sections carry data-pages="..."
 // in index.html: each page shows the sections that list its name, so no content or id is copied.
-const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help'];
+const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare'];
 const HEADING = { home: 'hello', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
 let firstRoute = true;       // the first page after loading does not move focus
@@ -476,6 +477,12 @@ async function route() {
     $('main').dataset.page = 'send';
     showSos(intent?.pos || null, Boolean(intent?.ask));
     finish('send', titleOf('send'), 'sosTitle', intent);
+    return;
+  }
+  if (name === 'prepare') {
+    $('main').dataset.page = 'prepare';
+    showPrepare();
+    finish(null, titleOf('prepare'), 'prepTitle', intent);
     return;
   }
   if (name === 'help') {
@@ -987,7 +994,9 @@ function markOpened() { sos.openedAt = Date.now(); renderOpened(); }
 function renderOpened() {
   const b = t().bipod, n = minutesAgo(sos.openedAt);
   $('bipodAfter').hidden = !sos.openedAt;
+  $('prepLink').textContent = t().prepare.link;
   if (!sos.openedAt) return;
+  renderLive();
   $('bipodAgo').textContent = n ? fill(b.ago, { n: digits(n) }) : b.agoNow;
   $('bipodAgain').textContent = b.again;
   $('bipodSafe').textContent = sos.safe ? b.backToDanger : b.safe;
@@ -1090,6 +1099,51 @@ function showHelp(arg) {
   if (place.outside) { const more = el('a', 'btn', b.national); more.href = '#/numbers'; $('helpSteps').append(more); }
 }
 $('helpBack').addEventListener('click', goHome);
+
+/* ---------- আগে থেকে প্রস্তুতি (#/prepare, #161): official help pages only, never a guessed menu ---------- */
+function showPrepare() {
+  const p = t().prepare;
+  showView('prepare');
+  $('prepBack').textContent = t().back; $('prepTitle').textContent = p.title; $('prepIntro').textContent = p.intro;
+  $('prepCheckTitle').textContent = p.checkTitle;
+  $('prepCheck').replaceChildren(...p.check.map((x) => el('li', null, x)));
+  $('prepWarn').textContent = p.warn;
+  $('prepBrandsTitle').textContent = p.brandsTitle;
+  const when = fmtDate(CHECKED);
+  $('prepBrands').replaceChildren(...BRANDS.map((b) => {
+    const text = p.brands[b.key];
+    const card = el('details', 'cat prep-brand');
+    card.append(el('summary', null, text.name));
+    const body = el('div', 'cat-body');
+    if (b.url && !b.unread) {
+      const ol = el('ol'); ol.append(...text.steps.map((x) => el('li', null, x)));
+      body.append(ol);
+      if (text.note) body.append(el('p', 'privacy', text.note));
+    } else body.append(el('p', 'msg plain', b.url ? p.unread : p.none));
+    if (b.url) {
+      const src = el('p', 'src');
+      const a = el('a', null, `${p.official} ↗`); a.href = b.url; a.target = '_blank'; a.rel = 'noopener';
+      src.append(a, ` · ${t().checked} ${when}`);
+      body.append(src);
+    }
+    card.append(body);
+    return card;
+  }));
+  $('prepNote').textContent = p.note;
+}
+$('prepBack').addEventListener('click', () => history.length > 1 ? history.back() : goHome());
+
+// After sending (#161): live location in WhatsApp (first) or Google Maps (second), with their official steps.
+function renderLive() {
+  const p = t().prepare, people = getPeople();
+  $('liveTitle').textContent = p.liveTitle;
+  const body = $('liveBody');
+  const wa = appButton(p.liveOpen, people.length ? `whatsapp://send?phone=88${people[0].phone}` : 'whatsapp://send', () => ifAppDidNotOpen(() => sendNote(t().waFailed)));
+  const steps = (list) => { const ol = el('ol'); ol.append(...list.map((x) => el('li', null, x))); return ol; };
+  const src = (label, url) => { const s = el('p', 'src'); const a = el('a', null, `${label} ↗`); a.href = url; a.target = '_blank'; a.rel = 'noopener'; s.append(a, ` · ${t().checked} ${fmtDate(CHECKED)}`); return s; };
+  body.replaceChildren(el('p', null, p.liveWhy), wa, el('h3', null, p.waTitle), steps(p.waSteps), src(p.official, LIVE.whatsapp),
+    el('h3', null, p.mapsTitle), steps(p.mapsSteps), src(p.official, LIVE.maps));
+}
 $('addForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const err = $('formErr');
