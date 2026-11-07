@@ -1093,10 +1093,13 @@ function renderLive() {
   $('liveTitle').textContent = p.liveTitle;
   const body = $('liveBody');
   // "WhatsApp did not open" shows here in the box, where the person tapped (not in #sendNote far below)
-  const note = el('p', 'msg', sos.liveFailed ? t().waFailed : '');
+  const note = el('p', 'msg', sos.liveFailed ? p.liveFailed : '');
   note.hidden = !sos.liveFailed;
   const wa = appButton(p.liveOpen, people.length ? `whatsapp://send?phone=88${people[0].phone}` : 'whatsapp://send',
-    () => ifAppDidNotOpen(() => { sos.liveFailed = true; note.textContent = t().waFailed; note.hidden = false; }));
+    () => {   // a new tap clears the old note; the note element may have been redrawn meanwhile, so look it up again
+      sos.liveFailed = false; note.hidden = true;
+      ifAppDidNotOpen(() => { sos.liveFailed = true; const n = $('liveBody').querySelector('p.msg'); if (n) { n.textContent = t().prepare.liveFailed; n.hidden = false; } });
+    });
   const steps = (list) => { const ol = el('ol'); ol.append(...list.map((x) => el('li', null, x))); return ol; };
   const src = (label, url) => { const s = el('p', 'src'); const a = el('a', null, `${label} ↗`); a.href = url; a.target = '_blank'; a.rel = 'noopener'; s.append(a, ` · ${t().checked} ${fmtDate(CHECKED)}`); return s; };
   body.replaceChildren(el('p', null, p.liveWhy), wa, note, el('h3', null, p.waTitle), steps(p.waSteps), src(p.official, LIVE.whatsapp),

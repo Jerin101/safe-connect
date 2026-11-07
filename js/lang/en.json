@@ -279,7 +279,7 @@
     "prepare": {
       "title": "Prepare ahead",
       "link": "Prepare ahead: turn on your phone's own SOS →",
-      "intro": "Most phones have their own Emergency SOS. When it is on, pressing a button a few times can send your location to your people, even without opening SafeConnect. On many phones this also calls the emergency number (999). Below are the official steps we found for each company.",
+      "intro": "Most phones have their own Emergency SOS. When it is on, pressing a button a few times can send your location to your people, even without opening SafeConnect. On many phones this also calls the emergency number (999). Below are the official steps for the companies where we found them.",
       "checkTitle": "Three things",
       "check": [
         "Turn on your phone's SOS (find your phone's company below).",
@@ -323,7 +323,7 @@
           "name": "Xiaomi / Redmi",
           "steps": [
             "Open Settings > Safety & emergency > Emergency SOS.",
-            "Turn on “Share info with emergency contacts”: your location is shared in an emergency.",
+            "Turn on “Share info with emergency contacts”: your location is shared when SOS starts.",
             "Pressing the power button quickly five times or more starts SOS."
           ],
           "note": "Xiaomi's official page does not say how to add emergency contacts."
@@ -363,7 +363,8 @@
         "Open Google Maps and tap your profile picture.",
         "Tap Location sharing > New share.",
         "Choose the time and the people, then tap Share."
-      ]
+      ],
+      "liveFailed": "WhatsApp did not open. You can share live location with Google Maps instead (steps below)."
     }
   },
   "page": {
