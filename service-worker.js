@@ -16,6 +16,7 @@ const FILES = [
   'manifest.json',
   'js/preview.js',
   'js/bipod.js',
+  'js/prepare.js',
   'js/data.js',
   'js/location.js',
   'js/autoloc.js',
