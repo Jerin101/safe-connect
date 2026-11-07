@@ -3,6 +3,7 @@
 // through tools/ and a pull request (CLAUDE.md rule 1).
 // The top part has no browser code, so tests/rules/firestore.rules.test.mjs can check the exact documents.
 export const PROBLEMS = ['off', 'other_person', 'changed', 'other'];
+export const MISSING = 'missing_place';   // "জায়গাটা যোগ করতে বলুন" (#159)
 export const STATUSES = ['open', 'review', 'fixed', 'same'];
 export const REPORT_DISTRICTS = ['noakhali', 'coxsbazar'];
 export const NOTE_MAX = 300;   // the rules allow 500; 300 keeps Bangla notes well inside it
@@ -28,6 +29,16 @@ export function reportFields(uid, draft) {
   const note = cut(draft.note, NOTE_MAX);
   if (hasPhone(note)) return null;
   if (note) d.note = note;
+  return d;
+}
+// A request to add a place the search did not know (#159): the name the person typed, the upazila (an upazila_en
+// from our data) and, if known, the union. No record and no phone number; same limits as every report.
+export function missingFields(uid, draft) {
+  if (!uid || !draft || !REPORT_DISTRICTS.includes(draft.district)) return null;
+  const place = cut(draft.place, AREA_MAX), upazila = cut(draft.upazila, 60), union = cut(draft.union, AREA_MAX);
+  if ([...place].length < 2 || [...upazila].length < 2 || hasPhone(place) || hasPhone(union)) return null;
+  const d = { uid, recordId: 'missing-place', district: draft.district, problem: MISSING, status: 'open', place, upazila };
+  if (union) d.union = union;
   return d;
 }
 // The audit entry that must be written in the same batch as an admin's status change (js/firebase.js adds "at").
@@ -224,5 +235,20 @@ export function initReports(helpers) {
       $('repTitle').focus();
     },
     setText() { if (dlg().open) render(); },
+    // "জায়গাটা যোগ করতে বলুন" (#159): sign in if needed (Firebase loads only after this tap), then one request with the
+    // same limits as reports. done(code): 'sent' | 'verify' | 'limitWait' | 'limitDay' | 'invalid' | 'err' | 'cancel'.
+    askPlace(draft, from, done) {
+      if (!navigator.onLine) { done('offline'); return; }
+      ctx.withUser(from, async ({ fb, user }) => {
+        const fields = missingFields(user.uid, draft);
+        if (!fields) { done('invalid'); return; }
+        try {
+          if (!(await fb.isVerified())) { done('verify'); return; }
+          await fb.sendReport(fields);
+          ctx.reportSent();
+          done('sent');
+        } catch (e) { done(e && e.code === 'limit-wait' ? 'limitWait' : e && e.code === 'limit-day' ? 'limitDay' : 'err'); }
+      }, () => done('cancel'));
+    },
   };
 }

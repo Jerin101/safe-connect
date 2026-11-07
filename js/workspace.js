@@ -362,7 +362,8 @@ function reportRow(r) {
   const ic = ctx.el('span', 'avatar'); ic.append(icon(ICON.reports));
   const txt = ctx.el('div');
   const when = r.createdAt ? ctx.fill(W().sentOn, { date: ctx.fmtDate(r.createdAt) }) : '';
-  txt.append(ctx.el('b', null, rec ? recordName(rec) : (r.area || r.recordId)),
+  // a missing-place request (#159) names the place the person asked for
+  txt.append(ctx.el('b', null, rec ? recordName(rec) : r.place ? `${r.place} · ${r.upazila}${r.union ? `, ${r.union}` : ''}` : (r.area || r.recordId)),
     ctx.el('small', null, [rec ? r.area : '', R().problems[r.problem] || '', when].filter(Boolean).join(' · ')));
   const end = ctx.el('span', 'end'); end.append(statusTag(r.status));
   row.append(ic, txt, end);

@@ -4,7 +4,7 @@ import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex
 import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
 import { createAutoLoc } from './autoloc.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
-import { REPORT_DISTRICTS } from './reports.js';
+import { REPORT_DISTRICTS, hasPhone } from './reports.js';
 import { helpLink, parseHelp, buildSms, smsParts, minutesAgo, pickPolice } from './bipod.js';
 import { BRANDS, LIVE, CHECKED } from './prepare.js';
 
@@ -59,16 +59,47 @@ function itemLabel(h) {
   const p = { ...h.place };
   const named = h.named && (lang === 'bn' ? h.named.name_bn : h.named.name_en || h.named.name_bn);
   if (named) p.label = named;
-  const kindWord = (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
+  // A name the team added from local knowledge says so: "কাশেম বাজার (স্থানীয়ভাবে জানা নাম)" (#149); others show their type.
+  const teamName = h.kind === 'local' && /^local name, added by the team/.test(h.named?.source || '');
+  const kindWord = (teamName && t().kinds.known) || (h.kind === 'thana' && fill(t().kinds.thanaOf, { u: upazilaName(p.district, p.upazila) }))   // "সুধারাম মডেল থানা (নোয়াখালী সদর উপজেলা)" (#153)
+    || (h.kind === 'landmark' && t().kinds[`lm_${h.named?.type}`])                       // "… উচ্চ বিদ্যালয় (বিদ্যালয়)" (#157)
+    || (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
   let title;
   if (h.kind === 'village') title = h.village;
   else if (named) title = named;
   else if (h.place.area) title = areaName(h.place.area);
   else title = upazilaName(p.district, p.upazila);
   if (h.kind === 'village') p.label = `${h.village} (${kindWord})`;
-  const where = (h.kind === 'village' || h.kind === 'local') && h.place.area ? `${areaName(h.place.area)}, ` : '';
+  // The village is known only in Bangla; English leaves it out rather than mixing scripts (#149).
+  // The full address (#155): village · union or town · upazila (thana) · district; each part only once.
+  const parts = [];
+  if (h.kind === 'local' && h.named?.village_bn && lang === 'bn') parts.push(h.named.village_bn);   // the village is known only in Bangla
+  if ((h.kind === 'village' || h.kind === 'local' || h.kind === 'place' || h.kind === 'landmark') && h.place.area) {
+    // named places keep only the Bangla union name: the full entry has the English one too
+    const full = localAreas(data.docs[p.district], p.upazila).find((x) => x.type === h.place.area.type && x.bn === norm(h.place.area.bn));
+    parts.push(areaName(full || h.place.area));
+  }
+  if (h.place.area || h.kind === 'village' || h.kind === 'local' || h.kind === 'landmark') {
+    const th = thanaOf(p.district, p.upazila);
+    parts.push(th ? `${upazilaName(p.district, p.upazila)} (${th})` : upazilaName(p.district, p.upazila));
+  } else if (h.kind === 'upazila') {
+    const th = thanaOf(p.district, p.upazila);
+    if (th) parts.push(th);
+  }
+  const d = districtOf(p.district);
+  parts.push(lang === 'bn' ? d.bn : d.en);
   const ward = h.ward ? ` · ${t().ward} ${digits(h.ward)}` : '';
-  return { p, title: `${title} (${kindWord})`, sub: where + placeSub(p) + ward };
+  return { p, title: `${title} (${kindWord})`, sub: parts.join(', ') + ward };
+}
+// The upazila's thana, only when the official list (data/thanas.json) gives it exactly one thana with another name
+// (সুধারাম মডেল থানা for Noakhali Sadar). Bangla only: there are no official English thana names (#155).
+function thanaOf(dkey, upazilaEn) {
+  if (lang !== 'bn' || !data?.thanas) return '';
+  const dn = districtOf(dkey)?.en;
+  const list = data.thanas.filter((x) => x.district === dn && x.upazila_en === upazilaEn);
+  if (list.length !== 1) return '';
+  const core = (n) => norm(n).replace(/\s*(মডেল\s*)?থানা$/, '').replace(/\s*সদর$/, '');
+  return core(list[0].name_bn) === core(upazilaName(dkey, upazilaEn)) ? '' : norm(list[0].name_bn);
 }
 function suggestButton(h) {
   const li = el('li');
@@ -84,33 +115,139 @@ function renderSuggest() {
   const box = $('suggest');
   if (norm(q).length < 2) { box.hidden = true; return; }
   const only = $('distSel').value;
-  const { hits, close } = findAreas(areaIndex, q, { district: only });
-  if (hits.length) { box.replaceChildren(...hits.map(suggestButton)); box.hidden = false; return; }
-  // Never a dead end: similar names, then the upazila list, then GPS and 999.
-  const s = t();
-  const parts = [el('li', 'none', close.length ? s.noExact : s.noMatch)];
-  if (close.length) { parts.push(el('li', 'group', s.didYouMean)); close.forEach((h) => parts.push(suggestButton(h))); }
-  const ups = el('li', 'fallback-box');
-  ups.append(el('p', null, s.pickUpazila));
-  const chips = el('div', 'chips');
-  for (const d of DISTRICTS) {
-    if (only && d.key !== only) continue;
-    const doc = data.docs[d.key]; if (!doc) continue;
-    for (const u of upazilas(doc)) {
-      const c = el('button', 'chip', lang === 'bn' ? u.bn : u.en); c.type = 'button';
-      c.addEventListener('click', () => openArea({ district: d.key, upazila: u.en, area: null }, null));
-      chips.append(c);
-    }
+  const { hits, close, context, missing, elsewhere } = findAreas(areaIndex, q, { district: only });
+  const areaLabel = (c) => (c.kind === 'district' ? (lang === 'bn' ? districtOf(c.place.district).bn : districtOf(c.place.district).en)
+    : c.place.area ? `${areaName(c.place.area)}, ${upazilaName(c.place.district, c.place.upazila)}` : upazilaName(c.place.district, c.place.upazila));
+  if (hits.length) {
+    // not in the area the person named: say so, then the places of that name elsewhere (#151 review)
+    const note = elsewhere ? [el('li', 'none', fill(t().elsewhere, { c: areaLabel(elsewhere) }))] : [];
+    box.replaceChildren(...note, ...hits.map(suggestButton)); box.hidden = false; return;
   }
-  ups.append(chips);
-  const row = el('div', 'tools');
-  const gps = el('button', 'btn violet', s.locate); gps.type = 'button'; gps.addEventListener('click', locate);
+  // Never a dead end: the area the person named (#151), similar names, then the upazila list, then GPS and 999.
+  const s = t();
+  const parts = [];
+  if (context) {
+    const name = areaLabel(context);
+    parts.push(el('li', 'none', fill(s.notFoundBut, { n: missing, c: name })));
+    if (context.kind !== 'district') {
+      const li = el('li');
+      const go = el('button', 'btn violet ctx-open', fill(s.openContext, { c: name })); go.type = 'button';
+      go.addEventListener('click', () => openArea({ ...context.place }, null));
+      li.append(go); parts.push(li);
+    }
+  } else parts.push(el('li', 'none', close.length ? s.noExact : s.noMatch));
+  // When nothing matches (#159): 1) location works for every village, 2) step by step, 3) ask us to add the place.
+  const big = el('li', 'fallback-box');
+  const gps = el('button', 'btn violet big-locate'); gps.type = 'button'; gps.id = 'bigLocate';
+  gps.append(el('b', null, s.locateBig), el('small', null, s.locateBigSub));
+  gps.addEventListener('click', locate);
+  big.append(gps); parts.push(big);
+  if (close.length) { parts.push(el('li', 'group', s.didYouMean)); close.forEach((h) => parts.push(suggestButton(h))); }
+  const pick = only || (context ? context.place.district : '');   // a named district shows only its upazilas
+  parts.push(stepPicker(pick, context));
+  parts.push(askBox(q, pick, context));
+  const end = el('li', 'fallback-box');
   const call = el('a', 'btn', s.call999); call.href = 'tel:999';
-  row.append(gps, call);
-  ups.append(row, el('p', 'privacy', s.tellUs));
-  parts.push(ups);
+  const row = el('div', 'tools'); row.append(call);
+  end.append(row, el('p', 'privacy', s.tellUs));
+  parts.push(end);
+  const keep = box.contains(document.activeElement) ? document.activeElement.id : '';
   box.replaceChildren(...parts);
   box.hidden = false;
+  if (keep && $(keep)) $(keep).focus({ preventScroll: true });
+}
+// Step by step (#159): upazila or thana, then the union, each with a few of its village and bazar names.
+let pickUp = null;        // { district, upazila } chosen in the step picker
+function stepPicker(only, context) {
+  const s = t(), li = el('li', 'fallback-box step-pick');
+  if (pickUp && only && pickUp.district !== only) pickUp = null;
+  if (!pickUp) {
+    li.append(el('p', null, s.stepTitle));
+    const chips = el('div', 'chips');
+    for (const d of DISTRICTS) {
+      if (only && d.key !== only) continue;
+      const doc = data.docs[d.key]; if (!doc) continue;
+      for (const u of upazilas(doc)) {
+        const th = thanaOf(d.key, u.en);
+        const c = el('button', 'chip', th ? `${upazilaName(d.key, u.en)} (${th})` : upazilaName(d.key, u.en)); c.type = 'button';
+        c.id = `pick-${d.key}-${slug(u.en)}`;
+        c.addEventListener('click', () => { pickUp = { district: d.key, upazila: u.en }; renderSuggest(); $('pickBack')?.focus({ preventScroll: true }); });
+        chips.append(c);
+      }
+    }
+    li.append(chips);
+    return li;
+  }
+  const { district, upazila } = pickUp;
+  const back = el('button', 'linkbtn', `← ${s.stepBack}`); back.type = 'button'; back.id = 'pickBack';
+  back.addEventListener('click', () => { pickUp = null; renderSuggest(); });
+  li.append(back, el('p', null, fill(s.stepUnion, { u: upazilaName(district, upazila) })));
+  const list = el('div', 'union-pick');
+  const whole = el('button', 'btn'); whole.type = 'button';
+  whole.append(el('b', null, `${upazilaName(district, upazila)} (${t().wholeUpazila})`));
+  whole.addEventListener('click', () => openArea({ district, upazila, area: null }, null));
+  list.append(whole);
+  for (const a of localAreas(data.docs[district], upazila)) {
+    const names = areaIndex.filter((i) => i.place.upazila === upazila && i.place.area?.bn === a.bn
+      && (i.kind === 'village' || (i.kind === 'landmark' && i.named?.type === 'bazar') || i.kind === 'local'))
+      .map((i) => i.village || i.named?.name_bn).filter(Boolean);
+    const b = el('button', 'btn'); b.type = 'button';
+    b.append(el('b', null, areaName(a)));
+    if (names.length) b.append(el('small', null, [...new Set(names)].slice(0, 4).join(', ')));
+    b.addEventListener('click', () => openArea({ district, upazila, area: a }, null));
+    list.append(b);
+  }
+  li.append(list);
+  return li;
+}
+// "জায়গাটা যোগ করতে বলুন" (#159): place + upazila (+ union); sent like a report, with the same limits.
+let ask = { open: false, msg: '', busy: false };
+function askBox(q, only, context) {
+  const s = t(), li = el('li', 'fallback-box ask-place');
+  if (!ask.open) {
+    const b = el('button', 'btn', s.askTitle); b.type = 'button'; b.id = 'askOpen';
+    b.addEventListener('click', () => { ask = { open: true, msg: '', busy: false }; renderSuggest(); $('askPlace')?.focus(); });
+    li.append(b);
+    return li;
+  }
+  const f = el('form', 'form ask-form'); f.noValidate = true;
+  f.append(el('h3', null, s.askTitle), el('p', 'privacy', s.askText));
+  const lab = (text, input) => { const l = el('label'); l.append(el('span', null, text), input); return l; };
+  const place = el('input'); place.id = 'askPlace'; place.maxLength = 80; place.autocomplete = 'off';
+  place.value = ask.place ?? norm(q);
+  const up = el('select'); up.id = 'askUpazila';
+  up.append(...[['', s.askPick], ...DISTRICTS.filter((d) => !only || d.key === only).flatMap((d) => upazilas(data.docs[d.key] || { unions: [], records: [] })
+    .map((u) => [`${d.key}|${u.en}`, `${upazilaName(d.key, u.en)}, ${lang === 'bn' ? d.bn : d.en}`]))].map(([v, l]) => { const o = el('option', null, l); o.value = v; return o; }));
+  up.value = ask.upazila ?? (context && context.place.upazila ? `${context.place.district}|${context.place.upazila}` : (pickUp ? `${pickUp.district}|${pickUp.upazila}` : ''));
+  const un = el('select'); un.id = 'askUnion';
+  const fillUnions = () => {
+    const [dk, ue] = up.value.split('|');
+    un.replaceChildren(...[['', s.askUnionNone], ...(dk && data.docs[dk] ? localAreas(data.docs[dk], ue).map((a) => [a.bn, areaName(a)]) : [])]
+      .map(([v, l]) => { const o = el('option', null, l); o.value = v; return o; }));
+    un.value = ask.union ?? (context?.place.area?.bn || '');
+  };
+  fillUnions();
+  up.addEventListener('change', () => { ask.upazila = up.value; ask.union = ''; fillUnions(); });
+  place.addEventListener('input', () => { ask.place = place.value; });
+  un.addEventListener('change', () => { ask.union = un.value; });
+  const send = el('button', 'send', ask.busy ? s.askSending : s.askSend); send.type = 'submit'; send.disabled = ask.busy; send.id = 'askSend';
+  const msg = el('p', ask.msg === 'sent' ? 'msg plain' : 'msg', ask.msg ? s.askMsg[ask.msg] || s.askMsg.err : '');
+  msg.id = 'askMsg'; msg.setAttribute('role', 'status'); msg.hidden = !ask.msg;
+  f.append(lab(s.askPlaceLabel, place), lab(s.askUpazila, up), lab(s.askUnion, un), msg, send, el('p', 'privacy', s.askSignin));
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const [dk, ue] = up.value.split('|');
+    if ([...norm(place.value)].length < 2 || !dk) { ask.msg = 'need'; renderSuggest(); $('askMsg')?.focus(); return; }
+    if (hasPhone(place.value)) { ask.msg = 'phone'; renderSuggest(); return; }
+    ask.busy = true; ask.msg = ''; renderSuggest();
+    auth.askPlace({ district: dk, upazila: ue, union: un.value, place: norm(place.value) }, $('askSend'), (code) => {
+      ask.busy = false; ask.msg = code === 'cancel' ? '' : code;
+      if (code === 'sent') { ask.place = ''; }
+      renderSuggest(); $('askMsg')?.focus?.();
+    });
+  });
+  li.append(f);
+  return li;
 }
 
 /* ---------- contacts ---------- */
@@ -754,7 +891,9 @@ const smsLang = () => (sos.short && lang === 'bn' ? 'en' : lang);
 function areaText(place, l) {
   if (!place || place.outside) return '';
   const d = districtOf(place.district);
-  return l === 'bn' ? `${upazilaName(place.district, place.upazila)}, ${d.bn}` : `${place.upazila}, ${d.en}`;
+  // A Sadar upazila already names its district: "এলাকা: নোয়াখালী সদর", not "নোয়াখালী সদর, নোয়াখালী" (keeps the SMS in 3 parts).
+  const up = l === 'bn' ? upazilaName(place.district, place.upazila) : place.upazila, dn = l === 'bn' ? d.bn : d.en;
+  return up.startsWith(dn) ? up : `${up}, ${dn}`;
 }
 function policeOf(place) {
   if (!place || place.outside || !data) return null;
