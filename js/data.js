@@ -357,7 +357,7 @@ function matchName(index, q, { district = '' } = {}) {
 const words = (list) => new Set(list.map((w) => norm(w).toLowerCase()));
 const FILLER = words(['জেলা', 'উপজেলা', 'থানা', 'ইউনিয়ন', 'পৌরসভা', 'গ্রাম', 'এর', 'কাছে', 'কাছাকাছি', 'পাশে', 'er', 'kache', 'kase', 'kachhe',
   'near', 'nearby', 'zila', 'zilla', 'district', 'upazila', 'upozila', 'thana', 'union', 'village', 'gram', 'pourashava', 'municipality',
-  'police', 'station', 'ps', 'পুলিশ', 'স্টেশন']);
+  'police', 'station', 'ps', 'পুলিশ', 'স্টেশন', 'মডেল', 'model']);   // "মডেল থানা" is a kind of thana, not a name (#154 review)
 const COMMON = words(['বাজার', 'bazar', 'bajar', 'হাট', 'hat', 'পাড়া', 'para', 'চর', 'char', 'স্কুল', 'school', 'skul', 'দ্বীপ', 'dwip', 'dip', 'island']);
 // Direction words: part of a village name ("উত্তর শরীফপুর"), never a place on their own (#152 review 4)
 const DIRECTION = words(['উত্তর', 'দক্ষিণ', 'দক্ষিন', 'পূর্ব', 'পশ্চিম', 'মধ্য', 'uttar', 'dakkhin', 'dakshin', 'purba', 'paschim', 'poschim', 'moddho', 'madhya', 'north', 'south', 'east', 'west', 'middle']);
@@ -450,6 +450,7 @@ function findAreasRaw(index, q, opts = {}) {
   const words = all.filter((w) => !FILLER.has(w));
   const exactly = (r) => r.hits.filter((h) => (h.names || []).some((n) => norm(n).toLowerCase() === words.join(' ')));
   if (!context.length) {
+    if (!words.length) return { hits: [], close: [] };             // only filler ("থানা", "মডেল থানা"): no place (#154 review)
     if (!onlyCommon) return matchName(index, place || q, opts);
     // "bazar" alone is no place; but a place NAMED only with such words ("বাজার পাড়া") is found when written exactly
     return words.length > 1 ? { hits: exactly(matchName(index, words.join(' '), opts)), close: [] } : { hits: [], close: [] };
