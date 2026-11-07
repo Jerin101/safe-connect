@@ -319,7 +319,10 @@ function openArea(place, pos) { go(areaPath(place), { place, pos }); }
 function showArea(place, pos) {
   current = { place, pos };
   // While auto location is on, the saved area is where the person is: looking at another area does not replace it (#105).
-  if (!place.outside && (!autoLoc.isOn() || !getLast())) saveLast(place, pos ? 'loc' : 'saved');
+  // Opening the same area again (reload, "আগের এলাকা", My area) keeps how and when it was found, so a pin stays a pin (#147).
+  const old = getLast();
+  const again = !pos && old?.src && samePlace(old, place);   // an old entry without src is upgraded
+  if (!place.outside && !again && (!autoLoc.isOn() || !old)) saveLast(place, pos ? 'loc' : 'saved');
   renderChip();
   renderArea();
   showView('area');
@@ -587,7 +590,11 @@ function autoFix(pos) {
   if (!data) return;
   const place = resolvePlace(pos);
   const old = lastPlace();
-  if (place.outside || (old && samePlace(old, place))) return;
+  if (place.outside) return;
+  if (old && samePlace(old, place)) {                    // already the saved area: now it is where the person is (#147)
+    if (old.src !== 'auto') { saveLast(place, 'auto'); renderRecent(); }
+    return;
+  }
   saveLast(place, 'auto');
   renderRecent(); renderMyArea(); renderAutoNote();   // header chip, sidebar card, home list, area note; never leaves the page
   showToast(fill(old ? t().auto.changed : t().auto.found, { n: placeTitle(place) }));   // "changed" only for a real change
