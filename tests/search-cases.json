@@ -75,6 +75,9 @@
   {"q": "হাজী পাড়া চকরিয়া", "expect": "a village with its upazila: not read as হাজীপুর union (#151 review 3)", "first": {"kind": "village", "name_bn": "হাজী পাড়া", "upazila": "Chakaria"}},
   {"q": "haji para chakaria", "expect": "the same in English (#151 review 3)", "first": {"kind": "village", "upazila": "Chakaria"}},
   {"q": "পেকুয়া ইউনিয়ন কক্সবাজার", "expect": "a short Bangla union name with the district keeps the union (#151 review 3)", "first": {"kind": "union", "upazila": "Pekua"}},
-  {"q": "Kadra Senbagh", "expect": "union + upazila still puts the union first (#151 review 3)", "first": {"kind": "union", "upazila": "Senbagh"}}
+  {"q": "Kadra Senbagh", "expect": "union + upazila still puts the union first (#151 review 3)", "first": {"kind": "union", "upazila": "Senbagh"}},
+  {"q": "উত্তর বড়ঘোপ নোয়াখালী", "expect": "a village with the wrong district: the village elsewhere, never a wrong place (#151 review 4)", "first": {"kind": "village", "name_bn": "উত্তর বড়ঘোপ"}},
+  {"q": "উত্তর শরীফপুর কক্সবাজার", "expect": "the same: not উত্তর ধুরুং (#151 review 4)", "first": {"kind": "village", "name_bn": "উত্তর শরীফপুর"}},
+  {"q": "হাজী পাড়া নোয়াখালী", "expect": "not হাজীপুর union just by sound (#151 review 4)", "first": {"kind": "village", "name_bn": "হাজী পাড়া"}}
  ]
 }
