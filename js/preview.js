@@ -59,16 +59,47 @@ function itemLabel(h) {
   const p = { ...h.place };
   const named = h.named && (lang === 'bn' ? h.named.name_bn : h.named.name_en || h.named.name_bn);
   if (named) p.label = named;
-  const kindWord = (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
+  // A name the team added from local knowledge says so: "কাশেম বাজার (স্থানীয়ভাবে জানা নাম)" (#149); others show their type.
+  const teamName = h.kind === 'local' && /^local name, added by the team/.test(h.named?.source || '');
+  const kindWord = (teamName && t().kinds.known) || (h.kind === 'thana' && fill(t().kinds.thanaOf, { u: upazilaName(p.district, p.upazila) }))   // "সুধারাম মডেল থানা (নোয়াখালী সদর উপজেলা)" (#153)
+    || (h.kind === 'landmark' && t().kinds[`lm_${h.named?.type}`])                       // "… উচ্চ বিদ্যালয় (বিদ্যালয়)" (#157)
+    || (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
   let title;
   if (h.kind === 'village') title = h.village;
   else if (named) title = named;
   else if (h.place.area) title = areaName(h.place.area);
   else title = upazilaName(p.district, p.upazila);
   if (h.kind === 'village') p.label = `${h.village} (${kindWord})`;
-  const where = (h.kind === 'village' || h.kind === 'local') && h.place.area ? `${areaName(h.place.area)}, ` : '';
+  // The village is known only in Bangla; English leaves it out rather than mixing scripts (#149).
+  // The full address (#155): village · union or town · upazila (thana) · district; each part only once.
+  const parts = [];
+  if (h.kind === 'local' && h.named?.village_bn && lang === 'bn') parts.push(h.named.village_bn);   // the village is known only in Bangla
+  if ((h.kind === 'village' || h.kind === 'local' || h.kind === 'place' || h.kind === 'landmark') && h.place.area) {
+    // named places keep only the Bangla union name: the full entry has the English one too
+    const full = localAreas(data.docs[p.district], p.upazila).find((x) => x.type === h.place.area.type && x.bn === norm(h.place.area.bn));
+    parts.push(areaName(full || h.place.area));
+  }
+  if (h.place.area || h.kind === 'village' || h.kind === 'local' || h.kind === 'landmark') {
+    const th = thanaOf(p.district, p.upazila);
+    parts.push(th ? `${upazilaName(p.district, p.upazila)} (${th})` : upazilaName(p.district, p.upazila));
+  } else if (h.kind === 'upazila') {
+    const th = thanaOf(p.district, p.upazila);
+    if (th) parts.push(th);
+  }
+  const d = districtOf(p.district);
+  parts.push(lang === 'bn' ? d.bn : d.en);
   const ward = h.ward ? ` · ${t().ward} ${digits(h.ward)}` : '';
-  return { p, title: `${title} (${kindWord})`, sub: where + placeSub(p) + ward };
+  return { p, title: `${title} (${kindWord})`, sub: parts.join(', ') + ward };
+}
+// The upazila's thana, only when the official list (data/thanas.json) gives it exactly one thana with another name
+// (সুধারাম মডেল থানা for Noakhali Sadar). Bangla only: there are no official English thana names (#155).
+function thanaOf(dkey, upazilaEn) {
+  if (lang !== 'bn' || !data?.thanas) return '';
+  const dn = districtOf(dkey)?.en;
+  const list = data.thanas.filter((x) => x.district === dn && x.upazila_en === upazilaEn);
+  if (list.length !== 1) return '';
+  const core = (n) => norm(n).replace(/\s*(মডেল\s*)?থানা$/, '').replace(/\s*সদর$/, '');
+  return core(list[0].name_bn) === core(upazilaName(dkey, upazilaEn)) ? '' : norm(list[0].name_bn);
 }
 function suggestButton(h) {
   const li = el('li');
@@ -84,17 +115,34 @@ function renderSuggest() {
   const box = $('suggest');
   if (norm(q).length < 2) { box.hidden = true; return; }
   const only = $('distSel').value;
-  const { hits, close } = findAreas(areaIndex, q, { district: only });
-  if (hits.length) { box.replaceChildren(...hits.map(suggestButton)); box.hidden = false; return; }
-  // Never a dead end: similar names, then the upazila list, then GPS and 999.
+  const { hits, close, context, missing, elsewhere } = findAreas(areaIndex, q, { district: only });
+  const areaLabel = (c) => (c.kind === 'district' ? (lang === 'bn' ? districtOf(c.place.district).bn : districtOf(c.place.district).en)
+    : c.place.area ? `${areaName(c.place.area)}, ${upazilaName(c.place.district, c.place.upazila)}` : upazilaName(c.place.district, c.place.upazila));
+  if (hits.length) {
+    // not in the area the person named: say so, then the places of that name elsewhere (#151 review)
+    const note = elsewhere ? [el('li', 'none', fill(t().elsewhere, { c: areaLabel(elsewhere) }))] : [];
+    box.replaceChildren(...note, ...hits.map(suggestButton)); box.hidden = false; return;
+  }
+  // Never a dead end: the area the person named (#151), similar names, then the upazila list, then GPS and 999.
   const s = t();
-  const parts = [el('li', 'none', close.length ? s.noExact : s.noMatch)];
+  const parts = [];
+  if (context) {
+    const name = areaLabel(context);
+    parts.push(el('li', 'none', fill(s.notFoundBut, { n: missing, c: name })));
+    if (context.kind !== 'district') {
+      const li = el('li');
+      const go = el('button', 'btn violet ctx-open', fill(s.openContext, { c: name })); go.type = 'button';
+      go.addEventListener('click', () => openArea({ ...context.place }, null));
+      li.append(go); parts.push(li);
+    }
+  } else parts.push(el('li', 'none', close.length ? s.noExact : s.noMatch));
   if (close.length) { parts.push(el('li', 'group', s.didYouMean)); close.forEach((h) => parts.push(suggestButton(h))); }
   const ups = el('li', 'fallback-box');
   ups.append(el('p', null, s.pickUpazila));
   const chips = el('div', 'chips');
+  const pick = only || (context ? context.place.district : '');   // a named district shows only its upazilas
   for (const d of DISTRICTS) {
-    if (only && d.key !== only) continue;
+    if (pick && d.key !== pick) continue;
     const doc = data.docs[d.key]; if (!doc) continue;
     for (const u of upazilas(doc)) {
       const c = el('button', 'chip', lang === 'bn' ? u.bn : u.en); c.type = 'button';
@@ -754,7 +802,9 @@ const smsLang = () => (sos.short && lang === 'bn' ? 'en' : lang);
 function areaText(place, l) {
   if (!place || place.outside) return '';
   const d = districtOf(place.district);
-  return l === 'bn' ? `${upazilaName(place.district, place.upazila)}, ${d.bn}` : `${place.upazila}, ${d.en}`;
+  // A Sadar upazila already names its district: "এলাকা: নোয়াখালী সদর", not "নোয়াখালী সদর, নোয়াখালী" (keeps the SMS in 3 parts).
+  const up = l === 'bn' ? upazilaName(place.district, place.upazila) : place.upazila, dn = l === 'bn' ? d.bn : d.en;
+  return up.startsWith(dn) ? up : `${up}, ${dn}`;
 }
 function policeOf(place) {
   if (!place || place.outside || !data) return null;
