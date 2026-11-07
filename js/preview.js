@@ -5,7 +5,7 @@ import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.j
 import { createAutoLoc } from './autoloc.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS, hasPhone } from './reports.js';
-import { helpLink, parseHelp, buildSms, smsParts, minutesAgo } from './bipod.js';
+import { helpLink, parseHelp, buildSms, smsParts, minutesAgo, pickPolice } from './bipod.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -456,7 +456,10 @@ function openArea(place, pos) { go(areaPath(place), { place, pos }); }
 function showArea(place, pos) {
   current = { place, pos };
   // While auto location is on, the saved area is where the person is: looking at another area does not replace it (#105).
-  if (!place.outside && (!autoLoc.isOn() || !getLast())) saveLast(place, pos ? 'loc' : 'saved');
+  // Opening the same area again (reload, "আগের এলাকা", My area) keeps how and when it was found, so a pin stays a pin (#147).
+  const old = getLast();
+  const again = !pos && old?.src && samePlace(old, place);   // an old entry without src is upgraded
+  if (!place.outside && !again && (!autoLoc.isOn() || !old)) saveLast(place, pos ? 'loc' : 'saved');
   renderChip();
   renderArea();
   showView('area');
@@ -659,7 +662,8 @@ function resolvePlace(pos) {
   }
   return place;
 }
-function applyPosition(pos) { lastFix = { pos, at: Date.now() }; openArea(resolvePlace(pos), pos); }
+// lastFix.at is the time the phone took the fix, so a help link made from it shows the real age (#143).
+function applyPosition(pos) { lastFix = { pos, at: pos.at || Date.now() }; openArea(resolvePlace(pos), pos); }
 function demoPicks() {
   if (!locations) return [];
   const picks = [
@@ -723,7 +727,11 @@ function autoFix(pos) {
   if (!data) return;
   const place = resolvePlace(pos);
   const old = lastPlace();
-  if (place.outside || (old && samePlace(old, place))) return;
+  if (place.outside) return;
+  if (old && samePlace(old, place)) {                    // already the saved area: now it is where the person is (#147)
+    if (old.src !== 'auto') { saveLast(place, 'auto'); renderRecent(); }
+    return;
+  }
   saveLast(place, 'auto');
   renderRecent(); renderMyArea(); renderAutoNote();   // header chip, sidebar card, home list, area note; never leaves the page
   showToast(fill(old ? t().auto.changed : t().auto.found, { n: placeTitle(place) }));   // "changed" only for a real change
@@ -883,8 +891,8 @@ function areaText(place, l) {
 function policeOf(place) {
   if (!place || place.outside || !data) return null;
   const g = areaContacts(data, place).find((x) => x.id === 'police');
-  const r = g && pickContact([g], 'police');
-  return r ? { phone: r.phones[0], district: Boolean(g.fallback) } : null;
+  const p = g && pickPolice(g.items);
+  return p ? { phone: p.record.phones[0], thana: p.thana && !g.fallback } : null;
 }
 function sosMessage() {
   const s = LANG[smsLang()].ui;
@@ -892,7 +900,7 @@ function sosMessage() {
   const place = sos.place && !sos.place.outside ? sos.place : null;
   const police = policeOf(place);
   const texts = { ...s.bipod.sms, noLoc: s.noLoc };
-  if (police?.district) texts.police = texts.policeDistrict;
+  if (police && !police.thana) texts.police = texts.policeDistrict;   // "পুলিশ:" unless it is the thana's OC
   return buildSms({ texts, situation: s.sits[sos.situation][1], area: areaText(place, smsLang()), police: police?.phone || '',
     link: sos.pos ? helpLink(sos.pos, sos.at, sos.situation) : '' });
 }
@@ -1102,18 +1110,19 @@ function showSos(pos, askLocation) {
   if (askLocation) { requestSosLocation(); return; }
   renderLoc(); refreshMessage();
 }
-async function requestSosLocation() {
+// fresh = true ("Send new location", #134): a new fix, never one the phone kept from earlier.
+async function requestSosLocation(fresh = false) {
   sos.state = 'getting'; sos.error = null;
   $('sosDemo').hidden = true;
   renderLoc(); refreshMessage();
-  try { setSosPos(await getPosition()); }
+  try { const pos = await getPosition(fresh ? { maximumAge: 0 } : {}); setSosPos(pos, pos.at || Date.now()); }
   catch (err) {
     sos.state = 'failed'; sos.error = err.code;
     renderLoc(); refreshMessage();
     fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos);
   }
 }
-$('sosLocBtn').addEventListener('click', requestSosLocation);
+$('sosLocBtn').addEventListener('click', () => requestSosLocation());
 $('sosBtn').addEventListener('click', () => openSos(null));
 $('sosBack').addEventListener('click', goHome);
 $('sosMsg').addEventListener('input', () => { sos.edited = true; renderSend(); });
@@ -1122,7 +1131,7 @@ $('bipodBtn').addEventListener('click', (e) => {
   e.preventDefault();
   $('peopleBox').open = true; $('peopleBox').scrollIntoView({ block: 'start' }); $('pName').focus({ preventScroll: true });
 });
-$('bipodAgain').addEventListener('click', () => { sos.safe = false; sos.edited = false; requestSosLocation(); $('bipodBtn').focus(); });
+$('bipodAgain').addEventListener('click', () => { sos.safe = false; sos.edited = false; requestSosLocation(true); $('bipodBtn').focus(); });
 $('bipodSafe').addEventListener('click', () => { sos.safe = !sos.safe; sos.edited = false; refreshMessage(); $('bipodBtn').focus(); });
 $('smsEn').addEventListener('change', () => { sos.short = $('smsEn').checked; sos.edited = false; refreshMessage(); });
 
@@ -1147,6 +1156,8 @@ function showHelp(arg) {
   $('helpAge').textContent = n < 1 ? b.ageNow : n < 60 ? fill(b.age, { n: digits(n) }) : fill(b.ageHours, { h: digits(Math.floor(n / 60)) });
   $('helpAge').classList.toggle('old', n >= 60);
   $('helpWhereTitle').textContent = b.where;
+  $('helpFollowed').hidden = h.situation !== 'followed';            // a ringing phone can make it worse (#143)
+  $('helpFollowed').textContent = b.followedWarn;
   $('helpSit').hidden = !h.situation;
   $('helpSit').textContent = h.situation ? fill(b.sitLine, { s: t().sits[h.situation][0] }) : '';
   $('helpPlace').textContent = place.outside ? b.outsideData : `${placeTitle(place)}, ${placeSub(place)}`;
