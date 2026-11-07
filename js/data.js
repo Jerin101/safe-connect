@@ -367,7 +367,12 @@ function contextKeys(index) {
     const it = { kind: 'district', place: { district: d.key, upazila: null, area: null } };
     for (const n of [d.bn, d.en]) { put(strong(soundKey(n)), it); put(text(n), it); }
   }
-  for (const item of index) if (item.kind in CTX_RANK) { for (const k of item.fullKeys) put(strong(k), item); for (const n of item.names) put(text(n), item); }
+  // "পেকুয়া ইউনিয়ন" is also "পেকুয়া": a short Bangla union name is found by its text without the kind word (#152 review)
+  const bare = (n) => { const w = norm(n).toLowerCase().split(/\s+/); return w.length > 1 && FILLER.has(w[w.length - 1]) ? w.slice(0, -1).join(' ') : ''; };
+  for (const item of index) if (item.kind in CTX_RANK) {
+    for (const k of item.fullKeys) put(strong(k), item);
+    for (const n of item.names) { put(text(n), item); if (bare(n)) put(text(bare(n)), item); }
+  }
   ctxCache.set(index, map);
   return map;
 }
@@ -448,6 +453,11 @@ function findAreasRaw(index, q, opts = {}) {
     const ranked = [...wholeHits].sort((x, y) => whole.scores.get(x) - whole.scores.get(y) || inside(x) - inside(y));
     return { hits: [...ranked, ...whole.hits.filter((h) => !ranked.includes(h))], close: whole.close };
   }
+  // 1b) A place name with area words around it ("উত্তর শরীফপুর নোয়াখালী সদর", "হাজী পাড়া চকরিয়া"): the longest run of
+  //     words that is one whole name and lies inside the area the other words name. A part of the name must not be
+  //     taken as an area word on its own ("শরীফপুর" union, "হাজী পাড়া" ~ হাজীপুর) (#152 review).
+  const span = wholeInside(index, words, weak, place ? null : runs.map((r) => r.at.map((i) => all[i]).join(' ')), opts);
+  if (span) return span;
   if (!place) {
     // Only area words. One word ("begumganj", "char jabbar"): the normal search, so the upazila, its union and the
     // thana all show. Several ("narottampur kabirhat"): the places that fit all of them, then the normal results.
@@ -483,6 +493,28 @@ function findAreasRaw(index, q, opts = {}) {
   if (all2.hits.length) return all2;
   if (last) return { hits: [], close: all2.close, context: last.ctx[0], missing: last.name };
   return all2;
+}
+
+// areaRuns: when every word was read as an area word, the texts of those words; a place is then taken only from one
+// whole area word that is a better match as a place than as an area ("হাজী পাড়া" read as হাজীপুর)
+function wholeInside(index, words, weak, areaRuns, opts) {
+  for (let n = words.length - 1; n >= 1; n--) {
+    for (let i = 0; i + n <= words.length; i++) {
+      const name = words.slice(i, i + n);
+      if (areaRuns && !areaRuns.includes(name.join(' '))) continue;
+      const u = understand(index, [...words.slice(0, i), ...words.slice(i + n)].join(' '));
+      if (u.place || !u.context.length) continue;                     // every other word must be an area word
+      const m = matchName(index, name.join(' '), opts);
+      // a name made only of common words ("বাজার পাড়া") counts only when written exactly
+      const onlyCommon = name.every((w) => COMMON.has(w));
+      const fits = (h) => (onlyCommon ? (h.names || []).some((x) => norm(x).toLowerCase() === name.join(' ')) : m.scores.get(h) <= (weak ? 2 : 3));
+      const hits = m.hits.filter((h) => fits(h) && u.context.some((c) => inContext(h, c)));
+      if (!hits.length) continue;
+      if (areaRuns && (hits[0].kind in CTX_RANK || m.hits.some((h) => h.kind in CTX_RANK && m.scores.get(h) <= m.scores.get(hits[0]) && u.context.some((c) => inContext(h, c) || inContext(c, h))))) continue;
+      return { hits, close: [] };
+    }
+  }
+  return null;
 }
 
 export function search(data, query, limit = 40) {

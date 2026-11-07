@@ -70,6 +70,11 @@
   {"q": "shahporir dwip", "expect": "English, ব-ফলা as w (#151 review 2)", "first": {"kind": "village", "upazila": "Teknaf"}},
   {"q": "বাজার পাড়া", "expect": "a village named only with common words (#151 review 2)", "first": {"kind": "village"}},
   {"q": "হাজী পাড়া", "expect": "exact village before a same-sounding union (#151 review 2)", "first": {"kind": "village"}},
-  {"q": "pekua union", "expect": "the kind word decides (#151 review 2)", "first": {"kind": "union", "upazila": "Pekua"}}
+  {"q": "pekua union", "expect": "the kind word decides (#151 review 2)", "first": {"kind": "union", "upazila": "Pekua"}},
+  {"q": "উত্তর শরীফপুর নোয়াখালী সদর", "expect": "a village with its upazila: not split at the union শরীফপুর (#151 review 3)", "first": {"kind": "village", "name_bn": "উত্তর শরীফপুর", "upazila": "Noakhali Sadar"}},
+  {"q": "হাজী পাড়া চকরিয়া", "expect": "a village with its upazila: not read as হাজীপুর union (#151 review 3)", "first": {"kind": "village", "name_bn": "হাজী পাড়া", "upazila": "Chakaria"}},
+  {"q": "haji para chakaria", "expect": "the same in English (#151 review 3)", "first": {"kind": "village", "upazila": "Chakaria"}},
+  {"q": "পেকুয়া ইউনিয়ন কক্সবাজার", "expect": "a short Bangla union name with the district keeps the union (#151 review 3)", "first": {"kind": "union", "upazila": "Pekua"}},
+  {"q": "Kadra Senbagh", "expect": "union + upazila still puts the union first (#151 review 3)", "first": {"kind": "union", "upazila": "Senbagh"}}
  ]
 }
