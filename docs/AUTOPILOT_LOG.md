@@ -1,52 +1,53 @@
 # Autopilot log
 
-## Summary (2 Nov 2026)
+## Summary (7 Nov 2026, queue v3)
 
-**Live:** https://jerin101.github.io/safe-connect/ (was …/preview.html until #141; the old address still works), service worker **`v28-2026-11-02`**. That is `main` at `3114067` (after PR #135), and all checks on `main` are green.
+**Live:** https://jerin101.github.io/safe-connect/ = `main` (#142 site at index.html, #146 phone layout, #148 saved area; merged 6 Nov). Firestore rules were last deployed on 2 Nov from `1274fd9`; **#160 needs a new deploy after it is merged.**
 
-**Firestore rules and indexes:** deployed today from `main` at **`1274fd9`**, after `npm run test:rules` passed **83/83** on that commit. The report limits (M1) and the phone-number check in notes (L3) now apply on the live site.
+**Repo folder:** the project moved to `E:\Projects\safe-connect` (fresh clone, 6 Nov). Old copies: `E:\New folder\Downloads\Project_Capstone\safe-connect-old-2026-11-05` and `C:\Users\ASUS\Downloads\Project_Capstone\safe-connect` (still to rename, see below).
 
-**PRs since #109:**
-
-| PR | What | State |
+| PR | Queue step | State |
 |---|---|---|
-| [#109](https://github.com/Jerin101/safe-connect/pull/109), [#110](https://github.com/Jerin101/safe-connect/pull/110), [#111](https://github.com/Jerin101/safe-connect/pull/111), [#112](https://github.com/Jerin101/safe-connect/pull/112), [#114](https://github.com/Jerin101/safe-connect/pull/114) | UI clarity 1–5 (#108) | merged |
-| [#116](https://github.com/Jerin101/safe-connect/pull/116) | UI/UX test reports and README Testing section (#115) | merged |
-| [#119](https://github.com/Jerin101/safe-connect/pull/119) | Secret alert #1 explained, SECURITY.md (#118) | merged |
-| [#120](https://github.com/Jerin101/safe-connect/pull/120) | C1 = M1: report limits (#117) | merged |
-| [#122](https://github.com/Jerin101/safe-connect/pull/122) | C2 = M3: Content-Security-Policy (#121) | merged |
-| [#124](https://github.com/Jerin101/safe-connect/pull/124) | C3 = L3: no mobile numbers in report notes (#123) | merged |
-| [#126](https://github.com/Jerin101/safe-connect/pull/126) | C4 = L1: Actions pinned to SHAs, Dependabot (#125) | merged |
-| [#128](https://github.com/Jerin101/safe-connect/pull/128) | C5 = L2: rules-test dev tools updated (#127) | merged |
-| [#130](https://github.com/Jerin101/safe-connect/pull/130) | Audit report + FAQ for shared phones (#129) | merged |
-| [#135](https://github.com/Jerin101/safe-connect/pull/135) | Header and pages with large text, 44 px district menu, Hatiya post in English (#113) | merged today |
-| [#133](https://github.com/Jerin101/safe-connect/pull/133) | Rules tests on every PR, so they can be a required check (#132) | **open: for Jerin** |
-| [#136](https://github.com/Jerin101/safe-connect/pull/136) | বিপদ বার্তা step 1 (#134) | **open: don't merge** before the SMS text review |
-| [#138](https://github.com/Jerin101/safe-connect/pull/138) | autoloc test always removes its Chrome profile (#137) | **open: for Jerin** |
-| this PR | this log (#139) | open |
+| [#163](https://github.com/Jerin101/safe-connect/pull/163) | Follow-up to #148/#146: saved-area icon fixes and width-sweep fixes (#148 and #146 were merged before these) | **merge first**: live main has the two icon bugs |
+| [#144](https://github.com/Jerin101/safe-connect/pull/144) | 2: বিপদ বার্তা review fixes (short link, thana OC, SMS texts within 3 parts, fresh location) | tester GO |
+| [#150](https://github.com/Jerin101/safe-connect/pull/150) | 5.1: smart-search plan + Kashem Bazar | tester GO; Jerin to confirm the village |
+| [#152](https://github.com/Jerin101/safe-connect/pull/152) | 5.2: query understanding | fixes for 2 NO-GOs done; the re-review was cut off by the usage limit |
+| [#154](https://github.com/Jerin101/safe-connect/pull/154) | 5.3: thana names (`data/thanas.json`) | same re-review |
+| [#156](https://github.com/Jerin101/safe-connect/pull/156) | 5.4: full address in results | same re-review |
+| [#158](https://github.com/Jerin101/safe-connect/pull/158) | 5.5: landmarks from the union pages | NO-GO fixed (copied lists, prose); same re-review |
+| [#160](https://github.com/Jerin101/safe-connect/pull/160) | 5.6: when nothing matches + `missing_place` requests (rules tests 90/90) | same re-review; **rules deploy after merge** |
+| [#162](https://github.com/Jerin101/safe-connect/pull/162) | 6: prepare page (phone SOS) + live location | Bangla and tester review cut off by the usage limit |
+| Step 7 | docs move, README, tidy-ups | **not started**: moving docs now would conflict with every open PR; do it after the merges |
 
-## NEEDS JERIN (only you can do these)
+**Merge order:** #163 → #144 → #150 → #152 → #154 → #156 → #158 → #160 → #162. Each builds on the one before.
 
-- [ ] **Merge [#133](https://github.com/Jerin101/safe-connect/pull/133), then make the rules test required.** GitHub → Settings → Rules → Rulesets → **main** → Require status checks to pass → Add checks → type `rules` → pick it → Save changes. (It can't be required before #133: PRs that don't touch the rules would wait for it forever.)
-- [ ] **Review the বিপদ বার্তা SMS texts with Claude chat:** [#136](https://github.com/Jerin101/safe-connect/pull/136) and `docs/plans/bipod-barta.md` → "Questions for the review". Merge only after that. Also check on a real iPhone whether a group SMS opens (we assume one person at a time).
-- [ ] **Merge [#138](https://github.com/Jerin101/safe-connect/pull/138)** (test clean-up) after a look at the diff.
-- [ ] **Password-reset email (Firebase console):**
-  1. Authentication → Templates → Password reset → edit.
-  2. "Customize action URL" → `https://jerin101.github.io/safe-connect/reset.html`. The API refuses this change on the free plan, so it must be done in the console.
-  3. Sender name "SafeConnect", with a Bangla subject and text.
-  4. Then test one real reset with a **test account** on the live site, and delete that account afterwards.
-- [ ] **Add Tasmin as admin.** Her User UID is in Authentication → Users. In Firestore create `admins/<her UID>` with `since` (timestamp) and `addedBy` = `console` (`docs/FIREBASE_SETUP.md` part F).
-- [ ] **Real sign-in test with a test account** on the live site: Google and email sign-in, one "wrong number" report (it now needs a verified email), and workspace sync on/off. Then delete the test account and its `users`, `family`, `reports` and `limits` documents in the console (audit entries can only be deleted there).
-- [ ] **On a real Android phone (#75):** does Messenger open with the map link, and does WhatsApp open with the message?
-- [ ] **P13 (#80):** open each link in `data/spot_check_40.csv`, then fill in `human_ok`, `checked_by` and `checked_on`. Row `acd98005cc` is already known not to match.
-- [ ] **Firebase CLI login on this PC:** it was already logged in to an account with access to safeconnect-67d83 (see which with `npx firebase login:list`). Today's rules deploy used that login. I didn't log in, so I didn't log out. If this login shouldn't stay, run `npx firebase logout`.
-- [ ] **Three leftover Firestore emulators** from today's rules runs. On Windows, `firebase emulators:exec` doesn't stop its Java process, and I wasn't allowed to stop them.
-  - The processes: port 8080 = PID 30492, port 8085 = PID 10212, port 8086 = PID 19776 (all `java.exe`, started 19:09–19:19).
-  - Close them in Task Manager, or run `Stop-Process -Id 30492,10212,19776` in PowerShell.
-- [ ] **Delete the untracked folder `safeconnect-uiux-reports/`** in the project root (queue part G). I wasn't allowed to delete it. I checked it first: all 81 files are already in the repo under `docs/testing/`. 79 match exactly or differ only in line endings, and the 2 READMEs in the repo are the later, corrected wording.
-- [ ] **Before v1.0:** remove `localhost` from the Firebase authorized domains and from the API key's websites.
+**Search check for #152–#160:** every name in main's index (1,545, villages included) is still found, and no first result changes. 160 union+upazila pairs pick the right union; the 3 where the union has the upazila's own name show it second.
 
-Removed from the old list because they are done: API key restriction · secret scanning and push protection · Jerin's own admin · real-phone test (30 Oct) · the old emulator processes from 29 Oct.
+## NEEDS JERIN
+
+- [ ] **Merge #163 first** (live bug), then the order above as each PR gets tester GO.
+- [ ] **Rename the old C: folder** after closing VS Code: `C:\Users\ASUS\Downloads\Project_Capstone\safe-connect` → `safe-connect-old-2026-11-05`. Then reopen Claude Code in `E:\Projects\safe-connect`.
+- [ ] **Kashem Bazar (#150):** the official Newajpur page lists it in নিয়াজপুর ইউনিয়ন. Please confirm the village is ধর্মপুর (Noakhali Sadar also has a whole ধর্মপুর union).
+- [ ] **Thanas (#154):** 7 Cox's Bazar rows have only "portal" proof: the thana's own official site sits under the upazila's address. Is that OK, or should they be marked "not confirmed"?
+- [ ] **Deploy the rules after #160 is merged:**
+  1. Run `npm run test:rules` on main.
+  2. Then run `npx firebase deploy --only firestore:rules,firestore:indexes --project safeconnect-67d83`.
+  3. Then send one real "জায়গাটা যোগ করতে বলুন" request with a test account.
+- [ ] **Data fix through the tools:** 3 garbled English union names ("Narottampurup1", "Mohammadpuru5P", "Mohammadpurup7").
+- [ ] **realme SOS page (#162):** open https://www.realme.com/in/support/kw/doc/2077523 in a browser. If it has steps, they can be added. No official SOS page was found for OPPO, vivo, Infinix or Tecno.
+- [ ] **Old branches:** delete these when you're sure. 66 merged branches were already deleted, and "Automatically delete head branches" is on.
+  - `feature/134-bipod-barta`: its extra commit is in #144.
+  - `fix/145-phone-layout`: its extra commits are in #163.
+  - `feature/53-offline-app`: old, never merged.
+  - `toshi`: a person's branch, kept.
+- [ ] **Still open from 2 Nov:**
+  - set the password-reset action URL in the Firebase console
+  - add Tasmin as admin
+  - real sign-in test with a test account
+  - Android Messenger/WhatsApp check
+  - P13 spot-check (#80)
+  - the Firebase CLI login on the old PC
+  - remove `localhost` before v1.0
 
 ## Queue results (CLAUDE_CODE_QUEUE_v2)
 

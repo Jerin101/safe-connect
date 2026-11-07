@@ -25,16 +25,16 @@ export async function permissionState() {
   }
 }
 
-// Resolves { lat, lon, accuracy } or rejects with Error whose .code is
-// 'unsupported' | 'denied' | 'unavailable' | 'timeout'.
-export function getPosition({ timeout = 15000 } = {}) {
+// Resolves { lat, lon, accuracy, at } (at = when the phone took the fix, ms) or rejects with Error whose .code is
+// 'unsupported' | 'denied' | 'unavailable' | 'timeout'. maximumAge 0 = never reuse an older fix.
+export function getPosition({ timeout = 15000, maximumAge = 60000 } = {}) {
   return new Promise((resolve, reject) => {
     const fail = (code) => { const e = new Error(code); e.code = code; reject(e); };
     if (!('geolocation' in navigator)) return fail('unsupported');
     navigator.geolocation.getCurrentPosition(
-      (p) => resolve({ lat: p.coords.latitude, lon: p.coords.longitude, accuracy: Math.round(p.coords.accuracy) }),
+      (p) => resolve({ lat: p.coords.latitude, lon: p.coords.longitude, accuracy: Math.round(p.coords.accuracy), at: p.timestamp }),
       (err) => fail(['unavailable', 'denied', 'unavailable', 'timeout'][err.code] || 'unavailable'),
-      { enableHighAccuracy: true, timeout, maximumAge: 60000 },
+      { enableHighAccuracy: true, timeout, maximumAge },
     );
   });
 }

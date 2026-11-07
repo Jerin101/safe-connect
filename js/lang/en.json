@@ -155,7 +155,7 @@
       ],
       "followed": [
         "Being followed",
-        "Someone is following me and I am scared."
+        "Someone is following me."
       ],
       "accident": [
         "Accident",
@@ -170,7 +170,7 @@
         "I am lost."
       ]
     },
-    "noLoc": "I could not get my location. Call me now.",
+    "noLoc": "I could not get my location. Text me; if I don't answer, call 999.",
     "offline": "No internet. Numbers, area search and SMS still work.",
     "locIdle": "Location not taken yet. To send it, tap the button below.",
     "locBtn": "Get my location",
@@ -178,7 +178,7 @@
     "gotLoc": "{place}",
     "gotLocAcc": "{place} (about {m} m)",
     "outsideLoc": "Location found (the map link is in the message)",
-    "noLocYet": "You can send without a location. The message asks them to call you.",
+    "noLocYet": "You can send without a location. The message asks them to text you first.",
     "sosDenied": "Location is not allowed (turn it on in phone settings).",
     "sosNoLoc": "Could not get your location.",
     "sms": "Send SMS",
@@ -265,7 +265,8 @@
       "badOutside": "The location in this link is outside Bangladesh. Don't wait: call 999, then call the person who sent it.",
       "call999": "Emergency",
       "national": "National emergency numbers",
-      "helpPrivacy": "This page reads the location only from the link; nothing is saved anywhere."
+      "helpPrivacy": "This page reads the location only from the link; nothing is saved anywhere.",
+      "followedWarn": "Text before you call; a ringing phone can make it worse. Call 999 directly."
     },
     "notFoundBut": "Didn't find {n}, but found {c}.",
     "openContext": "See the numbers for {c}",

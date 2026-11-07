@@ -1,6 +1,6 @@
 # বিপদ বার্তা (danger message): plan and SMS texts
 
-Issue #134 · branch `feature/134-bipod-barta` · **step 1 is built; the PR stays open until Jerin and Claude chat review the SMS texts.**
+Issue #134 (step 1, merged in PR #136) and #143 (review fixes). Step 2 is listed below.
 
 ## What it does
 
@@ -19,24 +19,24 @@ The family opens the link and gets a calm page: where the person is, a map link,
 - **No sign-in.** Works offline for the sender: SMS needs no internet, and the page and data are in the offline cache.
 - **We never claim a message was sent.** We only open the messages app. After a tap we say "the messages app was opened X min ago; check that you tapped Send".
 - **Numbers come only from our data** (`data/`, with sources).
-  - The police number is the first police record of the person's upazila.
-  - If the upazila has none, it is the district police; the SMS then says "পুলিশ:" instead of "থানা:".
+  - The police number is the thana's officer-in-charge: in the person's upazila, the record whose office contains "থানা" and whose post contains "অফিসার ইনচার্জ" (so an outpost listed first, like Chowmuhani's in Begumganj, is never picked).
+  - If there is no such record, it is the first police record of the upazila (or the district police), and the SMS says "পুলিশ:" instead of "থানা:". Today that is Cox's Bazar Sadar, Eidgaon, Kutubdia and Maheshkhali.
 - **No outside resources.** There is no map tile server, so the CSP is unchanged. The help page shows a pin icon, the coordinates and an "Open in Google Maps" link (plain navigation).
 
-## Step 1 (this PR)
+## Step 1 (built)
 
 | # | Part | Where |
 |---|---|---|
 | 1 | Big red "বিপদ বার্তা পাঠান" button. Android opens one SMS to all saved people; iPhone opens it for the first person, and the list below has the others. With no saved people it opens the "আমার প্রিয়জন" form. | `#/send`, top |
 | 1 | Situation chips (already there): বিপদে আছি / কেউ পিছু নিয়েছে / দুর্ঘটনা / অসুস্থ / পথ হারিয়েছি | `#/send` |
-| 2 | SMS text with the help link `preview.html#/help/<lat>,<lng>,<unix seconds>[,<situation>]` (5 decimals) | `js/bipod.js` |
+| 2 | SMS text with the help link `https://jerin101.github.io/safe-connect/#/help/<lat>,<lng>,<unix seconds>[,<situation>]` (5 decimals; old `preview.html#/help/…` links still work) | `js/bipod.js` |
 | 2 | "ছোট ইংরেজি বার্তা পাঠান (কম SMS লাগে)" checkbox (Bangla mode only) and the SMS part count under the message | `#/send` |
 | 3 | "৯৯৯-কে যা বলবেন" card, large text | `#/send` |
 | 4 | After a tap: "শেষবার মেসেজ অ্যাপ খোলা হয়েছিল X মিনিট আগে" with two buttons: "নতুন লোকেশন পাঠান" (asks for the location again and rebuilds the message) and "আমি এখন নিরাপদ" (turns the button green and switches the message to the safe text for the same people) | `#/send` |
-| 5 | Help page for the family: age of the location (warns after 1 hour), situation, area, coordinates with a pin, Google Maps link, "৯৯৯-কে এই ঠিকানা পড়ে শোনান", then call steps: 1. ৯৯৯, 2. থানা, 3. স্বাস্থ্য কমপ্লেক্স, 4. ইউএনও. A broken link, a cut-off link or a link outside Bangladesh shows a calm message with ৯৯৯ and the national numbers. | `#/help/...` |
-| 7 | Tests: link maker and parser, SMS text (bn/en, inside/outside our data, no location), SMS part counts | `tests/bipod-test.mjs` (`node --test`) |
+| 5 | Help page for the family: age of the location (warns after 1 hour), situation, area, coordinates with a pin, Google Maps link, "৯৯৯-কে এই ঠিকানা পড়ে শোনান", then call steps: 1. ৯৯৯, 2. থানা, 3. স্বাস্থ্য কমপ্লেক্স, 4. ইউএনও. For the situation "কেউ পিছু নিয়েছে" a warning comes first: "ফোন করার আগে মেসেজ করুন। ফোন বাজলে বিপদ বাড়তে পারে। সরাসরি ৯৯৯-এ কল করুন।" A broken link, a cut-off link or a link outside Bangladesh shows a calm message with ৯৯৯ and the national numbers. | `#/help/...` |
+| 7 | Tests: link maker and parser, SMS text (bn/en, inside/outside our data, no location), SMS part counts, the police choice on the real data | `tests/bipod-test.mjs` (`node --test`) |
 
-## Step 2 (later, not in this PR)
+## Step 2 (later)
 
 - **"আগে থেকে প্রস্তুতি" page (item 8):** how to turn on the phone's own Emergency SOS for iPhone, Samsung, Pixel, Xiaomi/Redmi, Realme/Oppo, vivo and Infinix/Tecno.
   - Each brand needs its **official** help page, checked and linked with a check date (source-researcher). Where there is none, we say so instead of guessing menu names.
@@ -45,24 +45,24 @@ The family opens the link and gets a calm page: where the person is, a map link,
 
 ## SMS texts (exact)
 
-The example is Hatiya, situation "followed". The police number is the first Hatiya police record in our data. Placeholders: `{situation}`, `{area}`, `{police}`, `{link}`.
+The example is Hatiya, situation "followed". The police number is Hatiya thana's officer-in-charge from our data. Placeholders: `{situation}`, `{area}`, `{police}`, `{link}`.
 
 ### Bangla
 
 ```
-জরুরি! কেউ আমার পিছু নিয়েছে, আমি ভয় পাচ্ছি।
+জরুরি! কেউ আমার পিছু নিয়েছে।
 এলাকা: হাতিয়া, নোয়াখালী
 আগে 999-এ কল করো। থানা: 01320111137
-লোকেশন: https://jerin101.github.io/safe-connect/preview.html#/help/22.29580,91.10660,1793624400,followed
+লোকেশন: https://jerin101.github.io/safe-connect/#/help/22.29580,91.10660,1793624400,followed
 ```
 
 ### English (also the short version offered in Bangla mode)
 
 ```
-URGENT! Someone is following me and I am scared.
+URGENT! Someone is following me.
 Area: Hatiya, Noakhali
 Call 999 first. Police station: 01320111137
-Location: https://jerin101.github.io/safe-connect/preview.html#/help/22.29580,91.10660,1793624400,followed
+Location: https://jerin101.github.io/safe-connect/#/help/22.29580,91.10660,1793624400,followed
 ```
 
 ### Variations
@@ -70,33 +70,34 @@ Location: https://jerin101.github.io/safe-connect/preview.html#/help/22.29580,91
 | Case | Bangla | English |
 |---|---|---|
 | Outside our two districts | situation + "আগে 999-এ কল করো।" + link (no area, no police) | situation + "Call 999 first." + link |
-| No location yet | situation + area/police if known + "আমার লোকেশন পাওয়া যায়নি, এখনই আমাকে ফোন করো।" | "… I could not get my location. Call me now." |
-| District police only | "পুলিশ: {police}" | "Police: {police}" |
+| No location yet | situation + area/police if known + "আমার লোকেশন পাওয়া যায়নি। আমাকে মেসেজ করো, উত্তর না পেলে 999-এ কল করো।" (being called can be dangerous when followed) | "… I could not get my location. Text me; if I don't answer, call 999." |
+| No thana officer-in-charge in our data | "পুলিশ: {police}" | "Police: {police}" |
 | Safe | "আমি এখন নিরাপদ, চিন্তা কোরো না।" | "I am safe now, don't worry." |
 
 ### SMS parts
 
 - Bangla is sent as Unicode: 70 characters fit one SMS, and a longer message is split into parts of 67.
 - English uses plain letters: 160 fit one SMS, and parts of 153.
-- The link alone is 96 characters.
+- The link alone is 84 characters. **Every Bangla message fits in 3 SMS** in every upazila we cover, with its real police number and label (checked by `tests/bipod-test.mjs`; the longest is 199 of 201 characters, "বিপদে আছি" in Cox's Bazar Sadar). For that, two Bangla SMS sentences were shortened: "বিপদে আছি, এখনই সাহায্য দরকার।" and "কেউ আমার পিছু নিয়েছে।".
 - Counted with `smsParts()` in `js/bipod.js`:
 
 | Message (Hatiya, with link) | Bangla: chars → SMS | English: chars → SMS |
 |---|---|---|
-| বিপদে আছি / In danger | 208 → **4** | 215 → **2** |
-| কেউ পিছু নিয়েছে / Being followed | 212 → **4** | 222 → **2** |
-| দুর্ঘটনা / Accident | 195 → **3** | 200 → **2** |
-| অসুস্থ / Sick | 200 → **3** | 205 → **2** |
-| পথ হারিয়েছি / Lost | 191 → **3** | 192 → **2** |
-| Outside our data | 164 → **3** | 164 → **2** |
-| No location | 150 → **3** | 150 → **1** |
+| বিপদে আছি / In danger | 192 → **3** | 203 → **2** |
+| কেউ পিছু নিয়েছে / Being followed | 184 → **3** | 210 → **2** |
+| দুর্ঘটনা / Accident | 183 → **3** | 188 → **2** |
+| অসুস্থ / Sick | 188 → **3** | 193 → **2** |
+| পথ হারিয়েছি / Lost | 179 → **3** | 180 → **2** |
+| Outside our data | 152 → **3** | 152 → **1** |
+| No location | 175 → **3** | 175 → **2** |
 | Safe | 31 → **1** | 27 → **1** |
 
-### Questions for the review (Jerin + Claude chat)
+### Review decisions (Jerin + Claude chat, 2 Nov 2026)
 
-1. **Digits in the SMS** (bangla-reviewer: use "999"). The SMS now says "আগে 999-এ কল করো।" with normal digits, because messages apps reliably make "999" tappable but not "৯৯৯". The pages keep "৯৯৯" in Bangla mode. OK?
-2. **Tone** (bangla-reviewer: keep). The SMS uses "তুমি" forms ("কল করো") because it goes to family, like the existing "এখনই আমাকে ফোন করো". The pages use "আপনি".
-3. **Dropped lines** (bangla-reviewer: OK). "(SafeConnect থেকে পাঠানো)" and the time line are dropped to save SMS parts: the phone stamps the arrival time, and the help page shows how old the location is. Their unused texts were removed.
-6. **iPhone.** We assume an iPhone opens an SMS for one person at a time (as the queue says), so the big button opens it for the first person. Please check on a real iPhone whether a group SMS opens.
-4. **Shorter link.** A shorter link would save 1 Bangla SMS part, for example a short custom domain later (zero budget: GitHub Pages only for now).
-5. **"থানা" label.** We use "থানা" when the upazila has its own police record. Some upazilas have more than one police station; we take the first record in the data.
+1. **Digits:** "999" with normal digits in the SMS. OK as it is.
+2. **Tone:** "তুমি" forms in the SMS, "আপনি" on the pages. OK as it is.
+3. **Dropped lines:** no sign-off and no time line in the SMS. OK as it is.
+4. **Shorter link:** done, `https://jerin101.github.io/safe-connect/#/help/…` (#141, #143). Every Bangla message now fits in 3 SMS.
+5. **"থানা" label:** only for the thana's officer-in-charge; anything else is "পুলিশ:" (#143).
+6. **iPhone:** keep as it is (the big button opens the SMS for the first person; the list has the others).
+7. **Safety when followed** (new): the no-location text asks for a message first, and the help page for "কেউ পিছু নিয়েছে" starts with "ফোন করার আগে মেসেজ করুন…" (#143).
