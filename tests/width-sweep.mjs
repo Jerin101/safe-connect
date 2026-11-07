@@ -40,7 +40,9 @@ async function connect(url) {
   let id = 0; const waiting = new Map(); const listeners = [];
   ws.addEventListener('message', (m) => { const d = JSON.parse(m.data); if (waiting.has(d.id)) { waiting.get(d.id)(d.result || {}); waiting.delete(d.id); } else listeners.forEach((f) => f(d)); });
   return { on: (f) => listeners.push(f), close: () => ws.close(),
-    send: (method, params = {}) => new Promise((r) => { const i = ++id; waiting.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); }) };
+    // 15 s per request: a page that stops answering is reported as a failed case instead of hanging the run.
+    send: (method, params = {}) => Promise.race([new Promise((r) => { const i = ++id; waiting.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); }),
+      new Promise((r) => { const t = setTimeout(() => r({}), 15000); t.unref(); })]) };
 }
 let version = null;
 for (let i = 0; i < 50 && !version; i++) { await wait(200); version = await fetch(`http://127.0.0.1:${PORT}/json/version`).then((r) => r.json()).catch(() => null); }
@@ -108,6 +110,9 @@ for (const pg of PAGES) for (const lang of ['bn', 'en']) for (const signed of [f
   await ev(`localStorage.clear(); localStorage.setItem('sc-lang','${lang}'); localStorage.setItem('sc-welcomed','1');
     localStorage.setItem('sc-last', JSON.stringify({ district: 'noakhali', upazila: 'Begumganj', area: null }));
     ${signed ? "localStorage.setItem('sc-signed-in','1');" : ''} true`);
+  // A blank page first: from BASE to BASE#/... only the # part changes, the page would not reload and would keep
+  // the language and sign-in of the round before (tester, #146).
+  await page.send('Page.navigate', { url: 'about:blank' }); await wait(100);
   await page.send('Page.navigate', { url: BASE + pg }); await wait(300);
   // Wait until the page has drawn itself (page set, header texts filled), at most 15 s.
   for (let i = 0; i < 60; i++) {

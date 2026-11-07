@@ -2,7 +2,7 @@
 // No page, no storage, no network: the coordinates live only in the SMS and after the # of the link
 // (CLAUDE.md rule 5). Tested in tests/bipod-test.mjs.
 
-export const SITE_URL = 'https://jerin101.github.io/safe-connect/preview.html';
+export const SITE_URL = 'https://jerin101.github.io/safe-connect/';   // the site is index.html (#141); old preview.html links still work
 export const SITUATIONS = ['danger', 'followed', 'accident', 'sick', 'lost'];
 
 // A box around Bangladesh (incl. St Martin's Island): a link outside it shows the calm "check the link" page.
@@ -26,6 +26,17 @@ export function parseHelp(text, now = Date.now()) {
   if (at > now + 10 * 60000) return { ok: false, reason: 'broken' };   // a phone clock a few minutes off is fine
   if (!inBangladesh(lat, lon)) return { ok: false, reason: 'outside' };
   return { ok: true, lat, lon, at, situation: SITUATIONS.includes(m[4]) ? m[4] : null };
+}
+
+// The police number for the SMS (#143): the thana's officer-in-charge when the upazila has one (office with
+// "থানা", post with "অফিসার ইনচার্জ"); else the first police record, which the SMS labels "পুলিশ:" instead of "থানা:".
+// items: the police group from areaContacts (already only records with a number). Returns { record, thana } or null.
+const has = (text, word) => String(text || '').normalize('NFC').includes(word);
+export function pickPolice(items) {
+  const list = (items || []).filter((r) => r.phones?.length && r.kind !== 'national');
+  const oc = list.find((r) => has(r.office_bn, 'থানা') && has(r.designation_bn, 'অফিসার ইনচার্জ'));
+  if (oc) return { record: oc, thana: true };
+  return list.length ? { record: list[0], thana: false } : null;
 }
 
 export const minutesAgo = (at, now = Date.now()) => Math.max(0, Math.floor((now - at) / 60000));
