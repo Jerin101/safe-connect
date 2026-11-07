@@ -1,6 +1,6 @@
 {
  "note": "Local names people use (towns, markets, post offices, landmarks) that are not in the official area or village lists. Each entry needs either an official source_url, or source 'local name, added by the team' with the team member who confirmed it. Never guess a union or town: if it is not confirmed, leave union_bn and municipality_bn null (the site then shows the whole upazila). Used only by the area search; no phone numbers here.",
- "fields": "id, name_bn, name_en, type, district, upazila_en, municipality_bn, union_bn, source, source_note, source_url, added_by, added_on",
+ "fields": "id, name_bn, name_en, also (other spellings), type, district, upazila_en, municipality_bn, union_bn, village_bn, source, source_note, source_url, added_by, added_on",
  "aliases": [
   {
    "id": "alias-maijdee",
@@ -29,6 +29,27 @@
    "source_url": "https://sharifpurup.noakhali.gov.bd/pages/static-pages/6990ef2935ce18e1c072be5f",
    "added_by": "jerin101",
    "added_on": "2026-10-22"
+  },
+  {
+   "id": "alias-kashem-bazar",
+   "name_bn": "কাশেম বাজার",
+   "name_en": "Kashem Bazar",
+   "also": [
+    "কাসেম বাজার",
+    "Kasem Bazar",
+    "Kashembazar"
+   ],
+   "type": "bazar",
+   "district": "Noakhali",
+   "upazila_en": "Noakhali Sadar",
+   "municipality_bn": null,
+   "union_bn": "নিয়াজপুর ইউনিয়ন",
+   "village_bn": "ধর্মপুর",
+   "source": "local name, added by the team",
+   "source_note": "Kashem Bazar is a bazar in Dharmapur (ধর্মপুর) village. Dharmapur is on the official village list of Newajpur (নিয়াজপুর) union, Noakhali Sadar (source_url). The bazar itself is not on an official list; added by the team.",
+   "source_url": "https://newajpurup.noakhali.gov.bd/pages/static-pages/6990ef0235ce18e1c072ac6d",
+   "added_by": "jerin101",
+   "added_on": "2026-11-02"
   }
  ]
 }
