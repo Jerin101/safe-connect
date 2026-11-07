@@ -275,7 +275,96 @@
     "clearArea": "✕ Remove",
     "clearAreaLabel": "Remove the last area",
     "noArea": "Don't remember my area",
-    "areaCleared": "Last area removed."
+    "areaCleared": "Last area removed.",
+    "prepare": {
+      "title": "Prepare ahead",
+      "link": "Prepare ahead: turn on your phone's own SOS →",
+      "intro": "Most phones have their own Emergency SOS. When it is on, pressing a button a few times can send your location to your people, even without opening SafeConnect. Below are the official instructions of each company.",
+      "checkTitle": "Three things",
+      "check": [
+        "Turn on your phone's SOS (find your phone's company below).",
+        "Save your people's numbers: in the phone's SOS and in SafeConnect.",
+        "Check once: see that the settings are right and tell your people."
+      ],
+      "warn": "Never test by calling 999 or by starting SOS. If an emergency call goes out by mistake, don't hang up: tell the operator it was a mistake.",
+      "brandsTitle": "Your phone's company",
+      "official": "Company's official help page",
+      "none": "We found no instructions on this company's official help pages, so we don't name any menu. See the phone's manual or ask the company's service centre.",
+      "unread": "The company has an official page, but we could not open it to check, so we list no steps. See the instructions at the link below.",
+      "note": "Phone companies can change their menus. If it doesn't match, see the company's page.",
+      "brands": {
+        "apple": {
+          "name": "iPhone (Apple)",
+          "steps": [
+            "Go to Settings > Emergency SOS and turn on “Call with 5 Presses”.",
+            "Add Emergency Contacts in the Health app.",
+            "When an emergency call ends, your iPhone texts your emergency contacts with your location (if available)."
+          ]
+        },
+        "samsung": {
+          "name": "Samsung",
+          "steps": [
+            "Open Settings > Safety and emergency > Emergency SOS.",
+            "Turn on “Send SOS to emergency contacts” and add your people with Add contacts.",
+            "Pressing the Side button five times in a row starts SOS."
+          ],
+          "note": "Samsung's page says the phone needs an active SIM card to send an SOS alert."
+        },
+        "pixel": {
+          "name": "Google Pixel",
+          "steps": [
+            "In Settings > Safety and emergency > Emergency SOS, tap Start setup.",
+            "To share your location, add your people with Add contact.",
+            "Pressing the power button five times or more starts SOS."
+          ],
+          "note": "Google's page says Emergency SOS doesn't work in airplane mode or when Battery Saver is on."
+        },
+        "xiaomi": {
+          "name": "Xiaomi / Redmi",
+          "steps": [
+            "Open Settings > Safety & emergency > Emergency SOS.",
+            "Turn on “Share info with emergency contacts”: your location is shared in an emergency.",
+            "Pressing the power button quickly five times or more starts SOS."
+          ],
+          "note": "Xiaomi's official page does not say how to add emergency contacts."
+        },
+        "realme": {
+          "name": "realme",
+          "steps": []
+        },
+        "oppo": {
+          "name": "OPPO",
+          "steps": []
+        },
+        "vivo": {
+          "name": "vivo",
+          "steps": []
+        },
+        "infinix": {
+          "name": "Infinix",
+          "steps": []
+        },
+        "tecno": {
+          "name": "Tecno",
+          "steps": []
+        }
+      },
+      "liveTitle": "Turn on live location in WhatsApp",
+      "liveWhy": "Our message sends your location once, at the moment you send it. WhatsApp and Google Maps keep sending it for the time you choose, even after you close SafeConnect.",
+      "liveOpen": "Open WhatsApp",
+      "waTitle": "In WhatsApp",
+      "waSteps": [
+        "Open the chat of the person you want to send to.",
+        "Tap Attach (📎) > Location > Share live location.",
+        "Choose how long, then tap Send."
+      ],
+      "mapsTitle": "Or in Google Maps",
+      "mapsSteps": [
+        "Open Google Maps and tap your profile picture.",
+        "Tap Location sharing > New share.",
+        "Choose the time and the people, then tap Share."
+      ]
+    }
   },
   "page": {
     "greet": {
@@ -409,7 +498,8 @@
       "about": "About",
       "faq": "Questions",
       "account": "Account",
-      "help": "Danger message location"
+      "help": "Danger message location",
+      "prepare": "Prepare ahead"
     },
     "seeMore": "See more",
     "notFound": "We could not find the area in this link. Type its name below to search.",
