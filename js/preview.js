@@ -88,17 +88,34 @@ function renderSuggest() {
   const box = $('suggest');
   if (norm(q).length < 2) { box.hidden = true; return; }
   const only = $('distSel').value;
-  const { hits, close } = findAreas(areaIndex, q, { district: only });
-  if (hits.length) { box.replaceChildren(...hits.map(suggestButton)); box.hidden = false; return; }
-  // Never a dead end: similar names, then the upazila list, then GPS and 999.
+  const { hits, close, context, missing, elsewhere } = findAreas(areaIndex, q, { district: only });
+  const areaLabel = (c) => (c.kind === 'district' ? (lang === 'bn' ? districtOf(c.place.district).bn : districtOf(c.place.district).en)
+    : c.place.area ? `${areaName(c.place.area)}, ${upazilaName(c.place.district, c.place.upazila)}` : upazilaName(c.place.district, c.place.upazila));
+  if (hits.length) {
+    // not in the area the person named: say so, then the places of that name elsewhere (#151 review)
+    const note = elsewhere ? [el('li', 'none', fill(t().elsewhere, { c: areaLabel(elsewhere) }))] : [];
+    box.replaceChildren(...note, ...hits.map(suggestButton)); box.hidden = false; return;
+  }
+  // Never a dead end: the area the person named (#151), similar names, then the upazila list, then GPS and 999.
   const s = t();
-  const parts = [el('li', 'none', close.length ? s.noExact : s.noMatch)];
+  const parts = [];
+  if (context) {
+    const name = areaLabel(context);
+    parts.push(el('li', 'none', fill(s.notFoundBut, { n: missing, c: name })));
+    if (context.kind !== 'district') {
+      const li = el('li');
+      const go = el('button', 'btn violet ctx-open', fill(s.openContext, { c: name })); go.type = 'button';
+      go.addEventListener('click', () => openArea({ ...context.place }, null));
+      li.append(go); parts.push(li);
+    }
+  } else parts.push(el('li', 'none', close.length ? s.noExact : s.noMatch));
   if (close.length) { parts.push(el('li', 'group', s.didYouMean)); close.forEach((h) => parts.push(suggestButton(h))); }
   const ups = el('li', 'fallback-box');
   ups.append(el('p', null, s.pickUpazila));
   const chips = el('div', 'chips');
+  const pick = only || (context ? context.place.district : '');   // a named district shows only its upazilas
   for (const d of DISTRICTS) {
-    if (only && d.key !== only) continue;
+    if (pick && d.key !== pick) continue;
     const doc = data.docs[d.key]; if (!doc) continue;
     for (const u of upazilas(doc)) {
       const c = el('button', 'chip', lang === 'bn' ? u.bn : u.en); c.type = 'button';
@@ -758,7 +775,9 @@ const smsLang = () => (sos.short && lang === 'bn' ? 'en' : lang);
 function areaText(place, l) {
   if (!place || place.outside) return '';
   const d = districtOf(place.district);
-  return l === 'bn' ? `${upazilaName(place.district, place.upazila)}, ${d.bn}` : `${place.upazila}, ${d.en}`;
+  // A Sadar upazila already names its district: "এলাকা: নোয়াখালী সদর", not "নোয়াখালী সদর, নোয়াখালী" (keeps the SMS in 3 parts).
+  const up = l === 'bn' ? upazilaName(place.district, place.upazila) : place.upazila, dn = l === 'bn' ? d.bn : d.en;
+  return up.startsWith(dn) ? up : `${up}, ${dn}`;
 }
 function policeOf(place) {
   if (!place || place.outside || !data) return null;
