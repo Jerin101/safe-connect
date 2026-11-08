@@ -61,7 +61,8 @@ function itemLabel(h) {
   if (named) p.label = named;
   // A name the team added from local knowledge says so: "কাশেম বাজার (স্থানীয়ভাবে জানা নাম)" (#149); others show their type.
   const teamName = h.kind === 'local' && /^local name, added by the team/.test(h.named?.source || '');
-  const kindWord = (teamName && t().kinds.known) || (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
+  const kindWord = (teamName && t().kinds.known) || (h.kind === 'thana' && fill(t().kinds.thanaOf, { u: upazilaName(p.district, p.upazila) }))   // "সুধারাম মডেল থানা (নোয়াখালী সদর উপজেলা)" (#153)
+    || (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
   let title;
   if (h.kind === 'village') title = h.village;
   else if (named) title = named;

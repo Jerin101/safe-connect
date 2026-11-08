@@ -33,6 +33,7 @@ const FILES = [
   'data/manual_additions.json',
   'data/villages.json',
   'data/aliases.json',
+  'data/thanas.json',
   'data/contacts_noakhali.json',
   'data/contacts_coxsbazar.json',
   'data/locations.json',

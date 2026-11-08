@@ -1,0 +1,196 @@
+{
+ "note": "Police stations (থানা) and the upazila each belongs to, for the area search only: a thana name leads to its upazila. No phone numbers here (those stay in the contact files). Every row has an official source and a quote. proof: 'statement' = the page says it in a sentence; 'table' = a row of the district's upazila/thana table; 'portal' = the thana's own official portal lives under that upazila's domain and names it (no sentence found). Totals: noakhali.gov.bd '১০টি থানা', coxsbazar.gov.bd 'থানা : ০৯ টি'. Collected by the source-researcher on 2026-11-06.",
+ "fields": "name_bn, name_en, district, upazila_en, proof, source_url, source_quote_bn, checked_on",
+ "thanas": [
+  {
+   "name_bn": "সুধারাম মডেল থানা",
+   "name_en": null,
+   "district": "Noakhali",
+   "upazila_en": "Noakhali Sadar",
+   "proof": "statement",
+   "source_url": "https://noakhali.police.gov.bd/content/130.html",
+   "source_quote_bn": "নোয়াখালী সদর উপজেলায় ১টি পৌরসভা ও ১৩টি ইউনিয়ন রয়েছে। সম্পূর্ণ উপজেলার প্রশাসনিক কার্যক্রম সুধারাম মডেল থানার আওতাধীন।",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "বেগমগঞ্জ থানা",
+   "name_en": null,
+   "district": "Noakhali",
+   "upazila_en": "Begumganj",
+   "proof": "statement",
+   "source_url": "https://noakhali.police.gov.bd/content/133.html",
+   "source_quote_bn": "বেগমগঞ্জ থানা গঠিত হয় ১৮৯২ সালে। বর্তমানে এটি উপজেলা। এ উপজেলায় ১টি পৌরসভা ও ১৬টি ইউনিয়ন রয়েছে। সম্পূর্ণ উপজেলার প্রশাসনিক কার্যক্রম বেগমগঞ্জ থানার আওতাধীন।",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "কোম্পানীগঞ্জ থানা",
+   "name_en": null,
+   "district": "Noakhali",
+   "upazila_en": "Companiganj",
+   "proof": "statement",
+   "source_url": "https://noakhali.police.gov.bd/content/140.html",
+   "source_quote_bn": "কোম্পানীগঞ্জ উপজেলায় বর্তমানে ১টি পৌরসভা ও ৮টি ইউনিয়ন রয়েছে। সম্পূর্ণ উপজেলার প্রশাসনিক কার্যক্রম কোম্পানীগঞ্জ থানার আওতাধীন।",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "কবিরহাট থানা",
+   "name_en": null,
+   "district": "Noakhali",
+   "upazila_en": "Kabirhat",
+   "proof": "statement",
+   "source_url": "https://noakhali.police.gov.bd/content/142.html",
+   "source_quote_bn": "কবিরহাট উপজেলায় বর্তমানে ১টি পৌরসভা ও ৭টি ইউনিয়ন রয়েছে। সম্পূর্ণ উপজেলার প্রশাসনিক কার্যক্রম কবিরহাট থানার আওতাধীন।",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "চরজব্বর থানা",
+   "name_en": null,
+   "district": "Noakhali",
+   "upazila_en": "Subarnachar",
+   "proof": "portal",
+   "source_url": "https://noakhali.police.gov.bd/content/143.html",
+   "source_quote_bn": "চরজব্বর থানা … সুবর্ণচর উপজেলায় ৮টি ইউনিয়ন রয়েছে। সম্পূর্ণ উপজেলার প্রশাসনিক কার্যক্রম সুবর্ণচর থানার আওতাধীন।",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "হাতিয়া থানা",
+   "name_en": null,
+   "district": "Noakhali",
+   "upazila_en": "Hatiya",
+   "proof": "statement",
+   "source_url": "https://noakhali.police.gov.bd/content/144.html",
+   "source_quote_bn": "হাতিয়া উপজেলায় বর্তমানে ১টি পৌরসভা ও ১১টি ইউনিয়ন রয়েছে। সম্পূর্ণ উপজেলার প্রশাসনিক কার্যক্রম হাতিয়া থানার আওতাধীন।",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "চাটখিল থানা",
+   "name_en": null,
+   "district": "Noakhali",
+   "upazila_en": "Chatkhil",
+   "proof": "statement",
+   "source_url": "https://noakhali.police.gov.bd/content/145.html",
+   "source_quote_bn": "চাটখিল উপজেলায় বর্তমানে ১টি পৌরসভা ও ৯টি ইউনিয়ন রয়েছে। সম্পূর্ণ উপজেলার প্রশাসনিক কার্যক্রম চাটখিল থানার আওতাধীন।",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "সেনবাগ থানা",
+   "name_en": null,
+   "district": "Noakhali",
+   "upazila_en": "Senbagh",
+   "proof": "table",
+   "source_url": "https://noakhali.gov.bd/pages/static-pages/6990eefd35ce18e1c072a9f6",
+   "source_quote_bn": "উপজেলা | আয়তন | প্রশাসনিক থানা … ৭ | সেনবাগ | ১৫৯.৩৬ | সেনবাগ | পৌরসভা (১টি): সেনবাগ",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "সোনাইমুড়ী থানা",
+   "name_en": null,
+   "district": "Noakhali",
+   "upazila_en": "Sonaimuri",
+   "proof": "statement",
+   "source_url": "https://noakhali.police.gov.bd/content/147.html",
+   "source_quote_bn": "সোনাইমুড়ি উপজেলায় বর্তমানে ১টি পৌরসভা ও ১০টি ইউনিয়ন রয়েছে। সম্পূর্ণ উপজেলার প্রশাসনিক কার্যক্রম সোনাইমুড়ি থানার আওতাধীন।",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "ভাসানচর থানা",
+   "name_en": null,
+   "district": "Noakhali",
+   "upazila_en": "Hatiya",
+   "proof": "statement",
+   "source_url": "https://noakhali.police.gov.bd/content/230.html",
+   "source_quote_bn": "ভাসানচর থানা বাংলাদেশের নোয়াখালী জেলার অন্তর্গত হাতিয়া উপজেলার একটি থানা।",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "কক্সবাজার সদর মডেল থানা",
+   "name_en": null,
+   "district": "Cox's Bazar",
+   "upazila_en": "Cox's Bazar Sadar",
+   "proof": "portal",
+   "source_url": "https://police.sadar.coxsbazar.gov.bd/",
+   "source_quote_bn": "মডেল থানা, কক্সবাজার সদর",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "রামু থানা",
+   "name_en": null,
+   "district": "Cox's Bazar",
+   "upazila_en": "Ramu",
+   "proof": "portal",
+   "source_url": "https://police.ramu.coxsbazar.gov.bd/",
+   "source_quote_bn": "থানা, রামু, কক্সবাজার",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "উখিয়া থানা",
+   "name_en": null,
+   "district": "Cox's Bazar",
+   "upazila_en": "Ukhia",
+   "proof": "statement",
+   "source_url": "https://ukhiya.coxsbazar.gov.bd/pages/static-pages/eknazare-ukhia-568c09-6991215c516a96d4de401f5b",
+   "source_quote_bn": "উখিয়া উপজেলার মৌলিক তথ্যাবলিঃ … উখিয়া থানা প্রতিষ্ঠাকাল : ১৯০৮ সাল, উখিয়া উপজেলায় উন্নীত : ০৭-১১-১৯৮৩ খ্রি:",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "টেকনাফ মডেল থানা",
+   "name_en": null,
+   "district": "Cox's Bazar",
+   "upazila_en": "Teknaf",
+   "proof": "portal",
+   "source_url": "https://police.teknaf.coxsbazar.gov.bd/",
+   "source_quote_bn": "মডেল থানা, টেকনাফ, কক্সবাজার",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "চকরিয়া থানা",
+   "name_en": null,
+   "district": "Cox's Bazar",
+   "upazila_en": "Chakaria",
+   "proof": "portal",
+   "source_url": "https://police.chakaria.coxsbazar.gov.bd/",
+   "source_quote_bn": "থানা, চকরিয়া,কক্সবাজার",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "পেকুয়া থানা",
+   "name_en": null,
+   "district": "Cox's Bazar",
+   "upazila_en": "Pekua",
+   "proof": "portal",
+   "source_url": "https://police.pekua.coxsbazar.gov.bd/",
+   "source_quote_bn": "থানা, পেকুয়া,কক্সবাজার",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "মহেশখালী থানা",
+   "name_en": null,
+   "district": "Cox's Bazar",
+   "upazila_en": "Maheshkhali",
+   "proof": "portal",
+   "source_url": "https://police.moheshkhali.coxsbazar.gov.bd/",
+   "source_quote_bn": "থানা, মহেশখালী",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "কুতুবদিয়া থানা",
+   "name_en": null,
+   "district": "Cox's Bazar",
+   "upazila_en": "Kutubdia",
+   "proof": "portal",
+   "source_url": "https://police.kutubdia.coxsbazar.gov.bd/",
+   "source_quote_bn": "থানা, কুতুবদিয়া, কক্সবাজার",
+   "checked_on": "2026-11-06"
+  },
+  {
+   "name_bn": "ঈদগাঁও থানা",
+   "name_en": null,
+   "district": "Cox's Bazar",
+   "upazila_en": "Eidgaon",
+   "proof": "statement",
+   "source_url": "https://eidgaon.coxsbazar.gov.bd/pages/static-pages/list-of-unions-xa6lx8-6a5321c1306e967d3d7566b7",
+   "source_quote_bn": "কক্সবাজার জেলার ৫টি ইউনিয়ন নিয়ে উপজেলাটি গঠিত হয়। অত্র উপজেলা ঈদগাঁও থানার আওতাধীন।",
+   "checked_on": "2026-11-06"
+  }
+ ]
+}

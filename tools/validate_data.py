@@ -82,10 +82,33 @@ def check_areas(f):
     if n < 4000: err(f, "-", f"only {n} unions – download probably incomplete")
 
 
+def check_thanas(f):
+    # Thana -> upazila for the search (#153): every row official, quoted, and pointing to an upazila we have.
+    d = load(f)
+    have = {}
+    for c in os.listdir(DATA):
+        if c.startswith("contacts_") and c.endswith(".json"):
+            for r in load(c)["records"]:
+                if r.get("upazila_en"): have.setdefault(r.get("district"), set()).add(r["upazila_en"])
+    seen = set()
+    for i, t in enumerate(d.get("thanas", [])):
+        rid = t.get("name_bn") or f"row {i}"
+        if not t.get("name_bn"): err(f, rid, "name_bn missing")
+        if t.get("upazila_en") not in have.get(t.get("district"), set()): err(f, rid, f"upazila {t.get('upazila_en')!r} is not in the {t.get('district')} contact data")
+        if not OFFICIAL.match(t.get("source_url") or ""): err(f, rid, "source_url must be an official https page")
+        if not (t.get("source_quote_bn") or "").strip(): err(f, rid, "source_quote_bn missing")
+        if t.get("proof") not in {"statement", "table", "portal"}: err(f, rid, "proof must be statement, table or portal")
+        if not re.match(r"^20[0-9]{2}-[01][0-9]-[0-3][0-9]$", t.get("checked_on") or ""): err(f, rid, "checked_on must be YYYY-MM-DD")
+        if any(re.search(r"01[3-9][0-9]{8}", str(v)) for v in t.values()): err(f, rid, "no phone numbers in this file")
+        if (t.get("district"), t.get("name_bn")) in seen: err(f, rid, "duplicate")
+        seen.add((t.get("district"), t.get("name_bn")))
+
+
 for name in sorted(os.listdir(DATA)):
     if name == "national_hotlines.json": check_national(name)
     elif (name.startswith("contacts_") or name == "manual_additions.json") and name.endswith(".json"): check_district(name)
     elif name == "areas_bangladesh.json": check_areas(name)
+    elif name == "thanas.json": check_thanas(name)
 
 for w in warnings: print("WARNING", w)
 for e in errors[:50]: print("ERROR  ", e)

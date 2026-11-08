@@ -77,7 +77,8 @@
       "market and post office": "market and post office",
       "market": "market",
       "post office": "post office",
-      "known": "known locally"
+      "known": "known locally",
+      "thanaOf": "{u} upazila"
     },
     "recent": "Last area: {n}",
     "denied": "Location is not allowed. Turn on location in your phone settings, or type your area below.",

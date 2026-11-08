@@ -23,11 +23,12 @@ const noManual = { records: [], places: [] };
 // A district file that fails to load is left out (listed in `missing`), so the
 // national hotlines and the other district still work.
 export async function loadAll(base = 'data/') {
-  const [national, manual, villages, aliases, ...files] = await Promise.all([
+  const [national, manual, villages, aliases, thanas, ...files] = await Promise.all([
     getJSON(`${base}national_hotlines.json`),
     getJSON(`${base}manual_additions.json`).catch(() => noManual),
     getJSON(`${base}villages.json`).catch(() => ({ unions: [] })),       // official village lists (optional)
     getJSON(`${base}aliases.json`).catch(() => ({ aliases: [] })),       // local names added by the team (optional)
+    getJSON(`${base}thanas.json`).catch(() => ({ thanas: [] })),         // thana -> upazila, official sources (#153, optional)
     ...DISTRICTS.map((d) => getJSON(base + d.file).catch(() => null)),
   ]);
   const docs = {};
@@ -46,7 +47,7 @@ export async function loadAll(base = 'data/') {
   const officialVillages = (villages.unions || []).flatMap((u) => u.villages.map(([name, ward]) => ({
     district: u.district, upazila_bn: u.upazila_bn, union_bn: u.union_bn, union_en: u.union_en,
     village_bn: name, ward_no: ward, source_url: u.source_url })));
-  return { national: nationalCards, docs, missing, villages: officialVillages, aliases: aliases.aliases || [] };
+  return { national: nationalCards, docs, missing, villages: officialVillages, aliases: aliases.aliases || [], thanas: thanas.thanas || [] };
 }
 
 function nationalCard(r, checkedOn) {
@@ -259,6 +260,11 @@ export function areaIndex(data) {
       const upz = upByBn.get(norm(p.upazila_bn));
       if (upz) add({ kind: 'place', place: { district: d.key, upazila: upz, area: { type: 'union', bn: norm(p.union_bn) }, placeId: p.id }, named: p }, [p.name_bn, p.name_en]);
     }
+    for (const th of (data.thanas || []).filter((x) => x.district === doc.district)) {
+      if (!ups.some((u) => u.en === th.upazila_en)) continue;
+      const core = norm(th.name_bn).replace(new RegExp(`\\s*(${norm('মডেল')}\\s*)?${norm('থানা')}$`), '');
+      add({ kind: 'thana', place: { district: d.key, upazila: th.upazila_en, area: null }, named: th }, [th.name_bn, core, th.name_en || '']);
+    }
     for (const a of (data.aliases || []).filter((x) => x.district === doc.district)) {
       // A local name links to its union or town only when that was confirmed; otherwise to the whole upazila.
       const area = (a.municipality_bn && areaOf(a.upazila_en, 'municipality', a.municipality_bn))
@@ -316,7 +322,7 @@ const COMMON_KEYS = [...new Set(['বাজার', 'bazar', 'bajar', 'হাট
   .sort((a, b) => b.length - a.length);
 const stripCommon = (k) => { const c = COMMON_KEYS.find((x) => k.length > x.length && k.endsWith(x)); return c ? k.slice(0, -c.length) : k; };
 
-const KIND_ORDER = { municipality: 0, local: 1, place: 1, union: 2, village: 3, upazila: 4 };
+const KIND_ORDER = { municipality: 0, local: 1, place: 1, union: 2, village: 3, upazila: 4, thana: 4 };
 
 // { hits: real matches (best first), close: similar names } for one place name.
 function matchName(index, q, { district = '' } = {}) {
@@ -351,7 +357,7 @@ function matchName(index, q, { district = '' } = {}) {
 const words = (list) => new Set(list.map((w) => norm(w).toLowerCase()));
 const FILLER = words(['জেলা', 'উপজেলা', 'থানা', 'ইউনিয়ন', 'পৌরসভা', 'গ্রাম', 'এর', 'কাছে', 'কাছাকাছি', 'পাশে', 'er', 'kache', 'kase', 'kachhe',
   'near', 'nearby', 'zila', 'zilla', 'district', 'upazila', 'upozila', 'thana', 'union', 'village', 'gram', 'pourashava', 'municipality',
-  'police', 'station', 'ps', 'পুলিশ', 'স্টেশন']);
+  'police', 'station', 'ps', 'পুলিশ', 'স্টেশন', 'মডেল', 'model']);   // "মডেল থানা" is a kind of thana, not a name (#154 review)
 const COMMON = words(['বাজার', 'bazar', 'bajar', 'হাট', 'hat', 'পাড়া', 'para', 'চর', 'char', 'স্কুল', 'school', 'skul', 'দ্বীপ', 'dwip', 'dip', 'island']);
 // Direction words: part of a village name ("উত্তর শরীফপুর"), never a place on their own (#152 review 4)
 const DIRECTION = words(['উত্তর', 'দক্ষিণ', 'দক্ষিন', 'পূর্ব', 'পশ্চিম', 'মধ্য', 'uttar', 'dakkhin', 'dakshin', 'purba', 'paschim', 'poschim', 'moddho', 'madhya', 'north', 'south', 'east', 'west', 'middle']);
@@ -444,6 +450,7 @@ function findAreasRaw(index, q, opts = {}) {
   const words = all.filter((w) => !FILLER.has(w));
   const exactly = (r) => r.hits.filter((h) => (h.names || []).some((n) => norm(n).toLowerCase() === words.join(' ')));
   if (!context.length) {
+    if (!words.length) return { hits: [], close: [] };             // only filler ("থানা", "মডেল থানা"): no place (#154 review)
     if (!onlyCommon) return matchName(index, place || q, opts);
     // "bazar" alone is no place; but a place NAMED only with such words ("বাজার পাড়া") is found when written exactly
     return words.length > 1 ? { hits: exactly(matchName(index, words.join(' '), opts)), close: [] } : { hits: [], close: [] };
