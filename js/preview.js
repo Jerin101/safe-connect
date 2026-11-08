@@ -70,10 +70,35 @@ function itemLabel(h) {
   else title = upazilaName(p.district, p.upazila);
   if (h.kind === 'village') p.label = `${h.village} (${kindWord})`;
   // The village is known only in Bangla; English leaves it out rather than mixing scripts (#149).
-  const village = h.kind === 'local' && h.named?.village_bn && lang === 'bn' ? `${h.named.village_bn}, ` : '';   // "ধর্মপুর, নিয়াজপুর ইউনিয়ন, …"
-  const where = (h.kind === 'village' || h.kind === 'local') && h.place.area ? `${village}${areaName(h.place.area)}, ` : '';
+  // The full address (#155): village · union or town · upazila (thana) · district; each part only once.
+  const parts = [];
+  if (h.kind === 'local' && h.named?.village_bn && lang === 'bn') parts.push(h.named.village_bn);   // the village is known only in Bangla
+  if ((h.kind === 'village' || h.kind === 'local' || h.kind === 'place') && h.place.area) {
+    // named places keep only the Bangla union name: the full entry has the English one too
+    const full = localAreas(data.docs[p.district], p.upazila).find((x) => x.type === h.place.area.type && x.bn === norm(h.place.area.bn));
+    parts.push(areaName(full || h.place.area));
+  }
+  if (h.place.area || h.kind === 'village' || h.kind === 'local') {
+    const th = thanaOf(p.district, p.upazila);
+    parts.push(th ? `${upazilaName(p.district, p.upazila)} (${th})` : upazilaName(p.district, p.upazila));
+  } else if (h.kind === 'upazila') {
+    const th = thanaOf(p.district, p.upazila);
+    if (th) parts.push(th);
+  }
+  const d = districtOf(p.district);
+  parts.push(lang === 'bn' ? d.bn : d.en);
   const ward = h.ward ? ` · ${t().ward} ${digits(h.ward)}` : '';
-  return { p, title: `${title} (${kindWord})`, sub: where + placeSub(p) + ward };
+  return { p, title: `${title} (${kindWord})`, sub: parts.join(', ') + ward };
+}
+// The upazila's thana, only when the official list (data/thanas.json) gives it exactly one thana with another name
+// (সুধারাম মডেল থানা for Noakhali Sadar). Bangla only: there are no official English thana names (#155).
+function thanaOf(dkey, upazilaEn) {
+  if (lang !== 'bn' || !data?.thanas) return '';
+  const dn = districtOf(dkey)?.en;
+  const list = data.thanas.filter((x) => x.district === dn && x.upazila_en === upazilaEn);
+  if (list.length !== 1) return '';
+  const core = (n) => norm(n).replace(/\s*(মডেল\s*)?থানা$/, '').replace(/\s*সদর$/, '');
+  return core(list[0].name_bn) === core(upazilaName(dkey, upazilaEn)) ? '' : norm(list[0].name_bn);
 }
 function suggestButton(h) {
   const li = el('li');
