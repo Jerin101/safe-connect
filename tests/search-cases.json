@@ -44,6 +44,11 @@
   {"q": "babunagar", "expect": "must NOT show মনিনগর", "not_anywhere": "মনিনগর"},
 
   {"q": "blorptanq", "expect": "nonsense word -> 999 fallback", "no_match": true, "no_similar": true},
-  {"q": "qwzx", "expect": "nonsense word -> 999 fallback", "no_match": true, "no_similar": true}
+  {"q": "qwzx", "expect": "nonsense word -> 999 fallback", "no_match": true, "no_similar": true},
+  {"q": "kashem bazar", "expect": "Kashem Bazar, a local name in Newajpur union (#149)", "first_contains": "কাশেম বাজার"},
+  {"q": "Kasem Bazar", "expect": "other spelling (#149)", "first_contains": "কাশেম বাজার"},
+  {"q": "kashembazar", "expect": "written as one word (#149)", "first_contains": "কাশেম বাজার"},
+  {"q": "কাশেম বাজার", "expect": "Bangla (#149)", "first_contains": "কাশেম বাজার"},
+  {"q": "কাসেম বাজার", "expect": "other Bangla spelling (#149)", "first_contains": "কাশেম বাজার"}
  ]
 }
