@@ -317,12 +317,12 @@
     "prepare": {
       "title": "Prepare ahead",
       "link": "Prepare ahead: turn on your phone's own SOS →",
-      "intro": "Most phones have their own Emergency SOS. When it is on, pressing a button a few times can send your location to your people, even without opening SafeConnect. Below are the official instructions of each company.",
+      "intro": "Most phones have their own Emergency SOS. When it is on, pressing a button a few times can send your location to your people, even without opening SafeConnect. On many phones this also calls the emergency number (999). Below are the official steps for the companies where we found them.",
       "checkTitle": "Three things",
       "check": [
         "Turn on your phone's SOS (find your phone's company below).",
         "Save your people's numbers: in the phone's SOS and in SafeConnect.",
-        "Check once: see that the settings are right and tell your people."
+        "Check once: see that the settings are right, and tell your people."
       ],
       "warn": "Never test by calling 999 or by starting SOS. If an emergency call goes out by mistake, don't hang up: tell the operator it was a mistake.",
       "brandsTitle": "Your phone's company",
@@ -361,7 +361,7 @@
           "name": "Xiaomi / Redmi",
           "steps": [
             "Open Settings > Safety & emergency > Emergency SOS.",
-            "Turn on “Share info with emergency contacts”: your location is shared in an emergency.",
+            "Turn on “Share info with emergency contacts”: your location is shared when SOS starts.",
             "Pressing the power button quickly five times or more starts SOS."
           ],
           "note": "Xiaomi's official page does not say how to add emergency contacts."
@@ -387,8 +387,8 @@
           "steps": []
         }
       },
-      "liveTitle": "Turn on live location in WhatsApp",
-      "liveWhy": "Our message sends your location once, at the moment you send it. WhatsApp and Google Maps keep sending it for the time you choose, even after you close SafeConnect.",
+      "liveTitle": "Turn on live location (WhatsApp or Google Maps)",
+      "liveWhy": "SafeConnect's message sends your location once, at the moment you send it. WhatsApp and Google Maps keep sending it for the time you choose, even after you close SafeConnect. This needs internet.",
       "liveOpen": "Open WhatsApp",
       "waTitle": "In WhatsApp",
       "waSteps": [
@@ -401,7 +401,8 @@
         "Open Google Maps and tap your profile picture.",
         "Tap Location sharing > New share.",
         "Choose the time and the people, then tap Share."
-      ]
+      ],
+      "liveFailed": "WhatsApp did not open. You can share live location with Google Maps instead (steps below)."
     }
   },
   "page": {
