@@ -6,12 +6,12 @@ must-find list. A name that is truly on no official or reference list goes to `d
 ## Where we start (9 Nov 2026)
 
 Measured with `node tests/must-find/run.mjs` on main `ca5f864` (with the phonetic search, #173). Entries with a data gap are
-left out of the % and listed in `docs/DATA_GAPS.md` §12 (1 in Noakhali, 17 in Cox's Bazar: 10 places, some in two lists).
+left out of the % and listed in `docs/DATA_GAPS.md` §12 (none in Noakhali; 14 entries in Cox's Bazar: 8 places, in English and Bangla).
 
 | District | Found | Unions (bn + en) | Pourashavas | Tourist spots (portals) | Banglapedia list | Jerin's names (en + bn) | Villages (bn + Banglish) |
 |---|---|---|---|---|---|---|---|
-| Noakhali | 287/317 (90.5%) | 175/175 | 8/8 | 4/34 | — | — | 100/100 |
-| Cox's Bazar | 264/346 (76.3%) | 142/142 | 4/4 | 5/50 | 1/16 | 12/34 | 100/100 |
+| Noakhali | 285/315 (90.5%) | 175/175 | 8/8 | 2/32 | — | — | 100/100 |
+| Cox's Bazar | 262/337 (77.7%) | 142/142 | 4/4 | 5/49 | 1/14 | 10/28 | 100/100 |
 
 Our data today:
 
