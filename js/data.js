@@ -1,6 +1,8 @@
 // SafeConnect data module: loads the data files and answers
 // "who should I call here?" in fallback-chain order (docs/BUILD_PLAN.md §4).
 
+import { soundKey as phoneKey, keysOf as phoneKeys, headsOf as phoneHeads, keyScore as phoneScore } from './phonetic.js';
+
 export const DISTRICTS = [
   { key: 'noakhali', file: 'contacts_noakhali.json', en: 'Noakhali', bn: 'নোয়াখালী' },
   { key: 'coxsbazar', file: 'contacts_coxsbazar.json', en: "Cox's Bazar", bn: 'কক্সবাজার' },
@@ -245,6 +247,8 @@ export function areaIndex(data) {
     item.keys = [...new Set(parts.map(soundKey).filter((k) => k.length >= 2))];       // whole names and single words
     item.fullKeys = [...new Set(names.map(soundKey).filter((k) => k.length >= 2))];   // whole names only
     item.vowels = names.map(vowelForm);
+    item.pkeys = phoneKeys(names);   // one sound for Bangla, English and Banglish ("sahapur", "himchori"; js/phonetic.js)
+    item.pheads = phoneHeads(names).map(([k, t]) => ({ k, v: vowelForm(t) }));   // first words, with their vowels
     item.names = names;
     items.push(item);
   };
@@ -295,7 +299,7 @@ export function areaIndex(data) {
 
 // Lower score = better. 0-2 text match, 3 same sound, 4 sound starts the same: these are real matches.
 // 5+ is only a close spelling: shown under "Similar names", never as if it were the place.
-export function scoreItem(item, s, key) {
+export function scoreItem(item, s, key, pq = phoneKey(s)) {
   const w = item.words.split(/\s+/);
   if (w.some((x) => x === s)) return 0;
   if (w.some((x) => x.startsWith(s))) return 1;
@@ -320,6 +324,15 @@ export function scoreItem(item, s, key) {
       take(5 + d);
     }
   }
+  // The phonetic key (js/phonetic.js), next to the one above: the same sound is a real match (3), a name that starts
+  // with it too (4); one sound off is only a similar name (6.5, never taken as the place). Text matches stay first.
+  // A name's first words count only when the vowels are close too: "sahapur" is সাহাপুর বাজার, not শাহপরীর দ্বীপ.
+  if (pq.length >= 2 && item.pkeys) {
+    const p = phoneScore(item.pkeys, pq);
+    if (p === 0) take(3);
+    else if (pq.length >= 4 && item.pheads.some((h) => h.k === pq)) take(item.pheads.some((h) => h.k === pq && editDistance(h.v, vowelForm(s)) <= 2) ? 4 : 6.5);
+    else if (p === 1 && item.pkeys.some((k) => k.length >= 4 && editDistance(k, pq) <= 1 && !commonOnly(pq, k))) take(6.5);
+  }
   return best;
 }
 
@@ -329,6 +342,15 @@ const COMMON_KEYS = [...new Set(['বাজার', 'bazar', 'bajar', 'হাট
   .sort((a, b) => b.length - a.length);
 const stripCommon = (k) => { const c = COMMON_KEYS.find((x) => k.length > x.length && k.endsWith(x)); return c ? k.slice(0, -c.length) : k; };
 
+// One sound off only in a common last word's neighbour ("kashembazar" ~ কক্সবাজার): not even a similar name (#145).
+const P_COMMON = [...new Set(['বাজার', 'হাট', 'পাড়া', 'চর', 'স্কুল'].map(phoneKey))];
+const pRest = (k) => { const c = P_COMMON.find((x) => k.length > x.length && k.endsWith(x)); return c ? k.slice(0, -c.length) : null; };
+function commonOnly(q, k) {
+  const a = pRest(q), b = pRest(k);
+  if (a == null || b == null) return false;
+  return Math.min(a.length, b.length) < 3 ? a !== b : editDistance(a, b) > 1;
+}
+
 const KIND_ORDER = { municipality: 0, local: 1, place: 1, union: 2, village: 3, landmark: 3, upazila: 4, thana: 4 };
 
 // { hits: real matches (best first), close: similar names } for one place name.
@@ -336,6 +358,7 @@ function matchName(index, q, { district = '' } = {}) {
   const s = norm(q).toLowerCase().trim();
   if (s.length < 2) return { hits: [], close: [] };
   const key = soundKey(s);
+  const pq = phoneKey(s);
   const typed = vowelForm(s);
   const out = [];
   // A landmark that only contains the typed name ("উত্তর মোহাম্মদপুর সরকারি প্রাথমিক বিদ্যালয়") is a weaker match than a
@@ -343,7 +366,7 @@ function matchName(index, q, { district = '' } = {}) {
   const exactName = (item) => (item.names || []).some((n) => norm(n).toLowerCase() === s);
   for (const item of index) {
     if (district && item.place.district !== district) continue;
-    let sc = scoreItem(item, s, key);
+    let sc = scoreItem(item, s, key, pq);
     if (sc != null && sc <= 3 && item.kind === 'landmark' && !exactName(item)) sc += 0.5;
     if (sc != null) out.push({ item, sc, near: Math.min(...item.vowels.map((v) => editDistance(typed, v))) });
   }
@@ -372,7 +395,7 @@ function matchName(index, q, { district = '' } = {}) {
   const sameName = (a, b) => a && b && norm(a.item.named?.name_bn || a.item.village || '') === norm(b.item.named?.name_bn || b.item.village || '') && a.item.place.area?.bn === b.item.place.area?.bn;
   const rivals = close.slice(1).filter((x) => x.sc <= 6 && !sameName(x, close[0]));
   if (!hits.length && close[0]?.sc === 6 && key.replace('@', '').length >= 6 && !rivals.length) hits.push(close.shift());
-  const top = hits.slice(0, 8);
+  const top = hits.slice(0, 16);   // a name in many places shows every one (সিকদার পাড়া / সিকদারপাড়া: 15)
   return { hits: top.map((x) => x.item), close: close.slice(0, 3).map((x) => x.item), scores: new Map(top.map((x) => [x.item, x.sc])) };
 }
 
@@ -563,7 +586,10 @@ function wholeInside(index, words, weak, areaRuns, opts) {
       // a name made only of common words ("বাজার পাড়া") counts only when written exactly
       const onlyCommon = name.every((w) => COMMON.has(w));
       const fits = (h) => (onlyCommon ? (h.names || []).some((x) => norm(x).toLowerCase() === name.join(' ')) : m.scores.get(h) <= (weak ? 2 : 3));
-      const top = m.hits.length ? m.scores.get(m.hits[0]) : 0;      // an exact name elsewhere beats a same sound here
+      // an exact name elsewhere beats a same sound here; typed in Latin letters, a Bangla-only name can only match by
+      // sound, so up to the same sound counts as equal ("sahapur noakhali sadar": the village, not Chatkhil's union)
+      const top0 = m.hits.length ? m.scores.get(m.hits[0]) : 0;
+      const top = /[a-z]/.test(name.join(' ')) && !/[ঀ-৿]/.test(name.join(' ')) ? Math.max(top0, 3) : top0;
       const hits = m.hits.filter((h) => fits(h) && m.scores.get(h) <= top && u.context.some((c) => inContext(h, c)));
       if (!hits.length) {
         const out = onlyCommon ? m.hits.filter(fits) : m.hits;
