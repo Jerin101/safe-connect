@@ -131,13 +131,21 @@ service cloud.firestore {
       allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
       allow create: if signedIn()
         && (isAdmin() || (verified() && limitsAfter().lastReport == reportId && limitsAfter().lastAt == request.time))
-        && incoming().keys().hasOnly(['uid', 'recordId', 'district', 'area', 'problem', 'note', 'status', 'createdAt', 'updatedAt'])
+        && incoming().keys().hasOnly(['uid', 'recordId', 'district', 'area', 'problem', 'note', 'status', 'createdAt', 'updatedAt', 'place', 'upazila', 'union'])
         && incoming().uid == request.auth.uid
         && incoming().status == 'open'
         && shortText(incoming().recordId, 120)
         && incoming().district in ['noakhali', 'coxsbazar']
         && shortText(incoming().get('area', ''), 80)
-        && incoming().problem in ['off', 'other_person', 'changed', 'other']
+        && incoming().problem in ['off', 'other_person', 'changed', 'other', 'missing_place']
+        // "জায়গাটা যোগ করতে বলুন" (#159): a place name the search did not know, with its upazila (and union if known).
+        // Same limits as every report; no record; never a phone number. Other kinds carry none of these fields.
+        && (incoming().problem == 'missing_place'
+          ? (incoming().recordId == 'missing-place'
+            && incoming().place is string && incoming().place.size() >= 2 && shortText(incoming().place, 80) && noPhone(incoming().place)
+            && incoming().upazila is string && incoming().upazila.size() >= 2 && shortText(incoming().upazila, 60) && noPhone(incoming().upazila)
+            && shortText(incoming().get('union', ''), 80) && noPhone(incoming().get('union', '')))
+          : !('place' in incoming()) && !('upazila' in incoming()) && !('union' in incoming()))
         && shortText(incoming().get('note', ''), 500)
         && noPhone(incoming().get('note', ''))
         && incoming().createdAt == request.time
