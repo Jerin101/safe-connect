@@ -34,6 +34,8 @@ const FILES = [
   'data/villages.json',
   'data/aliases.json',
   'data/thanas.json',
+  'data/landmarks/noakhali.json',
+  'data/landmarks/coxsbazar.json',
   'data/contacts_noakhali.json',
   'data/contacts_coxsbazar.json',
   'data/locations.json',

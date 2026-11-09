@@ -62,6 +62,7 @@ function itemLabel(h) {
   // A name the team added from local knowledge says so: "কাশেম বাজার (স্থানীয়ভাবে জানা নাম)" (#149); others show their type.
   const teamName = h.kind === 'local' && /^local name, added by the team/.test(h.named?.source || '');
   const kindWord = (teamName && t().kinds.known) || (h.kind === 'thana' && fill(t().kinds.thanaOf, { u: upazilaName(p.district, p.upazila) }))   // "সুধারাম মডেল থানা (নোয়াখালী সদর উপজেলা)" (#153)
+    || (h.kind === 'landmark' && t().kinds[`lm_${h.named?.type}`])                       // "… উচ্চ বিদ্যালয় (বিদ্যালয়)" (#157)
     || (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
   let title;
   if (h.kind === 'village') title = h.village;
@@ -73,12 +74,12 @@ function itemLabel(h) {
   // The full address (#155): village · union or town · upazila (thana) · district; each part only once.
   const parts = [];
   if (h.kind === 'local' && h.named?.village_bn && lang === 'bn') parts.push(h.named.village_bn);   // the village is known only in Bangla
-  if ((h.kind === 'village' || h.kind === 'local' || h.kind === 'place') && h.place.area) {
+  if ((h.kind === 'village' || h.kind === 'local' || h.kind === 'place' || h.kind === 'landmark') && h.place.area) {
     // named places keep only the Bangla union name: the full entry has the English one too
     const full = localAreas(data.docs[p.district], p.upazila).find((x) => x.type === h.place.area.type && x.bn === norm(h.place.area.bn));
     parts.push(areaName(full || h.place.area));
   }
-  if (h.place.area || h.kind === 'village' || h.kind === 'local') {
+  if (h.place.area || h.kind === 'village' || h.kind === 'local' || h.kind === 'landmark') {
     const th = thanaOf(p.district, p.upazila);
     parts.push(th ? `${upazilaName(p.district, p.upazila)} (${th})` : upazilaName(p.district, p.upazila));
   } else if (h.kind === 'upazila') {
