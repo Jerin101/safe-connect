@@ -211,7 +211,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://begumganj.noakhali.gov.bd/pages/tourist-spot/হযরত-ছায়েদুল-আলম-চিঃ-রঃ-মাজার-শরীফ-67b0ba-6990be2235ce18e1c07077b7",
-   "source_last_updated": null,
+   "source_last_updated": "2026-01-20",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -322,7 +322,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://chatkhil.noakhali.gov.bd/pages/tourist-spot/জরাজীর্ন-জমিদার-বাড়ী-db095d-6990be2635ce18e1c0707a78",
+   "source_url": "https://chatkhil.noakhali.gov.bd/pages/tourist-spot/জরাজীর্ন-জমিদার-বাড়ী-db095d-6990be2635ce18e1c0707a78",
    "source_last_updated": "2019-10-22",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -483,7 +483,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://kabirhat.noakhali.gov.bd/pages/tourist-spot/ধানসিঁড়ি-স্টীল-ব্রীজ-414e39-6990be1a35ce18e1c0707355",
-   "source_last_updated": null,
+   "source_last_updated": "2021-06-24",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -499,7 +499,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://kabirhat.noakhali.gov.bd/pages/tourist-spot/রমজান-মিয়া-জামে-মসজিদ-992085-6990be2735ce18e1c0707ae3",
-   "source_last_updated": null,
+   "source_last_updated": "2021-06-24",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -515,7 +515,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://kabirhat.noakhali.gov.bd/pages/tourist-spot/তাকিয়া-মসজিদ-3cb6c8-6990be2535ce18e1c070793b",
-   "source_last_updated": null,
+   "source_last_updated": "2021-06-24",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -547,7 +547,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://sadar.noakhali.gov.bd/pages/tourist-spot/নোয়াখালী-বিজ্ঞান-ও-প্রযুক্তি-বিশ্ববিদ্যালয়-ক্যাম্পাস-a0d6dc-6990be1c35ce18e1c070749e",
-   "source_last_updated": null,
+   "source_last_updated": "2021-06-22",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -581,7 +581,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/কুতুবদিয়া-বাতিঘর-2d5152-6990be2035ce18e1c0707693",
-   "source_last_updated": null,
+   "source_last_updated": "2025-12-22",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
    "also_source": "Kutubdia lighthouse: names and spellings given by the team (final queue, 9 Nov 2026)"
@@ -598,10 +598,10 @@
    "district": "Cox's Bazar",
    "upazila_en": "Maheshkhali",
    "municipality_bn": null,
-   "union_bn": null,
+   "union_bn": "কুতুবজোম ইউনিয়ন",
    "source": "official page",
    "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/সোনাদিয়া-দ্বীপ-মহেশখালী-db86c9-6990be2035ce18e1c0707692",
-   "source_last_updated": null,
+   "source_last_updated": "2016-11-30",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
    "also_source": "Sonadia, Sonadia island: names and spellings given by the team (final queue, 9 Nov 2026)"
@@ -619,22 +619,6 @@
    "source": "official page",
    "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/মহেশখালী-জেটি-00fb17-6990be2035ce18e1c0707690",
    "source_last_updated": "2014-04-10",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
-  },
-  {
-   "id": "spot-630088af61",
-   "name_bn": "ডুলাহাজরা সাফারি পার্ক",
-   "name_en": null,
-   "also": [],
-   "type": "park",
-   "district": "Cox's Bazar",
-   "upazila_en": "Chakaria",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/ডুলাহাজরা-সাফারি-পার্ক-3c896a-6990be2035ce18e1c070768d",
-   "source_last_updated": "2014-01-23",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -680,7 +664,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/হিমছড়ি-5c3c52-6990be2035ce18e1c0707688",
-   "source_last_updated": null,
+   "source_last_updated": "2013-10-03",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
    "also_source": "Himchari, Himchori: names and spellings given by the team (final queue, 9 Nov 2026); হিমছড়ির ঝর্ণা: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা; the other titles: the pages in also_pages",
@@ -696,7 +680,8 @@
    "also": [
     "Dulahazra Safari Park",
     "Safari Park",
-    "বঙ্গবন্ধু সাফারি পার্ক"
+    "বঙ্গবন্ধু সাফারি পার্ক",
+    "ডুলাহাজরা সাফারি পার্ক"
    ],
    "type": "park",
    "district": "Cox's Bazar",
@@ -708,7 +693,10 @@
    "source_last_updated": "2025-09-14",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
-   "also_source": "Dulahazra Safari Park, Safari Park: names and spellings given by the team (final queue, 9 Nov 2026); বঙ্গবন্ধু সাফারি পার্ক: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা"
+   "also_source": "Dulahazra Safari Park, Safari Park: names and spellings given by the team (final queue, 9 Nov 2026); বঙ্গবন্ধু সাফারি পার্ক: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা; the other titles: the pages in also_pages",
+   "also_pages": [
+    "https://coxsbazar.gov.bd/pages/tourist-spot/ডুলাহাজরা-সাফারি-পার্ক-3c896a-6990be2035ce18e1c070768d"
+   ]
   },
   {
    "id": "spot-cbeaf11381",
@@ -722,7 +710,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://chakaria.coxsbazar.gov.bd/pages/tourist-spot/নিভৃতে-নিসর্গ-পার্ক-চকরিয়া-b9354c-6990be2535ce18e1c0707964",
-   "source_last_updated": null,
+   "source_last_updated": "2023-02-22",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -738,7 +726,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://chakaria.coxsbazar.gov.bd/pages/tourist-spot/মেদাকচ্ছপিয়া-জাতীয়-উদ্যান-পর্যটন-কেন্দ্র-ইকোট্যুরিজম-27c0d9-6990be2635ce18e1c0707a12",
-   "source_last_updated": null,
+   "source_last_updated": "2019-05-22",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -786,7 +774,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://kutubdia.coxsbazar.gov.bd/pages/tourist-spot/বায়ু-বিদ্যুৎ-প্রকল্প-cfbebd-6990be2535ce18e1c07078f7",
-   "source_last_updated": null,
+   "source_last_updated": "2024-04-26",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -801,10 +789,10 @@
    "district": "Cox's Bazar",
    "upazila_en": "Maheshkhali",
    "municipality_bn": null,
-   "union_bn": null,
+   "union_bn": "কুতুবজোম ইউনিয়ন",
    "source": "official page",
    "source_url": "https://moheshkhali.coxsbazar.gov.bd/pages/tourist-spot/সোনাদিয়া-সমুদ্র-সৈকত-d0f9eb-6990be2335ce18e1c07077f1",
-   "source_last_updated": null,
+   "source_last_updated": "2015-01-26",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
    "also_source": "Sonadia beach: names and spellings given by the team (final queue, 9 Nov 2026)"
@@ -845,7 +833,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://moheshkhali.coxsbazar.gov.bd/pages/tourist-spot/বড়-রাখাইন-পাড়া-বৌদ্ধ-মন্দির-5d85e0-6990be2335ce18e1c07077ef",
-   "source_last_updated": null,
+   "source_last_updated": "2015-01-26",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -861,7 +849,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://pekua.coxsbazar.gov.bd/pages/tourist-spot/সংগ্রামী-জুম-ধনিয়াকাটা-টইটং-635aee-6990be2535ce18e1c0707977",
-   "source_last_updated": null,
+   "source_last_updated": "2026-08-05",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -877,7 +865,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://pekua.coxsbazar.gov.bd/pages/tourist-spot/আলহাজ্ব-কবির-আহমদ-চৌধুরী-জমিদার-বাড়ি-পেকুয়াা-2ea8be-6990be2635ce18e1c0707a2f",
-   "source_last_updated": null,
+   "source_last_updated": "2026-08-05",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -938,10 +926,10 @@
    "district": "Cox's Bazar",
    "upazila_en": "Ramu",
    "municipality_bn": null,
-   "union_bn": null,
+   "union_bn": "ঈদগড় ইউনিয়ন",
    "source": "official page",
    "source_url": "https://ramu.coxsbazar.gov.bd/pages/tourist-spot/ঐতিহাসিক-শাহসুজা-সড়ক-ae1063-6990be1f35ce18e1c07075e2",
-   "source_last_updated": null,
+   "source_last_updated": "2023-04-04",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -973,7 +961,8 @@
    "name_bn": "লামার পাড়া বৌদ্ধ বিহার",
    "name_en": "Lamar Para Buddhist temple",
    "also": [
-    "Lamar Para Buddhist temple"
+    "Lamar Para Buddhist temple",
+    "লামারপাড়া বৌদ্ধবিহার"
    ],
    "type": "temple",
    "district": "Cox's Bazar",
@@ -985,7 +974,10 @@
    "source_last_updated": "2026-07-09",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
-   "also_source": "Lamar Para Buddhist temple: names and spellings given by the team (final queue, 9 Nov 2026)"
+   "also_source": "Lamar Para Buddhist temple: names and spellings given by the team (final queue, 9 Nov 2026); the other titles: the pages in also_pages",
+   "also_pages": [
+    "https://coxsbazar.gov.bd/pages/tourist-spot/লামারপাড়া-বৌদ্ধবিহার-ad28d2-6990be2035ce18e1c070768b"
+   ]
   },
   {
    "id": "spot-262a90f0f4",
@@ -1106,7 +1098,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/কালো-রাজার-সুড়ঙ্গ-019fad-6990be2535ce18e1c07078f0",
+   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/কালো-রাজার-সুড়ঙ্গ-019fad-6990be2535ce18e1c07078f0",
    "source_last_updated": "2023-01-31",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -1122,7 +1114,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/তৈঙ্গা-চূড়া-f2da26-6990be1a35ce18e1c0707358",
+   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/তৈঙ্গা-চূড়া-f2da26-6990be1a35ce18e1c0707358",
    "source_last_updated": "2023-01-31",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -1163,7 +1155,7 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/ছেঁড়া-দ্বীপ-b5d19e-6990be1c35ce18e1c07074ba",
-   "source_last_updated": null,
+   "source_last_updated": "2023-01-31",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
    "also_source": "Chhera Dwip, Chera dwip: names and spellings given by the team (final queue, 9 Nov 2026); the other titles: the pages in also_pages",
@@ -1248,10 +1240,10 @@
    "district": "Cox's Bazar",
    "upazila_en": "Ukhia",
    "municipality_bn": null,
-   "union_bn": null,
+   "union_bn": "জালিয়াপালং ইউনিয়ন",
    "source": "official page",
    "source_url": "https://ukhiya.coxsbazar.gov.bd/pages/tourist-spot/কানা-রাজার-সুড়ঙ্গ-a38605-6990be1e35ce18e1c07075a6",
-   "source_last_updated": null,
+   "source_last_updated": "2025-06-01",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
    "also_source": "Kana Rajar Surongo: names and spellings given by the team (final queue, 9 Nov 2026); কানারাজার সুড়ঙ্গ: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা"
@@ -1422,11 +1414,11 @@
   {
    "id": "spot-a35ccf3427",
    "name_bn": "পাটুয়ারটেক সৈকত",
-   "name_en": "পাটুয়ারটেক",
+   "name_en": "Patuartek",
    "also": [
-    "পাটুয়ারটেক",
     "Patuartek",
-    "Patuartek beach"
+    "Patuartek beach",
+    "পাটুয়ারটেক"
    ],
    "also_source": "names and spellings given by the team (final queue, 9 Nov 2026)",
    "type": "beach",

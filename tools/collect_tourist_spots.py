@@ -21,9 +21,20 @@ DETAIL = re.compile(r'href="([^"#]*/pages/tourist-spot/[^"#?]+)"')
 NOT_A_SPOT = {N("অন্যান্য")}
 
 
-def page_url(url):
-    """The address as the portal writes it: ড় ঢ় য় as single letters (NFC splits them, and then the link gives 404)."""
+def one_letter(url):
     return url.replace("ড়", "ড়").replace("ঢ়", "ঢ়").replace("য়", "য়")
+
+
+_cache = {}
+
+
+def page_url(url):
+    """The address the portal really serves. NFC splits ড় ঢ় য় into letter + nukta; some portals use that form, others
+    the single letters. Whichever form gave the page is kept (data-checker, #177)."""
+    if _cache.get(url):
+        return url
+    alt = one_letter(url)
+    return alt if alt != url and fetch(alt, _cache) else url
 
 
 def fetch(url, cache):
@@ -48,7 +59,7 @@ def from_list(page, base, cache):
     spots = []
     for href in dict.fromkeys(DETAIL.findall(page or "")):
         url = urllib.parse.urljoin(base + "/", href)
-        body = fetch(url, cache) or ""
+        body = fetch(url, cache) or fetch(one_letter(url), cache) or ""
         slug = urllib.parse.unquote(url.rsplit("/", 1)[-1])
         name = N(re.sub(r"-[0-9a-f]{6}-[0-9a-f]{20,}$", "", slug).replace("-", " ")).strip()
         text = clean_text(content_of(body))
@@ -94,6 +105,8 @@ def from_table(page, url):
 
 def main(data, out_path, cache_path=None):
     cache = load_json(cache_path, {}) if cache_path else {}
+    global _cache
+    _cache = cache
     out = []
     for fname, district, home in (("contacts_noakhali.json", "Noakhali", "https://noakhali.gov.bd"),
                                   ("contacts_coxsbazar.json", "Cox's Bazar", "https://coxsbazar.gov.bd")):
@@ -153,6 +166,8 @@ SAME_SPOT = [
     ("Ramu", ["হিমছড়ি", "প্রকৃতির লীলাভূমি হিমছড়ি", "হিমছড়ি ঝর্ণা/সমুদ্র সৈকত"]),
     ("Ramu", ["শ্রী শ্রী রামকুট তীর্থ ধাম", "শ্রী শ্রী রামকুট তীর্থধাম রাজারকুল রামু"]),
     ("Ramu", ["রামকোট বৌদ্ধ বিহার", "রাংকূট বৌদ্ধ বিহার"]),
+    ("Chakaria", ["ডুলাহাজারা সাফারি পার্ক", "ডুলাহাজরা সাফারি পার্ক"]),
+    ("Ramu", ["লামার পাড়া বৌদ্ধ বিহার", "লামারপাড়া বৌদ্ধবিহার"]),
     ("Teknaf", ["সেন্টমার্টিন দ্বীপ", "প্রবালদ্বীপ সেন্টমার্টিন"]),
     ("Teknaf", ["ছেঁড়া দ্বীপ", "ছেঁড়াদ্বীপ সেন্টমার্টিন টেকনাফ"]),
     ("Teknaf", ["মারিশবনিয়া সৈকত", "মারিস বনিয়া সমুদ্র সৈকত"]),
@@ -194,7 +209,7 @@ IN_TEXT = [(n, "Teknaf", TEKNAF_OTHERS, "listed on the Teknaf upazila page 'অ�
     ("সাবমেরিন ক্যাবল ল্যান্ডিং স্টেশন", "Cox's Bazar Sadar", BP_CX, "Banglapedia (secondary reference): \"ঝিলংজাতে অবস্থিত\"; "
      "ঝিলংজা is a union of Cox's Bazar Sadar in our data, so the upazila is from that, not from Banglapedia itself")]
 IN_TEXT_SPELLINGS = {N("মাথিনের কূপ"): ["Mathiner Kup", "Mathin's well"], N("মেরিন ড্রাইভ"): ["Marine Drive", "Marine Drive road"],
-                     N("পাটুয়ারটেক সৈকত"): ["পাটুয়ারটেক", "Patuartek", "Patuartek beach"]}
+                     N("পাটুয়ারটেক সৈকত"): ["Patuartek", "Patuartek beach", "পাটুয়ারটেক"]}
 IN_TEXT_UNION = {N("পাটুয়ারটেক সৈকত"): N("জালিয়াপালং ইউনিয়ন")}
 
 
