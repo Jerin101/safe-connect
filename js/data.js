@@ -21,18 +21,21 @@ async function getJSON(url) {
 const noManual = { records: [], places: [] };
 
 // A district file that fails to load is left out (listed in `missing`), so the
-// national hotlines and the other district still work.
+// national hotlines and the other district still work. An optional list that fails is listed in `partial`
+// ('villages', 'landmarks', …), so the page can say so instead of quietly finding less (#170).
 export async function loadAll(base = 'data/') {
+  const partial = [];
+  const optional = (name, url, empty) => getJSON(url).catch(() => { if (!partial.includes(name)) partial.push(name); return empty; });
   const [national, manual, villages, aliases, thanas, ...files] = await Promise.all([
     getJSON(`${base}national_hotlines.json`),
     getJSON(`${base}manual_additions.json`).catch(() => noManual),
-    getJSON(`${base}villages.json`).catch(() => ({ unions: [] })),       // official village lists (optional)
-    getJSON(`${base}aliases.json`).catch(() => ({ aliases: [] })),       // local names added by the team (optional)
-    getJSON(`${base}thanas.json`).catch(() => ({ thanas: [] })),         // thana -> upazila, official sources (#153, optional)
+    optional('villages', `${base}villages.json`, { unions: [] }),       // official village lists
+    optional('aliases', `${base}aliases.json`, { aliases: [] }),       // local names added by the team
+    optional('thanas', `${base}thanas.json`, { thanas: [] }),          // thana -> upazila, official sources (#153)
     ...DISTRICTS.map((d) => getJSON(base + d.file).catch(() => null)),
   ]);
-  // Landmarks from the official union pages (bazars, schools, …; #157), optional: the search works without them.
-  const marks = await Promise.all(DISTRICTS.map((d) => getJSON(`${base}landmarks/${d.key}.json`).catch(() => ({ landmarks: [] }))));
+  // Landmarks from the official union pages (bazars, schools, …; #157): the search works without them.
+  const marks = await Promise.all(DISTRICTS.map((d) => optional('landmarks', `${base}landmarks/${d.key}.json`, { landmarks: [] })));
   const docs = {};
   const missing = [];
   DISTRICTS.forEach((d, i) => {
@@ -50,7 +53,7 @@ export async function loadAll(base = 'data/') {
   const officialVillages = (villages.unions || []).flatMap((u) => u.villages.map(([name, ward]) => ({
     district: u.district, upazila_bn: u.upazila_bn, union_bn: u.union_bn, union_en: u.union_en,
     village_bn: name, ward_no: ward, source_url: u.source_url })));
-  return { national: nationalCards, docs, missing, villages: officialVillages, aliases: aliases.aliases || [], thanas: thanas.thanas || [] };
+  return { national: nationalCards, docs, missing, partial, villages: officialVillages, aliases: aliases.aliases || [], thanas: thanas.thanas || [] };
 }
 
 function nationalCard(r, checkedOn) {
