@@ -1,38 +1,85 @@
 # Autopilot log
 
-## Summary (7 Nov 2026, queue v3)
+## Summary (9 Nov 2026, merge queue done)
 
-**Live:** https://jerin101.github.io/safe-connect/ = `main` (#142 site at index.html, #146 phone layout, #148 saved area; merged 6 Nov). Firestore rules were last deployed on 2 Nov from `1274fd9`; **#160 needs a new deploy after it is merged.**
+**Live:** https://jerin101.github.io/safe-connect/ = `main` at `9b57973`, `VERSION = 'v49-2026-11-09'`. Firestore rules and indexes were deployed on 9 Nov from `4167be2` (#160 merged; rules tests 90/90 on main first).
 
-**Repo folder:** the project moved to `E:\Projects\safe-connect` (fresh clone, 6 Nov). Old copies: `E:\New folder\Downloads\Project_Capstone\safe-connect-old-2026-11-05` and `C:\Users\ASUS\Downloads\Project_Capstone\safe-connect` (still to rename, see below).
+**Live check (9 Nov, headless Chrome, fresh profile, 360 px; nothing sent to Firebase):**
+- the service worker installs; the only cache is `safeconnect-v49-2026-11-09`
+- "kashem bazar" → কাশেম বাজার, ধর্মপুর, নিয়াজপুর ইউনিয়ন, নোয়াখালী সদর (সুধারাম মডেল থানা), নোয়াখালী
+- "sudharam" → সুধারাম মডেল থানা (নোয়াখালী সদর উপজেলা)
+- the help link in the বিপদ বার্তা SMS opens `#/help/…` on the live site (200)
+- offline: the site loads after a reload, and both searches work
+- old `preview.html` links forward to the site with their `#/…` part kept
+- no page errors
 
-| PR | Queue step | State |
+**Merged (all with merge commits):**
+
+| PR | What | Merge commit |
 |---|---|---|
-| [#163](https://github.com/Jerin101/safe-connect/pull/163) | Follow-up to #148/#146: saved-area icon fixes and width-sweep fixes (#148 and #146 were merged before these) | **merge first**: live main has the two icon bugs |
-| [#144](https://github.com/Jerin101/safe-connect/pull/144) | 2: বিপদ বার্তা review fixes (short link, thana OC, SMS texts within 3 parts, fresh location) | tester GO |
-| [#150](https://github.com/Jerin101/safe-connect/pull/150) | 5.1: smart-search plan + Kashem Bazar | tester GO; Jerin to confirm the village |
-| [#152](https://github.com/Jerin101/safe-connect/pull/152) | 5.2: query understanding | fixes for 2 NO-GOs done; the re-review was cut off by the usage limit |
-| [#154](https://github.com/Jerin101/safe-connect/pull/154) | 5.3: thana names (`data/thanas.json`) | same re-review |
-| [#156](https://github.com/Jerin101/safe-connect/pull/156) | 5.4: full address in results | same re-review |
-| [#158](https://github.com/Jerin101/safe-connect/pull/158) | 5.5: landmarks from the union pages | NO-GO fixed (copied lists, prose); same re-review |
-| [#160](https://github.com/Jerin101/safe-connect/pull/160) | 5.6: when nothing matches + `missing_place` requests (rules tests 90/90) | same re-review; **rules deploy after merge** |
-| [#162](https://github.com/Jerin101/safe-connect/pull/162) | 6: prepare page (phone SOS) + live location | Bangla and tester review cut off by the usage limit |
-| Step 7 | docs move, README, tidy-ups | **not started**: moving docs now would conflict with every open PR; do it after the merges |
+| [#163](https://github.com/Jerin101/safe-connect/pull/163) | saved-area icon and width-sweep fixes | `8f53b13` |
+| [#144](https://github.com/Jerin101/safe-connect/pull/144) | বিপদ বার্তা review fixes | `eb64a89` |
+| [#162](https://github.com/Jerin101/safe-connect/pull/162) | prepare page (phone SOS) + live location | `cd063be` |
+| [#150](https://github.com/Jerin101/safe-connect/pull/150) | 5.1 smart-search plan + Kashem Bazar | `14fa307` |
+| [#152](https://github.com/Jerin101/safe-connect/pull/152) | 5.2 query understanding | `144551b` |
+| [#154](https://github.com/Jerin101/safe-connect/pull/154) | 5.3 thana names | `337f319` |
+| [#165](https://github.com/Jerin101/safe-connect/pull/165) | fixes from the #162 post-merge review | `412edfd` |
+| [#156](https://github.com/Jerin101/safe-connect/pull/156) | 5.4 full address in results | `f4be1df` |
+| [#158](https://github.com/Jerin101/safe-connect/pull/158) | 5.5 landmarks from the union pages | `9ebe882` |
+| [#160](https://github.com/Jerin101/safe-connect/pull/160) | 5.6 when nothing matches + `missing_place` requests | `4167be2` |
+| [#168](https://github.com/Jerin101/safe-connect/pull/168) | VERSION only, v48 → v49 | `9b57973` |
 
-**Merge order:** #163 → #144 → #150 → #152 → #154 → #156 → #158 → #160 → #162. Each builds on the one before.
+**#158, three NO-GOs, all fixed before the merge:**
+- landmarks outranked an exact village or union ("ঈদগাও", "উত্তর মোহাম্মদপুর")
+- Khurushkul's college and school pages list the whole Cox's Bazar Sadar upazila
+- prose and headings were taken as names, and some mosques had the wrong type
+- one copied page ("সুবিল ইউনিয়নে মোট মসজিদের সংখ্যা - ২২ টি") sits on 8 union sites; its 22 mosques had been filed under বড়ঘোপ
 
-**Search check for #152–#160:** every name in main's index (1,545, villages included) is still found, and no first result changes. 160 union+upazila pairs pick the right union; the 3 where the union has the upazila's own name show it second.
+The data was rebuilt from the saved pages, with no new requests: 41 rows dropped and 21 types fixed.
+
+**#160 review:**
+- Bangla review: 5 text changes; the sent message no longer promises the place will be added
+- security review: a phone number in `upazila` is now refused, in the rules and in `missingFields()`
+- tester: the width sweep passed 7392/7392, and no coordinate is stored or sent (checked with a faked GPS fix)
+
+**Search checks on main** (sweeps in the session scratchpad):
+
+| Check | Result |
+|---|---|
+| same-named unions | 472/474 |
+| union+upazila | 634/640 |
+| village+upazila | 808/810 |
+| village + wrong district, exact village first | 754/761 |
+| search tests | 80/80 |
+| names lost against the old main | 0 |
+
+**Open notes (not blockers):**
+- [#167](https://github.com/Jerin101/safe-connect/issues/167): English names for the towns, from the BBS/HDX data. "নোয়াখালী সদর, নোয়াখালী" stays as it is.
+- If `villages.json` fails to load, `loadAll` turns it into an empty list with no error, and village search quietly stops. The sweeps sometimes ran on such a small index.
+- A missing-place request may also carry `area` and `note`. `area` has no phone check; this is older than #160.
+- A loose match limits the step picker and the ask form to one district. Example: "ঝুমঝুমপুর খালপাড়" lists only Noakhali upazilas, prefilled with Chatkhil / খিলপাড়া.
+- Search:
+  - the "elsewhere" note can contradict the result
+  - "chhayani begumganj"
+  - "uttar" alone
+  - "ukhiya thana" and "ukhiya police station" give no result (only "similar")
+- Data cleanup rows: "/রাস্তা: উত্তর মানিকপুর", "ত্তর মানিকপুর", the village "ইউনিয়ন পরিষদ".
+- The Apple label "Call with 5 Presses" (#162) is not confirmed on an official Apple page.
+- Leftover Firestore emulators from test runs:
+  - PID 18036 on 8080 and 9150. It blocks `npm run test:rules`; the tests ran on other ports with a temporary config.
+  - PID 27252 on 8088.
+  - PIDs 13144, 27412 and 9604 on 8095, 8097 and 8099.
+  - Close them, or restart the PC.
+
+**Next, each needs your OK first:** the permanent deploy fix (GitHub Actions Pages deploy with `VERSION` set by the deploy), step 7 (docs move, README, tidy-ups), and the `E:\Projects\SafeConnect-Files` folder.
 
 ## NEEDS JERIN
 
-- [ ] **Merge #163 first** (live bug), then the order above as each PR gets tester GO.
 - [ ] **Rename the old C: folder** after closing VS Code: `C:\Users\ASUS\Downloads\Project_Capstone\safe-connect` → `safe-connect-old-2026-11-05`. Then reopen Claude Code in `E:\Projects\safe-connect`.
 - [ ] **Kashem Bazar (#150):** the official Newajpur page lists it in নিয়াজপুর ইউনিয়ন. Please confirm the village is ধর্মপুর (Noakhali Sadar also has a whole ধর্মপুর union).
 - [ ] **Thanas (#154):** 7 Cox's Bazar rows have only "portal" proof: the thana's own official site sits under the upazila's address. Is that OK, or should they be marked "not confirmed"?
-- [ ] **Deploy the rules after #160 is merged:**
-  1. Run `npm run test:rules` on main.
-  2. Then run `npx firebase deploy --only firestore:rules,firestore:indexes --project safeconnect-67d83`.
-  3. Then send one real "জায়গাটা যোগ করতে বলুন" request with a test account.
+- [ ] **Send one real "জায়গাটা যোগ করতে বলুন" request** with a test account. The rules were deployed on 9 Nov from `4167be2`.
+- [ ] **Thanas (#154):** Begumganj may be a মডেল থানা (the contacts file). Please check.
 - [ ] **Data fix through the tools:** 3 garbled English union names ("Narottampurup1", "Mohammadpuru5P", "Mohammadpurup7").
 - [ ] **realme SOS page (#162):** open https://www.realme.com/in/support/kw/doc/2077523 in a browser. If it has steps, they can be added. No official SOS page was found for OPPO, vivo, Infinix or Tecno.
 - [ ] **Old branches:** delete these when you're sure. 66 merged branches were already deleted, and "Automatically delete head branches" is on.
