@@ -62,6 +62,7 @@
     "or": "or",
     "areaLabel": "Type your area",
     "areaHint": "Village, union, town or upazila, in Bangla or English, any spelling. For example: Chowmuhani, হাতিয়া, Inani",
+    "partialNote": "Some village and market names can't be searched right now. Type the union, town, upazila or police station, or search by location.",
     "noMatch": "This name is not in our list yet. You can still get help:",
     "didYouMean": "Similar names",
     "noExact": "Not found with this exact spelling. Is it one of these?",

@@ -116,16 +116,19 @@ function renderSuggest() {
   if (norm(q).length < 2) { box.hidden = true; return; }
   const only = $('distSel').value;
   const { hits, close, context, missing, elsewhere } = findAreas(areaIndex, q, { district: only });
+  // The village or landmark list did not load (#170): say so calmly; unions, upazilas, thanas and towns still work.
+  const lists = (data.partial || []).filter((x) => x === 'villages' || x === 'landmarks');
+  const partNote = lists.length ? [el('li', 'none part-note', t().partialNote)] : [];
   const areaLabel = (c) => (c.kind === 'district' ? (lang === 'bn' ? districtOf(c.place.district).bn : districtOf(c.place.district).en)
     : c.place.area ? `${areaName(c.place.area)}, ${upazilaName(c.place.district, c.place.upazila)}` : upazilaName(c.place.district, c.place.upazila));
   if (hits.length) {
     // not in the area the person named: say so, then the places of that name elsewhere (#151 review)
     const note = elsewhere ? [el('li', 'none', fill(t().elsewhere, { c: areaLabel(elsewhere) }))] : [];
-    box.replaceChildren(...note, ...hits.map(suggestButton)); box.hidden = false; return;
+    box.replaceChildren(...partNote, ...note, ...hits.map(suggestButton)); box.hidden = false; return;
   }
   // Never a dead end: the area the person named (#151), similar names, then the upazila list, then GPS and 999.
   const s = t();
-  const parts = [];
+  const parts = [...partNote];
   if (context) {
     const name = areaLabel(context);
     parts.push(el('li', 'none', fill(s.notFoundBut, { n: missing, c: name })));
