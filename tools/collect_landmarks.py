@@ -86,7 +86,21 @@ def main(data, cache_path=None):
     cache = load_json(cache_path, {})
     today = datetime.date.today().isoformat()
     os.makedirs(os.path.join(data, "landmarks"), exist_ok=True)
-    for fname, key in (("contacts_noakhali.json", "noakhali"), ("contacts_coxsbazar.json", "coxsbazar")):
+    files = (("contacts_noakhali.json", "noakhali"), ("contacts_coxsbazar.json", "coxsbazar"))
+    # The same page text on several unions' sites, in either district, is a copied page ("সুবিল ইউনিয়নে মোট মসজিদের
+    # সংখ্যা - ২২ টি" on 8 sites): its names belong to none of them, and they still count as copied names (tester #158).
+    sites, pages = {}, {}
+    for fname, _ in files:
+        for u in load_json(os.path.join(data, fname))["unions"]:
+            base = (u.get("website") or "").rstrip("/")
+            for url in links(fetch(base, cache) or "", base) if base else []:
+                text = text_of(content_of(fetch(url, cache) or ""))
+                if text:
+                    sites.setdefault(text, set()).add(u["union_bn"])
+                    pages[text] = fetch(url, cache)
+    copied = {t for t, us in sites.items() if len(us) > 1}
+    copied_names = {name for t in copied for name, _ in names_on_page(pages[t])}
+    for fname, key in files:
         doc = load_json(os.path.join(data, fname))
         out = {"note": "Landmarks named on the official union portals (হাট-বাজার and শিক্ষা প্রতিষ্ঠান pages), for the area search only: "
                        "a landmark leads to its union. Only names that say what they are were kept. No phone numbers. "
@@ -103,6 +117,8 @@ def main(data, cache_path=None):
             got = 0
             for url in links(home or "", base):
                 page = fetch(url, cache)
+                if text_of(content_of(page or "")) in copied:
+                    continue
                 for name, t in names_on_page(page or ""):
                     if (name, u["union_bn"]) in seen:
                         continue
@@ -124,7 +140,8 @@ def main(data, cache_path=None):
             unions_of.setdefault(x["name_bn"], set()).add(x["union_bn"])
         own = {N(u["union_bn"]) for u in doc["unions"]} | {N(u["union_bn"]).replace(N(" ইউনিয়ন"), "") for u in doc["unions"]}
         before = len(out["landmarks"])
-        out["landmarks"] = [x for x in out["landmarks"] if len(unions_of[x["name_bn"]]) == 1 and x["name_bn"] not in own]
+        out["landmarks"] = [x for x in out["landmarks"] if len(unions_of[x["name_bn"]]) == 1 and x["name_bn"] not in own
+                           and x["name_bn"] not in copied_names]
         out["dropped_copied_or_own_names"] = before - len(out["landmarks"])
         path = os.path.join(data, "landmarks", f"{key}.json")
         with open(path, "w", encoding="utf-8") as f:            # one landmark per line: small, still readable in a diff
