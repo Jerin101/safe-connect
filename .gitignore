@@ -1,6 +1,9 @@
 # raw working files from the data collectors (large, re-creatable)
 *_raw.json
 
+# kits and downloads belong in E:\Projects\SafeConnect-Files\kits, never in the repo
+*.zip
+
 # Python
 __pycache__/
 *.pyc

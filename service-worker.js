@@ -18,6 +18,7 @@ const FILES = [
   'js/bipod.js',
   'js/prepare.js',
   'js/data.js',
+  'js/phonetic.js',
   'js/location.js',
   'js/autoloc.js',
   'js/auth.js',
