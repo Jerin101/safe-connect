@@ -1,6 +1,6 @@
 {
  "note": "Local names people use (towns, markets, post offices, landmarks) that are not in the official area or village lists. Each entry needs either an official source_url, or source 'local name, added by the team' with the team member who confirmed it. Never guess a union or town: if it is not confirmed, leave union_bn and municipality_bn null (the site then shows the whole upazila). Used only by the area search; no phone numbers here.",
- "fields": "id, name_bn, name_en, also (other spellings), type, district, upazila_en, municipality_bn, union_bn, village_bn, source, source_note, source_url, added_by, added_on",
+ "fields": "id, name_bn, name_en, also (other spellings), type, district, upazila_en, municipality_bn, union_bn, village_bn, source, source_note, source_url, added_by, added_on, also_source, also_pages, ward_no, source_last_updated",
  "aliases": [
   {
    "id": "alias-maijdee",
@@ -94,7 +94,9 @@
    "id": "spot-d2b67251ce",
    "name_bn": "বীরশ্রেষ্ঠ শহীদ মোঃ রুহুল আমিন গ্রন্থাগার ও স্মৃতি জাদুঘর",
    "name_en": null,
-   "also": [],
+   "also": [
+    "বীরশ্রেষ্ঠ শহীদ রুহুল আমিন স্মৃতি পাঠাগার ও জাদুঘর"
+   ],
    "type": "tourist",
    "district": "Noakhali",
    "upazila_en": "Sonaimuri",
@@ -104,7 +106,11 @@
    "source_url": "https://noakhali.gov.bd/pages/tourist-spot/বীরশ্রেষ্ঠ-শহীদ-মোঃ-রুহুল-আমিন-গ্রন্থাগার-ও-স্মৃতি-জাদুঘর-83f51f-6990be1b35ce18e1c0707427",
    "source_last_updated": "2021-08-07",
    "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
+   "added_on": "2026-11-09",
+   "also_pages": [
+    "https://sonaimuri.noakhali.gov.bd/pages/tourist-spot/বীরশ্রেষ্ঠ-শহীদ-রুহুল-আমিন-স্মৃতি-পাঠাগার-ও-জাদুঘর-079d7f-6990be2335ce18e1c07077ea"
+   ],
+   "also_source": "the other titles: the pages in also_pages"
   },
   {
    "id": "spot-ac41dba2db",
@@ -562,22 +568,6 @@
    "added_on": "2026-11-09"
   },
   {
-   "id": "spot-61d87b006d",
-   "name_bn": "বীরশ্রেষ্ঠ শহীদ রুহুল আমিন স্মৃতি পাঠাগার ও জাদুঘর",
-   "name_en": null,
-   "also": [],
-   "type": "tourist",
-   "district": "Noakhali",
-   "upazila_en": "Sonaimuri",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://sonaimuri.noakhali.gov.bd/pages/tourist-spot/বীরশ্রেষ্ঠ-শহীদ-রুহুল-আমিন-স্মৃতি-পাঠাগার-ও-জাদুঘর-079d7f-6990be2335ce18e1c07077ea",
-   "source_last_updated": "2026-01-13",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
-  },
-  {
    "id": "spot-7aa0bfbef7",
    "name_bn": "কুতুবদিয়া বাতিঘর",
    "name_en": "Kutubdia lighthouse",
@@ -597,42 +587,13 @@
    "also_source": "Kutubdia lighthouse: names and spellings given by the team (final queue, 9 Nov 2026)"
   },
   {
-   "id": "spot-5e39378e2f",
-   "name_bn": "শ্রী শ্রী রামকুট তীর্থধাম রাজারকুল রামু",
-   "name_en": null,
-   "also": [],
-   "type": "temple",
-   "district": "Cox's Bazar",
-   "upazila_en": "Ramu",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/শ্রী-শ্রী-রামকুট-তীর্থধাম-রাজারকুল-রামু-638d29-6990be2035ce18e1c070768a",
-   "source_last_updated": "2025-11-16",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
-  },
-  {
-   "id": "spot-f00631dc72",
-   "name_bn": "প্রবালদ্বীপ সেন্টমার্টিন",
-   "name_en": null,
-   "also": [],
-   "type": "island",
-   "district": "Cox's Bazar",
-   "upazila_en": "Teknaf",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/প্রবালদ্বীপ-সেন্টমার্টিন-fbaf58-6990be2035ce18e1c070768e",
-   "source_last_updated": "2023-10-29",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
-  },
-  {
    "id": "spot-d08e3d5591",
    "name_bn": "সোনাদিয়া দ্বীপ মহেশখালী",
-   "name_en": null,
-   "also": [],
+   "name_en": "Sonadia",
+   "also": [
+    "Sonadia",
+    "Sonadia island"
+   ],
    "type": "island",
    "district": "Cox's Bazar",
    "upazila_en": "Maheshkhali",
@@ -642,7 +603,8 @@
    "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/সোনাদিয়া-দ্বীপ-মহেশখালী-db86c9-6990be2035ce18e1c0707692",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
+   "added_on": "2026-11-09",
+   "also_source": "Sonadia, Sonadia island: names and spellings given by the team (final queue, 9 Nov 2026)"
   },
   {
    "id": "spot-94ece70926",
@@ -657,22 +619,6 @@
    "source": "official page",
    "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/মহেশখালী-জেটি-00fb17-6990be2035ce18e1c0707690",
    "source_last_updated": "2014-04-10",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
-  },
-  {
-   "id": "spot-1476c93e03",
-   "name_bn": "ছেঁড়াদ্বীপ সেন্টমার্টিন টেকনাফ",
-   "name_en": null,
-   "also": [],
-   "type": "island",
-   "district": "Cox's Bazar",
-   "upazila_en": "Teknaf",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/ছেঁড়াদ্বীপ-সেন্টমার্টিন-টেকনাফ-e6eb7a-6990be2035ce18e1c070768f",
-   "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -693,42 +639,14 @@
    "added_on": "2026-11-09"
   },
   {
-   "id": "spot-eb1c575235",
-   "name_bn": "আদিনাথ মন্দির মহেশখালী",
-   "name_en": null,
-   "also": [],
-   "type": "temple",
-   "district": "Cox's Bazar",
-   "upazila_en": "Maheshkhali",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/আদিনাথ-মন্দির-মহেশখালী-398e9b-6990be2035ce18e1c0707691",
-   "source_last_updated": "2013-10-07",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
-  },
-  {
-   "id": "spot-6bb2a1721d",
-   "name_bn": "রাবার বাগান",
-   "name_en": null,
-   "also": [],
-   "type": "park",
-   "district": "Cox's Bazar",
-   "upazila_en": "Ramu",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/রাবার-বাগান-b12099-6990be2035ce18e1c070768c",
-   "source_last_updated": "2013-10-03",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
-  },
-  {
    "id": "spot-230fb91b37",
    "name_bn": "রামকোট বৌদ্ধ বিহার",
    "name_en": null,
-   "also": [],
+   "also": [
+    "রাংকূট বৌদ্ধ বিহার",
+    "Ramkot Buddhist temple",
+    "রামকোট বৌদ্ধ কেয়াং"
+   ],
    "type": "temple",
    "district": "Cox's Bazar",
    "upazila_en": "Ramu",
@@ -738,7 +656,11 @@
    "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/রামকোট-বৌদ্ধ-বিহার-908d84-6990be2035ce18e1c0707689",
    "source_last_updated": "2013-10-03",
    "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
+   "added_on": "2026-11-09",
+   "also_pages": [
+    "https://ramu.coxsbazar.gov.bd/pages/static-pages/6990d1ee35ce18e1c071c76e"
+   ],
+   "also_source": "Ramkot Buddhist temple: names and spellings given by the team (final queue, 9 Nov 2026); রামকোট বৌদ্ধ কেয়াং: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা; the other titles: the pages in also_pages"
   },
   {
    "id": "spot-46c06da318",
@@ -746,7 +668,10 @@
    "name_en": "Himchari",
    "also": [
     "Himchari",
-    "Himchori"
+    "Himchori",
+    "প্রকৃতির লীলাভূমি হিমছড়ি",
+    "হিমছড়ি ঝর্ণা/সমুদ্র সৈকত",
+    "হিমছড়ির ঝর্ণা"
    ],
    "type": "tourist",
    "district": "Cox's Bazar",
@@ -758,7 +683,11 @@
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
-   "also_source": "Himchari, Himchori: names and spellings given by the team (final queue, 9 Nov 2026)"
+   "also_source": "Himchari, Himchori: names and spellings given by the team (final queue, 9 Nov 2026); হিমছড়ির ঝর্ণা: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা; the other titles: the pages in also_pages",
+   "also_pages": [
+    "https://ramu.coxsbazar.gov.bd/pages/tourist-spot/প্রকৃতির-লীলাভূমি-হিমছড়ি-6096a3-6990be1e35ce18e1c07075df",
+    "https://ramu.coxsbazar.gov.bd/pages/static-pages/6990d1ee35ce18e1c071c76e"
+   ]
   },
   {
    "id": "spot-fa24cff1ba",
@@ -864,11 +793,9 @@
   {
    "id": "spot-dbc669ea6f",
    "name_bn": "সোনাদিয়া সমুদ্র সৈকত",
-   "name_en": "Sonadia",
+   "name_en": "Sonadia beach",
    "also": [
-    "Sonadia",
-    "Sonadia beach",
-    "Sonadia island"
+    "Sonadia beach"
    ],
    "type": "beach",
    "district": "Cox's Bazar",
@@ -880,7 +807,7 @@
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
-   "also_source": "Sonadia, Sonadia beach, Sonadia island: names and spellings given by the team (final queue, 9 Nov 2026)"
+   "also_source": "Sonadia beach: names and spellings given by the team (final queue, 9 Nov 2026)"
   },
   {
    "id": "spot-88977aacfa",
@@ -888,7 +815,8 @@
    "name_en": "Adinath temple",
    "also": [
     "Adinath temple",
-    "Adinath mandir"
+    "Adinath mandir",
+    "আদিনাথ মন্দির মহেশখালী"
    ],
    "type": "temple",
    "district": "Cox's Bazar",
@@ -900,7 +828,10 @@
    "source_last_updated": "2015-01-26",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
-   "also_source": "Adinath temple, Adinath mandir: names and spellings given by the team (final queue, 9 Nov 2026)"
+   "also_source": "Adinath temple, Adinath mandir: names and spellings given by the team (final queue, 9 Nov 2026); the other titles: the pages in also_pages",
+   "also_pages": [
+    "https://coxsbazar.gov.bd/pages/tourist-spot/আদিনাথ-মন্দির-মহেশখালী-398e9b-6990be2035ce18e1c0707691"
+   ]
   },
   {
    "id": "spot-8f6d160bdc",
@@ -1015,62 +946,12 @@
    "added_on": "2026-11-09"
   },
   {
-   "id": "spot-84e6cad008",
-   "name_bn": "বৃহত্তম রাবার বাগান",
-   "name_en": null,
-   "also": [],
-   "type": "park",
-   "district": "Cox's Bazar",
-   "upazila_en": "Ramu",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://ramu.coxsbazar.gov.bd/pages/tourist-spot/বৃহত্তম-রাবার-বাগান-79806e-6990be1e35ce18e1c07075e0",
-   "source_last_updated": "2013-08-28",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
-  },
-  {
-   "id": "spot-b90336253f",
-   "name_bn": "প্রকৃতির লীলাভূমি হিমছড়ি",
-   "name_en": null,
-   "also": [],
-   "type": "tourist",
-   "district": "Cox's Bazar",
-   "upazila_en": "Ramu",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://ramu.coxsbazar.gov.bd/pages/tourist-spot/প্রকৃতির-লীলাভূমি-হিমছড়ি-6096a3-6990be1e35ce18e1c07075df",
-   "source_last_updated": null,
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
-  },
-  {
-   "id": "spot-c3e31aba6d",
-   "name_bn": "হিমছড়ি ঝর্ণা/সমুদ্র সৈকত",
-   "name_en": null,
-   "also": [
-    "হিমছড়ির ঝর্ণা"
-   ],
-   "type": "beach",
-   "district": "Cox's Bazar",
-   "upazila_en": "Ramu",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://ramu.coxsbazar.gov.bd/pages/static-pages/6990d1ee35ce18e1c071c76e",
-   "source_last_updated": "2026-07-09",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09",
-   "also_source": "হিমছড়ির ঝর্ণা: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা"
-  },
-  {
    "id": "spot-5229e9171c",
    "name_bn": "শ্রী শ্রী রামকুট তীর্থ ধাম",
    "name_en": null,
    "also": [
-    "রামকোট হিন্দু মন্দির"
+    "রামকোট হিন্দু মন্দির",
+    "শ্রী শ্রী রামকুট তীর্থধাম রাজারকুল রামু"
    ],
    "type": "temple",
    "district": "Cox's Bazar",
@@ -1082,27 +963,10 @@
    "source_last_updated": "2026-07-09",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
-   "also_source": "রামকোট হিন্দু মন্দির: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা"
-  },
-  {
-   "id": "spot-fff7dc0501",
-   "name_bn": "রাংকূট বৌদ্ধ বিহার",
-   "name_en": "Ramkot Buddhist temple",
-   "also": [
-    "Ramkot Buddhist temple",
-    "রামকোট বৌদ্ধ কেয়াং"
-   ],
-   "type": "temple",
-   "district": "Cox's Bazar",
-   "upazila_en": "Ramu",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://ramu.coxsbazar.gov.bd/pages/static-pages/6990d1ee35ce18e1c071c76e",
-   "source_last_updated": "2026-07-09",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09",
-   "also_source": "Ramkot Buddhist temple: names and spellings given by the team (final queue, 9 Nov 2026); রামকোট বৌদ্ধ কেয়াং: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা"
+   "also_source": "রামকোট হিন্দু মন্দির: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা; the other titles: the pages in also_pages",
+   "also_pages": [
+    "https://coxsbazar.gov.bd/pages/tourist-spot/শ্রী-শ্রী-রামকুট-তীর্থধাম-রাজারকুল-রামু-638d29-6990be2035ce18e1c070768a"
+   ]
   },
   {
    "id": "spot-bde07dfa59",
@@ -1195,7 +1059,10 @@
    "id": "spot-ec7c9f3569",
    "name_bn": "রামু রাবার বাগান",
    "name_en": null,
-   "also": [],
+   "also": [
+    "বৃহত্তম রাবার বাগান",
+    "রাবার বাগান"
+   ],
    "type": "park",
    "district": "Cox's Bazar",
    "upazila_en": "Ramu",
@@ -1205,7 +1072,12 @@
    "source_url": "https://ramu.coxsbazar.gov.bd/pages/static-pages/6990d1ee35ce18e1c071c76e",
    "source_last_updated": "2026-07-09",
    "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
+   "added_on": "2026-11-09",
+   "also_pages": [
+    "https://ramu.coxsbazar.gov.bd/pages/tourist-spot/বৃহত্তম-রাবার-বাগান-79806e-6990be1e35ce18e1c07075e0",
+    "https://coxsbazar.gov.bd/pages/tourist-spot/রাবার-বাগান-b12099-6990be2035ce18e1c070768c"
+   ],
+   "also_source": "the other titles: the pages in also_pages"
   },
   {
    "id": "spot-c766ce0156",
@@ -1220,22 +1092,6 @@
    "source": "official page",
    "source_url": "https://ramu.coxsbazar.gov.bd/pages/static-pages/6990d1ee35ce18e1c071c76e",
    "source_last_updated": "2026-07-09",
-   "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
-  },
-  {
-   "id": "spot-8a4af13795",
-   "name_bn": "মারিস বনিয়া সমুদ্র সৈকত",
-   "name_en": null,
-   "also": [],
-   "type": "beach",
-   "district": "Cox's Bazar",
-   "upazila_en": "Teknaf",
-   "municipality_bn": null,
-   "union_bn": null,
-   "source": "official page",
-   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/মারিস-বনিয়া-সমুদ্র-সৈকত-036738-6990be1c35ce18e1c07074b9",
-   "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -1297,7 +1153,8 @@
    "name_en": "Chhera Dwip",
    "also": [
     "Chhera Dwip",
-    "Chera dwip"
+    "Chera dwip",
+    "ছেঁড়াদ্বীপ সেন্টমার্টিন টেকনাফ"
    ],
    "type": "island",
    "district": "Cox's Bazar",
@@ -1309,7 +1166,10 @@
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
-   "also_source": "Chhera Dwip, Chera dwip: names and spellings given by the team (final queue, 9 Nov 2026)"
+   "also_source": "Chhera Dwip, Chera dwip: names and spellings given by the team (final queue, 9 Nov 2026); the other titles: the pages in also_pages",
+   "also_pages": [
+    "https://coxsbazar.gov.bd/pages/tourist-spot/ছেঁড়াদ্বীপ-সেন্টমার্টিন-টেকনাফ-e6eb7a-6990be2035ce18e1c070768f"
+   ]
   },
   {
    "id": "spot-59e29bc05d",
@@ -1323,7 +1183,8 @@
     "Narikel Jinjira",
     "Saint Martin's",
     "St. Martin's Island",
-    "সেন্ট মার্টিনস দ্বীপ"
+    "সেন্ট মার্টিনস দ্বীপ",
+    "প্রবালদ্বীপ সেন্টমার্টিন"
    ],
    "type": "island",
    "district": "Cox's Bazar",
@@ -1335,7 +1196,10 @@
    "source_last_updated": "2023-01-31",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
-   "also_source": "Saint Martin, St Martin, Saint Martin island, নারিকেল জিঞ্জিরা, Narikel Jinjira, Saint Martin's, St. Martin's Island: names and spellings given by the team (final queue, 9 Nov 2026); সেন্ট মার্টিনস দ্বীপ: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা"
+   "also_source": "Saint Martin, St Martin, Saint Martin island, নারিকেল জিঞ্জিরা, Narikel Jinjira, Saint Martin's, St. Martin's Island: names and spellings given by the team (final queue, 9 Nov 2026); সেন্ট মার্টিনস দ্বীপ: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা; the other titles: the pages in also_pages",
+   "also_pages": [
+    "https://coxsbazar.gov.bd/pages/tourist-spot/প্রবালদ্বীপ-সেন্টমার্টিন-fbaf58-6990be2035ce18e1c070768e"
+   ]
   },
   {
    "id": "spot-3a6770658c",
@@ -1501,7 +1365,9 @@
    "id": "spot-e50f638ab7",
    "name_bn": "মারিশবনিয়া সৈকত",
    "name_en": null,
-   "also": [],
+   "also": [
+    "মারিস বনিয়া সমুদ্র সৈকত"
+   ],
    "type": "beach",
    "district": "Cox's Bazar",
    "upazila_en": "Teknaf",
@@ -1511,7 +1377,11 @@
    "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/অন্যান্য-dcb997-6990be1a35ce18e1c070736f",
    "source_note": "listed on the Teknaf upazila page 'অন্যান্য'",
    "added_by": "collect_tourist_spots.py",
-   "added_on": "2026-11-09"
+   "added_on": "2026-11-09",
+   "also_pages": [
+    "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/মারিস-বনিয়া-সমুদ্র-সৈকত-036738-6990be1c35ce18e1c07074b9"
+   ],
+   "also_source": "the other titles: the pages in also_pages"
   },
   {
    "id": "spot-38dcdf8a86",
@@ -1646,7 +1516,7 @@
    "union_bn": null,
    "source": "reference",
    "source_url": "https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা",
-   "source_note": "Banglapedia (secondary reference, place names only)",
+   "source_note": "Banglapedia (secondary reference): \"ঝিলংজাতে অবস্থিত\"; ঝিলংজা is a union of Cox's Bazar Sadar in our data, so the upazila is from that, not from Banglapedia itself",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },

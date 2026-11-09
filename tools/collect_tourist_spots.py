@@ -136,7 +136,7 @@ TEAM_SPELLINGS = {
     N("হিমছড়ি"): ["Himchari", "Himchori"], N("ইনানী সি বীচ"): ["Inani", "Inani beach", "Inani sea beach"],
     N("টেকনাফ সমুদ্র সৈকত"): ["Teknaf beach"], N("সেন্টমার্টিন দ্বীপ"): ["Saint Martin", "St Martin", "Saint Martin island", "নারিকেল জিঞ্জিরা", "Narikel Jinjira", "Saint Martin's", "St. Martin's Island"],
     N("ছেঁড়া দ্বীপ"): ["Chhera Dwip", "Chera dwip"], N("শাহপরীর দ্বীপ"): ["Shah Porir Dwip", "Shahporir dwip"],
-    N("সোনাদিয়া সমুদ্র সৈকত"): ["Sonadia", "Sonadia beach", "Sonadia island"], N("আদিনাথ মন্দির"): ["Adinath temple", "Adinath mandir"],
+    N("সোনাদিয়া সমুদ্র সৈকত"): ["Sonadia beach"], N("সোনাদিয়া দ্বীপ মহেশখালী"): ["Sonadia", "Sonadia island"], N("আদিনাথ মন্দির"): ["Adinath temple", "Adinath mandir"],
     N("কুতুবদিয়া বাতিঘর"): ["Kutubdia lighthouse"], N("ডুলাহাজারা সাফারি পার্ক"): ["Dulahazra Safari Park", "Safari Park"],
     N("কানা রাজার সুড়ঙ্গ"): ["Kana Rajar Surongo"], N("রামু সীমা বিহার"): ["Ramu Buddhist temple", "Ramu Sima Bihar"],
     N("রাংকূট বৌদ্ধ বিহার"): ["Ramkot Buddhist temple"], N("লামার পাড়া বৌদ্ধ বিহার"): ["Lamar Para Buddhist temple"],
@@ -144,6 +144,35 @@ TEAM_SPELLINGS = {
     N("গান্ধী আশ্রম"): ["Gandhi Ashram"], N("বজরা শাহী জামে মসজিদ"): ["Bajra Shahi Mosque"],
 }
 TEAM = "names and spellings given by the team (final queue, 9 Nov 2026)"
+# The same spot listed twice in one upazila (district page + upazila page, or two titles): one entry, the first name kept,
+# the others in "also", every page in "also_pages" (data-checker, #177).
+SAME_SPOT = [
+    ("Sonaimuri", ["বীরশ্রেষ্ঠ শহীদ মোঃ রুহুল আমিন গ্রন্থাগার ও স্মৃতি জাদুঘর", "বীরশ্রেষ্ঠ শহীদ রুহুল আমিন স্মৃতি পাঠাগার ও জাদুঘর"]),
+    ("Maheshkhali", ["আদিনাথ মন্দির", "আদিনাথ মন্দির মহেশখালী"]),
+    ("Ramu", ["রামু রাবার বাগান", "বৃহত্তম রাবার বাগান", "রাবার বাগান"]),
+    ("Ramu", ["হিমছড়ি", "প্রকৃতির লীলাভূমি হিমছড়ি", "হিমছড়ি ঝর্ণা/সমুদ্র সৈকত"]),
+    ("Ramu", ["শ্রী শ্রী রামকুট তীর্থ ধাম", "শ্রী শ্রী রামকুট তীর্থধাম রাজারকুল রামু"]),
+    ("Ramu", ["রামকোট বৌদ্ধ বিহার", "রাংকূট বৌদ্ধ বিহার"]),
+    ("Teknaf", ["সেন্টমার্টিন দ্বীপ", "প্রবালদ্বীপ সেন্টমার্টিন"]),
+    ("Teknaf", ["ছেঁড়া দ্বীপ", "ছেঁড়াদ্বীপ সেন্টমার্টিন টেকনাফ"]),
+    ("Teknaf", ["মারিশবনিয়া সৈকত", "মারিস বনিয়া সমুদ্র সৈকত"]),
+]
+
+
+def merge_same(entries):
+    for up, names in SAME_SPOT:
+        names = [N(n) for n in names]
+        group = sorted([e for e in entries if e["upazila_en"] == up and e["name_bn"] in names], key=lambda e: names.index(e["name_bn"]))
+        if len(group) < 2:
+            continue
+        keep, rest = group[0], group[1:]
+        keep["also"] = list(dict.fromkeys(keep["also"] + [n for e in rest for n in [e["name_bn"], *e["also"]]]))
+        keep["union_bn"] = keep["union_bn"] or next((e["union_bn"] for e in rest if e["union_bn"]), None)
+        keep["also_pages"] = list(dict.fromkeys(e["source_url"] for e in rest if e["source_url"] != keep["source_url"]))
+        srcs = [x for x in [keep.get("also_source")] + [e.get("also_source") for e in rest] if x]
+        keep["also_source"] = "; ".join(dict.fromkeys(srcs + ["the other titles: the pages in also_pages"]))
+        for e in rest:
+            entries.remove(e)
 # Banglapedia's names for spots an official page already places (secondary reference, place names only).
 REFERENCE_NAMES = {N("ডুলাহাজারা সাফারি পার্ক"): ["বঙ্গবন্ধু সাফারি পার্ক"], N("রাংকূট বৌদ্ধ বিহার"): ["রামকোট বৌদ্ধ কেয়াং"],
                    N("শ্রী শ্রী রামকুট তীর্থ ধাম"): ["রামকোট হিন্দু মন্দির"], N("হিমছড়ি ঝর্ণা/সমুদ্র সৈকত"): ["হিমছড়ির ঝর্ণা"],
@@ -161,7 +190,9 @@ IN_TEXT = [(n, "Teknaf", TEKNAF_OTHERS, "listed on the Teknaf upazila page 'অ�
      "the Ukhia page: উখিয়া উপজেলার জালিয়াপালং ইউনিয়নের পাটুয়ারটেক সৈকতের নিকটে"),
 ] + [(n, up, BP_CX, "Banglapedia (secondary reference, place names only)") for n, up in
      [("মৈনাক পর্বত", "Maheshkhali"), ("কুতুব আউলিয়ার মাযার", "Kutubdia"), ("বীর কমলার দিঘী", "Teknaf"), ("থোয়াইংগা চৌধুরীর ক্যাং", "Ramu"),
-                                                                    ("সাবমেরিন ক্যাবল ল্যান্ডিং স্টেশন", "Cox's Bazar Sadar")]]
+                                                                    ]] + [
+    ("সাবমেরিন ক্যাবল ল্যান্ডিং স্টেশন", "Cox's Bazar Sadar", BP_CX, "Banglapedia (secondary reference): \"ঝিলংজাতে অবস্থিত\"; "
+     "ঝিলংজা is a union of Cox's Bazar Sadar in our data, so the upazila is from that, not from Banglapedia itself")]
 IN_TEXT_SPELLINGS = {N("মাথিনের কূপ"): ["Mathiner Kup", "Mathin's well"], N("মেরিন ড্রাইভ"): ["Marine Drive", "Marine Drive road"],
                      N("পাটুয়ারটেক সৈকত"): ["পাটুয়ারটেক", "Patuartek", "Patuartek beach"]}
 IN_TEXT_UNION = {N("পাটুয়ারটেক সৈকত"): N("জালিয়াপালং ইউনিয়ন")}
@@ -225,6 +256,7 @@ def write_aliases(data, spots, cache):
                         "upazila_en": up, "municipality_bn": None, "union_bn": IN_TEXT_UNION.get(name),
                         "source": "reference" if "banglapedia" in url else "official page", "source_url": page_url(url), "source_note": note,
                         "added_by": "collect_tourist_spots.py", "added_on": TODAY})
+    merge_same(entries)
     # Kolatoli: the Cox's Bazar pourashava's ward page lists দক্ষিণ/উত্তর কলাতলী in ward 12 (Cox's Bazar Sadar).
     ward = "https://ps.coxsbazar.gov.bd/pages/static-pages/6990e62b35ce18e1c0725cdb"
     if N("কলাতলী") in text_of(content_of(fetch(ward, cache) or "")):
@@ -232,6 +264,9 @@ def write_aliases(data, spots, cache):
                         "also_source": TEAM, "type": "tourist", "district": "Cox's Bazar", "upazila_en": "Cox's Bazar Sadar",
                         "municipality_bn": N("কক্সবাজার পৌরসভা"), "union_bn": None, "ward_no": "12", "source": "official page",
                         "source_url": ward, "source_note": "ward 12: দক্ষিণ কলাতলী, উত্তর কলাতলী", "added_by": "collect_tourist_spots.py", "added_on": TODAY})
+    for f in ["also_source", "also_pages", "ward_no", "source_note", "source_last_updated"]:
+        if f not in doc["fields"]:
+            doc["fields"] += f", {f}"
     doc["aliases"] = [a for a in doc["aliases"] if not a["id"].startswith("spot-")] + entries
     save_json(path, doc, indent=1)
     print("aliases: spots", len(entries))
