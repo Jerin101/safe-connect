@@ -61,9 +61,8 @@ test('himchari and himchori find হিমছড়ি', () => {
   for (const q of ['himchari', 'himchori']) assert.equal(nameOf(hits(q)[0] || { place: {} }), norm('হিমছড়ি'), q);
 });
 
-// Kolatoli (Cox's Bazar) is not in our data yet; today only কালিতলা (a Chatkhil mosque) sounds like it. Step 3 adds the
-// tourist spots from the official portals; then this must pass.
-test('kolatoli: nothing from Noakhali first', { todo: 'Kolatoli is added with the tourist spots (coverage fix, step 3)' }, () => {
+// Kolatoli: ward 12 of Cox's Bazar pourashava (its ward page), added with the tourist spots (coverage fix).
+test('kolatoli: nothing from Noakhali first', () => {
   for (const q of ['kolatoli', 'কলাতলী']) assert.notEqual(hits(q)[0]?.place.district, 'noakhali', q);
 });
 

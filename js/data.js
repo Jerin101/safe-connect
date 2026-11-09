@@ -354,6 +354,9 @@ function commonOnly(q, k) {
   return Math.min(a.length, b.length) < 3 ? a !== b : editDistance(a, b) > 1;
 }
 
+// Tourist spots collected from the portals (data/aliases.json "spot-…") are landmarks too: after a village or place of that name.
+const isLm = (i) => i.kind === 'landmark' || (i.kind === 'local' && /^spot-/.test(i.named?.id || ''));
+
 const KIND_ORDER = { municipality: 0, local: 1, place: 1, union: 2, village: 3, landmark: 3, upazila: 4, thana: 4 };
 
 // { hits: real matches (best first), close: similar names } for one place name.
@@ -383,7 +386,7 @@ function matchName(index, q, { district = '' } = {}) {
     return true;
   });
   // Landmarks only fill the places left after everything else (#157): they never push out a union, town or village.
-  const lmLast = (list) => [...list.filter((x) => x.item.kind !== 'landmark'), ...list.filter((x) => x.item.kind === 'landmark')];
+  const lmLast = (list) => [...list.filter((x) => !isLm(x.item)), ...list.filter((x) => isLm(x.item))];
   const hits = lmLast(uniq.filter((x) => x.sc <= 4));
   let close = lmLast(uniq.filter((x) => x.sc > 4));
   // Only landmarks that contain the name: a town, union or upazila one letter off ("ঈদগাও" ~ ঈদগাঁও) is what was meant,
@@ -521,7 +524,7 @@ function findAreasRaw(index, q, opts = {}) {
   if (wholeHits.length && beats(Math.min(...wholeHits.map((h) => whole.scores.get(h))))) {
     // the better match first (exact text before same sound); inside the area words only breaks a tie
     const inside = (h) => (context.some((c) => inContext(h, c)) ? 0 : 1);
-    const ranked = [...wholeHits].sort((x, y) => whole.scores.get(x) - whole.scores.get(y) || inside(x) - inside(y));
+    const ranked = [...wholeHits].sort((x, y) => isLm(x) - isLm(y) || whole.scores.get(x) - whole.scores.get(y) || inside(x) - inside(y));
     return { hits: [...ranked, ...whole.hits.filter((h) => !ranked.includes(h))], close: whole.close };
   }
   if (span && !away) return span;

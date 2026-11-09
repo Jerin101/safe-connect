@@ -3,7 +3,7 @@
 Usage: python validate_data.py <data folder>
 Errors stop a merge; warnings are printed for the team to review.
 """
-import json, os, re, sys
+import unicodedata, json, os, re, sys
 
 sys.stdout.reconfigure(encoding="utf-8")                        # Bangla names print on Windows too
 DATA = sys.argv[1] if len(sys.argv) > 1 else "."
@@ -127,6 +127,41 @@ def check_landmarks(f):
         if not x.get("added_by") or not x.get("added_on"): err(f, rid, "added_by and added_on are needed")
         if any(re.search(r"01[3-9][0-9]{8}", str(v)) for v in x.values()): err(f, rid, "no phone numbers in this file")
 
+
+nfc = lambda s: " ".join(unicodedata.normalize("NFC", s or "").split())   # য়/ড় are stored in two ways
+REFERENCE = re.compile(r"^https://bn\.banglapedia\.org/")   # secondary reference, place names only (final queue rule 6)
+
+
+def check_aliases(f):
+    # Local names and tourist spots for the search: each one has an official page (or Banglapedia, for a place name),
+    # or says the team added it, with who and when. A union or town only if it is in our data. No phone numbers.
+    d = load(f)
+    areas = set()
+    for c in os.listdir(DATA):
+        if c.startswith("contacts_") and c.endswith(".json"):
+            doc = load(c)
+            areas |= {("union", u.get("upazila_en"), nfc(u.get("union_bn"))) for u in doc.get("unions", [])}
+            areas |= {("municipality", m.get("upazila_en"), nfc(m.get("municipality_bn"))) for m in doc.get("municipalities", [])}
+    seen = set()
+    for i, a in enumerate(d.get("aliases", [])):
+        rid = a.get("id") or f"row {i}"
+        if not a.get("id") or not a.get("name_bn"): err(f, rid, "id and name_bn are needed")
+        if a.get("id") in seen: err(f, rid, "duplicate id")
+        seen.add(a.get("id"))
+        if not a.get("upazila_en"): err(f, rid, "upazila_en is needed (the search shows the whole upazila when the union is not known)")
+        url, src = a.get("source_url") or "", a.get("source") or ""
+        if not (OFFICIAL.match(url) or REFERENCE.match(url) or src.startswith("local name")):
+            err(f, rid, "needs an official source_url, a Banglapedia page, or source 'local name, added by the team'")
+        if not a.get("added_by") or not a.get("added_on"): err(f, rid, "added_by and added_on are needed")
+        if a.get("union_bn") and ("union", a.get("upazila_en"), nfc(a.get("union_bn"))) not in areas:
+            err(f, rid, f"union {a.get('union_bn')!r} in {a.get('upazila_en')!r} is not in the contact data")
+        if a.get("municipality_bn") and ("municipality", a.get("upazila_en"), nfc(a.get("municipality_bn"))) not in areas:
+            err(f, rid, f"town {a.get('municipality_bn')!r} in {a.get('upazila_en')!r} is not in the contact data")
+        if any(re.search(r"01[3-9][0-9]{8}", str(v)) for v in a.values()): err(f, rid, "no phone numbers in this file")
+
+
+if os.path.exists(os.path.join(DATA, "aliases.json")):
+    check_aliases("aliases.json")
 
 for name in sorted(os.listdir(os.path.join(DATA, "landmarks")) if os.path.isdir(os.path.join(DATA, "landmarks")) else []):
     if name.endswith(".json"): check_landmarks(os.path.join("landmarks", name))
