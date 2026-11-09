@@ -36,7 +36,7 @@ export function reportFields(uid, draft) {
 export function missingFields(uid, draft) {
   if (!uid || !draft || !REPORT_DISTRICTS.includes(draft.district)) return null;
   const place = cut(draft.place, AREA_MAX), upazila = cut(draft.upazila, 60), union = cut(draft.union, AREA_MAX);
-  if ([...place].length < 2 || [...upazila].length < 2 || hasPhone(place) || hasPhone(union)) return null;
+  if ([...place].length < 2 || [...upazila].length < 2 || hasPhone(place) || hasPhone(upazila) || hasPhone(union)) return null;
   const d = { uid, recordId: 'missing-place', district: draft.district, problem: MISSING, status: 'open', place, upazila };
   if (union) d.union = union;
   return d;

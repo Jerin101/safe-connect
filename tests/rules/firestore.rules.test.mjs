@@ -628,9 +628,10 @@ describe('missing-place requests (#159)', () => {
     await assertFails(setDoc(doc(db(KARIM), 'reports', 'm1'), missing(KARIM)));
     await assertFails(sendWithLimits(dbUnverified(KARIM), KARIM, missing(KARIM)));
   });
-  test('a phone number in the place name or union is refused (also by missingFields)', async () => {
+  test('a phone number in the place name, upazila or union is refused (also by missingFields)', async () => {
     await assertFails(sendWithLimits(db(KARIM), KARIM, missing(KARIM, { place: 'বাজার ০১৭১২-৩৪৫৬৭৮' })));
     await assertFails(sendWithLimits(db(KARIM), KARIM, missing(KARIM, { union: 'call 01712345678' })));
+    await assertFails(sendWithLimits(db(KARIM), KARIM, missing(KARIM, { upazila: 'Hatiya 01712345678' })));
     assert.equal(missingFields(KARIM, { district: 'noakhali', place: 'বাজার 01712345678', upazila: 'Hatiya' }), null);
   });
   test('it needs a place and an upazila, short texts only, and the fixed record id', async () => {

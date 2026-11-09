@@ -279,12 +279,12 @@
     "notFoundBut": "Didn't find {n}, but found {c}.",
     "openContext": "See the numbers for {c}",
     "locateBig": "📍 Find by location",
-    "locateBigSub": "Works for every village",
-    "stepTitle": "Step by step: pick the upazila or thana",
+    "locateBigSub": "Works even if your village isn't listed",
+    "stepTitle": "Step by step: pick the upazila or police station",
     "stepUnion": "{u}: pick the union or town",
     "stepBack": "Another upazila",
     "askTitle": "Ask us to add the place",
-    "askText": "The name is not on our list. An admin adds it only after checking an official list or confirming it locally. No number changes.",
+    "askText": "The name is not on our list. An admin adds it only after checking an official list or confirming it locally. This request does not change any phone number.",
     "askPlaceLabel": "Place name",
     "askUpazila": "Upazila",
     "askPick": "Choose",
@@ -294,7 +294,7 @@
     "askSending": "Sending…",
     "askSignin": "Sending needs a sign-in. Your name and phone number are not part of the request.",
     "askMsg": {
-      "sent": "Thank you! Your request was sent. Once checked, the name will show in the search.",
+      "sent": "Thank you! Your request was sent. If it checks out, the name will show in the search.",
       "need": "Please give the place name and the upazila.",
       "phone": "Please don't put a phone number in the place name.",
       "verify": "Please verify your email first (the link is in your inbox), then send again.",
@@ -929,7 +929,7 @@
       "other_person": "Someone else answers",
       "changed": "The number has changed",
       "other": "Another problem",
-      "missing_place": "Asked to add a place"
+      "missing_place": "Request to add a place"
     },
     "pick": "Please choose what is wrong.",
     "noteLabel": "Anything else? (optional)",

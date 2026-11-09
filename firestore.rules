@@ -143,7 +143,7 @@ service cloud.firestore {
         && (incoming().problem == 'missing_place'
           ? (incoming().recordId == 'missing-place'
             && incoming().place is string && incoming().place.size() >= 2 && shortText(incoming().place, 80) && noPhone(incoming().place)
-            && incoming().upazila is string && incoming().upazila.size() >= 2 && shortText(incoming().upazila, 60)
+            && incoming().upazila is string && incoming().upazila.size() >= 2 && shortText(incoming().upazila, 60) && noPhone(incoming().upazila)
             && shortText(incoming().get('union', ''), 80) && noPhone(incoming().get('union', '')))
           : !('place' in incoming()) && !('upazila' in incoming()) && !('union' in incoming()))
         && shortText(incoming().get('note', ''), 500)
