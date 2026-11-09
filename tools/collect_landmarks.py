@@ -21,14 +21,15 @@ NOT_LINK = re.compile(N(r"পুলিশ|আদালত|উন্নয়ন|
 # The type comes from the name itself; a name without one of these words is not kept (it may be prose).
 TYPES = [("college", N(r"কলেজ")), ("madrasa", N(r"মাদ্রাসা|মাদরাসা|মাদ্‌রাসা")), ("school", N(r"বিদ্যালয়|বিদ্যালয়|স্কুল|বিদ্যানিকেতন|একাডেমী|একাডেমি")),
          ("mosque", N(r"মসজিদ")), ("hospital", N(r"হাসপাতাল|স্বাস্থ্য কমপ্লেক্স|ক্লিনিক|স্বাস্থ্য কেন্দ্র")),
-         ("ghat", N(r"ঘাট$|খেয়াঘাট|ফেরিঘাট|লঞ্চঘাট")), ("bazar", N(r"বাজার$|হাট$|বাজার |হাট "))]
+         ("ghat", N(r"(?:^| )ঘাট$|খেয়াঘাট|ফেরিঘাট|লঞ্চঘাট")), ("bazar", N(r"বাজার$|হাট$|বাজার |হাট "))]
 NOT_A_NAME = re.compile(N(r"মোট|সর্বমোট|ক্রমিক|নাম|তালিকা|সংখ্যা|ঠিকানা|মোবাইল|ফোন|প্রধান শিক্ষক|অধ্যক্ষ|সুপার|রয়েছে|আছে|হলো|এর |টি |[0-9০-৯]{3,}|@|http"))
 MAX_PER_PAGE = 120
 # A name must say WHERE it is, not only what it is: at least one word besides these (#157).
 GENERIC_WORDS = set(N(w) for w in "সরকারি সরকারী বেসরকারি প্রাথমিক উচ্চ নিম্ন মাধ্যমিক বিদ্যালয় বিদ্যালয় স্কুল বালিকা বালক কেন্দ্রীয় জামে মসজিদ বাজার হাট "
                     "মাদ্রাসা মাদরাসা দাখিল আলিম ফাজিল কামিল এবতেদায়ী হাফেজিয়া নূরানী কওমী কলেজ ডিগ্রী ডিগ্রি মহাবিদ্যালয় ঘাট হাসপাতাল ক্লিনিক এন্ড অ্যান্ড ও".split())
-# Prose, headings and negatives, never a name ("কোন ধরনের বাজার বসে না", "সরকারি কলেজসমূহ", "… নীতিমালা"; tester #158).
-NEGATIVE = re.compile(N(r"নেই|নাই|নয়|নাহি|ওয়ার্ড|ওয়ার্ড|[0-9০-৯]|না$|বসে|সমূহ|সমুহ|নিম্নরূপ|নীতিমালা|ব্যবস্থা|তালিকা|চাইলে|দেখতে|প্রতি |সপ্তাহ|ইউনিয়নে|ইউনিয়ন$|সকল|সবগুলো|বিশ্ববিদ্যালয়|জন্য|এবং"))
+# Prose, headings and negatives, never a name ("কোন ধরনের বাজার বসে না", "সরকারি কলেজসমূহ", "… নীতিমালা", "… গ্রামে … অবস্থিত",
+# "… পরিচালনা কমিটি", "বেসরকারি ও আধা-সরকারি মাধ্যমিক বিদ্যালয়"; tester #158).
+NEGATIVE = re.compile(N(r"নেই|নাই|নয়|নাহি|ওয়ার্ড|ওয়ার্ড|[0-9০-৯]|না$|বসে|সমূহ|সমুহ|নিম্নরূপ|নীতিমালা|ব্যবস্থা|তালিকা|চাইলে|দেখতে|প্রতি |সপ্তাহ|ইউনিয়নে|ইউনিয়ন$|সকল|সবগুলো|বিশ্ববিদ্যালয়|জন্য|এবং|অবস্থিত|কমিটি|আধা-?সরকারি"))
 
 
 def fetch(url, cache):
@@ -51,12 +52,19 @@ def links(home, base):
 
 def type_of(name):
     name = re.sub(N(r"কক্সবাজার|কক্স বাজার"), " ", name)              # the district's name is not a bazar
-    return next((t for t, rx in TYPES if re.search(rx, name)), None)
+    # the LAST type word says what it is: "হারবাং হাইস্কুল মসজিদ" is a mosque (tester #158)
+    found = [(m.start(), t) for t, rx in TYPES for m in re.finditer(rx, name)]
+    return max(found)[1] if found else None
 
 
 def names_on_page(page):
     """Table cells and list lines from the page's own content (never menus), cleaned to one name each."""
     content = content_of(page)
+    # A page that opens as a list for the whole upazila or district ("কক্সবাজার সদর উপজেলার প্রধান প্রধান কলেজ") and names
+    # no union is not the union's own places: its town colleges would point to this union (tester #158).
+    opening = text_of(content)[:150]
+    if re.search(N(r"উপজেলার|জেলার"), opening) and not re.search(N(r"ইউনিয়ন"), opening):
+        return []
     pieces = [text_of(c) for c in re.findall(r"<t[hd][^>]*>(.*?)</t[hd]>", content, re.S)]
     if not pieces:
         pieces = [text_of(b) for b in re.split(r"</?(?:p|li|br|div|tr|h\d)[^>]*>", content)]

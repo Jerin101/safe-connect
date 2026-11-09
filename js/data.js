@@ -338,9 +338,13 @@ function matchName(index, q, { district = '' } = {}) {
   const key = soundKey(s);
   const typed = vowelForm(s);
   const out = [];
+  // A landmark that only contains the typed name ("উত্তর মোহাম্মদপুর সরকারি প্রাথমিক বিদ্যালয়") is a weaker match than a
+  // place of exactly that name, here or in another area (#158 review 2)
+  const exactName = (item) => (item.names || []).some((n) => norm(n).toLowerCase() === s);
   for (const item of index) {
     if (district && item.place.district !== district) continue;
-    const sc = scoreItem(item, s, key);
+    let sc = scoreItem(item, s, key);
+    if (sc != null && sc <= 3 && item.kind === 'landmark' && !exactName(item)) sc += 0.5;
     if (sc != null) out.push({ item, sc, near: Math.min(...item.vowels.map((v) => editDistance(typed, v))) });
   }
   out.sort((a, b) => a.sc - b.sc || a.near - b.near || (KIND_ORDER[a.item.kind] ?? 3) - (KIND_ORDER[b.item.kind] ?? 3));
@@ -355,7 +359,14 @@ function matchName(index, q, { district = '' } = {}) {
   // Landmarks only fill the places left after everything else (#157): they never push out a union, town or village.
   const lmLast = (list) => [...list.filter((x) => x.item.kind !== 'landmark'), ...list.filter((x) => x.item.kind === 'landmark')];
   const hits = lmLast(uniq.filter((x) => x.sc <= 4));
-  const close = lmLast(uniq.filter((x) => x.sc > 4));
+  let close = lmLast(uniq.filter((x) => x.sc > 4));
+  // Only landmarks that contain the name: a town, union or upazila one letter off ("ঈদগাও" ~ ঈদগাঁও) is what was meant,
+  // so it comes first, before "ঈদগাও বাজার" (#158 review 2)
+  if (hits.length && hits.every((x) => x.item.kind === 'landmark' && !exactName(x.item))) {
+    const near = close.filter((x) => x.item.kind !== 'landmark' && x.sc <= 6);
+    hits.unshift(...near);
+    close = close.filter((x) => !near.includes(x));
+  }
   // A clear slip in a long name ("kasehmbazar"): one letter off, and nothing else that close, counts as the place (#151).
   // (the same name in the same union twice, e.g. a local name that is also an official landmark, is one candidate)
   const sameName = (a, b) => a && b && norm(a.item.named?.name_bn || a.item.village || '') === norm(b.item.named?.name_bn || b.item.village || '') && a.item.place.area?.bn === b.item.place.area?.bn;
