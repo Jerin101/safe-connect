@@ -44,6 +44,12 @@ offline; 360 px in bn/en and night/day.
 
 **Run:** `node --test tests/bipod-test.mjs` (no browser, no internet).
 
+## A list that fails to load (issue #170)
+
+`partial-load-test.mjs`: if `villages.json` or the landmark lists fail to load, `loadAll` lists them in `partial`, the search still finds unions, upazilas and thanas, and the calm note exists in bn/en.
+
+**Run:** `node --test tests/partial-load-test.mjs` (no browser, no internet).
+
 ## Width sweep (issue #145)
 
 `width-sweep.mjs` opens the main pages (home, an area, area search, send, numbers, a help link) at every width from
