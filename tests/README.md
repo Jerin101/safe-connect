@@ -44,6 +44,20 @@ offline; 360 px in bn/en and night/day.
 
 **Run:** `node --test tests/bipod-test.mjs` (no browser, no internet).
 
+## Bangla, English and Banglish search (phonetic key)
+
+`phonetic/phonetic-test.mjs` runs on the real index:
+- the kit's 53 Banglish/English queries
+- sahapur in both places, and "sahapur noakhali sadar" → the নিয়াজপুর village first
+- krishnapur, himchari/himchori
+- bazar/char/hat alone find nothing
+- every village, union and town finds itself in Bangla
+- every name used in more than one place shows every place, typed in Bangla and in Banglish
+
+"kolatoli" is a `todo` until the tourist spots are added (coverage fix).
+
+**Run:** `node --test tests/phonetic/phonetic-test.mjs` (no browser, no internet).
+
 ## A list that fails to load (issue #170)
 
 `partial-load-test.mjs`: if `villages.json` or the landmark lists fail to load, `loadAll` lists them in `partial`, the search still finds unions, upazilas and thanas, and the calm note exists in bn/en.
