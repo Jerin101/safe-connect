@@ -245,7 +245,7 @@ def write_aliases(data, spots, cache):
         seen.add((s["district"], up, name))
         # the union only when the page names one of this upazila's unions ("০২নং কেশারপাড় ইউনিয়নে অবস্থিত")
         text = N(name + " " + s["location_text"])
-        unions = [u for u in unions_of.get(up, []) if re.search(re.escape(u.replace(N(" ইউনিয়ন"), "")) + N(r"\s*ইউনিয়ন(?!\S*\s*(হতে|থেকে))"), text)]   # "… ইউনিয়ন হতে" (from) is not where it is
+        unions = [u for u in unions_of.get(up, []) if re.search(r"(?<![,،])(?<![,،]\s)" + re.escape(u.replace(N(" ইউনিয়ন"), "")) + N(r"\s*ইউনিয়ন(?!\S*\s*(হতে|থেকে))"), text)]   # not "… ইউনিয়ন হতে" (from), not the last of a list ("কচ্ছপিয়া, গর্জনিয়া,ঈদগড় ইউনিয়নের")
         kind = next((t for t, rx in TYPES if re.search(rx, name)), "tourist")
         key = hashlib.sha1(f"{s['district']}|{up}|{name}".encode("utf-8")).hexdigest()[:10]   # stable: same spot, same id
         e = {"id": f"spot-{key}",
