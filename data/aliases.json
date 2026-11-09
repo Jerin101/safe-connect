@@ -107,6 +107,25 @@
    "added_on": "2026-11-09"
   },
   {
+   "id": "spot-ac41dba2db",
+   "name_bn": "গান্ধী আশ্রম",
+   "name_en": "Gandhi Ashram",
+   "also": [
+    "Gandhi Ashram"
+   ],
+   "type": "tourist",
+   "district": "Noakhali",
+   "upazila_en": "Sonaimuri",
+   "municipality_bn": null,
+   "union_bn": null,
+   "source": "official page",
+   "source_url": "https://noakhali.gov.bd/pages/tourist-spot/গান্ধী-আশ্রম-30aa94-6990be1b35ce18e1c0707429",
+   "source_last_updated": "2012-07-19",
+   "added_by": "collect_tourist_spots.py",
+   "added_on": "2026-11-09",
+   "also_source": "Gandhi Ashram: names and spellings given by the team (final queue, 9 Nov 2026)"
+  },
+  {
    "id": "spot-186db9dee4",
    "name_bn": "মুছাপুর ক্লোজার",
    "name_en": "Musapur closure",
@@ -185,7 +204,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://begumganj.noakhali.gov.bd/pages/tourist-spot/হযরত-ছায়েদুল-আলম-চিঃ-রঃ-মাজার-শরীফ-67b0ba-6990be2235ce18e1c07077b7",
+   "source_url": "https://begumganj.noakhali.gov.bd/pages/tourist-spot/হযরত-ছায়েদুল-আলম-চিঃ-রঃ-মাজার-শরীফ-67b0ba-6990be2235ce18e1c07077b7",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -297,7 +316,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://chatkhil.noakhali.gov.bd/pages/tourist-spot/জরাজীর্ন-জমিদার-বাড়ী-db095d-6990be2635ce18e1c0707a78",
+   "source_url": "https://chatkhil.noakhali.gov.bd/pages/tourist-spot/জরাজীর্ন-জমিদার-বাড়ী-db095d-6990be2635ce18e1c0707a78",
    "source_last_updated": "2019-10-22",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -457,7 +476,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://kabirhat.noakhali.gov.bd/pages/tourist-spot/ধানসিঁড়ি-স্টীল-ব্রীজ-414e39-6990be1a35ce18e1c0707355",
+   "source_url": "https://kabirhat.noakhali.gov.bd/pages/tourist-spot/ধানসিঁড়ি-স্টীল-ব্রীজ-414e39-6990be1a35ce18e1c0707355",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -473,7 +492,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://kabirhat.noakhali.gov.bd/pages/tourist-spot/রমজান-মিয়া-জামে-মসজিদ-992085-6990be2735ce18e1c0707ae3",
+   "source_url": "https://kabirhat.noakhali.gov.bd/pages/tourist-spot/রমজান-মিয়া-জামে-মসজিদ-992085-6990be2735ce18e1c0707ae3",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -489,7 +508,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://kabirhat.noakhali.gov.bd/pages/tourist-spot/তাকিয়া-মসজিদ-3cb6c8-6990be2535ce18e1c070793b",
+   "source_url": "https://kabirhat.noakhali.gov.bd/pages/tourist-spot/তাকিয়া-মসজিদ-3cb6c8-6990be2535ce18e1c070793b",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -521,7 +540,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://sadar.noakhali.gov.bd/pages/tourist-spot/নোয়াখালী-বিজ্ঞান-ও-প্রযুক্তি-বিশ্ববিদ্যালয়-ক্যাম্পাস-a0d6dc-6990be1c35ce18e1c070749e",
+   "source_url": "https://sadar.noakhali.gov.bd/pages/tourist-spot/নোয়াখালী-বিজ্ঞান-ও-প্রযুক্তি-বিশ্ববিদ্যালয়-ক্যাম্পাস-a0d6dc-6990be1c35ce18e1c070749e",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -571,7 +590,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/কুতুবদিয়া-বাতিঘর-2d5152-6990be2035ce18e1c0707693",
+   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/কুতুবদিয়া-বাতিঘর-2d5152-6990be2035ce18e1c0707693",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
@@ -620,7 +639,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/সোনাদিয়া-দ্বীপ-মহেশখালী-db86c9-6990be2035ce18e1c0707692",
+   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/সোনাদিয়া-দ্বীপ-মহেশখালী-db86c9-6990be2035ce18e1c0707692",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -652,8 +671,24 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/ছেঁড়াদ্বীপ-সেন্টমার্টিন-টেকনাফ-e6eb7a-6990be2035ce18e1c070768f",
+   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/ছেঁড়াদ্বীপ-সেন্টমার্টিন-টেকনাফ-e6eb7a-6990be2035ce18e1c070768f",
    "source_last_updated": null,
+   "added_by": "collect_tourist_spots.py",
+   "added_on": "2026-11-09"
+  },
+  {
+   "id": "spot-630088af61",
+   "name_bn": "ডুলাহাজরা সাফারি পার্ক",
+   "name_en": null,
+   "also": [],
+   "type": "park",
+   "district": "Cox's Bazar",
+   "upazila_en": "Chakaria",
+   "municipality_bn": null,
+   "union_bn": null,
+   "source": "official page",
+   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/ডুলাহাজরা-সাফারি-পার্ক-3c896a-6990be2035ce18e1c070768d",
+   "source_last_updated": "2014-01-23",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
@@ -719,7 +754,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/হিমছড়ি-5c3c52-6990be2035ce18e1c0707688",
+   "source_url": "https://coxsbazar.gov.bd/pages/tourist-spot/হিমছড়ি-5c3c52-6990be2035ce18e1c0707688",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
@@ -757,7 +792,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://chakaria.coxsbazar.gov.bd/pages/tourist-spot/নিভৃতে-নিসর্গ-পার্ক-চকরিয়া-b9354c-6990be2535ce18e1c0707964",
+   "source_url": "https://chakaria.coxsbazar.gov.bd/pages/tourist-spot/নিভৃতে-নিসর্গ-পার্ক-চকরিয়া-b9354c-6990be2535ce18e1c0707964",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -773,7 +808,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://chakaria.coxsbazar.gov.bd/pages/tourist-spot/মেদাকচ্ছপিয়া-জাতীয়-উদ্যান-পর্যটন-কেন্দ্র-ইকোট্যুরিজম-27c0d9-6990be2635ce18e1c0707a12",
+   "source_url": "https://chakaria.coxsbazar.gov.bd/pages/tourist-spot/মেদাকচ্ছপিয়া-জাতীয়-উদ্যান-পর্যটন-কেন্দ্র-ইকোট্যুরিজম-27c0d9-6990be2635ce18e1c0707a12",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -821,7 +856,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://kutubdia.coxsbazar.gov.bd/pages/tourist-spot/বায়ু-বিদ্যুৎ-প্রকল্প-cfbebd-6990be2535ce18e1c07078f7",
+   "source_url": "https://kutubdia.coxsbazar.gov.bd/pages/tourist-spot/বায়ু-বিদ্যুৎ-প্রকল্প-cfbebd-6990be2535ce18e1c07078f7",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -841,7 +876,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://moheshkhali.coxsbazar.gov.bd/pages/tourist-spot/সোনাদিয়া-সমুদ্র-সৈকত-d0f9eb-6990be2335ce18e1c07077f1",
+   "source_url": "https://moheshkhali.coxsbazar.gov.bd/pages/tourist-spot/সোনাদিয়া-সমুদ্র-সৈকত-d0f9eb-6990be2335ce18e1c07077f1",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
@@ -878,7 +913,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://moheshkhali.coxsbazar.gov.bd/pages/tourist-spot/বড়-রাখাইন-পাড়া-বৌদ্ধ-মন্দির-5d85e0-6990be2335ce18e1c07077ef",
+   "source_url": "https://moheshkhali.coxsbazar.gov.bd/pages/tourist-spot/বড়-রাখাইন-পাড়া-বৌদ্ধ-মন্দির-5d85e0-6990be2335ce18e1c07077ef",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -894,14 +929,14 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://pekua.coxsbazar.gov.bd/pages/tourist-spot/সংগ্রামী-জুম-ধনিয়াকাটা-টইটং-635aee-6990be2535ce18e1c0707977",
+   "source_url": "https://pekua.coxsbazar.gov.bd/pages/tourist-spot/সংগ্রামী-জুম-ধনিয়াকাটা-টইটং-635aee-6990be2535ce18e1c0707977",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },
   {
-   "id": "spot-85115eed61",
-   "name_bn": "আলহাজ্ব কবির আহমদ চৌধুরী জমিদার বাড়ি পেকুয়াা",
+   "id": "spot-df72cbfa6e",
+   "name_bn": "আলহাজ্ব কবির আহমদ চৌধুরী জমিদার বাড়ি পেকুয়া",
    "name_en": null,
    "also": [],
    "type": "tourist",
@@ -910,7 +945,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://pekua.coxsbazar.gov.bd/pages/tourist-spot/আলহাজ্ব-কবির-আহমদ-চৌধুরী-জমিদার-বাড়ি-পেকুয়াা-2ea8be-6990be2635ce18e1c0707a2f",
+   "source_url": "https://pekua.coxsbazar.gov.bd/pages/tourist-spot/আলহাজ্ব-কবির-আহমদ-চৌধুরী-জমিদার-বাড়ি-পেকুয়াা-2ea8be-6990be2635ce18e1c0707a2f",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -974,7 +1009,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://ramu.coxsbazar.gov.bd/pages/tourist-spot/ঐতিহাসিক-শাহসুজা-সড়ক-ae1063-6990be1f35ce18e1c07075e2",
+   "source_url": "https://ramu.coxsbazar.gov.bd/pages/tourist-spot/ঐতিহাসিক-শাহসুজা-সড়ক-ae1063-6990be1f35ce18e1c07075e2",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -1006,7 +1041,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://ramu.coxsbazar.gov.bd/pages/tourist-spot/প্রকৃতির-লীলাভূমি-হিমছড়ি-6096a3-6990be1e35ce18e1c07075df",
+   "source_url": "https://ramu.coxsbazar.gov.bd/pages/tourist-spot/প্রকৃতির-লীলাভূমি-হিমছড়ি-6096a3-6990be1e35ce18e1c07075df",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -1199,7 +1234,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/মারিস-বনিয়া-সমুদ্র-সৈকত-036738-6990be1c35ce18e1c07074b9",
+   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/মারিস-বনিয়া-সমুদ্র-সৈকত-036738-6990be1c35ce18e1c07074b9",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -1215,7 +1250,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/কালো-রাজার-সুড়ঙ্গ-019fad-6990be2535ce18e1c07078f0",
+   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/কালো-রাজার-সুড়ঙ্গ-019fad-6990be2535ce18e1c07078f0",
    "source_last_updated": "2023-01-31",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -1231,7 +1266,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/তৈঙ্গা-চূড়া-f2da26-6990be1a35ce18e1c0707358",
+   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/তৈঙ্গা-চূড়া-f2da26-6990be1a35ce18e1c0707358",
    "source_last_updated": "2023-01-31",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
@@ -1270,7 +1305,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/ছেঁড়া-দ্বীপ-b5d19e-6990be1c35ce18e1c07074ba",
+   "source_url": "https://teknaf.coxsbazar.gov.bd/pages/tourist-spot/ছেঁড়া-দ্বীপ-b5d19e-6990be1c35ce18e1c07074ba",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
@@ -1286,6 +1321,8 @@
     "Saint Martin island",
     "নারিকেল জিঞ্জিরা",
     "Narikel Jinjira",
+    "Saint Martin's",
+    "St. Martin's Island",
     "সেন্ট মার্টিনস দ্বীপ"
    ],
    "type": "island",
@@ -1298,7 +1335,7 @@
    "source_last_updated": "2023-01-31",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
-   "also_source": "Saint Martin, St Martin, Saint Martin island, নারিকেল জিঞ্জিরা, Narikel Jinjira: names and spellings given by the team (final queue, 9 Nov 2026); সেন্ট মার্টিনস দ্বীপ: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা"
+   "also_source": "Saint Martin, St Martin, Saint Martin island, নারিকেল জিঞ্জিরা, Narikel Jinjira, Saint Martin's, St. Martin's Island: names and spellings given by the team (final queue, 9 Nov 2026); সেন্ট মার্টিনস দ্বীপ: Banglapedia (secondary reference, place names only): https://bn.banglapedia.org/index.php/কক্সবাজার_জেলা"
   },
   {
    "id": "spot-3a6770658c",
@@ -1349,7 +1386,7 @@
    "municipality_bn": null,
    "union_bn": null,
    "source": "official page",
-   "source_url": "https://ukhiya.coxsbazar.gov.bd/pages/tourist-spot/কানা-রাজার-সুড়ঙ্গ-a38605-6990be1e35ce18e1c07075a6",
+   "source_url": "https://ukhiya.coxsbazar.gov.bd/pages/tourist-spot/কানা-রাজার-সুড়ঙ্গ-a38605-6990be1e35ce18e1c07075a6",
    "source_last_updated": null,
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09",
@@ -1508,7 +1545,28 @@
    "union_bn": null,
    "source": "official page",
    "source_url": "https://ukhiya.coxsbazar.gov.bd/pages/tourist-spot/ইনানী-সি-বীচ-84b2a7-6990be1e35ce18e1c07075a5",
-   "source_note": "the Ukhia page: the 84 km Marine Drive road from Kolatoli to Teknaf leads to Inani",
+   "source_note": "the Ukhia page: the 84 km Marine Drive road from Kolatoli to Teknaf leads to Inani; it also runs through Cox's Bazar Sadar, Ramu and Teknaf",
+   "added_by": "collect_tourist_spots.py",
+   "added_on": "2026-11-09"
+  },
+  {
+   "id": "spot-a35ccf3427",
+   "name_bn": "পাটুয়ারটেক সৈকত",
+   "name_en": "পাটুয়ারটেক",
+   "also": [
+    "পাটুয়ারটেক",
+    "Patuartek",
+    "Patuartek beach"
+   ],
+   "also_source": "names and spellings given by the team (final queue, 9 Nov 2026)",
+   "type": "beach",
+   "district": "Cox's Bazar",
+   "upazila_en": "Ukhia",
+   "municipality_bn": null,
+   "union_bn": "জালিয়াপালং ইউনিয়ন",
+   "source": "official page",
+   "source_url": "https://ukhiya.coxsbazar.gov.bd/pages/tourist-spot/কানা-রাজার-সুড়ঙ্গ-a38605-6990be1e35ce18e1c07075a6",
+   "source_note": "the Ukhia page: উখিয়া উপজেলার জালিয়াপালং ইউনিয়নের পাটুয়ারটেক সৈকতের নিকটে",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
   },

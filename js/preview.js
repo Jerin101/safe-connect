@@ -89,7 +89,9 @@ function itemLabel(h) {
   const d = districtOf(p.district);
   parts.push(lang === 'bn' ? d.bn : d.en);
   const ward = h.ward ? ` · ${t().ward} ${digits(h.ward)}` : '';
-  return { p, title: `${title} (${kindWord})`, sub: parts.join(', ') + ward };
+  // a name that already says what it is ("নিঝুম দ্বীপ", "টেকনাফ সমুদ্র সৈকত") gets no "(দ্বীপ)" after it
+  const says = kindWord && norm(title).toLowerCase().endsWith(norm(kindWord).toLowerCase());
+  return { p, title: says ? title : `${title} (${kindWord})`, sub: parts.join(', ') + ward };
 }
 // The upazila's thana, only when the official list (data/thanas.json) gives it exactly one thana with another name
 // (সুধারাম মডেল থানা for Noakhali Sadar). Bangla only: there are no official English thana names (#155).

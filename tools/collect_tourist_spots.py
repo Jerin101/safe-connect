@@ -21,6 +21,11 @@ DETAIL = re.compile(r'href="([^"#]*/pages/tourist-spot/[^"#?]+)"')
 NOT_A_SPOT = {N("অন্যান্য")}
 
 
+def page_url(url):
+    """The address as the portal writes it: ড় ঢ় য় as single letters (NFC splits them, and then the link gives 404)."""
+    return url.replace("ড়", "ড়").replace("ঢ়", "ঢ়").replace("য়", "য়")
+
+
 def fetch(url, cache):
     if cache.get(url) is None:                                    # not yet, or failed before: (re)try once
         status, body = get(urllib.parse.quote(url, safe=":/?=&%#"), delay=1.0)   # Bangla page names, percent-encoded
@@ -48,8 +53,8 @@ def from_list(page, base, cache):
         name = N(re.sub(r"-[0-9a-f]{6}-[0-9a-f]{20,}$", "", slug).replace("-", " ")).strip()
         text = clean_text(content_of(body))
         loc = re.search(N(r"অবস্থান\s*[:ঃ]?\s*(.{0,200})"), text)
-        spots.append({"name_bn": name, "source_url": url, "source_last_updated": last_updated(body),
-                      "location_text": N(loc.group(1)).strip() if loc else where(text)})
+        spots.append({"name_bn": name, "source_url": page_url(url), "source_last_updated": last_updated(body),
+                      "location_text": N(where(text) + (" । " + loc.group(1) if loc else ""))[:900]})
     return spots
 
 
@@ -81,7 +86,7 @@ def from_table(page, url):
         for r in rows[1:]:
             if len(r) <= name_col or not r[name_col].strip():
                 continue
-            spots.append({"name_bn": N(r[name_col]).strip(), "source_url": url, "source_last_updated": last_updated(page),
+            spots.append({"name_bn": N(r[name_col]).strip(), "source_url": page_url(url), "source_last_updated": last_updated(page),
                           # every other cell: the "অবস্থান" column, or a description that says where it is
                           "location_text": N(" ".join(c for i, c in enumerate(r) if i != name_col))[:600]})
     return spots
@@ -104,6 +109,7 @@ def main(data, out_path, cache_path=None):
             seen = set()
             for s in got:
                 s["name_bn"] = re.sub(r"^[০-৯0-9]+[.)।]?\s*", "", s["name_bn"]).strip()     # "৪ কমলার দিঘি"
+                s["name_bn"] = re.sub(r"([া-ৌ])\1+", r"\1", s["name_bn"])   # a doubled vowel sign ("পেকুয়াা")
                 if not re.search(r"[ঀ-৿]{2}", s["name_bn"]) or s["name_bn"] in NOT_A_SPOT or s["name_bn"] in seen:
                     continue
                 seen.add(s["name_bn"])
@@ -117,6 +123,8 @@ def main(data, out_path, cache_path=None):
     write_aliases(data, out, cache)
 
 
+# Other spellings of upazila names on the pages ("সোনামুড়ী উপজেলার জয়াগ বাজার" on the Gandhi Ashram page).
+UPAZILA_SPELLINGS = {"Sonaimuri": [N("সোনামুড়ী"), N("সোনাইমুড়ি")], "Maheshkhali": [N("মহেশখালি")], "Ukhia": [N("উখিয়া")]}
 # Rows on the pages that are not places one can be at ("মহিষের দধি" is a food; an office; a page heading).
 NOT_A_PLACE = {N(x) for x in ["মহিষের দধি", "লিডারশীপ ইউনিভার্সিটি কলেজ", "বারবাকিয়া রেন্জ অফিস", "উপজেলা শহীদ মিনার",
                                "মাহাসিংদোগ্রী বৌদ্ধ মন্দিরের ঐতিহাসিক পটভূমি", "জেলা জামে মসজিদ", "আইসোলেটেড নারিকেল বীজ বাগান"]}
@@ -126,7 +134,7 @@ TYPES = [("beach", N(r"সৈকত|বীচ|বিচ")), ("island", N(r"দ�
 # page already places. Each one keeps who gave it.
 TEAM_SPELLINGS = {
     N("হিমছড়ি"): ["Himchari", "Himchori"], N("ইনানী সি বীচ"): ["Inani", "Inani beach", "Inani sea beach"],
-    N("টেকনাফ সমুদ্র সৈকত"): ["Teknaf beach"], N("সেন্টমার্টিন দ্বীপ"): ["Saint Martin", "St Martin", "Saint Martin island", "নারিকেল জিঞ্জিরা", "Narikel Jinjira"],
+    N("টেকনাফ সমুদ্র সৈকত"): ["Teknaf beach"], N("সেন্টমার্টিন দ্বীপ"): ["Saint Martin", "St Martin", "Saint Martin island", "নারিকেল জিঞ্জিরা", "Narikel Jinjira", "Saint Martin's", "St. Martin's Island"],
     N("ছেঁড়া দ্বীপ"): ["Chhera Dwip", "Chera dwip"], N("শাহপরীর দ্বীপ"): ["Shah Porir Dwip", "Shahporir dwip"],
     N("সোনাদিয়া সমুদ্র সৈকত"): ["Sonadia", "Sonadia beach", "Sonadia island"], N("আদিনাথ মন্দির"): ["Adinath temple", "Adinath mandir"],
     N("কুতুবদিয়া বাতিঘর"): ["Kutubdia lighthouse"], N("ডুলাহাজারা সাফারি পার্ক"): ["Dulahazra Safari Park", "Safari Park"],
@@ -148,11 +156,15 @@ IN_TEXT = [(n, "Teknaf", TEKNAF_OTHERS, "listed on the Teknaf upazila page 'অ�
            ["সাবরাং ট্যুরিজম পার্ক", "মাথিনের কূপ", "বাংলাদেশ-মায়ানমার ট্রানজিট জেটিঘাট", "টেকনাফ ন্যাচার গেম রিজার্ভ",
             "শীলখালী চিরহরিৎ গর্জন বাগান", "মারিশবনিয়া সৈকত", "কুদুমগুহা"]] + [
     ("মেরিন ড্রাইভ", "Ukhia", "https://ukhiya.coxsbazar.gov.bd/pages/tourist-spot/ইনানী-সি-বীচ-84b2a7-6990be1e35ce18e1c07075a5",
-     "the Ukhia page: the 84 km Marine Drive road from Kolatoli to Teknaf leads to Inani"),
+     "the Ukhia page: the 84 km Marine Drive road from Kolatoli to Teknaf leads to Inani; it also runs through Cox's Bazar Sadar, Ramu and Teknaf"),
+    ("পাটুয়ারটেক সৈকত", "Ukhia", "https://ukhiya.coxsbazar.gov.bd/pages/tourist-spot/কানা-রাজার-সুড়ঙ্গ-a38605-6990be1e35ce18e1c07075a6",
+     "the Ukhia page: উখিয়া উপজেলার জালিয়াপালং ইউনিয়নের পাটুয়ারটেক সৈকতের নিকটে"),
 ] + [(n, up, BP_CX, "Banglapedia (secondary reference, place names only)") for n, up in
      [("মৈনাক পর্বত", "Maheshkhali"), ("কুতুব আউলিয়ার মাযার", "Kutubdia"), ("বীর কমলার দিঘী", "Teknaf"), ("থোয়াইংগা চৌধুরীর ক্যাং", "Ramu"),
                                                                     ("সাবমেরিন ক্যাবল ল্যান্ডিং স্টেশন", "Cox's Bazar Sadar")]]
-IN_TEXT_SPELLINGS = {N("মাথিনের কূপ"): ["Mathiner Kup", "Mathin's well"], N("মেরিন ড্রাইভ"): ["Marine Drive", "Marine Drive road"]}
+IN_TEXT_SPELLINGS = {N("মাথিনের কূপ"): ["Mathiner Kup", "Mathin's well"], N("মেরিন ড্রাইভ"): ["Marine Drive", "Marine Drive road"],
+                     N("পাটুয়ারটেক সৈকত"): ["পাটুয়ারটেক", "Patuartek", "Patuartek beach"]}
+IN_TEXT_UNION = {N("পাটুয়ারটেক সৈকত"): N("জালিয়াপালং ইউনিয়ন")}
 
 
 def write_aliases(data, spots, cache):
@@ -178,7 +190,8 @@ def write_aliases(data, spots, cache):
         up = s["portal_upazila_en"]
         if not up:                                                   # a district page: the upazila named in its text,
             text = N(name + " " + s["location_text"])               # or the same spot on an upazila portal
-            named = [en for en, (d, bn) in ups.items() if d == s["district"] and bn != N(s["district"] == "Noakhali" and "নোয়াখালী" or "কক্সবাজার") and bn in text]
+            named = [en for en, (d, bn) in ups.items() if d == s["district"] and bn != N(s["district"] == "Noakhali" and "নোয়াখালী" or "কক্সবাজার")
+                     and any(v in text for v in [bn, *UPAZILA_SPELLINGS.get(en, [])])]
             same = next((v for (d, k), v in twin.items() if d == s["district"] and (k in name or name in k)), None)
             up = named[0] if len(named) == 1 else same
         if not up or (s["district"], up, name) in seen:
@@ -186,7 +199,7 @@ def write_aliases(data, spots, cache):
         seen.add((s["district"], up, name))
         # the union only when the page names one of this upazila's unions ("০২নং কেশারপাড় ইউনিয়নে অবস্থিত")
         text = N(name + " " + s["location_text"])
-        unions = [u for u in unions_of.get(up, []) if re.search(re.escape(u.replace(N(" ইউনিয়ন"), "")) + N(r"\s*ইউনিয়ন"), text)]
+        unions = [u for u in unions_of.get(up, []) if re.search(re.escape(u.replace(N(" ইউনিয়ন"), "")) + N(r"\s*ইউনিয়ন(?!\S*\s*(হতে|থেকে))"), text)]   # "… ইউনিয়ন হতে" (from) is not where it is
         kind = next((t for t, rx in TYPES if re.search(rx, name)), "tourist")
         key = hashlib.sha1(f"{s['district']}|{up}|{name}".encode("utf-8")).hexdigest()[:10]   # stable: same spot, same id
         e = {"id": f"spot-{key}",
@@ -209,8 +222,8 @@ def write_aliases(data, spots, cache):
         entries.append({"id": "spot-" + hashlib.sha1(f"Cox's Bazar|{up}|{name}".encode("utf-8")).hexdigest()[:10], "name_bn": name,
                         "name_en": also[0] if also else None, "also": also, **({"also_source": TEAM} if also else {}),
                         "type": next((t for t, rx in TYPES if re.search(rx, name)), "tourist"), "district": "Cox's Bazar",
-                        "upazila_en": up, "municipality_bn": None, "union_bn": None,
-                        "source": "reference" if "banglapedia" in url else "official page", "source_url": url, "source_note": note,
+                        "upazila_en": up, "municipality_bn": None, "union_bn": IN_TEXT_UNION.get(name),
+                        "source": "reference" if "banglapedia" in url else "official page", "source_url": page_url(url), "source_note": note,
                         "added_by": "collect_tourist_spots.py", "added_on": TODAY})
     # Kolatoli: the Cox's Bazar pourashava's ward page lists দক্ষিণ/উত্তর কলাতলী in ward 12 (Cox's Bazar Sadar).
     ward = "https://ps.coxsbazar.gov.bd/pages/static-pages/6990e62b35ce18e1c0725cdb"
