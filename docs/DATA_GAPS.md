@@ -177,7 +177,7 @@ can add it to `data/aliases.json` as "local name, added by the team", with who a
 - **Two Hatiya unions are not in our data** (#180). The national portal's location list and BBS both name 11 unions
   in Hatiya; our contact data has 9. Chanandi (চানন্দী) and Harni (হরণী) are missing, so they can't be searched and have
   no union contacts. Needed: their union portals, collected the usual way.
-- **616 villages have only an English name.** BBS's Bangla text comes out of the PDF garbled. It is kept only where, with its
+- **618 villages have only an English name.** BBS's Bangla text comes out of the PDF garbled. It is kept only where, with its
   vowel signs put back, it sounds the same as the English name. The other villages are found by their English name (and
   Banglish). Needed: the Bangla names, from a union page or a readable BBS file.
 - **3 BBS unions spelled differently from ours:** Nhila (our হ্নীলা), Teknaf (our টেকনাফ সদর) and Patali Machhuakhali

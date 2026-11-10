@@ -166,9 +166,15 @@ BBS_PDF = re.compile(r"^https://objectstorage\.[a-z0-9-]+\.oraclecloud15\.com/n/
 
 def check_bbs_villages(f):
     # Villages from BBS's geo-code lists: only for unions in our data that have no village page, each union once,
-    # an English name always, a Bangla name only in Bangla letters, no phone numbers.
+    # its own district's PDF, each village once, an English name always, a Bangla name only in Bangla letters and with
+    # the same sound as the English one (the collector's own check), no phone numbers.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from collect_bbs_villages import sound
     d = load(f)
     if not BBS_PAGE.match(d.get("source_page") or ""): err(f, "file", "source_page must be the bbs.gov.bd geo-code page")
+    pdfs = d.get("source_pdfs") or {}
+    if not pdfs or not all(BBS_PDF.match(p or "") for p in pdfs.values()) or len(set(pdfs.values())) != len(pdfs):
+        err(f, "file", "source_pdfs must give each district its own BBS PDF")
     unions = set()
     for c in os.listdir(DATA):
         if c.startswith("contacts_") and c.endswith(".json"):
@@ -183,11 +189,21 @@ def check_bbs_villages(f):
         if key not in without: err(f, rid, "union has an official village page: BBS is only for the others")
         if key in seen: err(f, rid, "union listed twice")
         seen.add(key)
-        if not BBS_PDF.match(u.get("source_url") or ""): err(f, rid, "source_url must be the district's BBS PDF")
+        if not BBS_PDF.match(u.get("source_url") or "") or u.get("source_url") != pdfs.get(u.get("district")):
+            err(f, rid, "source_url must be the district's BBS PDF")
+        if u.get("level") not in ("village", "mauza"): err(f, rid, f"unknown level {u.get('level')!r}")
         if not u.get("villages"): err(f, rid, "no villages")
-        for en, bn in u.get("villages", []):
-            if not en or not re.fullmatch(r"[A-Za-z0-9 .()'-]+", en): err(f, rid, f"bad English name {en!r}")
-            if bn is not None and not re.fullmatch(r"[ঀ-৿ .()-]+", bn): err(f, rid, f"bad Bangla name {bn!r}")
+        names = set()
+        for v in u.get("villages", []):
+            if not (isinstance(v, list) and len(v) == 2):
+                err(f, rid, f"a village must be [English, Bangla or null], not {v!r}")
+                continue
+            en, bn = v
+            if not isinstance(en, str) or not re.fullmatch(r"[A-Za-z0-9 .()'-]+", en): err(f, rid, f"bad English name {en!r}")
+            elif en in names: err(f, rid, f"village {en!r} listed twice")
+            else: names.add(en)
+            if bn is not None and not (isinstance(bn, str) and re.fullmatch(r"[ঀ-৿ .()-]+", bn)): err(f, rid, f"bad Bangla name {bn!r}")
+            elif bn is not None and isinstance(en, str) and sound(bn) != sound(en): err(f, rid, f"Bangla {bn!r} is not the village {en!r}")
         if re.search(r"01[3-9][0-9]{8}", json.dumps(u)): err(f, rid, "no phone numbers in this file")
 
 

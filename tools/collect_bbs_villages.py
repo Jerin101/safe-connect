@@ -22,6 +22,9 @@ GEOCODE = "https://bbs.gov.bd/pages/static-pages/6922ded1933eb65569e1d95d"
 DISTRICTS = (("Noakhali", "NOAKHALI", "contacts_noakhali.json"), ("Cox's Bazar", "COX", "contacts_coxsbazar.json"))
 N = lambda s: " ".join(unicodedata.normalize("NFC", s or "").split())
 TODAY = datetime.date.today().isoformat()
+# Rebuilt Bangla that sounds right but is not a reliable spelling (bangla-reviewer, PR #181, 11 Nov 2026): English only.
+NOT_BANGLA = {"Satghariapara Lal Shiariapara",   # "শরীয়া" for Shiaria: a vowel sign put back in the wrong place
+              "Bataiya"}                         # "বাটৈয়া": the union itself is বাটইয়া
 
 
 # ---- one sound for Bangla and English (the same idea as js/phonetic.js) ----
@@ -102,12 +105,13 @@ def main(data, pdf_dir):
     out = {"note": "Villages for the unions with no official village page, from BBS's geo-code list (জিও-কোড, bbs.gov.bd). "
                    "English names as BBS writes them. A Bangla name only where BBS's Bangla, with its vowel signs put back, "
                    "sounds the same as the English name; otherwise null. Collected by tools/collect_bbs_villages.py.",
-           "source_page": GEOCODE, "retrieved_on": TODAY, "unions": [], "not_matched": []}
+           "source_page": GEOCODE, "retrieved_on": TODAY, "source_pdfs": {}, "unions": [], "not_matched": []}
     for district, label, fname in DISTRICTS:
         path = os.path.join(pdf_dir, f"{label.lower()}.pdf")
         pdf_url = next(v for k, v in links.items() if k.startswith(label))
         if not re.match(r"https://objectstorage\.[a-z0-9-]+\.oraclecloud15\.com/n/[a-z0-9]+/b/V2Ministry/o/office-bbs/", pdf_url):
             sys.exit(f"{district}: the PDF link is not on the portal's file store, stopping: {pdf_url}")   # as validate_data.py
+        out["source_pdfs"][district] = pdf_url                  # validate_data.py ties each union to its district's PDF
         if not os.path.exists(path):
             with urllib.request.urlopen(urllib.request.Request(pdf_url, headers=UA), context=CTX, timeout=120) as r, open(path, "wb") as f:
                 f.write(r.read())
@@ -135,7 +139,7 @@ def main(data, pdf_dir):
                 items.setdefault(id(union), (union, [], []))
             elif lvl in (7, 8) and union:
                 fixed = repair(bn)
-                name_bn = fixed if fixed and sound(fixed) == sound(en) else None
+                name_bn = fixed if fixed and sound(fixed) == sound(en) and en not in NOT_BANGLA else None
                 items[id(union)][1 if lvl == 8 else 2].append([en, name_bn])
         for union, vill, mauza in items.values():
             if not union or (district, union["upazila_en"], N(union["union_bn"])) not in without:

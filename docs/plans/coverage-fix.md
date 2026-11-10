@@ -36,7 +36,7 @@ Measured on the branch of part 3 (BBS villages), with #175 (must-find) and #177 
 | Cox's Bazar | **393/393 (100%)** | 142/142 | 4/4 | 49/49 | 14/14 | 28/28 | 100/100 | 56/56 |
 
 Cox's Bazar has 14 more entries (8 places, in English and Bangla) with a data gap, in `docs/DATA_GAPS.md` §12; they are
-not in the %. All 78 unions without a village page now have BBS's villages: 960 villages, 344 of them with a Bangla name.
+not in the %. All 78 unions without a village page now have BBS's villages: 960 villages, 342 of them with a Bangla name.
 What is still missing is in `docs/DATA_GAPS.md` §13.
 
 ## The must-find lists (`tests/must-find/<district>.json`)
