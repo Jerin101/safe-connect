@@ -153,3 +153,19 @@ A number on the official page was broken (a birth date or too short) and was rem
 `data/spot_check_40.csv` (made with `python tools/spot_check.py data --auto`, seed 20261028, 40 of 1,059 key contacts): the automatic hint found 39 of 40 numbers on their source page. A person still checks every row by hand (`human_ok`).
 
 - Noakhali › Begumganj › Amanullapur: `acd98005cc` (union secretary, 01823239591). The officers page changed after 2026-10-21 and no longer lists him or this number; it now lists the chairman মোঃ বাহরুল আলম (already in our data as `fbe9145982`, same number) and an administrative officer, মোঃ মাহমুদুল হাছান, that our data does not have. Check the page and its archive ("আর্কাইভ দেখুন") by hand; do not mark `acd98005cc` verified. Add nothing before that hand check; a new record goes only through `data/manual_additions.json` with `source_url` and `source_quote_bn`.
+
+## 12. Places people search for that no page places in an upazila (must-find test, coverage fix)
+
+These are on the must-find lists (`tests/must-find/`), but no official page read so far, and no reference, names their
+upazila. The runner leaves them out of the % until a source is found. Never guess: a team member who knows the place
+can add it to `data/aliases.json` as "local name, added by the team", with who and when.
+
+| Name | District | What we have | Needed |
+|---|---|---|---|
+| কক্সবাজার সমুদ্র সৈকত (Cox's Bazar sea beach) | Cox's Bazar | District portal and Banglapedia; neither names an upazila, and the beach runs through several | which upazila(s) the search should open |
+| লাবণী পয়েন্ট, সুগন্ধা পয়েন্ট (Laboni, Sugandha) | Cox's Bazar | District beach page: "সমুদ্র সৈকতে কলাতলী, সুগন্ধা ও লাবনী পয়েন্টে"; no ward or upazila | the ward of Cox's Bazar pourashava (Kolatoli is ward 12 on the pourashava's ward page) |
+| রাডার স্টেশন (radar station) | Cox's Bazar | District portal: "হিলটপ সার্কিট হাউজের পাশে"; no upazila | upazila |
+| অগ্গামেধা ক্যাং / অগ্বমেধা বৌদ্ধ কেয়াং | Cox's Bazar | District portal and Banglapedia; no upazila | upazila |
+| দরিয়ানগর (Dariyanagar) | Cox's Bazar | District Himchari page: "হিমছড়ি যাওয়ার পথিমধ্যে দরিয়ানগরসহ (ভাংগামোড়া)"; no upazila | upazila, from an official page or the team |
+| শামলাপুর (Shamlapur) | Cox's Bazar | Jerin's list; on no page read so far (not শাপলাপুর, a Maheshkhali union) | an official page, or the team |
+| মারমেইড বিচ (Mermaid beach) | Cox's Bazar | Jerin's list; on no page read so far | an official page, or the team |

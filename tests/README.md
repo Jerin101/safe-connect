@@ -58,6 +58,19 @@ offline; 360 px in bn/en and night/day.
 
 **Run:** `node --test tests/phonetic/phonetic-test.mjs` (no browser, no internet).
 
+## Must-find test (coverage fix)
+
+`must-find/noakhali.json`, `must-find/coxsbazar.json`, `must-find/run.mjs`: the names people search for in each pilot
+district, each with its expected upazila (and union when an official page gives it) and its source:
+- unions, in Bangla and English
+- pourashavas
+- tourist spots: from the portals, Banglapedia and Jerin's list
+- 50 villages, in Bangla and Banglish
+
+Entries with `gap` are listed in `docs/DATA_GAPS.md` §12 and left out of the %. The plan is in `docs/plans/coverage-fix.md`.
+
+**Run:** `node tests/must-find/run.mjs` (`--list` shows every name not found, `--strict` fails below 100%).
+
 ## A list that fails to load (issue #170)
 
 `partial-load-test.mjs`: if `villages.json` or the landmark lists fail to load, `loadAll` lists them in `partial`, the search still finds unions, upazilas and thanas, and the calm note exists in bn/en.
