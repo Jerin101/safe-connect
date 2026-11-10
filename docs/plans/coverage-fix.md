@@ -10,7 +10,7 @@ left out of the % and listed in `docs/DATA_GAPS.md` §12 (none in Noakhali; 14 e
 
 | District | Found | Unions (bn + en) | Pourashavas | Tourist spots (portals) | Banglapedia list | Jerin's names (en + bn) | Villages (bn + Banglish) |
 |---|---|---|---|---|---|---|---|
-| Noakhali | 285/315 (90.5%) | 175/175 | 8/8 | 2/32 | — | — | 100/100 |
+| Noakhali | 284/314 (90.4%) | 175/175 | 8/8 | 2/32 | — | — | 99/99 |
 | Cox's Bazar | 262/337 (77.7%) | 142/142 | 4/4 | 5/49 | 1/14 | 10/28 | 100/100 |
 
 Our data today:
