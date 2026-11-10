@@ -22,8 +22,8 @@ test('everything loads: nothing is listed as partial', async () => {
   assert.ok(data.villages.length > 100);
 });
 
-test('the village list fails: it is listed, and unions, upazilas and thanas are still found', async () => {
-  withFetch(['villages.json']);
+test('the village lists fail: listed once, and unions, upazilas and thanas are still found', async () => {
+  withFetch(['villages.json', 'villages_bbs.json']);
   const data = await loadAll('data/');
   assert.deepEqual(data.partial, ['villages']);
   assert.equal(data.villages.length, 0);
@@ -32,6 +32,31 @@ test('the village list fails: it is listed, and unions, upazilas and thanas are 
   assert.equal(findAreas(idx, 'hatiya').hits[0]?.place.upazila, 'Hatiya');
   assert.equal(findAreas(idx, 'নিয়াজপুর').hits[0]?.kind, 'union');
   assert.equal(findAreas(idx, 'sudharam').hits[0]?.kind, 'thana');
+});
+
+test('only the BBS list fails: listed, and the portal villages are still found', async () => {
+  withFetch(['villages_bbs.json']);
+  const data = await loadAll('data/');
+  assert.deepEqual(data.partial, ['villages']);
+  assert.ok(data.villages.length > 100);
+  assert.ok(data.villages.every((v) => !v.bbs));
+  assert.equal(findAreas(areaIndex(data), 'Mekrarchar').hits.length, 0);
+});
+
+test('BBS villages (#179): found in English and Bangla, in their union; English-only names work too', async () => {
+  withFetch([]);
+  const idx = areaIndex(await loadAll('data/'));
+  for (const q of ['Mekrarchar', 'মেকরারচর']) {
+    const h = findAreas(idx, q).hits[0];
+    assert.equal(h?.kind, 'village', q);
+    assert.equal(h.village_en, 'Mekrarchar', q);
+    assert.equal(h.place.upazila, 'Chatkhil', q);
+  }
+  const bbs = idx.filter((i) => i.kind === 'village' && i.village_en);
+  assert.ok(bbs.length >= 900);
+  const enOnly = bbs.find((i) => i.village === i.village_en);
+  assert.ok(enOnly);
+  assert.ok(findAreas(idx, enOnly.village_en).hits.some((h) => h === enOnly), enOnly.village_en);
 });
 
 test('the landmark lists fail: listed once, the rest still works', async () => {

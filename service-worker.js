@@ -33,6 +33,7 @@ const FILES = [
   'data/national_hotlines.json',
   'data/manual_additions.json',
   'data/villages.json',
+  'data/villages_bbs.json',
   'data/aliases.json',
   'data/thanas.json',
   'data/landmarks/noakhali.json',

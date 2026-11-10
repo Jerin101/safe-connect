@@ -160,8 +160,42 @@ def check_aliases(f):
         if any(re.search(r"01[3-9][0-9]{8}", str(v)) for v in a.values()): err(f, rid, "no phone numbers in this file")
 
 
+BBS_PAGE = re.compile(r"^https://bbs\.gov\.bd/")
+BBS_PDF = re.compile(r"^https://objectstorage\.[a-z0-9-]+\.oraclecloud15\.com/n/[a-z0-9]+/b/V2Ministry/o/office-bbs/[0-9a-z/]+\.pdf$")   # the portal's file store
+
+
+def check_bbs_villages(f):
+    # Villages from BBS's geo-code lists: only for unions in our data that have no village page, each union once,
+    # an English name always, a Bangla name only in Bangla letters, no phone numbers.
+    d = load(f)
+    if not BBS_PAGE.match(d.get("source_page") or ""): err(f, "file", "source_page must be the bbs.gov.bd geo-code page")
+    unions = set()
+    for c in os.listdir(DATA):
+        if c.startswith("contacts_") and c.endswith(".json"):
+            doc = load(c)
+            unions |= {(doc.get("district"), u.get("upazila_en"), nfc(u.get("union_bn"))) for u in doc.get("unions", [])}
+    without = {(w["district"], w["upazila_en"], nfc(w["union_bn"])) for w in load("villages.json").get("unions_without_village_page", [])}
+    seen = set()
+    for u in d.get("unions", []):
+        key = (u.get("district"), u.get("upazila_en"), nfc(u.get("union_bn")))
+        rid = " ".join(map(str, key))
+        if key not in unions: err(f, rid, "union is not in the contact data")
+        if key not in without: err(f, rid, "union has an official village page: BBS is only for the others")
+        if key in seen: err(f, rid, "union listed twice")
+        seen.add(key)
+        if not BBS_PDF.match(u.get("source_url") or ""): err(f, rid, "source_url must be the district's BBS PDF")
+        if not u.get("villages"): err(f, rid, "no villages")
+        for en, bn in u.get("villages", []):
+            if not en or not re.fullmatch(r"[A-Za-z0-9 .()'-]+", en): err(f, rid, f"bad English name {en!r}")
+            if bn is not None and not re.fullmatch(r"[ঀ-৿ .()-]+", bn): err(f, rid, f"bad Bangla name {bn!r}")
+        if re.search(r"01[3-9][0-9]{8}", json.dumps(u)): err(f, rid, "no phone numbers in this file")
+
+
 if os.path.exists(os.path.join(DATA, "aliases.json")):
     check_aliases("aliases.json")
+
+if os.path.exists(os.path.join(DATA, "villages_bbs.json")):
+    check_bbs_villages("villages_bbs.json")
 
 for name in sorted(os.listdir(os.path.join(DATA, "landmarks")) if os.path.isdir(os.path.join(DATA, "landmarks")) else []):
     if name.endswith(".json"): check_landmarks(os.path.join("landmarks", name))

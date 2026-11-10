@@ -17,6 +17,7 @@ Python 3, standard library only. Run them from this `tools` folder. They wait be
 | `verify_sources.py` | Re-downloads every source page and confirms each number is still there | ~25 min |
 | `coverage_report.py` | Shows what's covered for every upazila, union and town | seconds |
 | `collect_tourist_spots.py` | Tourist spots (দর্শনীয় স্থান) from the district and upazila portals, written into `data/aliases.json` as `spot-…` entries (the team's own entries stay). The upazila and union come only from the page. `python collect_tourist_spots.py ../data spots.json [pages_raw.json]` | ~3 min |
+| `collect_bbs_villages.py` | Villages for the unions with no official village page, from BBS's geo-code PDFs (bbs.gov.bd → জিও-কোড), into `data/villages_bbs.json`. A union is matched to ours by sound, inside its upazila, never guessed; the Bangla name only where BBS's text reads back safely. Needs `pip install pypdf`. `python collect_bbs_villages.py ../data <pdf folder>` | ~1 min |
 | `collect_locations.py`, `fill_locations.py`, `build_locations.py` | Map points and upazila boundaries for GPS → area (BBS boundaries via OCHA HDX, OpenStreetMap) | ~15 min |
 
 Full refresh order and details: `docs/DATA_REPORT.md`. Raw `*_raw.json` files are working files and are not committed.
