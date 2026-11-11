@@ -169,3 +169,17 @@ can add it to `data/aliases.json` as "local name, added by the team", with who a
 | দরিয়ানগর (Dariyanagar) | Cox's Bazar | District Himchari page: "হিমছড়ি যাওয়ার পথিমধ্যে দরিয়ানগরসহ (ভাংগামোড়া)"; no upazila | upazila, from an official page or the team |
 | শামলাপুর (Shamlapur) | Cox's Bazar | Jerin's list; on no page read so far (not শাপলাপুর, a Maheshkhali union) | an official page, or the team |
 | মারমেইড বিচ (Mermaid beach) | Cox's Bazar | Jerin's list; on no page read so far | an official page, or the team |
+
+## 13. Villages and unions (BBS geo-codes, coverage fix part 3)
+
+`data/villages_bbs.json` gives villages to all 78 unions with no official village page (960 villages). What is left:
+
+- **Two Hatiya unions are not in our data** (#180). The national portal's location list and BBS both name 11 unions
+  in Hatiya; our contact data has 9. Chanandi (চানন্দী) and Harni (হরণী) are missing, so they can't be searched and have
+  no union contacts. Needed: their union portals, collected the usual way.
+- **618 villages have only an English name.** BBS's Bangla text comes out of the PDF garbled. It is kept only where, with its
+  vowel signs put back, it sounds the same as the English name. The other villages are found by their English name (and
+  Banglish). Needed: the Bangla names, from a union page or a readable BBS file.
+- **3 BBS unions spelled differently from ours:** Nhila (our হ্নীলা), Teknaf (our টেকনাফ সদর) and Patali Machhuakhali
+  (our পিএমখালী). All three have an official village page already, so nothing is missing; the collector does not guess
+  them.

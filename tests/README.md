@@ -66,6 +66,7 @@ district, each with its expected upazila (and union when an official page gives 
 - pourashavas
 - tourist spots: from the portals, Banglapedia and Jerin's list
 - 50 villages, in Bangla and Banglish
+- BBS villages (`bbs_village`): one per union in `data/villages_bbs.json`, in English, and in Bangla where BBS gives it
 
 Entries with `gap` are listed in `docs/DATA_GAPS.md` §12 and left out of the %. The plan is in `docs/plans/coverage-fix.md`.
 

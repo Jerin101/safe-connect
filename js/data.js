@@ -28,10 +28,11 @@ const noManual = { records: [], places: [] };
 export async function loadAll(base = 'data/') {
   const partial = [];
   const optional = (name, url, empty) => getJSON(url).catch(() => { if (!partial.includes(name)) partial.push(name); return empty; });
-  const [national, manual, villages, aliases, thanas, ...files] = await Promise.all([
+  const [national, manual, villages, bbs, aliases, thanas, ...files] = await Promise.all([
     getJSON(`${base}national_hotlines.json`),
     getJSON(`${base}manual_additions.json`).catch(() => noManual),
     optional('villages', `${base}villages.json`, { unions: [] }),       // official village lists
+    optional('villages', `${base}villages_bbs.json`, { unions: [] }),   // BBS's list, for the unions without one
     optional('aliases', `${base}aliases.json`, { aliases: [] }),       // local names added by the team
     optional('thanas', `${base}thanas.json`, { thanas: [] }),          // thana -> upazila, official sources (#153)
     ...DISTRICTS.map((d) => getJSON(base + d.file).catch(() => null)),
@@ -55,7 +56,12 @@ export async function loadAll(base = 'data/') {
   const officialVillages = (villages.unions || []).flatMap((u) => u.villages.map(([name, ward]) => ({
     district: u.district, upazila_bn: u.upazila_bn, union_bn: u.union_bn, union_en: u.union_en,
     village_bn: name, ward_no: ward, source_url: u.source_url })));
-  return { national: nationalCards, docs, missing, partial, villages: officialVillages, aliases: aliases.aliases || [], thanas: thanas.thanas || [] };
+  // villages_bbs.json (BBS geo-codes): [[village_en, village_bn or null], ...]. The English name is official; the Bangla
+  // one only where BBS's text could be read back safely, so some villages are known only in English.
+  const bbsVillages = (bbs.unions || []).flatMap((u) => u.villages.map(([en, bn]) => ({
+    district: u.district, upazila_en: u.upazila_en, union_bn: u.union_bn,
+    village_bn: bn || en, village_en: en, source_url: u.source_url, bbs: true })));
+  return { national: nationalCards, docs, missing, partial, villages: officialVillages.concat(bbsVillages), aliases: aliases.aliases || [], thanas: thanas.thanas || [] };
 }
 
 function nationalCard(r, checkedOn) {
@@ -239,6 +245,9 @@ export function editDistance(a, b) {
 // Ward texts, numbers, a bare direction word ("পূর্ব" = east) or a bare "গ্রাম" are not village names.
 const NOT_A_VILLAGE = new RegExp(`${norm('ওয়ার্ড|নং|বাড়ি|বাড়ী')}|[0-9০-৯]|^${norm('(পূর্ব|পশ্চিম|উত্তর|দক্ষিণ|দক্ষিন|মধ্য|গ্রাম)')}$`);
 
+// "কাদির হানিফ ইউনিয়ন" is the place "কাদির হানিফ": its kind word is no part of the whole name
+const KIND_TAIL = new RegExp(`\\s+(${norm('ইউনিয়ন|পৌরসভা')}|union|pourashava|municipality)$`);
+
 // Every searchable place: upazilas, unions, towns, named places, local names (data/aliases.json) and villages
 // (official lists from data/villages.json first, then names from representatives' addresses).
 export function areaIndex(data) {
@@ -246,6 +255,7 @@ export function areaIndex(data) {
   const add = (item, names) => {
     names = names.filter(Boolean);
     item.words = norm(names.join(' ')).toLowerCase();
+    item.full = names.map((n) => norm(n).toLowerCase().replace(KIND_TAIL, ''));       // whole names, for an exact match
     const parts = names.flatMap((n) => [n, ...norm(n).split(/\s+/)]);
     item.keys = [...new Set(parts.map(soundKey).filter((k) => k.length >= 2))];       // whole names and single words
     item.fullKeys = [...new Set(names.map(soundKey).filter((k) => k.length >= 2))];   // whole names only
@@ -289,12 +299,12 @@ export function areaIndex(data) {
     const official = (data.villages || []).filter((v) => v.district === doc.district);
     for (const v of official.concat(doc.villages || [])) {
       const name = norm(v.village_bn);
-      const upz = upByBn.get(norm(v.upazila_bn));
+      const upz = v.upazila_en || upByBn.get(norm(v.upazila_bn));
       const area = upz && areaOf(upz, 'union', v.union_bn);
       const id = `${name}|${norm(v.union_bn)}`;
-      if (!area || NOT_A_VILLAGE.test(name) || seen.has(id)) continue;
+      if (!area || (!v.bbs && NOT_A_VILLAGE.test(name)) || seen.has(id)) continue;   // BBS's names are clean ("Badarkhali Ghona-1")
       seen.add(id);
-      add({ kind: 'village', village: name, ward: v.ward_no || null, place: { district: d.key, upazila: upz, area } }, [name]);
+      add({ kind: 'village', village: name, village_en: v.village_en || null, ward: v.ward_no || null, place: { district: d.key, upazila: upz, area } }, [name, v.village_en]);
     }
   }
   return items;
@@ -304,7 +314,7 @@ export function areaIndex(data) {
 // 5+ is only a close spelling: shown under "Similar names", never as if it were the place.
 export function scoreItem(item, s, key, pq = phoneKey(s)) {
   const w = item.words.split(/\s+/);
-  if (w.some((x) => x === s)) return 0;
+  if (w.some((x) => x === s) || item.full?.includes(s)) return 0;   // a word, or the whole name ("দরগাহপাড়া শিয়াপাড়া")
   if (w.some((x) => x.startsWith(s))) return 1;
   if (item.words.includes(s)) return 2;
   if (key.length < 2) return null;
@@ -370,10 +380,14 @@ function matchName(index, q, { district = '' } = {}) {
   // A landmark that only contains the typed name ("উত্তর মোহাম্মদপুর সরকারি প্রাথমিক বিদ্যালয়") is a weaker match than a
   // place of exactly that name, here or in another area (#158 review 2)
   const exactName = (item) => (item.names || []).some((n) => norm(n).toLowerCase() === s);
+  const latin = /[a-z]/.test(s) && !/[ঀ-৿]/.test(s);
   for (const item of index) {
     if (district && item.place.district !== district) continue;
     let sc = scoreItem(item, s, key, pq);
     if (sc != null && sc <= 3 && item.kind === 'landmark' && !exactName(item)) sc += 0.5;
+    // BBS's English village names: typed in Latin letters they count as the same sound, as every Bangla-only place does,
+    // so "char jabbar" still gives the union চরজাব্বার first, not the village "Char Jabbar" in it (#179)
+    if (sc != null && sc < 3 && item.village_en && latin) sc = 3;
     if (sc != null) out.push({ item, sc, near: Math.min(...item.vowels.map((v) => editDistance(typed, v))) });
   }
   out.sort((a, b) => a.sc - b.sc || a.near - b.near || (KIND_ORDER[a.item.kind] ?? 3) - (KIND_ORDER[b.item.kind] ?? 3));
@@ -401,7 +415,7 @@ function matchName(index, q, { district = '' } = {}) {
   const sameName = (a, b) => a && b && norm(a.item.named?.name_bn || a.item.village || '') === norm(b.item.named?.name_bn || b.item.village || '') && a.item.place.area?.bn === b.item.place.area?.bn;
   const rivals = close.slice(1).filter((x) => x.sc <= 6 && !sameName(x, close[0]));
   if (!hits.length && close[0]?.sc === 6 && key.replace('@', '').length >= 6 && !rivals.length) hits.push(close.shift());
-  const top = hits.slice(0, 16);   // a name in many places shows every one (সিকদার পাড়া / সিকদারপাড়া: 15)
+  const top = hits.slice(0, 20);   // a name in many places shows every one ("sikdarpara": 20 places, both spellings, with BBS)
   return { hits: top.map((x) => x.item), close: close.slice(0, 3).map((x) => x.item), scores: new Map(top.map((x) => [x.item, x.sc])) };
 }
 

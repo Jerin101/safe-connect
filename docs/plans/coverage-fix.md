@@ -26,6 +26,19 @@ Claude chat's comparison with the 2011 census (Banglapedia) gives Noakhali 91 un
 66 unions and 927 villages. Those union counts predate the newer upazilas: Kabirhat, Eidgaon and the Subarnachar
 changes.
 
+## After the three data PRs (11 Nov 2026)
+
+Measured on the branch of part 3 (BBS villages), with #175 (must-find) and #177 (tourist spots) merged:
+
+| District | Found | Unions | Pourashavas | Tourist spots (portals) | Banglapedia list | Jerin's names | Villages | BBS villages |
+|---|---|---|---|---|---|---|---|---|
+| Noakhali | **401/401 (100%)** | 175/175 | 8/8 | 32/32 | — | — | 99/99 | 87/87 |
+| Cox's Bazar | **393/393 (100%)** | 142/142 | 4/4 | 49/49 | 14/14 | 28/28 | 100/100 | 56/56 |
+
+Cox's Bazar has 14 more entries (8 places, in English and Bangla) with a data gap, in `docs/DATA_GAPS.md` §12; they are
+not in the %. All 78 unions without a village page now have BBS's villages: 960 villages, 342 of them with a Bangla name.
+What is still missing is in `docs/DATA_GAPS.md` §13.
+
 ## The must-find lists (`tests/must-find/<district>.json`)
 
 Every entry has a query, its group, the expected upazila (the union only when an official page gives it) and the

@@ -65,11 +65,11 @@ function itemLabel(h) {
     || (h.kind === 'landmark' && t().kinds[`lm_${h.named?.type}`])                       // "… উচ্চ বিদ্যালয় (বিদ্যালয়)" (#157)
     || (h.kind === 'local' && t().kinds[h.named?.type]) || t().kinds[h.kind] || '';   // "হাসান হাট (হাট ও ডাকঘর)"
   let title;
-  if (h.kind === 'village') title = h.village;
+  if (h.kind === 'village') title = (lang === 'en' && h.village_en) || h.village;   // BBS gives the English name too
   else if (named) title = named;
   else if (h.place.area) title = areaName(h.place.area);
   else title = upazilaName(p.district, p.upazila);
-  if (h.kind === 'village') p.label = `${h.village} (${kindWord})`;
+  if (h.kind === 'village') p.label = `${title} (${kindWord})`;
   // The village is known only in Bangla; English leaves it out rather than mixing scripts (#149).
   // The full address (#155): village · union or town · upazila (thana) · district; each part only once.
   const parts = [];
