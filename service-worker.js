@@ -1,7 +1,8 @@
 // SafeConnect offline app (P34). After one visit with internet, the site opens with no internet.
-// Change VERSION whenever a file in FILES changes in a way that must reach every phone at once
-// (new data, a new page or script): the old cache is then deleted and everything is saved again.
-const VERSION = 'v50-2026-11-11';
+// VERSION is filled in when the site is published (.github/workflows/pages.yml, tools/stamp_version.py): the date and
+// commit of the last change to this file or to a file in FILES. A new VERSION deletes the old cache and saves everything
+// again. Keep it 'dev' here; never raise it by hand.
+const VERSION = 'dev';
 const CACHE = `safeconnect-${VERSION}`;
 
 // Every page, script, data file, font and icon the site needs (paths relative to this file).
