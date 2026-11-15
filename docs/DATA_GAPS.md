@@ -245,7 +245,7 @@ official address would fix them.
 
 **Upazila of an OSM place.** It comes from the OSM boundary, so:
 
-- 8,482 of 22,951 places (37%) have no upazila, mostly city areas that OSM draws as one polygon: Dhaka 6,162 of 6,961, Chittagong 1,548 of 2,755, Rangpur 349 of 516, Rajshahi 198 of 339, Khulna 122 of 367.
+- 9,197 of 25,007 places (37%) have no upazila (OSM has no upazila or city-thana boundary there, mostly city areas; per district in `docs/COVERAGE.md`): Dhaka 6,731 of 7,628, Chittagong 1,629 of 2,903, Rangpur 373 of 546, Rajshahi 213 of 362, Khulna 131 of 451.
 - New upazilas still lie inside their old upazila's OSM boundary, so their places get the old name (e.g. Ashuganj →
   Brahmanbaria Sadar, Guimara → Matiranga, Fulgazi → Chhagalnaiya, Dhanbari → Madhupur; also Kalukhali, Kabirhat,
   Eidgaon, Sonaimuri).

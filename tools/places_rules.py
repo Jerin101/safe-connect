@@ -9,17 +9,44 @@ import re
 import unicodedata
 import urllib.parse
 
-# MASTER_PLAN categories -> the subcategories we take from OpenStreetMap
+# craft=* that are repairs go to workshops (Jerin, 2026-11-15); every other craft goes to other_services
+REPAIR_CRAFTS = {"car_repair", "motorcycle_repair", "bicycle", "electronics_repair", "mobile_phone_repair",
+                 "shoemaker", "tailor"}
+# MASTER_PLAN categories -> the subcategories we take from OpenStreetMap (amenity=* / shop=*, and craft=* repairs)
 OSM_SUBCATEGORIES = {
     "health": {"hospital", "clinic", "doctors", "pharmacy", "chemist"},
     "shops": {"supermarket", "convenience", "general", "mall", "marketplace"},
-    "workshops": {"car_repair", "motorcycle_repair", "motorcycle", "bicycle", "mobile_phone", "craft"},
+    "workshops": {"car_repair", "motorcycle_repair", "motorcycle", "bicycle", "mobile_phone"} | REPAIR_CRAFTS,
     "fuel_transport": {"fuel", "bus_station", "ferry_terminal"},
     "money": {"bank", "atm"},
     "public_offices": {"police", "fire_station"},
+    "other_services": set(),          # any other craft=*, with its own subtype (e.g. sawmill, photographer)
 }
 CATEGORY_OF = {sub: cat for cat, subs in OSM_SUBCATEGORIES.items() for sub in subs}
 CATEGORIES = set(OSM_SUBCATEGORIES)
+SUBTYPE = re.compile(r"^[a-z0-9_;]+$")
+
+# These are kept even with no name in OSM (Jerin, 2026-11-15), shown as "<kind> (নাম জানা নেই)"
+UNNAMED_LABELS = {
+    "hospital": {"bn": "হাসপাতাল (নাম জানা নেই)", "en": "Hospital (name not known)"},
+    "clinic": {"bn": "ক্লিনিক (নাম জানা নেই)", "en": "Clinic (name not known)"},
+    "pharmacy": {"bn": "ফার্মেসি (নাম জানা নেই)", "en": "Pharmacy (name not known)"},
+    "fuel": {"bn": "পেট্রোল পাম্প (নাম জানা নেই)", "en": "Fuel station (name not known)"},
+    "atm": {"bn": "এটিএম (নাম জানা নেই)", "en": "ATM (name not known)"},
+    "bank": {"bn": "ব্যাংক (নাম জানা নেই)", "en": "Bank (name not known)"},
+    "police": {"bn": "পুলিশ (নাম জানা নেই)", "en": "Police (name not known)"},
+    "fire_station": {"bn": "ফায়ার স্টেশন (নাম জানা নেই)", "en": "Fire station (name not known)"},
+    "bus_station": {"bn": "বাস স্ট্যান্ড (নাম জানা নেই)", "en": "Bus station (name not known)"},
+    "ferry_terminal": {"bn": "ঘাট (নাম জানা নেই)", "en": "Ferry ghat (name not known)"},
+}
+KEEP_UNNAMED = set(UNNAMED_LABELS)
+
+
+def category_for(sub, osm_key=None):
+    """Category of an OSM subcategory; a craft that is not a repair is other_services."""
+    if osm_key == "craft":
+        return "workshops" if sub in REPAIR_CRAFTS else "other_services"
+    return CATEGORY_OF[sub]
 
 # verified_by -> MASTER_PLAN source
 VERIFIED_BY = {"official_list": "official", "owner_page": "owner", "visited": "user"}
@@ -32,7 +59,10 @@ BANNED_HOSTS = ("google.com", "google.com.bd", "goo.gl", "g.page")
 # Open Location Code ("plus code"), e.g. V3P8+2F or 7MJ4V3P8+2F
 PLUS_CODE = re.compile(r"(?<![0-9A-Za-z])[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3}(?![0-9A-Za-z])", re.I)
 # a banned host written anywhere in a text, with or without https:// and in any case: "maps.app.goo.gl/x", "WWW.GOOGLE.COM/maps"
-BANNED_IN_TEXT = re.compile(r"(?<![a-z0-9.-])(?:[a-z0-9-]{2,}\.)*(?:google\.com\.bd|google\.com|goo\.gl|g\.page)(?![a-z0-9-])", re.I)
+# Google hosts take any subdomain, also one letter (m.google.com). g.page only takes subdomains of 2+ letters, so the
+# text "e.g.page" is not read as a link.
+BANNED_IN_TEXT = re.compile(r"(?<![a-z0-9.-])(?:(?:[a-z0-9-]+\.)*(?:google\.com\.bd|google\.com|goo\.gl)"
+                            r"|(?:[a-z0-9-]{2,}\.)*g\.page)(?![a-z0-9-])", re.I)
 OFFICIAL = re.compile(r"^https://([a-z0-9-]+\.)*(gov\.bd|acc\.org\.bd)(/|$)", re.I)
 FACEBOOK = re.compile(r"^https://((www|m|web|mbasic|touch|l)\.)?(facebook\.com|fb\.com)/", re.I)
 FACEBOOK_SHORT = re.compile(r"^https?://(fb\.me|fb\.watch|fb\.gg)/", re.I)
@@ -42,6 +72,23 @@ FACEBOOK_NOT_A_PAGE = re.compile(r"(facebook|fb)\.com/(groups/|share/|story\.php
                                  r"reel/|events/|l\.php|[^/?#]+/(posts|videos|photos|reels)/)", re.I)
 # a mobile number however it is grouped: 01712345678, 01712-345678, 017-1234-5678, 017 12 345 678, +880 1712 345678
 PHONE_IN_TEXT = re.compile(r"(?<![0-9])(?:\+?88[\s-]?)?0[\s-]?1[3-9](?:[\s-]?[0-9]){8}(?![0-9])")
+# a landline: 0 + area code (02 Dhaka, 031 Chattogram, 0321 Noakhali, …) + number, 9 to 11 digits with the 0,
+# written with a dash, a space or brackets after the area code ("02-9555555", "০৩২১-৬১২৩৪", "(031) 612345", "+880 2 9555555")
+LANDLINE_IN_TEXT = re.compile(r"(?<![0-9])(?:\+?88[\s-]?0?|0)(?:\(?\s*[2-9][0-9]{0,3}\s*\)?)[\s-]+[0-9][0-9\s-]{3,9}[0-9](?![0-9])")
+
+
+def phone_in_text(text):
+    """A mobile or landline number in free text (Bangla or English digits)."""
+    t = to_ascii_digits(text)
+    if PHONE_IN_TEXT.search(t):
+        return True
+    for m in LANDLINE_IN_TEXT.finditer(t):
+        digits = re.sub(r"[^0-9]", "", m.group(0))
+        digits = digits[2:] if digits.startswith("880") else digits
+        digits = digits if digits.startswith("0") else "0" + digits
+        if 9 <= len(digits) <= 11:
+            return True
+    return False
 NOT_FREE_TEXT = {"phone", "id", "source_url", "place_node"}
 OSM_URL = re.compile(r"^https://www\.openstreetmap\.org/(node|way|relation)/([0-9]+)$")
 OSM_ID = re.compile(r"^osm-([nwr])([0-9]+)$")
@@ -130,7 +177,7 @@ def check_common(p):
                 found = BANNED_IN_TEXT.search(text)
                 link = found.group(0) if found else next(u for u in find_urls(text) if is_banned_url(u))
                 res.append(("error", f"Google link not allowed in {key}: {link}"))
-            if key not in NOT_FREE_TEXT and PHONE_IN_TEXT.search(to_ascii_digits(text)):
+            if key not in NOT_FREE_TEXT and phone_in_text(text):
                 res.append(("error", f"phone number in {key}: a number goes only in the phone field, with its source"))
     return res
 
@@ -141,12 +188,26 @@ def check_osm_place(p, district_en, upazilas, extract_date):
     m = OSM_ID.match(p.get("id") or "")
     if not m:
         res.append(("error", "id must be osm-<n|w|r><number>"))
-    if not (p.get("name_bn") or p.get("name_en")):
-        res.append(("error", "name_bn or name_en is needed (nameless places are dropped)"))
-    if p.get("category") not in CATEGORIES:
-        res.append(("error", f"unknown category {p.get('category')!r}"))
-    elif p.get("subcategory") not in OSM_SUBCATEGORIES[p["category"]]:
-        res.append(("error", f"subcategory {p.get('subcategory')!r} is not in {p['category']}"))
+    named = bool(p.get("name_bn") or p.get("name_en"))
+    if p.get("unnamed") is True:
+        if named:
+            res.append(("error", "an unnamed place must not have name_bn/name_en"))
+        if p.get("subcategory") not in KEEP_UNNAMED:
+            res.append(("error", f"only {', '.join(sorted(KEEP_UNNAMED))} are kept without a name"))
+    elif p.get("unnamed") is not None:
+        res.append(("error", "unnamed must be true or missing"))
+    elif not named:
+        res.append(("error", "name_bn or name_en is needed (or unnamed: true for the kinds kept without a name)"))
+    cat, sub, key = p.get("category"), p.get("subcategory"), p.get("osm_key")
+    if cat not in CATEGORIES:
+        res.append(("error", f"unknown category {cat!r}"))
+    elif key not in (None, "craft"):
+        res.append(("error", f"unknown osm_key {key!r}"))
+    elif key == "craft":
+        if not SUBTYPE.match(sub or "") or cat != category_for(sub, "craft"):
+            res.append(("error", f"craft {sub!r} belongs in {category_for(sub or '', 'craft')}"))
+    elif cat == "other_services" or sub not in OSM_SUBCATEGORIES[cat]:
+        res.append(("error", f"subcategory {sub!r} is not in {cat}"))
     if not in_bd(p.get("lat"), p.get("lon")):
         res.append(("error", "lat/lon missing or outside Bangladesh"))
     if p.get("district") != district_en:

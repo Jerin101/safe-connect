@@ -164,7 +164,48 @@ class ManualPlaceRules(unittest.TestCase):
         self.assertTrue(errors(self.check(union="X ইউনিয়ন", verified_by="visited", source="user", source_url=None)))
 
 
+class Item4Validator(unittest.TestCase):
+    def test_one_letter_subdomains(self):
+        for text in ("m.google.com/maps/x", "M.GOOGLE.COM", "x.goo.gl/a", "m.google.com.bd", "my.g.page"):
+            self.assertTrue(errors(R.check_common({"note": text})), text)
+        self.assertFalse(errors(R.check_common({"note": "e.g.page"})))
+
+    def test_landlines(self):
+        for text in ("02-9555555", "০২-৯৫৫৫৫৫৫", "031-612345", "0321-61234", "০৩২১-৬১২৩৪", "(031) 612345",
+                     "+880 2 9555555", "02 9555555"):
+            self.assertTrue(any("phone number" in m for m in errors(R.check_common({"note": text}))), text)
+        for text in ("02-11-2026", "০২/১১/২০২৬", "Ward 03-5", "Holding 0321", "Mo-Su 08:00-22:00",
+                     "07:00-23:00; Fr 14:00-23:00", "1,250 taka", "Road 12, House 5"):
+            self.assertFalse(errors(R.check_common({"note": text})), text)
+
+
 class OsmPlaceRules(unittest.TestCase):
+    BASE = {"id": "osm-n123", "category": "health", "subcategory": "pharmacy", "lat": 22.87, "lon": 91.1,
+            "district": "Noakhali", "upazila": None, "union": None, "phone": None, "source": "osm",
+            "source_url": "https://www.openstreetmap.org/node/123", "checked_on": "2026-11-13"}
+
+    def osm(self, **changes):
+        return errors(R.check_osm_place(dict(self.BASE, **changes), "Noakhali", set(), "2026-11-13"))
+
+    def test_unnamed_kinds(self):
+        self.assertEqual(self.osm(unnamed=True), [])
+        self.assertTrue(self.osm(unnamed=True, name_bn="X"))
+        self.assertTrue(self.osm(unnamed=True, category="shops", subcategory="marketplace"))
+        self.assertTrue(self.osm())                                   # no name and not marked unnamed
+        self.assertEqual(set(R.UNNAMED_LABELS), {"hospital", "clinic", "pharmacy", "fuel", "atm", "bank", "police",
+                                                 "fire_station", "bus_station", "ferry_terminal"})
+        for sub, lab in R.UNNAMED_LABELS.items():
+            self.assertTrue(lab["bn"].endswith("(নাম জানা নেই)") and lab["en"].endswith("(name not known)"), sub)
+
+    def test_crafts(self):
+        self.assertEqual(self.osm(name_en="T", category="workshops", subcategory="tailor", osm_key="craft"), [])
+        self.assertEqual(self.osm(name_en="T", category="other_services", subcategory="sawmill", osm_key="craft"), [])
+        self.assertTrue(self.osm(name_en="T", category="workshops", subcategory="sawmill", osm_key="craft"))
+        self.assertTrue(self.osm(name_en="T", category="other_services", subcategory="tailor", osm_key="craft"))
+        self.assertTrue(self.osm(name_en="T", category="other_services", subcategory="sawmill"))   # needs osm_key craft
+        self.assertEqual(R.category_for("shoemaker", "craft"), "workshops")
+        self.assertEqual(R.category_for("photographer", "craft"), "other_services")
+
     def test_osm_place(self):
         p = {"id": "osm-n123", "name_bn": "TEST", "category": "health", "subcategory": "pharmacy",
              "lat": 22.87, "lon": 91.1, "district": "Noakhali", "upazila": None, "union": None, "phone": None,

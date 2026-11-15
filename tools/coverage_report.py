@@ -73,3 +73,19 @@ for fname in ("contacts_noakhali.json", "contacts_coxsbazar.json"):
 print("\n## Summary\n")
 for k in sorted(total):
     print(f"- {k.replace('_', ' ')}: {total[k]}")
+
+# Places (data/places/, OpenStreetMap): how many, how many without a name in OSM, and how many could not be given
+# an upazila (no OSM upazila boundary there, e.g. city areas). The upazila comes from the OSM boundary, point in polygon.
+if os.path.exists(os.path.join(DATA, "places", "index.json")):
+    idx = load(os.path.join("places", "index.json"))
+    rows = idx["districts"]
+    print("\n## Places (OpenStreetMap, all 64 districts)\n")
+    print(f"From `data/places/` ({idx['attribution']}, {idx['license']}, extract of {idx['extract_date']}). "
+          "\"No name\" places are shown as \"<kind> (নাম জানা নেই)\". \"No upazila\": the place is outside every "
+          "OSM upazila boundary we can use (mostly city areas), so only its district is known.\n")
+    print("| Division | District | Places | No name | No upazila |")
+    print("|---|---|---:|---:|---:|")
+    for x in sorted(rows, key=lambda x: (x["division"], x["district_en"])):
+        print(f"| {x['division']} | {x['district_en']} | {x['places']:,} | {x['unnamed']:,} | {x['without_upazila']:,} |")
+    t = [sum(x[k] for x in rows) for k in ("places", "unnamed", "without_upazila")]
+    print(f"| **All** | | **{t[0]:,}** | **{t[1]:,}** | **{t[2]:,}** ({100 * t[2] / t[0]:.0f}%) |")

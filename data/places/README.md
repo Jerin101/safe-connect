@@ -24,15 +24,20 @@ As in MASTER_PLAN: `id, name_bn, name_en, category, subcategory, lat, lon, divis
 phone, hours, source, source_url, checked_by, checked_on`. In the OSM files a key that is missing means null (to keep each
 file under 120 KB gzip). Manual files also have `verified_by`, `location_approx` and `location_source`.
 
-- **category**: `health`, `shops`, `workshops`, `fuel_transport`, `money`, `public_offices`.
+- **category**: `health`, `shops`, `workshops`, `fuel_transport`, `money`, `public_offices`, `other_services`.
 - **OSM subcategory** (the OSM tag): health = hospital, clinic, doctors, pharmacy, chemist · shops = supermarket,
   convenience, general, mall, marketplace · workshops = car_repair, motorcycle_repair, motorcycle, bicycle, mobile_phone,
-  craft (+ `craft`: the craft tag) · fuel_transport = fuel, bus_station, ferry_terminal · money = bank, atm ·
-  public_offices = police, fire_station.
-- **OSM places**: named places only; the same kind of place with the same Bangla *or* English name within 100 m is
-  kept once (node first). Bangla text goes only in `name_bn`, English only in `name_en` ("Popular Pharmacy (পপুলার
+  and the repair crafts (car_repair, motorcycle_repair, bicycle, electronics_repair, mobile_phone_repair, shoemaker,
+  tailor) · fuel_transport = fuel, bus_station, ferry_terminal · money = bank, atm · public_offices = police,
+  fire_station · other_services = every other `craft=*`, with its own subtype (sawmill, photographer…; `unspecified`
+  for `craft=yes`). Crafts have `osm_key: "craft"`.
+- **OSM places**: the same kind of place with the same Bangla *or* English name within 100 m is kept once (node
+  first). **Places without a name** are kept for hospital, clinic, pharmacy, fuel, atm, bank, police, fire_station,
+  bus_station and ferry_terminal, with `unnamed: true` and no name: show `unnamed_labels[subcategory]` from the file
+  ("ফার্মেসি (নাম জানা নেই)"); other kinds need a name. Bangla text goes only in `name_bn`, English only in `name_en` ("Popular Pharmacy (পপুলার
   ফার্মেসী)" is split); names that are only coordinates, an address, "Test"/"Unnamed", or a private person's name with no
-  business (outside `doctors`) are dropped; `craft=yes` (no kind) is dropped. **No phone numbers** (OSM is not an
+  business (outside `doctors`) are not used (the place is kept as unnamed if it is one of the kinds above). Places whose
+  name has text copied from Google Maps (a rating, Google's category labels) are not used at all. **No phone numbers** (OSM is not an
   official source); `union` is always null; `upazila` comes from the OSM upazila boundary, matched
   to `areas_bangladesh.json` (null where OSM has no boundary); `hours` is the OSM `opening_hours` text; `source_url` is the
   object on openstreetmap.org; `checked_on` is the extract date.
