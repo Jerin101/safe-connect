@@ -16,7 +16,7 @@
     {
      "file": "barguna.json",
      "places": 181,
-     "gzip_bytes": 6062
+     "gzip_bytes": 6051
     }
    ]
   },
@@ -94,7 +94,7 @@
     {
      "file": "brahmanbaria.json",
      "places": 98,
-     "gzip_bytes": 4477
+     "gzip_bytes": 4468
     }
    ]
   },
@@ -102,12 +102,12 @@
    "division": "Chittagong",
    "district_en": "Comilla",
    "district_bn": "কুমিল্লা",
-   "places": 439,
+   "places": 437,
    "files": [
     {
      "file": "comilla.json",
-     "places": 439,
-     "gzip_bytes": 17479
+     "places": 437,
+     "gzip_bytes": 17357
     }
    ]
   },
@@ -133,7 +133,7 @@
     {
      "file": "noakhali.json",
      "places": 146,
-     "gzip_bytes": 5588
+     "gzip_bytes": 5586
     }
    ]
   },
@@ -180,12 +180,12 @@
    "division": "Chittagong",
    "district_en": "Chittagong",
    "district_bn": "চট্টগ্রাম",
-   "places": 2758,
+   "places": 2755,
    "files": [
     {
      "file": "chittagong.json",
-     "places": 2758,
-     "gzip_bytes": 106283
+     "places": 2755,
+     "gzip_bytes": 106057
     }
    ]
   },
@@ -219,12 +219,12 @@
    "division": "Chittagong",
    "district_en": "Feni",
    "district_bn": "ফেনী",
-   "places": 117,
+   "places": 115,
    "files": [
     {
      "file": "feni.json",
-     "places": 117,
-     "gzip_bytes": 5609
+     "places": 115,
+     "gzip_bytes": 5487
     }
    ]
   },
@@ -232,22 +232,22 @@
    "division": "Dhaka",
    "district_en": "Dhaka",
    "district_bn": "ঢাকা",
-   "places": 6965,
+   "places": 6961,
    "files": [
     {
      "file": "dhaka-1.json",
-     "places": 801,
-     "gzip_bytes": 29322
+     "places": 799,
+     "gzip_bytes": 29248
     },
     {
      "file": "dhaka-2.json",
-     "places": 3082,
-     "gzip_bytes": 95200
+     "places": 3081,
+     "gzip_bytes": 95157
     },
     {
      "file": "dhaka-3.json",
-     "places": 3082,
-     "gzip_bytes": 92079
+     "places": 3081,
+     "gzip_bytes": 92046
     }
    ]
   },
@@ -260,7 +260,7 @@
     {
      "file": "faridpur.json",
      "places": 270,
-     "gzip_bytes": 9943
+     "gzip_bytes": 9941
     }
    ]
   },
@@ -273,7 +273,7 @@
     {
      "file": "gazipur.json",
      "places": 603,
-     "gzip_bytes": 23027
+     "gzip_bytes": 23009
     }
    ]
   },
@@ -312,7 +312,7 @@
     {
      "file": "madaripur.json",
      "places": 82,
-     "gzip_bytes": 4291
+     "gzip_bytes": 4277
     }
    ]
   },
@@ -338,7 +338,7 @@
     {
      "file": "munshiganj.json",
      "places": 210,
-     "gzip_bytes": 8412
+     "gzip_bytes": 8402
     }
    ]
   },
@@ -351,7 +351,7 @@
     {
      "file": "narayanganj.json",
      "places": 362,
-     "gzip_bytes": 14279
+     "gzip_bytes": 14273
     }
    ]
   },
@@ -390,7 +390,7 @@
     {
      "file": "shariatpur.json",
      "places": 104,
-     "gzip_bytes": 5024
+     "gzip_bytes": 5001
     }
    ]
   },
@@ -403,7 +403,7 @@
     {
      "file": "tangail.json",
      "places": 573,
-     "gzip_bytes": 20297
+     "gzip_bytes": 20294
     }
    ]
   },
@@ -411,12 +411,12 @@
    "division": "Khulna",
    "district_en": "Khulna",
    "district_bn": "খুলনা",
-   "places": 368,
+   "places": 367,
    "files": [
     {
      "file": "khulna.json",
-     "places": 368,
-     "gzip_bytes": 12933
+     "places": 367,
+     "gzip_bytes": 12910
     }
    ]
   },
@@ -546,7 +546,7 @@
     {
      "file": "bogra.json",
      "places": 753,
-     "gzip_bytes": 27576
+     "gzip_bytes": 27566
     }
    ]
   },
@@ -572,7 +572,7 @@
     {
      "file": "naogaon.json",
      "places": 329,
-     "gzip_bytes": 13383
+     "gzip_bytes": 13374
     }
    ]
   },
@@ -580,12 +580,12 @@
    "division": "Rajshahi",
    "district_en": "Natore",
    "district_bn": "নাটোর",
-   "places": 345,
+   "places": 344,
    "files": [
     {
      "file": "natore.json",
-     "places": 345,
-     "gzip_bytes": 14219
+     "places": 344,
+     "gzip_bytes": 14142
     }
    ]
   },
@@ -645,12 +645,12 @@
    "division": "Rangpur",
    "district_en": "Dinajpur",
    "district_bn": "দিনাজপুর",
-   "places": 316,
+   "places": 315,
    "files": [
     {
      "file": "dinajpur.json",
-     "places": 316,
-     "gzip_bytes": 12104
+     "places": 315,
+     "gzip_bytes": 12084
     }
    ]
   },
@@ -715,7 +715,7 @@
     {
      "file": "panchagarh.json",
      "places": 203,
-     "gzip_bytes": 8192
+     "gzip_bytes": 8181
     }
    ]
   },
@@ -767,7 +767,7 @@
     {
      "file": "maulvibazar.json",
      "places": 153,
-     "gzip_bytes": 6310
+     "gzip_bytes": 6305
     }
    ]
   },
@@ -793,7 +793,7 @@
     {
      "file": "sylhet.json",
      "places": 509,
-     "gzip_bytes": 17793
+     "gzip_bytes": 17782
     }
    ]
   },
