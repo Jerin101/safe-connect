@@ -32,14 +32,16 @@ BANNED_HOSTS = ("google.com", "google.com.bd", "goo.gl", "g.page")
 # Open Location Code ("plus code"), e.g. V3P8+2F or 7MJ4V3P8+2F
 PLUS_CODE = re.compile(r"(?<![0-9A-Za-z])[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3}(?![0-9A-Za-z])", re.I)
 # a banned host written anywhere in a text, with or without https:// and in any case: "maps.app.goo.gl/x", "WWW.GOOGLE.COM/maps"
-BANNED_IN_TEXT = re.compile(r"(?<![a-z0-9.-])(?:[a-z0-9-]+\.)*(?:google\.com\.bd|google\.com|goo\.gl|g\.page)(?![a-z0-9-])", re.I)
+BANNED_IN_TEXT = re.compile(r"(?<![a-z0-9.-])(?:[a-z0-9-]{2,}\.)*(?:google\.com\.bd|google\.com|goo\.gl|g\.page)(?![a-z0-9-])", re.I)
 OFFICIAL = re.compile(r"^https://([a-z0-9-]+\.)*(gov\.bd|acc\.org\.bd)(/|$)", re.I)
-FACEBOOK = re.compile(r"^https://((www|m|web|mbasic|touch)\.)?(facebook\.com|fb\.com)/", re.I)
+FACEBOOK = re.compile(r"^https://((www|m|web|mbasic|touch|l)\.)?(facebook\.com|fb\.com)/", re.I)
 FACEBOOK_SHORT = re.compile(r"^https?://(fb\.me|fb\.watch|fb\.gg)/", re.I)
 # a shop's own page is fine; groups and other people's posts are not
+# (facebook.com/p/<Name>-<id>/ and profile.php?id= are real pages; l.php is Facebook's link redirect, not a page)
 FACEBOOK_NOT_A_PAGE = re.compile(r"(facebook|fb)\.com/(groups/|share/|story\.php|permalink\.php|photo\.php|photos?/|watch/|"
-                                 r"reel/|events/|p/|[^/?#]+/(posts|videos|photos|reels)/)", re.I)
-PHONE_IN_TEXT = re.compile(r"(?<![0-9])(?:\+?88)?01[3-9][0-9]{2}[\s-]?[0-9]{6}(?![0-9])")
+                                 r"reel/|events/|l\.php|[^/?#]+/(posts|videos|photos|reels)/)", re.I)
+# a mobile number however it is grouped: 01712345678, 01712-345678, 017-1234-5678, 017 12 345 678, +880 1712 345678
+PHONE_IN_TEXT = re.compile(r"(?<![0-9])(?:\+?88[\s-]?)?0[\s-]?1[3-9](?:[\s-]?[0-9]){8}(?![0-9])")
 NOT_FREE_TEXT = {"phone", "id", "source_url", "place_node"}
 OSM_URL = re.compile(r"^https://www\.openstreetmap\.org/(node|way|relation)/([0-9]+)$")
 OSM_ID = re.compile(r"^osm-([nwr])([0-9]+)$")
@@ -125,7 +127,9 @@ def check_common(p):
             if PLUS_CODE.search(text):
                 res.append(("error", f"plus code found ({PLUS_CODE.search(text).group(0)}): Google Maps data is not allowed"))
             if any(is_banned_url(u) for u in find_urls(text)) or BANNED_IN_TEXT.search(text):
-                res.append(("error", f"Google link not allowed in {key}: {(BANNED_IN_TEXT.search(text) or find_urls(text))}"))
+                found = BANNED_IN_TEXT.search(text)
+                link = found.group(0) if found else next(u for u in find_urls(text) if is_banned_url(u))
+                res.append(("error", f"Google link not allowed in {key}: {link}"))
             if key not in NOT_FREE_TEXT and PHONE_IN_TEXT.search(to_ascii_digits(text)):
                 res.append(("error", f"phone number in {key}: a number goes only in the phone field, with its source"))
     return res

@@ -253,7 +253,10 @@ def check_places():
             if doc.get("district_en") != den or doc.get("source") != "osm": err(fp, "file", "district_en/source do not match the index")
             if doc.get("license") != "ODbL-1.0" or not doc.get("attribution"): err(fp, "file", "missing ODbL credit")
             if len(doc.get("places", [])) != fi.get("places"): err(fp, "file", "place count differs from the index")
-            for p in doc.get("places", []):
+            for i, p in enumerate(doc.get("places", [])):
+                if not isinstance(p, dict):
+                    err(fp, f"entry {i}", "each place must be an object")
+                    continue
                 full = {k: p.get(k) for k in ("id", "name_bn", "name_en", "category", "subcategory", "lat", "lon",
                                               "district", "upazila", "union", "phone", "hours", "source",
                                               "source_url", "checked_on")}
@@ -295,10 +298,15 @@ def check_places():
                 for x in index.get("districts", []):
                     for fi in x.get("files", []):
                         for p in load(os.path.join("places", fi["file"])).get("places", []):
+                            if not isinstance(p, dict) or not p.get("category"):
+                                continue
                             osm_names.setdefault((x["district_en"], p.get("upazila"), p["category"]), set()).update(
                                 {R.name_key(p.get("name_bn")), R.name_key(p.get("name_en"))} - {""})
             ids = set()
-            for p in doc.get("places", []):
+            for i, p in enumerate(doc.get("places", [])):
+                if not isinstance(p, dict):
+                    err(fp, f"entry {i}", "each place must be an object")
+                    continue
                 pid = p.get("id")
                 for lvl, msg in R.check_manual_place(p, den, ups.get(den, set())) + R.check_in_upazila(p, polys, centres):
                     (err(fp, pid, msg) if lvl == "error" else warnings.append(f"{fp} [{pid}] {msg}"))

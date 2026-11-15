@@ -52,11 +52,15 @@ class GoogleAndPlusCodes(unittest.TestCase):
                      "maps.app.goo.gl/x", "goo.gl/maps/abc", "www.google.com/maps/place/x", "google.com.bd",
                      "g.page/shop", "Docs.Google.com/spreadsheets/d/x"):
             self.assertTrue(any("Google link" in m for m in errors(R.check_common({"note": text}))), text)
-        for text in ("notgoogle.com", "googleplex shop", "goo glass", "e-g page", "সাধারণ দোকান"):
+        msg = errors(R.check_common({"note": "see goo.gl/x"}))[0]
+        self.assertIn("goo.gl", msg)
+        self.assertNotIn("re.Match", msg)
+        for text in ("notgoogle.com", "googleplex shop", "goo glass", "e-g page", "e.g.page", "সাধারণ দোকান"):
             self.assertFalse(errors(R.check_common({"note": text})), text)
 
     def test_phone_number_in_free_text_is_an_error(self):
-        for text in ("call 01712345678", "০১৭১২৩৪৫৬৭৮", "+8801712345678", "01712-345678"):
+        for text in ("call 01712345678", "০১৭১২৩৪৫৬৭৮", "+8801712345678", "01712-345678", "017-1234-5678",
+                     "017 12 345 678", "+880 1712 345678"):
             self.assertTrue(any("phone number in note" in m for m in errors(R.check_common({"note": text}))), text)
         # OSM ids and links are not phone numbers
         self.assertEqual(errors(R.check_common({"id": "osm-n1361697420",
@@ -120,10 +124,12 @@ class ManualPlaceRules(unittest.TestCase):
     def test_more_facebook_links(self):
         ok = dict(verified_by="owner_page", source="owner")
         for u in ("https://www.facebook.com/photoclickstudiobd", "https://www.facebook.com/watchhousebd",
-                  "https://m.facebook.com/someshop"):
+                  "https://m.facebook.com/someshop", "https://www.facebook.com/p/Some-Shop-100064123456789/",
+                  "https://www.facebook.com/profile.php?id=100064123456789"):
             self.assertEqual(errors(self.check(source_url=u, **ok)), [], u)
         for u in ("https://fb.com/groups/x", "https://mbasic.facebook.com/groups/x", "https://www.facebook.com/reel/123",
-                  "https://fb.me/x", "https://www.facebook.com/photo.php?fbid=1"):
+                  "https://fb.me/x", "https://www.facebook.com/photo.php?fbid=1",
+                  "https://l.facebook.com/l.php?u=https%3A%2F%2Fexample.com"):
             self.assertTrue(errors(self.check(source_url=u, **ok)), u)
 
     def test_id_must_name_this_district(self):
@@ -267,6 +273,13 @@ class Validator(unittest.TestCase):
             json.dump({"district_en": "Noakhali", "place": []}, open(os.path.join(d, "places", "manual_noakhali.json"), "w", encoding="utf-8"))
         r = self.with_copy(no_list)
         self.assertIn('"places" list', r.stdout)
+
+        def not_objects(d):
+            json.dump({"district_en": "Noakhali", "places": ["x", None]}, open(os.path.join(d, "places", "manual_noakhali.json"), "w", encoding="utf-8"))
+        r = self.with_copy(not_objects)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("each place must be an object", r.stdout)
+        self.assertNotIn("Traceback", r.stderr)
 
         def upper_ext(d):
             json.dump({"district_en": "Noakhali", "places": []}, open(os.path.join(d, "places", "manual_noakhali.JSON"), "w", encoding="utf-8"))
