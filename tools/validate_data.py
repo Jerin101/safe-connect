@@ -213,6 +213,11 @@ def area_upazilas():
     return {ds["en"]: {u["en"] for u in ds["upazilas"]} for dv in d["divisions"] for ds in dv["districts"]}
 
 
+BOM = "﻿".encode("utf-8")
+FAR_FROM_DISTRICT_KM = 60    # an OSM place this far from every upazila centre of its district is suspicious
+CENTRE_FAR_KM = 100           # an upazila centre this far from its district's other centres is wrong
+
+
 def check_places():
     # Places (MASTER_PLAN place shape): OSM files listed in places/index.json, the team's manual files,
     # and data/upazila_centres.json. Shared rules live in places_rules.py (also used by the import tool).
@@ -256,18 +261,35 @@ def check_places():
                 for lvl, msg in R.check_osm_place(full, den, ups.get(den, set()), index.get("extract_date")):
                     (err(fp, p.get("id"), msg) if lvl == "error" else warnings.append(f"{fp} [{p.get('id')}] {msg}"))
                 if p.get("id") in seen: err(fp, p.get("id"), "duplicate id (in another places file too)")
+                near = [R.km(p["lat"], p["lon"], c[0], c[1]) for (cd, _), c in centres.items() if cd == den] if R.in_bd(p.get("lat"), p.get("lon")) else []
+                if near and min(near) > FAR_FROM_DISTRICT_KM:
+                    warnings.append(f"{fp} [{p.get('id')}] {min(near):.0f} km from every upazila centre of {den}: wrong district?")
                 seen.add(p.get("id"))
     osm_names = {}
     for name in sorted(os.listdir(pdir)):
         fp = os.path.join("places", name)
-        if name == "index.json" or not name.endswith(".json"):
+        if name == "index.json" or name == "README.md":
+            continue
+        if not name.endswith(".json"):
+            err(fp, "file", "only .json files (lower-case extension) and README.md belong in data/places/")
             continue
         if name.startswith("manual_"):
             den = by_slug.get(name[len("manual_"):-len(".json")])
             if not den:
                 err(fp, "file", "manual_<district>.json must use the district's slug (like data/landmarks/)")
                 continue
-            doc = load(fp)
+            raw = open(os.path.join(DATA, fp), "rb").read()
+            if raw.startswith(BOM):
+                err(fp, "file", "saved with a BOM: save as UTF-8 without BOM")
+                raw = raw[3:]
+            try:
+                doc = json.loads(raw.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError) as e:
+                err(fp, "file", f"not valid UTF-8 JSON: {e}")
+                continue
+            if not isinstance(doc, dict) or not isinstance(doc.get("places"), list):
+                err(fp, "file", "must be an object with a \"places\" list")
+                continue
             if doc.get("district_en") != den: err(fp, "file", "district_en does not match the file name")
             if not osm_names:
                 for x in index.get("districts", []):
@@ -301,12 +323,23 @@ def check_places():
             rid = f"{x.get('district')} {x.get('upazila_en')}"
             if not R.in_bd(x.get("lat"), x.get("lon")): err(fc, rid, "lat/lon missing or outside Bangladesh")
             if x.get("source") == "osm":
-                if x.get("method") not in ("osm_admin_centre", "osm_polygon_centroid", "osm_point_inside_polygon"): err(fc, rid, "unknown method")
+                if x.get("method") not in ("osm_admin_centre", "osm_place_node", "osm_upazila_office",
+                                           "osm_polygon_centroid", "osm_point_inside_polygon"): err(fc, rid, "unknown method")
+                if x.get("method") in ("osm_place_node", "osm_upazila_office") and not re.match(
+                        r"^https://www\.openstreetmap\.org/(node|way|relation)/[0-9]+$", x.get("place_node") or ""):
+                    err(fc, rid, "place_node must be the OSM link of the town or office used")
                 if not re.match(r"^https://www\.openstreetmap\.org/(relation|way)/[0-9]+$", x.get("source_url") or ""): err(fc, rid, "OSM centre needs its boundary's OSM link")
             elif x.get("source") == "locations.json":
                 if x.get("method") != "locations_json_center": err(fc, rid, "unknown method")
             else:
                 err(fc, rid, "source must be osm or locations.json")
+        for x in c.get("centres", []):
+            others = [(y["lat"], y["lon"]) for y in c.get("centres", []) if y.get("district") == x.get("district") and y is not x and R.in_bd(y.get("lat"), y.get("lon"))]
+            if others and R.in_bd(x.get("lat"), x.get("lon")):
+                mlat = sorted(o[0] for o in others)[len(others) // 2]
+                mlon = sorted(o[1] for o in others)[len(others) // 2]
+                if R.km(x["lat"], x["lon"], mlat, mlon) > CENTRE_FAR_KM:
+                    err(fc, f"{x.get('district')} {x.get('upazila_en')}", f"centre is {R.km(x['lat'], x['lon'], mlat, mlon):.0f} km from the district's other centres")
         for x in c.get("missing", []):
             if "lat" in x or "lon" in x: err(fc, f"{x.get('district')} {x.get('upazila_en')}", "a missing centre must not have lat/lon")
 

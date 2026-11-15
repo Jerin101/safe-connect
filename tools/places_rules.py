@@ -31,10 +31,16 @@ TEAM = {"jerin101", "tasmintoshi"}
 BANNED_HOSTS = ("google.com", "google.com.bd", "goo.gl", "g.page")
 # Open Location Code ("plus code"), e.g. V3P8+2F or 7MJ4V3P8+2F
 PLUS_CODE = re.compile(r"(?<![0-9A-Za-z])[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3}(?![0-9A-Za-z])", re.I)
-OFFICIAL = re.compile(r"^https://([a-z0-9-]+\.)*(gov\.bd|acc\.org\.bd)(/|$)")
-FACEBOOK = re.compile(r"^https://(www\.|m\.|web\.)?facebook\.com/", re.I)
+# a banned host written anywhere in a text, with or without https:// and in any case: "maps.app.goo.gl/x", "WWW.GOOGLE.COM/maps"
+BANNED_IN_TEXT = re.compile(r"(?<![a-z0-9.-])(?:[a-z0-9-]+\.)*(?:google\.com\.bd|google\.com|goo\.gl|g\.page)(?![a-z0-9-])", re.I)
+OFFICIAL = re.compile(r"^https://([a-z0-9-]+\.)*(gov\.bd|acc\.org\.bd)(/|$)", re.I)
+FACEBOOK = re.compile(r"^https://((www|m|web|mbasic|touch)\.)?(facebook\.com|fb\.com)/", re.I)
+FACEBOOK_SHORT = re.compile(r"^https?://(fb\.me|fb\.watch|fb\.gg)/", re.I)
 # a shop's own page is fine; groups and other people's posts are not
-FACEBOOK_NOT_A_PAGE = re.compile(r"facebook\.com/(groups/|share/|story\.php|permalink\.php|photo|watch|events/|[^/?#]+/(posts|videos|photos)/)", re.I)
+FACEBOOK_NOT_A_PAGE = re.compile(r"(facebook|fb)\.com/(groups/|share/|story\.php|permalink\.php|photo\.php|photos?/|watch/|"
+                                 r"reel/|events/|p/|[^/?#]+/(posts|videos|photos|reels)/)", re.I)
+PHONE_IN_TEXT = re.compile(r"(?<![0-9])(?:\+?88)?01[3-9][0-9]{2}[\s-]?[0-9]{6}(?![0-9])")
+NOT_FREE_TEXT = {"phone", "id", "source_url", "place_node"}
 OSM_URL = re.compile(r"^https://www\.openstreetmap\.org/(node|way|relation)/([0-9]+)$")
 OSM_ID = re.compile(r"^osm-([nwr])([0-9]+)$")
 MANUAL_ID = re.compile(r"^man-[a-z]+-[0-9]+$")
@@ -74,7 +80,11 @@ def is_banned_url(url):
 
 
 def find_urls(text):
-    return re.findall(r"https?://[^\s\"'<>]+", text or "")
+    return re.findall(r"https?://[^\s\"'<>]+", text or "", re.I)
+
+
+def number_or_none(x):
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
 
 
 def to_ascii_digits(s):
@@ -110,12 +120,14 @@ def _all_text(p):
 def check_common(p):
     """Rules for every place, OSM or manual: no Google data, no plus codes."""
     res = []
-    for text in _all_text(p):
-        if PLUS_CODE.search(text):
-            res.append(("error", f"plus code found ({PLUS_CODE.search(text).group(0)}): Google Maps data is not allowed"))
-        for u in find_urls(text):
-            if is_banned_url(u):
-                res.append(("error", f"Google link not allowed: {u}"))
+    for key, v in p.items():
+        for text in _all_text({key: v}):
+            if PLUS_CODE.search(text):
+                res.append(("error", f"plus code found ({PLUS_CODE.search(text).group(0)}): Google Maps data is not allowed"))
+            if any(is_banned_url(u) for u in find_urls(text)) or BANNED_IN_TEXT.search(text):
+                res.append(("error", f"Google link not allowed in {key}: {(BANNED_IN_TEXT.search(text) or find_urls(text))}"))
+            if key not in NOT_FREE_TEXT and PHONE_IN_TEXT.search(to_ascii_digits(text)):
+                res.append(("error", f"phone number in {key}: a number goes only in the phone field, with its source"))
     return res
 
 
@@ -158,8 +170,8 @@ def check_manual_place(p, district_en, upazilas, today=None):
     today = today or datetime.date.today()
     res = check_common(p)
     vb, url = p.get("verified_by"), p.get("source_url")
-    if not MANUAL_ID.match(p.get("id") or ""):
-        res.append(("error", "id must be man-<district>-<row_id>"))
+    if not MANUAL_ID.match(p.get("id") or "") or not (p.get("id") or "").startswith(f"man-{slug(district_en)}-"):
+        res.append(("error", f"id must be man-{slug(district_en)}-<row_id>"))
     if not (p.get("name_bn") or p.get("name_en")):
         res.append(("error", "name_bn or name_en is needed"))
     if p.get("category") not in CATEGORIES:
@@ -184,6 +196,8 @@ def check_manual_place(p, district_en, upazilas, today=None):
             res.append(("error", "official_list needs a *.gov.bd (or acc.org.bd) source_url"))
         if vb == "owner_page" and FACEBOOK.match(url) and FACEBOOK_NOT_A_PAGE.search(url):
             res.append(("error", "owner_page must be the shop's own Facebook page, not a group or a post"))
+        if FACEBOOK_SHORT.match(url):
+            res.append(("error", "use the page's full facebook.com address, not a short fb.me / fb.watch link"))
     elif vb in ("official_list", "owner_page"):
         res.append(("error", f"source_url is needed for {vb}"))
     if not p.get("checked_by"):
@@ -202,6 +216,9 @@ def check_manual_place(p, district_en, upazilas, today=None):
     if p.get("union") and not OFFICIAL.match(url or ""):
         res.append(("error", "union only when an official page names it (source_url on *.gov.bd)"))
     lat, lon = p.get("lat"), p.get("lon")
+    if (lat is not None and not number_or_none(lat)) or (lon is not None and not number_or_none(lon)):
+        res.append(("error", "lat and lon must be numbers"))
+        return res
     if (lat is None) != (lon is None):
         res.append(("error", "give both lat and lon, or neither"))
     if lat is not None:
@@ -244,8 +261,8 @@ def check_in_upazila(p, polygons_by_upazila, centres=None):
     With a real shape (data/locations.json, a ring of 4+ points) this is an error check.
     Otherwise (no shape, or the collapsed 2-point rings now in locations.json) only a warning when the pin is
     far from the upazila's centre (data/upazila_centres.json)."""
-    if p.get("lat") is None:
-        return []
+    if not (number_or_none(p.get("lat")) and number_or_none(p.get("lon"))):
+        return []                                    # missing or broken lat/lon: check_manual_place reports it
     key = (p.get("district"), p.get("upazila"))
     polys = [poly for poly in polygons_by_upazila.get(key, []) if poly and len(poly[0]) >= 4]
     if polys:

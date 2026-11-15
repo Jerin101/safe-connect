@@ -101,6 +101,8 @@ def main(csv_path, data, today=None):
         if not any((v or "").strip() for v in row.values()):
             continue
         problems = []
+        if None in row:                                # DictReader puts extra cells under the key None
+            problems.append(("error", "too many cells in this row: put text with a comma (e.g. the note) in quotes"))
         p = row_to_place(row, areas, problems)
         if p:
             problems += R.check_manual_place(p, p["district"], set(areas[p["district"]]["upazilas"]), today)

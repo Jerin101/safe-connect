@@ -184,13 +184,18 @@ can add it to `data/aliases.json` as "local name, added by the team", with who a
   (our পিএমখালী). All three have an official village page already, so nothing is missing; the collector does not guess
   them.
 
-## 14. Upazilas with no centre (places data)
+## 14. Upazilas with no centre, and other limits of the places data
 
-`data/upazila_centres.json` gives a centre to 472 of the 510 upazilas in `data/areas_bangladesh.json`: 469 from an
-OpenStreetMap `admin_level=6` boundary (ODbL, © OpenStreetMap contributors) and 3 (Sonaimuri, Kabirhat, Eidgaon) from
-the BBS/HDX centre in `data/locations.json`. The upazilas below have neither, so a place there with no known location
-is listed without a pin (never a guessed centre). Most are newer upazilas not yet drawn in OSM; the Dhaka entries are
-city areas that OSM draws as one Dhaka Metropolitan polygon.
+`data/upazila_centres.json` gives a centre to 471 of the 510 upazilas in `data/areas_bangladesh.json`. For each
+OpenStreetMap `admin_level=6` boundary (ODbL, © OpenStreetMap contributors) the centre is, in this order: the BBS/HDX
+centre in `data/locations.json` (pilot upazilas, as the site uses it; 17), the boundary's `admin_centre` node
+(58), an OSM town/village node with the upazila's name (367), the upazila's police station or health
+complex (7), and only then the middle of the shape (22). Each must lie inside the boundary.
+
+**39 upazilas have no centre** (no OSM boundary and no `data/locations.json` centre), so a place there with no
+known location is listed without a pin; no centre is guessed. Most are newer upazilas that OSM has not drawn yet; the
+Dhaka entries are city areas that OSM draws as one Dhaka Metropolitan polygon. **Kushtia Sadar and Mirpur**: OSM has one
+polygon named মিরপুর (relation 17674651, 690 km²) that covers both, so it is not used for either.
 
 | Division | District | Upazila |
 |---|---|---|
@@ -221,6 +226,7 @@ city areas that OSM draws as one Dhaka Metropolitan polygon.
 | Dhaka | Tangail | Dhanbari (ধনবাড়ী) |
 | Khulna | Meherpur | Mujib Nagar (মুজিবনগর) |
 | Khulna | Kushtia | Kushtia Sadar (কুষ্টিয়া সদর) |
+| Khulna | Kushtia | Mirpur (মিরপুর) |
 | Rajshahi | Bogra | Mokamtala (মোকামতলা) |
 | Rajshahi | Natore | Naldanga (নলডাঙ্গা) |
 | Rangpur | Thakurgaon | Bhulli (ভূল্লী) |
@@ -232,6 +238,18 @@ city areas that OSM draws as one Dhaka Metropolitan polygon.
 | Sylhet | Sunamganj | Madhyanagar (মধ্যনগর) |
 | Sylhet | Sylhet | Osmaninagar (ওসমানীনগর) |
 | Sylhet | Sylhet | Dakshin Surma (দক্ষিণ সুরমা) |
+
+**Centres that may be off.** 22 centres are the middle of the shape, because OSM has no town node or office named after
+the upazila. For the coastal Taltali and Rangabali this can be near the water. A town node or an
+official address would fix them.
+
+**Upazila of an OSM place.** It comes from the OSM boundary, so:
+
+- 8,486 of 22,965 places (37%) have no upazila, mostly city areas that OSM draws as one polygon: Dhaka 6,164 of 6,965, Chittagong 1,549 of 2,758, Rangpur 349 of 516, Rajshahi 198 of 339, Khulna 123 of 368.
+- New upazilas still lie inside their old upazila's OSM boundary, so their places get the old name (e.g. Ashuganj →
+  Brahmanbaria Sadar, Guimara → Matiranga, Fulgazi → Chhagalnaiya, Dhanbari → Madhupur; also Kalukhali, Kabirhat,
+  Eidgaon, Sonaimuri).
+- OSM borders are rough in places: e.g. Gopalpur/Walia (Lalpur) shows as Baraigram, Kalihati health complex as Ghatail.
 
 Also found while matching (not changed here):
 

@@ -48,8 +48,19 @@ class GoogleAndPlusCodes(unittest.TestCase):
             self.assertFalse(R.PLUS_CODE.search(s), s)
 
     def test_google_link_anywhere_is_an_error(self):
-        p = {"note": "see https://maps.app.goo.gl/xyz"}
-        self.assertTrue(any("Google link" in m for m in errors(R.check_common(p))))
+        for text in ("see https://maps.app.goo.gl/xyz", "HTTPS://MAPS.APP.GOO.GL/x", "HTTPS://WWW.GOOGLE.COM/maps",
+                     "maps.app.goo.gl/x", "goo.gl/maps/abc", "www.google.com/maps/place/x", "google.com.bd",
+                     "g.page/shop", "Docs.Google.com/spreadsheets/d/x"):
+            self.assertTrue(any("Google link" in m for m in errors(R.check_common({"note": text}))), text)
+        for text in ("notgoogle.com", "googleplex shop", "goo glass", "e-g page", "সাধারণ দোকান"):
+            self.assertFalse(errors(R.check_common({"note": text})), text)
+
+    def test_phone_number_in_free_text_is_an_error(self):
+        for text in ("call 01712345678", "০১৭১২৩৪৫৬৭৮", "+8801712345678", "01712-345678"):
+            self.assertTrue(any("phone number in note" in m for m in errors(R.check_common({"note": text}))), text)
+        # OSM ids and links are not phone numbers
+        self.assertEqual(errors(R.check_common({"id": "osm-n1361697420",
+                                                "source_url": "https://www.openstreetmap.org/node/1361697420"})), [])
 
 
 def good_manual():
@@ -104,6 +115,27 @@ class ManualPlaceRules(unittest.TestCase):
 
     def test_official_list_must_be_government(self):
         self.assertTrue(errors(self.check(source_url="https://example.com/x.pdf")))
+        self.assertEqual(errors(self.check(source_url="https://Police.GOV.BD/x")), [])
+
+    def test_more_facebook_links(self):
+        ok = dict(verified_by="owner_page", source="owner")
+        for u in ("https://www.facebook.com/photoclickstudiobd", "https://www.facebook.com/watchhousebd",
+                  "https://m.facebook.com/someshop"):
+            self.assertEqual(errors(self.check(source_url=u, **ok)), [], u)
+        for u in ("https://fb.com/groups/x", "https://mbasic.facebook.com/groups/x", "https://www.facebook.com/reel/123",
+                  "https://fb.me/x", "https://www.facebook.com/photo.php?fbid=1"):
+            self.assertTrue(errors(self.check(source_url=u, **ok)), u)
+
+    def test_id_must_name_this_district(self):
+        self.assertTrue(errors(self.check(id="man-feni-1")))
+
+    def test_lat_without_lon_does_not_crash(self):
+        p = dict(good_manual(), lat=22.9, lon=None, location_approx=False, location_source="visited_gps")
+        self.assertTrue(errors(R.check_manual_place(p, "Noakhali", self.UPZ, TODAY)))
+        self.assertEqual(R.check_in_upazila(p, {}, {("Noakhali", "Begumganj"): (22.93, 91.09)}), [])
+        p = dict(good_manual(), lat="22.9", lon=91.1, location_approx=False, location_source="visited_gps")
+        self.assertIn("lat and lon must be numbers", errors(R.check_manual_place(p, "Noakhali", self.UPZ, TODAY)))
+        self.assertEqual(R.check_in_upazila(p, {}, {("Noakhali", "Begumganj"): (22.93, 91.09)}), [])
 
     def test_location_rules(self):
         self.assertTrue(errors(self.check(lat=22.9, lon=91.1, location_approx=False)))           # no location_source
@@ -171,6 +203,19 @@ class ImportManualPlaces(unittest.TestCase):
         self.assertTrue(any(l.startswith("WARNING row 9:") and "km from the centre of Begumganj" in l for l in out.splitlines()), out)
         self.assertIn("4 places written", out)
 
+    def test_unquoted_comma_and_lat_without_lon(self):
+        bad = os.path.join(self.tmp, "bad.csv")
+        with open(FIXTURE, encoding="utf-8") as f:
+            header = f.readline()
+        with open(bad, "w", encoding="utf-8") as f:
+            f.write(header)
+            f.write("1,TEST এক,,shops,general,Noakhali,Begumganj,,,,,,,,visited,,tasmintoshi,2026-11-15,a note, with a comma\n")
+            f.write("2,TEST দুই,,shops,general,Noakhali,Begumganj,,,22.93,,visited_gps,,,visited,,tasmintoshi,2026-11-15,lat only\n")
+        code, out = self.run_import(bad)
+        self.assertEqual(code, 1)
+        self.assertIn("ERROR   row 2: too many cells", out)
+        self.assertIn("ERROR   row 3: give both lat and lon", out)
+
     def test_wrong_header(self):
         bad = os.path.join(self.tmp, "bad.csv")
         open(bad, "w", encoding="utf-8").write("name,district\nx,Noakhali\n")
@@ -200,6 +245,55 @@ class Validator(unittest.TestCase):
             self.assertIn("Google", r.stdout)
         finally:
             shutil.rmtree(tmp)
+
+    def with_copy(self, change):
+        tmp = tempfile.mkdtemp()
+        try:
+            shutil.copytree(DATA, os.path.join(tmp, "data"))
+            change(os.path.join(tmp, "data"))
+            return self.run_validator(os.path.join(tmp, "data"))
+        finally:
+            shutil.rmtree(tmp)
+
+    def test_manual_file_with_bom_or_without_places_list(self):
+        def bom(d):
+            body = json.dumps({"district_en": "Noakhali", "places": []}).encode("utf-8")
+            open(os.path.join(d, "places", "manual_noakhali.json"), "wb").write(b"\xef\xbb\xbf" + body)
+        r = self.with_copy(bom)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("BOM", r.stdout)
+
+        def no_list(d):
+            json.dump({"district_en": "Noakhali", "place": []}, open(os.path.join(d, "places", "manual_noakhali.json"), "w", encoding="utf-8"))
+        r = self.with_copy(no_list)
+        self.assertIn('"places" list', r.stdout)
+
+        def upper_ext(d):
+            json.dump({"district_en": "Noakhali", "places": []}, open(os.path.join(d, "places", "manual_noakhali.JSON"), "w", encoding="utf-8"))
+        r = self.with_copy(upper_ext)
+        self.assertIn("lower-case extension", r.stdout)
+
+    def test_centre_far_from_its_district_fails(self):
+        def move(d):
+            fp = os.path.join(d, "upazila_centres.json")
+            c = json.load(open(fp, encoding="utf-8"))
+            for x in c["centres"]:
+                if (x["district"], x["upazila_en"]) == ("Cox's Bazar", "Teknaf"):
+                    x["lat"], x["lon"] = 23.81, 90.41          # Dhaka
+            json.dump(c, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
+        r = self.with_copy(move)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("km from the district's other centres", r.stdout)
+
+    def test_osm_file_over_120_kb_fails(self):
+        def grow(d):
+            fp = os.path.join(d, "places", "noakhali.json")
+            doc = json.load(open(fp, encoding="utf-8"))
+            doc["padding"] = os.urandom(130 * 1024).hex()          # random text does not compress
+            json.dump(doc, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
+        r = self.with_copy(grow)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("over 120 KB gzip", r.stdout)
 
     def test_osm_file_over_limit_or_unlisted_fails(self):
         tmp = tempfile.mkdtemp()

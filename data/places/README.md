@@ -29,10 +29,16 @@ file under 120 KB gzip). Manual files also have `verified_by`, `location_approx`
   convenience, general, mall, marketplace · workshops = car_repair, motorcycle_repair, motorcycle, bicycle, mobile_phone,
   craft (+ `craft`: the craft tag) · fuel_transport = fuel, bus_station, ferry_terminal · money = bank, atm ·
   public_offices = police, fire_station.
-- **OSM places**: named places only; the same name and kind within 100 m is kept once (node first); **no phone
-  numbers** (OSM is not an official source); `union` is always null; `upazila` comes from the OSM upazila boundary, matched
+- **OSM places**: named places only; the same kind of place with the same Bangla *or* English name within 100 m is
+  kept once (node first). Bangla text goes only in `name_bn`, English only in `name_en` ("Popular Pharmacy (পপুলার
+  ফার্মেসী)" is split); names that are only coordinates, an address, "Test"/"Unnamed", or a private person's name with no
+  business (outside `doctors`) are dropped; `craft=yes` (no kind) is dropped. **No phone numbers** (OSM is not an
+  official source); `union` is always null; `upazila` comes from the OSM upazila boundary, matched
   to `areas_bangladesh.json` (null where OSM has no boundary); `hours` is the OSM `opening_hours` text; `source_url` is the
   object on openstreetmap.org; `checked_on` is the extract date.
+- **Upazila centres** (`data/upazila_centres.json`): see its `note` and `docs/DATA_GAPS.md` §14 (order: the
+  `data/locations.json` centre, the OSM `admin_centre`, an OSM town node with the upazila's name, the upazila's police
+  station or health complex, then the middle of the shape; never guessed).
 - **Manual places**: see `tools/import_manual_places.py`. With no `lat`/`lon`, `location_approx` is true and the website
   shows the pin at the upazila centre (`data/upazila_centres.json`) with the label "আনুমানিক অবস্থান". The centre is not
   copied into the place. No data from Google Maps (location, plus code, phone, hours): the validator rejects Google links
@@ -46,9 +52,10 @@ The scripts and the extract live in `E:\Projects\SafeConnect-Files\osm\`:
 ```
 python -I tools/extract.py bangladesh-latest.osm.pbf extract                     # boundaries + places from the extract
 python -I tools/upazila_members.py bangladesh-latest.osm.pbf extract/upazila_members.json
+python -I tools/place_nodes.py bangladesh-latest.osm.pbf extract/place_nodes.json           # towns, for upazila centres
 python -I tools/build_places.py . <repo>                                            # writes data/places/* and data/upazila_centres.json
 python tools/validate_data.py data                                                  # in the repo: must be 0 errors
 ```
 
 Only the generated JSON is committed. To refresh: download the extract again from download.geofabrik.de (once,
-certificate checks on), run the four commands, and review the diff.
+certificate checks on), run the five commands, and review the diff.
