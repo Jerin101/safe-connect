@@ -185,7 +185,7 @@
     {
      "file": "chittagong.json",
      "places": 2755,
-     "gzip_bytes": 106057
+     "gzip_bytes": 106051
     }
    ]
   },
@@ -390,7 +390,7 @@
     {
      "file": "shariatpur.json",
      "places": 104,
-     "gzip_bytes": 5001
+     "gzip_bytes": 4979
     }
    ]
   },
