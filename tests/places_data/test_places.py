@@ -1,0 +1,218 @@
+"""Tests for the places data: shared rules, the manual-places import, and the validator.
+
+Run: python -m unittest discover -s tests/places_data
+Standard library only. The CSV rows in fixtures/ are made up (every name starts with TEST).
+"""
+import contextlib
+import datetime
+import io
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+import places_rules as R  # noqa: E402
+import import_manual_places as I  # noqa: E402
+
+DATA = os.path.join(ROOT, "data")
+FIXTURE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "notun-jayga-test.csv")
+TODAY = datetime.date(2026, 11, 15)
+
+
+def errors(results):
+    return [m for lvl, m in results if lvl == "error"]
+
+
+class GoogleAndPlusCodes(unittest.TestCase):
+    def test_banned_hosts(self):
+        for u in ("https://google.com/maps", "https://www.google.com/maps/place/x", "https://maps.google.com/?q=1",
+                  "https://docs.google.com/spreadsheets/d/x", "https://drive.google.com/file/d/x",
+                  "https://www.google.com.bd/maps", "https://google.com.bd", "https://goo.gl/maps/x",
+                  "https://maps.app.goo.gl/abc", "https://g.page/shop", "https://MAPS.GOOGLE.COM/x"):
+            self.assertTrue(R.is_banned_url(u), u)
+
+    def test_allowed_hosts(self):
+        for u in ("https://pocl.gov.bd/pages/x", "https://www.facebook.com/someshop", "https://notgoogle.com/x",
+                  "https://google.com.example.org/x", "https://www.openstreetmap.org/node/1", "https://g.pages.dev/x"):
+            self.assertFalse(R.is_banned_url(u), u)
+
+    def test_plus_codes(self):
+        for s in ("V3P8+2F", "7MJ4V3P8+2F", "near v3p8+2f, Maijdee", "(V3P8+2FX)"):
+            self.assertTrue(R.PLUS_CODE.search(s), s)
+        for s in ("01712345678", "A+B", "1+1", "C++", "Road 12+13", "এক+দুই"):
+            self.assertFalse(R.PLUS_CODE.search(s), s)
+
+    def test_google_link_anywhere_is_an_error(self):
+        p = {"note": "see https://maps.app.goo.gl/xyz"}
+        self.assertTrue(any("Google link" in m for m in errors(R.check_common(p))))
+
+
+def good_manual():
+    return {"id": "man-noakhali-1", "name_bn": "TEST", "name_en": None, "category": "fuel_transport",
+            "subcategory": "fuel", "lat": None, "lon": None, "location_approx": True, "location_source": None,
+            "division": "Chittagong", "district": "Noakhali", "upazila": "Begumganj", "union": None,
+            "address_bn": None, "phone": None, "hours": None, "source": "official", "verified_by": "official_list",
+            "source_url": "https://pocl.gov.bd/pages/x", "checked_by": "tasmintoshi", "checked_on": "2026-11-15",
+            "note": None}
+
+
+class ManualPlaceRules(unittest.TestCase):
+    UPZ = {"Begumganj", "Hatiya"}
+
+    def check(self, **changes):
+        p = good_manual()
+        p.update(changes)
+        return R.check_manual_place(p, "Noakhali", self.UPZ, TODAY)
+
+    def test_pin_far_from_its_upazila_is_a_warning(self):
+        p = dict(good_manual(), lat=22.34816, lon=91.0914, location_approx=False, location_source="visited_gps")
+        res = R.check_in_upazila(p, {}, {("Noakhali", "Begumganj"): (22.93091, 91.09426)})
+        self.assertEqual([lvl for lvl, _ in res], ["warning"])
+        self.assertEqual(R.check_in_upazila(dict(p, lat=22.93, lon=91.09), {}, {("Noakhali", "Begumganj"): (22.93091, 91.09426)}), [])
+
+    def test_real_shape_is_an_error_check_collapsed_shape_is_ignored(self):
+        square = [[[[91.0, 22.9], [91.2, 22.9], [91.2, 23.0], [91.0, 23.0], [91.0, 22.9]]]]
+        collapsed = [[[[91.048, 22.9907], [91.048, 22.9907]]]]
+        p = dict(good_manual(), lat=22.5, lon=91.1, location_approx=False, location_source="visited_gps")
+        self.assertEqual([l for l, _ in R.check_in_upazila(p, {("Noakhali", "Begumganj"): square})], ["error"])
+        self.assertEqual(R.check_in_upazila(dict(p, lat=22.95), {("Noakhali", "Begumganj"): square}), [])
+        self.assertEqual(R.check_in_upazila(p, {("Noakhali", "Begumganj"): collapsed}), [])
+
+    def test_good(self):
+        self.assertEqual(self.check(), [])
+
+    def test_visited_needs_no_source_url_but_checked_by_and_on(self):
+        self.assertEqual(errors(self.check(verified_by="visited", source="user", source_url=None)), [])
+        self.assertIn("checked_by is needed", errors(self.check(verified_by="visited", source="user", source_url=None, checked_by=None)))
+        self.assertIn("checked_on must be YYYY-MM-DD", errors(self.check(verified_by="visited", source="user", source_url=None, checked_on=None)))
+
+    def test_owner_page_and_official_list_need_source_url(self):
+        self.assertTrue(errors(self.check(source_url=None)))
+        self.assertTrue(errors(self.check(verified_by="owner_page", source="owner", source_url=None)))
+
+    def test_facebook_page_ok_group_or_post_not(self):
+        ok = dict(verified_by="owner_page", source="owner")
+        self.assertEqual(errors(self.check(source_url="https://www.facebook.com/someshop", **ok)), [])
+        for u in ("https://www.facebook.com/groups/abc", "https://www.facebook.com/someone/posts/123",
+                  "https://www.facebook.com/permalink.php?story_fbid=1", "https://www.facebook.com/share/p/abc"):
+            self.assertTrue(errors(self.check(source_url=u, **ok)), u)
+
+    def test_official_list_must_be_government(self):
+        self.assertTrue(errors(self.check(source_url="https://example.com/x.pdf")))
+
+    def test_location_rules(self):
+        self.assertTrue(errors(self.check(lat=22.9, lon=91.1, location_approx=False)))           # no location_source
+        self.assertEqual(errors(self.check(lat=22.9, lon=91.1, location_approx=False, location_source="official_list")), [])
+        self.assertTrue(errors(self.check(lat=22.9, lon=91.1, location_approx=True, location_source="official_list")))
+        self.assertTrue(errors(self.check(location_approx=False)))
+        self.assertTrue(errors(self.check(lat=22.9, location_approx=False, location_source="official_list")))
+
+    def test_phone_only_with_a_published_source(self):
+        self.assertEqual(errors(self.check(phone="01712345678")), [])
+        self.assertTrue(errors(self.check(phone="01712345678", verified_by="visited", source="user", source_url=None)))
+        self.assertTrue(errors(self.check(phone="12345")))
+
+    def test_unknown_upazila_and_future_date(self):
+        self.assertTrue(errors(self.check(upazila="Nowhere")))
+        self.assertTrue(errors(self.check(checked_on="2027-01-01")))
+
+    def test_union_needs_official_page(self):
+        self.assertEqual(errors(self.check(union="X ইউনিয়ন")), [])
+        self.assertTrue(errors(self.check(union="X ইউনিয়ন", verified_by="visited", source="user", source_url=None)))
+
+
+class OsmPlaceRules(unittest.TestCase):
+    def test_osm_place(self):
+        p = {"id": "osm-n123", "name_bn": "TEST", "category": "health", "subcategory": "pharmacy",
+             "lat": 22.87, "lon": 91.1, "district": "Noakhali", "upazila": None, "union": None, "phone": None,
+             "source": "osm", "source_url": "https://www.openstreetmap.org/node/123", "checked_on": "2026-11-13"}
+        self.assertEqual(R.check_osm_place(p, "Noakhali", set(), "2026-11-13"), [])
+        self.assertTrue(errors(R.check_osm_place(dict(p, source_url="https://www.openstreetmap.org/node/124"), "Noakhali", set(), "2026-11-13")))
+        self.assertTrue(errors(R.check_osm_place(dict(p, phone="01712345678"), "Noakhali", set(), "2026-11-13")))
+        self.assertTrue(errors(R.check_osm_place(dict(p, name_bn=None), "Noakhali", set(), "2026-11-13")))
+        self.assertTrue(errors(R.check_osm_place(dict(p, subcategory="fuel"), "Noakhali", set(), "2026-11-13")))
+
+
+class ImportManualPlaces(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        for f in ("areas_bangladesh.json", "locations.json", "upazila_centres.json"):
+            shutil.copy(os.path.join(DATA, f), self.tmp)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def run_import(self, csv_path):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = I.main(csv_path, self.tmp, TODAY)
+        return code, out.getvalue()
+
+    def test_fixture(self):
+        code, out = self.run_import(FIXTURE)
+        self.assertEqual(code, 1, out)
+        doc = json.load(open(os.path.join(self.tmp, "places", "manual_noakhali.json"), encoding="utf-8"))
+        self.assertEqual([p["id"] for p in doc["places"]], ["man-noakhali-1", "man-noakhali-2", "man-noakhali-3", "man-noakhali-8"])
+        p1, p2, p3, _ = doc["places"]
+        self.assertTrue(p1["location_approx"])
+        self.assertIsNone(p1["lat"])
+        self.assertEqual((p2["district"], p2["upazila"], p2["source"], p2["location_approx"]), ("Noakhali", "Begumganj", "user", False))
+        self.assertEqual(p3["phone"], "01712345678")
+        expected = {5: "Google", 6: "plus code", 7: "checked_on", 8: "Facebook page", 10: "Google", 11: "official_list needs", 12: "phone number only", 13: "used twice",
+                    14: "Google", 15: "Google"}
+        for row, text in expected.items():
+            self.assertTrue(any(line.startswith(f"ERROR   row {row}:") and text in line for line in out.splitlines()),
+                            f"row {row} should fail with {text!r}\n{out}")
+        self.assertTrue(any(l.startswith("WARNING row 9:") and "km from the centre of Begumganj" in l for l in out.splitlines()), out)
+        self.assertIn("4 places written", out)
+
+    def test_wrong_header(self):
+        bad = os.path.join(self.tmp, "bad.csv")
+        open(bad, "w", encoding="utf-8").write("name,district\nx,Noakhali\n")
+        code, out = self.run_import(bad)
+        self.assertEqual(code, 1)
+        self.assertIn("header row", out)
+
+
+class Validator(unittest.TestCase):
+    def run_validator(self, data):
+        return subprocess.run([sys.executable, os.path.join(ROOT, "tools", "validate_data.py"), data],
+                              capture_output=True, text=True, encoding="utf-8")
+
+    def test_repo_data_is_clean(self):
+        r = self.run_validator(DATA)
+        self.assertEqual(r.returncode, 0, r.stdout[-2000:])
+
+    def test_bad_manual_file_fails(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            shutil.copytree(DATA, os.path.join(tmp, "data"))
+            p = dict(good_manual(), source_url="https://maps.app.goo.gl/x", verified_by="owner_page", source="owner")
+            json.dump({"district_en": "Noakhali", "places": [p]},
+                      open(os.path.join(tmp, "data", "places", "manual_noakhali.json"), "w", encoding="utf-8"))
+            r = self.run_validator(os.path.join(tmp, "data"))
+            self.assertEqual(r.returncode, 1)
+            self.assertIn("Google", r.stdout)
+        finally:
+            shutil.rmtree(tmp)
+
+    def test_osm_file_over_limit_or_unlisted_fails(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            shutil.copytree(DATA, os.path.join(tmp, "data"))
+            with open(os.path.join(tmp, "data", "places", "extra.json"), "w", encoding="utf-8") as fh:
+                fh.write("{}")
+            r = self.run_validator(os.path.join(tmp, "data"))
+            self.assertEqual(r.returncode, 1)
+            self.assertIn("not listed", r.stdout)
+        finally:
+            shutil.rmtree(tmp)
+
+
+if __name__ == "__main__":
+    unittest.main()

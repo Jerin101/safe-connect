@@ -19,6 +19,8 @@ Python 3, standard library only. Run them from this `tools` folder. They wait be
 | `collect_tourist_spots.py` | Tourist spots (দর্শনীয় স্থান) from the district and upazila portals, written into `data/aliases.json` as `spot-…` entries (the team's own entries stay). The upazila and union come only from the page. `python collect_tourist_spots.py ../data spots.json [pages_raw.json]` | ~3 min |
 | `collect_bbs_villages.py` | Villages for the unions with no official village page, from BBS's geo-code PDFs (bbs.gov.bd → জিও-কোড), into `data/villages_bbs.json`. A union is matched to ours by sound, inside its upazila, never guessed; the Bangla name only where BBS's text reads back safely. Needs `pip install pypdf`. `python collect_bbs_villages.py ../data <pdf folder>` | ~1 min |
 | `collect_locations.py`, `fill_locations.py`, `build_locations.py` | Map points and upazila boundaries for GPS → area (BBS boundaries via OCHA HDX, OpenStreetMap) | ~15 min |
+| `import_manual_places.py` | Tasmin's Sheet tab "নতুন জায়গা", downloaded as CSV (keep it outside the repo), into `data/places/manual_<district>.json`. Header: `templates/notun-jayga-template.csv`. Rows with an error are not written and are listed with their row number. No internet, no Google API. `python import_manual_places.py <file.csv> ../data` | seconds |
+| `places_rules.py` | Shared rules for `data/places/` (used by the import and by `validate_data.py`): categories, `verified_by`, no Google links or plus codes | – |
 
 Full refresh order and details: `docs/DATA_REPORT.md`. Raw `*_raw.json` files are working files and are not committed.
 
