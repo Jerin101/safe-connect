@@ -160,15 +160,7 @@ These are on the must-find lists (`tests/must-find/`), but no official page read
 upazila. The runner leaves them out of the % until a source is found. Never guess: a team member who knows the place
 can add it to `data/aliases.json` as "local name, added by the team", with who and when.
 
-| Name | District | What we have | Needed |
-|---|---|---|---|
-| কক্সবাজার সমুদ্র সৈকত (Cox's Bazar sea beach) | Cox's Bazar | District portal and Banglapedia; neither names an upazila, and the beach runs through several | which upazila(s) the search should open |
-| লাবণী পয়েন্ট, সুগন্ধা পয়েন্ট (Laboni, Sugandha) | Cox's Bazar | District beach page: "সমুদ্র সৈকতে কলাতলী, সুগন্ধা ও লাবনী পয়েন্টে"; no ward or upazila | the ward of Cox's Bazar pourashava (Kolatoli is ward 12 on the pourashava's ward page) |
-| রাডার স্টেশন (radar station) | Cox's Bazar | District portal: "হিলটপ সার্কিট হাউজের পাশে"; no upazila | upazila |
-| অগ্গামেধা ক্যাং / অগ্বমেধা বৌদ্ধ কেয়াং | Cox's Bazar | District portal and Banglapedia; no upazila | upazila |
-| দরিয়ানগর (Dariyanagar) | Cox's Bazar | District Himchari page: "হিমছড়ি যাওয়ার পথিমধ্যে দরিয়ানগরসহ (ভাংগামোড়া)"; no upazila | upazila, from an official page or the team |
-| শামলাপুর (Shamlapur) | Cox's Bazar | Jerin's list; on no page read so far (not শাপলাপুর, a Maheshkhali union) | an official page, or the team |
-| মারমেইড বিচ (Mermaid beach) | Cox's Bazar | Jerin's list; on no page read so far | an official page, or the team |
+None left: the seven places that were here (কক্সবাজার সমুদ্র সৈকত, লাবণী ও সুগন্ধা পয়েন্ট, রাডার স্টেশন, অগ্গমেধা ক্যাং, দরিয়ানগর, শামলাপুর, মারমেইড বিচ) are now in `data/aliases.json` as "local name, added by the team" (jerin101, 2026-11-17, #219), with their upazila.
 
 ## 13. Villages and unions (BBS geo-codes, coverage fix part 3)
 
