@@ -1533,6 +1533,172 @@
    "source_note": "ward 12: দক্ষিণ কলাতলী, উত্তর কলাতলী",
    "added_by": "collect_tourist_spots.py",
    "added_on": "2026-11-09"
+  },
+  {
+   "id": "spot-laboni",
+   "name_bn": "লাবণী পয়েন্ট",
+   "name_en": "Laboni Point",
+   "also": [
+    "Laboni",
+    "Laboni beach",
+    "Labony point",
+    "লাবনী পয়েন্ট",
+    "লাবণী বিচ"
+   ],
+   "also_source": "names and spellings people search for (team, 17 Nov 2026)",
+   "type": "tourist",
+   "district": "Cox's Bazar",
+   "upazila_en": "Cox's Bazar Sadar",
+   "municipality_bn": "কক্সবাজার পৌরসভা",
+   "union_bn": null,
+   "source": "local name, added by the team",
+   "source_note": "The district beach page names it on the town beach with Kolatoli (\"সমুদ্র সৈকতে কলাতলী, সুগন্ধা ও লাবনী পয়েন্টে\"); Kolatoli is ward 12 of কক্সবাজার পৌরসভা. Upazila and town confirmed by the team; ward not known.",
+   "added_by": "jerin101",
+   "added_on": "2026-11-17"
+  },
+  {
+   "id": "spot-sugandha",
+   "name_bn": "সুগন্ধা পয়েন্ট",
+   "name_en": "Sugandha Point",
+   "also": [
+    "Sugandha",
+    "Sugondha",
+    "Sugandha beach",
+    "সুগন্ধা বিচ"
+   ],
+   "also_source": "names and spellings people search for (team, 17 Nov 2026)",
+   "type": "tourist",
+   "district": "Cox's Bazar",
+   "upazila_en": "Cox's Bazar Sadar",
+   "municipality_bn": "কক্সবাজার পৌরসভা",
+   "union_bn": null,
+   "source": "local name, added by the team",
+   "source_note": "Same district beach page as Laboni and Kolatoli. Upazila and town confirmed by the team; ward not known.",
+   "added_by": "jerin101",
+   "added_on": "2026-11-17"
+  },
+  {
+   "id": "spot-coxsbazar-beach",
+   "name_bn": "কক্সবাজার সমুদ্র সৈকত",
+   "name_en": "Cox's Bazar sea beach",
+   "also": [
+    "Cox's Bazar beach",
+    "Coxs Bazar sea beach",
+    "cox bazar beach",
+    "সমুদ্র সৈকত কক্সবাজার"
+   ],
+   "also_source": "names and spellings people search for (team, 17 Nov 2026)",
+   "type": "tourist",
+   "district": "Cox's Bazar",
+   "upazila_en": "Cox's Bazar Sadar",
+   "municipality_bn": null,
+   "union_bn": null,
+   "source": "local name, added by the team",
+   "source_note": "The beach runs south to Teknaf; the search opens Cox's Bazar Sadar, where the town beach is. Confirmed by the team.",
+   "added_by": "jerin101",
+   "added_on": "2026-11-17"
+  },
+  {
+   "id": "spot-dariyanagar",
+   "name_bn": "দরিয়ানগর",
+   "name_en": "Dariyanagar",
+   "also": [
+    "Darianagar",
+    "Doriyanagar",
+    "Dariya Nagar",
+    "দরিয়া নগর"
+   ],
+   "also_source": "names and spellings people search for (team, 17 Nov 2026)",
+   "type": "tourist",
+   "district": "Cox's Bazar",
+   "upazila_en": "Cox's Bazar Sadar",
+   "municipality_bn": null,
+   "union_bn": null,
+   "source": "local name, added by the team",
+   "source_note": "The district Himchari page names it on the way from the town to Himchari (\"দরিয়ানগরসহ (ভাংগামোড়া)\"); Himchari is in Cox's Bazar Sadar. Upazila confirmed by the team; union not known.",
+   "added_by": "jerin101",
+   "added_on": "2026-11-17"
+  },
+  {
+   "id": "spot-mermaid",
+   "name_bn": "মারমেইড বিচ",
+   "name_en": "Mermaid beach",
+   "also": [
+    "Mermaid",
+    "Mermaid beach resort",
+    "Pechar Dwip",
+    "প্যাঁচার দ্বীপ"
+   ],
+   "also_source": "names and spellings people search for (team, 17 Nov 2026)",
+   "type": "tourist",
+   "district": "Cox's Bazar",
+   "upazila_en": "Ramu",
+   "municipality_bn": null,
+   "union_bn": null,
+   "source": "local name, added by the team",
+   "source_note": "At Pechar Dwip on Marine Drive, Ramu upazila. Confirmed by the team; union not known.",
+   "added_by": "jerin101",
+   "added_on": "2026-11-17"
+  },
+  {
+   "id": "spot-shamlapur",
+   "name_bn": "শামলাপুর",
+   "name_en": "Shamlapur",
+   "also": [
+    "Shamlapur beach",
+    "Shamla pur",
+    "শামলাপুর সৈকত"
+   ],
+   "also_source": "names and spellings people search for (team, 17 Nov 2026)",
+   "type": "tourist",
+   "district": "Cox's Bazar",
+   "upazila_en": "Teknaf",
+   "municipality_bn": null,
+   "union_bn": "বাহারছড়া ইউনিয়ন",
+   "source": "local name, added by the team",
+   "source_note": "Shamlapur is in Baharchhara union of Teknaf (not শাপলাপুর, a Maheshkhali union). Confirmed by the team.",
+   "added_by": "jerin101",
+   "added_on": "2026-11-17"
+  },
+  {
+   "id": "spot-radar",
+   "name_bn": "রাডার স্টেশন",
+   "name_en": "Radar station",
+   "also": [
+    "Cox's Bazar radar station",
+    "radar"
+   ],
+   "also_source": "names and spellings people search for (team, 17 Nov 2026)",
+   "type": "tourist",
+   "district": "Cox's Bazar",
+   "upazila_en": "Cox's Bazar Sadar",
+   "municipality_bn": "কক্সবাজার পৌরসভা",
+   "union_bn": null,
+   "source": "local name, added by the team",
+   "source_note": "The district portal: \"হিলটপ সার্কিট হাউজের পাশে\", in the town. Confirmed by the team.",
+   "added_by": "jerin101",
+   "added_on": "2026-11-17"
+  },
+  {
+   "id": "spot-aggameda",
+   "name_bn": "অগ্গমেধা ক্যাং",
+   "name_en": "Aggameda Khyang",
+   "also": [
+    "অজ্ঞমেধা ক্যং",
+    "অগ্বমেধা বৌদ্ধ কেয়াং",
+    "Aggmeda Kyang",
+    "Aggameda Kyang"
+   ],
+   "also_source": "names and spellings people search for (team, 17 Nov 2026)",
+   "type": "tourist",
+   "district": "Cox's Bazar",
+   "upazila_en": "Cox's Bazar Sadar",
+   "municipality_bn": "কক্সবাজার পৌরসভা",
+   "union_bn": null,
+   "source": "local name, added by the team",
+   "source_note": "Buddhist monastery in Cox's Bazar town (district portal and Banglapedia, neither names the upazila). Confirmed by the team.",
+   "added_by": "jerin101",
+   "added_on": "2026-11-17"
   }
  ]
 }

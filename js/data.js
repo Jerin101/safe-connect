@@ -506,11 +506,24 @@ const KIND_WORDS = [['union', ['ইউনিয়ন', 'union', 'up']], ['munic
   .map(([kind, list]) => [kind, new Set(list.map((w) => norm(w).toLowerCase()))]);
 // { hits, close, context?, missing?, elsewhere? } for what the person typed (#151).
 export function findAreas(index, q, opts = {}) {
-  const r = findAreasRaw(index, q, opts);
+  const r = villageLikeItsUnionLast(findAreasRaw(index, q, opts));
   const said = norm(q).toLowerCase().replace(/[,،।;]/g, ' ').split(/\s+/);
   const want = KIND_WORDS.find(([, ws]) => said.some((w) => ws.has(w)))?.[0];
   if (!want || r.hits.length < 2) return r;
   return { ...r, hits: [...r.hits.filter((h) => h.kind === want), ...r.hits.filter((h) => h.kind !== want)] };
+}
+// A village with the same name as the union it lies in (BBS lists "Sahapur" village in সাহাপুর ইউনিয়ন) opens the same
+// union as that union's own result, so the list showed "সাহাপুর" twice before the other সাহাপুর (Niazpur, Noakhali
+// Sadar). Keep every place (each name still finds itself) but move that village to the end.
+const bareName = (s) => norm(String(s || '')).toLowerCase().replace(/\s*(ইউনিয়ন|union)$/u, '').trim();
+function villageLikeItsUnionLast(r) {
+  const unions = r.hits.filter((h) => h.kind === 'union' && h.place.area);
+  if (!unions.length) return r;
+  const same = (h) => unions.some((u) => u.place.district === h.place.district && u.place.upazila === h.place.upazila
+    && u.place.area.bn === h.place.area?.bn
+    && [h.village, h.village_en].filter(Boolean).map(bareName).some((v) => v === bareName(u.place.area.bn) || v === bareName(u.place.area.en)));
+  const later = r.hits.filter((h) => h.kind === 'village' && same(h));
+  return later.length ? { ...r, hits: [...r.hits.filter((h) => !later.includes(h)), ...later] } : r;
 }
 function findAreasRaw(index, q, opts = {}) {
   const { all, runs, context, place, onlyCommon } = understand(index, q);
