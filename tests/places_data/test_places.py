@@ -388,6 +388,15 @@ class OfficialListRules(unittest.TestCase):
         self.assertTrue(self.check(address_en="C/O. A.H.SARKER DAUDKANDI"))
         self.assertEqual(self.check(address_en="DHAKA-CHATTOGRAM HIGHWAY, MIRSHARAI"), [])
 
+    def test_hidden_person_name(self):
+        lists = {"padma_2019": dict(self.LISTS["padma_2019"], hidden_name_label_bn="পেট্রোল/সিএনজি পাম্প (পদ্মা অয়েলের ডিলার)",
+                                    hidden_name_label_en="Petrol/CNG pump (Padma Oil dealer)")}
+        chk = lambda **c: errors(R.check_official_place(dict(self.BASE, **c), "Noakhali", {"Begumganj"}, lists))
+        self.assertEqual(chk(name_en=None, name_hidden=True), [])
+        self.assertTrue(chk(name_hidden=True))                              # hidden but the name is still there
+        self.assertTrue(errors(R.check_official_place(dict(self.BASE, name_en=None, name_hidden=True), "Noakhali", {"Begumganj"}, self.LISTS)))
+        self.assertTrue(chk(name_en=None))                                  # no name and not marked
+
     def test_no_location_and_flags(self):
         self.assertTrue(self.check(lat=22.9, lon=91.1))
         self.assertTrue(self.check(flags=[]))                          # 2019 list must be flagged

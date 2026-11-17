@@ -71,9 +71,13 @@ certificate checks on), run the five commands, and review the diff.
 
 Built outside the repo by `E:\Projects\SafeConnect-Files\official-lists\tools\build_fuel_lists.py` from the PDFs
 (Padma's is text; Meghna's is a scan, read with OCR). Each file names its lists (`lists`: the company's `*.gov.bd` page,
-the PDF's own address and SHA-256, the list date, the badge). Per place: `name_en`, `address_en`, `district`, `upazila`
-(only when the address names exactly one upazila of that district; a bare district name does not count as Sadar),
-`page` (the PDF page), `flags` (`source_older_than_2_years` for Padma). The lists have no location, so `lat`/`lon` are
-null and `location_approx` is true: pin at the upazila centre with "আনুমানিক অবস্থান", or no pin when the upazila is
-not known. **Never kept:** account numbers (A/C No) and owner names; an address that names a person is dropped
-(the upazila found from it is kept).
+the PDF's own address and SHA-256, the list date, the badge, and a label for a hidden name). Per place: `name_en` (or `name_hidden: true` when the list
+gives only a person's name: show the list's `hidden_name_label_bn/_en`, e.g. "পেট্রোল/সিএনজি পাম্প (পদ্মা অয়েলের
+ডিলার)"), `district`, `upazila` (only when the address names exactly one upazila of that district; a bare district
+name does not count as Sadar), `page` (the PDF page), `flags` (`source_older_than_2_years` for Padma). The PDF groups
+Padma's stations by sales area: a station moves to another district only when its address names that district and
+not its own district or one of its upazilas (every move and every unclear case is on a review list for Jerin).
+Terminated stations and internal accounts are left out. The lists have no location, so `lat`/`lon` are null and
+`location_approx` is true: pin at the upazila centre with "আনুমানিক অবস্থান", or no pin when the upazila is not known.
+**Never kept:** account numbers (A/C No), owner names, and the address text (it often holds the owner's name); the
+upazila and district found from the address are kept.

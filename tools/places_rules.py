@@ -411,8 +411,15 @@ def check_official_place(p, district_en, upazilas, lists):
     res = check_common(p)
     if not OFFICIAL_ID.match(p.get("id") or "") or f"-{slug(district_en)}-" not in (p.get("id") or ""):
         res.append(("error", "id must be <padma|meghna>-<district>-<n>"))
-    if not p.get("name_en"):
-        res.append(("error", "name_en is needed"))
+    if p.get("name_hidden") is True:
+        if p.get("name_en") or p.get("name_bn"):
+            res.append(("error", "name_hidden: the name must not be in the file"))
+        if not ((lists.get(p.get("list")) or {}).get("hidden_name_label_bn") and (lists.get(p.get("list")) or {}).get("hidden_name_label_en")):
+            res.append(("error", "name_hidden needs the list's hidden_name_label_bn/_en"))
+    elif p.get("name_hidden") is not None:
+        res.append(("error", "name_hidden must be true or missing"))
+    elif not p.get("name_en"):
+        res.append(("error", "name_en is needed (or name_hidden: true when the list gives only a person's name)"))
     if (p.get("category"), p.get("subcategory")) != ("fuel_transport", "fuel"):
         res.append(("error", "official fuel lists hold only fuel_transport / fuel"))
     if p.get("lat") is not None or p.get("lon") is not None or p.get("location_approx") is not True:

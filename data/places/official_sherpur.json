@@ -2,7 +2,7 @@
  "district_en": "Sherpur",
  "district_bn": "শেরপুর",
  "division": "Mymensingh",
- "note": "Fuel stations from the official dealer lists of the state oil companies. No location in the lists: show the upazila centre with \"আনুমানিক অবস্থান\" (or no pin when the upazila is not known). Upazila only when the address names it. Account numbers and owner names are not kept.",
+ "note": "Fuel stations from the official dealer lists of the state oil companies. No location in the lists: show the upazila centre with \"আনুমানিক অবস্থান\" (or no pin when the upazila is not known). Upazila only when the address names it. Account numbers, owner names and the address text are not kept; a dealer listed only under a person's name has name_hidden: true (show hidden_name_label).",
  "lists": {
   "padma_2019": {
    "name": "Padma Oil PLC: ডিলার (ফিলিং স্টেশান)",
@@ -10,6 +10,8 @@
    "list_date": "2019-07-23",
    "badge_bn": "২০১৯ সালের সরকারি তালিকা, এখন বদলে থাকতে পারে",
    "badge_en": "2019 official list, may have changed",
+   "hidden_name_label_bn": "পেট্রোল/সিএনজি পাম্প (পদ্মা অয়েলের ডিলার)",
+   "hidden_name_label_en": "Petrol/CNG pump (Padma Oil dealer)",
    "source_file": {
     "url": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-pocl/2024/12/09db3dd319ab47fe9a603c709b61b940.pdf",
     "sha256": "a5d5b7593f7980f3d2006c582e689ad2d0532d034b28d8dabc4b057d4ed90466"
@@ -21,6 +23,7 @@
    "id": "padma-sherpur-1",
    "name_bn": null,
    "name_en": "HAJI SAIZUDDIN FILLING STATION",
+   "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
    "lat": null,
@@ -30,7 +33,6 @@
    "district": "Sherpur",
    "upazila": "Nalitabari",
    "union": null,
-   "address_en": "KAPASIA,PASCHIMPARA UZ-NALITABARI,DIST-SHERPUR",
    "phone": null,
    "hours": null,
    "source": "official",
@@ -46,6 +48,7 @@
    "id": "padma-sherpur-2",
    "name_bn": null,
    "name_en": "SHAKIB FILLING STATION",
+   "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
    "lat": null,
@@ -55,7 +58,6 @@
    "district": "Sherpur",
    "upazila": null,
    "union": null,
-   "address_en": "JALALPUR NOKLA",
    "phone": null,
    "hours": null,
    "source": "official",
