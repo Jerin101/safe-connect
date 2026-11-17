@@ -1,0 +1,123 @@
+{
+ "district_en": "Rangamati",
+ "district_bn": "রাঙ্গামাটি",
+ "division": "Chittagong",
+ "note": "Fuel stations from the official dealer lists of the state oil companies. No location in the lists: show the upazila centre with \"আনুমানিক অবস্থান\" (or no pin when the upazila is not known). Upazila only when the address names it. Account numbers, owner names and the address text are not kept; a dealer listed only under a person's name has name_hidden: true (show hidden_name_label).",
+ "lists": {
+  "padma_2019": {
+   "name": "Padma Oil PLC: ডিলার (ফিলিং স্টেশান)",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "list_date": "2019-07-23",
+   "badge_bn": "২০১৯ সালের সরকারি তালিকা, এখন বদলে থাকতে পারে",
+   "badge_en": "2019 official list, may have changed",
+   "hidden_name_label_bn": "পেট্রোল পাম্প (পদ্মা অয়েলের ডিলার)",
+   "hidden_name_label_en": "Petrol pump (Padma Oil dealer)",
+   "source_file": {
+    "url": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-pocl/2024/12/09db3dd319ab47fe9a603c709b61b940.pdf",
+    "sha256": "a5d5b7593f7980f3d2006c582e689ad2d0532d034b28d8dabc4b057d4ed90466"
+   }
+  }
+ },
+ "places": [
+  {
+   "id": "padma-rangamati-1",
+   "name_bn": null,
+   "name_en": "KAPTAI FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Chittagong",
+   "district": "Rangamati",
+   "upazila": "Kaptai",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 22,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-rangamati-2",
+   "name_bn": null,
+   "name_en": "HILL VIEW PETROL PUMP",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Chittagong",
+   "district": "Rangamati",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 22,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-rangamati-3",
+   "name_bn": null,
+   "name_en": "HILL VIEW PETROLL PUMP",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Chittagong",
+   "district": "Rangamati",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 22,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-rangamati-4",
+   "name_bn": null,
+   "name_en": "M. A. TAHER & BROS.",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Chittagong",
+   "district": "Rangamati",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 22,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  }
+ ]
+}

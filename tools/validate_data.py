@@ -276,6 +276,27 @@ def check_places():
         if not name.endswith(".json"):
             err(fp, "file", "only .json files (lower-case extension) and README.md belong in data/places/")
             continue
+        if name.startswith("official_"):
+            den = by_slug.get(name[len("official_"):-len(".json")])
+            if not den:
+                err(fp, "file", "official_<district>.json must use the district's slug")
+                continue
+            doc = load(fp)
+            lists = doc.get("lists") or {}
+            if doc.get("district_en") != den: err(fp, "file", "district_en does not match the file name")
+            for lid, meta in lists.items():
+                for lvl, msg in R.check_official_list(lid, meta):
+                    (err(fp, "file", msg) if lvl == "error" else warnings.append(f"{fp} {msg}"))
+            ids = set()
+            for i, p in enumerate(doc.get("places", [])):
+                if not isinstance(p, dict):
+                    err(fp, f"entry {i}", "each place must be an object")
+                    continue
+                for lvl, msg in R.check_official_place(p, den, ups.get(den, set()), lists):
+                    (err(fp, p.get("id"), msg) if lvl == "error" else warnings.append(f"{fp} [{p.get('id')}] {msg}"))
+                if p.get("id") in ids: err(fp, p.get("id"), "duplicate id")
+                ids.add(p.get("id"))
+            continue
         if name.startswith("manual_"):
             den = by_slug.get(name[len("manual_"):-len(".json")])
             if not den:

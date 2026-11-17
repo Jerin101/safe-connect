@@ -362,5 +362,52 @@ class Validator(unittest.TestCase):
             shutil.rmtree(tmp)
 
 
+class OfficialListRules(unittest.TestCase):
+    LISTS = {"padma_2019": {"source_url": "https://pocl.gov.bd/pages/static-pages/x", "list_date": "2019-07-23",
+                            "badge_bn": "২০১৯ সালের সরকারি তালিকা, এখন বদলে থাকতে পারে", "badge_en": "2019 official list, may have changed",
+                            "source_file": {"url": "https://objectstorage.example.gov.bd/x.pdf", "sha256": "a" * 64}}}
+    BASE = {"id": "padma-noakhali-1", "name_en": "TEST FILLING STATION", "category": "fuel_transport", "subcategory": "fuel",
+            "lat": None, "lon": None, "location_approx": True, "district": "Noakhali", "upazila": "Begumganj", "union": None,
+            "phone": None, "checked_on": "2026-11-17", "source": "official", "list": "padma_2019",
+            "source_url": "https://pocl.gov.bd/pages/static-pages/x", "flags": ["source_older_than_2_years"]}
+
+    def check(self, **changes):
+        return errors(R.check_official_place(dict(self.BASE, **changes), "Noakhali", {"Begumganj"}, self.LISTS))
+
+    def test_good(self):
+        self.assertEqual(self.check(), [])
+        self.assertEqual(errors(R.check_official_list("padma_2019", self.LISTS["padma_2019"])), [])
+
+    def test_no_account_numbers_or_people(self):
+        self.assertTrue(self.check(address_en="CHOWKBAZAR, NEW A/C=1210707"))
+        self.assertTrue(self.check(address_en="MD. EMDADUL HAQUE DIARBAGHAIL"))
+        self.assertTrue(self.check(address_en="C/O. A.H.SARKER DAUDKANDI"))
+        self.assertTrue(self.check(address_en="DHAKA-CHATTOGRAM HIGHWAY, MIRSHARAI"))   # address text is never kept
+        self.assertTrue(self.check(name_en="M/S.MST.FEROZA BEGUM"))                  # a person-only name
+        self.assertEqual(self.check(name_en="MD. YUNUS & CO."), [])                   # a company named after a person
+
+    def test_hidden_person_name(self):
+        lists = {"padma_2019": dict(self.LISTS["padma_2019"], hidden_name_label_bn="পেট্রোল পাম্প (পদ্মা অয়েলের ডিলার)",
+                                    hidden_name_label_en="Petrol pump (Padma Oil dealer)")}
+        chk = lambda **c: errors(R.check_official_place(dict(self.BASE, **c), "Noakhali", {"Begumganj"}, lists))
+        self.assertEqual(chk(name_en=None, name_hidden=True), [])
+        self.assertTrue(chk(name_hidden=True))                              # hidden but the name is still there
+        self.assertTrue(errors(R.check_official_place(dict(self.BASE, name_en=None, name_hidden=True), "Noakhali", {"Begumganj"}, self.LISTS)))
+        self.assertTrue(chk(name_en=None))                                  # no name and not marked
+
+    def test_no_location_and_flags(self):
+        self.assertTrue(self.check(lat=22.9, lon=91.1))
+        self.assertTrue(self.check(flags=[]))                          # 2019 list must be flagged
+        self.assertTrue(self.check(upazila="Hatiya"))                  # not in this district's list given
+        self.assertTrue(self.check(source_url="https://example.com/x"))
+        self.assertTrue(self.check(id="padma-feni-1"))
+
+    def test_list_needs_badge_and_file(self):
+        meta = dict(self.LISTS["padma_2019"], badge_bn=None)
+        self.assertTrue(errors(R.check_official_list("padma_2019", meta)))
+        meta = dict(self.LISTS["padma_2019"], source_file={"url": "https://drive.google.com/file/d/x", "sha256": "a" * 64})
+        self.assertTrue(errors(R.check_official_list("padma_2019", meta)))
+
+
 if __name__ == "__main__":
     unittest.main()
