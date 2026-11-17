@@ -255,6 +255,8 @@ Also found while matching (not changed here):
 - OSM has **Khetlal** upazila (Joypurhat, relation 14326728), but `data/areas_bangladesh.json` lists only 4 Joypurhat
   upazilas (no Khetlal), so OSM places there get no upazila.
 - `data/areas_bangladesh.json` lists Habiganj's **Shayestaganj** twice (also as "Sayestaganj").
-- **The upazila shapes in `data/locations.json` are collapsed**: every ring has 2 identical points (since c94f085,
-  22 Oct). `js/location.js` therefore never finds a position inside a shape and always uses the nearest upazila centre
-  (within `PILOT_MAX_KM`), which can be the wrong upazila near a border. Needs its own fix.
+- **Fixed (#221):** the upazila shapes in `data/locations.json` had collapsed to 2 identical points (since c94f085,
+  22 Oct; a bug in `tools/build_locations.py`'s simplification of closed rings), so GPS → upazila always used the
+  nearest upazila centre. They are rebuilt from the same BBS/HDX file (1,913 points). One disagreement inside BBS's
+  own data is left as it is: BBS's point for **Mohammadpur union (Subarnachar)** lies inside BBS's **Hatiya** boundary
+  (a char), so a GPS position there shows Hatiya. Needed: the union's real location from the union portal or the team.
