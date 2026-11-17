@@ -324,7 +324,7 @@ def km(lat1, lon1, lat2, lon2):
 def check_in_upazila(p, polygons_by_upazila, centres=None):
     """A given pin should be in the stated upazila.
     With a real shape (data/locations.json, a ring of 4+ points) this is an error check.
-    Otherwise (no shape, or the collapsed 2-point rings now in locations.json) only a warning when the pin is
+    Otherwise (no shape for that upazila, or a broken ring of fewer than 4 points) only a warning when the pin is
     far from the upazila's centre (data/upazila_centres.json)."""
     if not (number_or_none(p.get("lat")) and number_or_none(p.get("lon"))):
         return []                                    # missing or broken lat/lon: check_manual_place reports it
