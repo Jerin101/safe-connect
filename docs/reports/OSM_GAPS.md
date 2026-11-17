@@ -1,6 +1,6 @@
 # OSM gaps: fuel deep-dive and 64-district gap table
 
-> **Status (2026-11-17):** this is the measurement of 14–15 Nov 2026 that the places plan was based on. The data that was built from it is in `data/places/` (PR #217, 25,007 places; Jerin's later rules: places of the key kinds are kept even without a name, crafts split into workshops / other_services). For current numbers see `docs/COVERAGE.md` (Places section) and `docs/DATA_GAPS.md` §14.
+> **Status (2026-11-17):** this is the record of 14–15 Nov 2026 that the places plan was based on; it is kept as it was written. Since then: **PR 2 is done** (#217): `data/places/` has 25,007 places (Jerin's later rules: places of the key kinds are kept even without a name, crafts split into workshops / other_services), `data/upazila_centres.json` gives 471 of the 510 upazilas a centre, and `tools/import_manual_places.py` exists. So §6 and §8 describe the plan as it was, and the PR order changed (the data PR went first, this docs PR after the cleanup PR #214). For current numbers see `docs/COVERAGE.md` (Places section) and `docs/DATA_GAPS.md` §14.
 
 Source: Geofabrik `bangladesh-latest.osm.pbf` (2026-11-13, MD5 matched), © OpenStreetMap contributors, ODbL 1.0. District = OSM `admin_level=5` polygon (as in OSM_COVERAGE.md); upazila = OSM `admin_level=6`. Every object type counted: node, way and relation.
 
@@ -459,10 +459,10 @@ These change §6: `source_url` is optional only for `visited`; `owner_page` URLs
   |---|---|
   | HOSSAIN ENTERPRISE | NOATOLA BY PASS ROAD BEGUMGONJ |
   | SONAPUR F. STATION | VILL. SONAPUR PS. SONAPUR |
-  | 1320159 | M/S.ABDUL HOQUE | MAIZDEE NOAKHALI |
-  | 1320167 | FIDAAP FILLING STATION | EKHLASPUR BEGUMGONJ |
+  | (a dealer named after a person) | MAIZDEE NOAKHALI |
+  | FIDAAP FILLING STATION | EKHLASPUR BEGUMGONJ |
 
-  (Two more addresses mention Noakhali places but are filed under other districts: IBRAHIM & BROTHERS, "CHOWMUHANI ROAD DAGONBHUIYAN" (Feni) and MOZAMMEL HOQUE, "LAKSMIPUR, NOAKHALI" (Lakshmipur).)
+  (Two more addresses mention Noakhali places but are filed under other districts: IBRAHIM & BROTHERS, "CHOWMUHANI ROAD DAGONBHUIYAN" (Feni) and a dealer named after a person, "LAKSMIPUR, NOAKHALI" (Lakshmipur).)
 
 ### Jamuna Oil
 

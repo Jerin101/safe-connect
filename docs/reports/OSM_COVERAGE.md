@@ -1,6 +1,6 @@
 # OSM coverage: 64 districts
 
-> **Status (2026-11-17):** this is the measurement of 14–15 Nov 2026 that the places plan was based on. The data that was built from it is in `data/places/` (PR #217, 25,007 places; Jerin's later rules: places of the key kinds are kept even without a name, crafts split into workshops / other_services). For current numbers see `docs/COVERAGE.md` (Places section) and `docs/DATA_GAPS.md` §14.
+> **Status (2026-11-17):** this is the record of 14–15 Nov 2026 that the places plan was based on; it is kept as it was written. Since then: **PR 2 is done** (#217): `data/places/` has 25,007 places (Jerin's later rules: places of the key kinds are kept even without a name, crafts split into workshops / other_services), `data/upazila_centres.json` gives 471 of the 510 upazilas a centre, and `tools/import_manual_places.py` exists. So the plan sections describe the plan as it was, and the PR order changed (the data PR went first, this docs PR after the cleanup PR #214). For current numbers see `docs/COVERAGE.md` (Places section) and `docs/DATA_GAPS.md` §14.
 
 Measured from the Geofabrik extract `bangladesh-latest.osm.pbf` (server Last-Modified 2026-11-13 23:54 UTC, 356,086,480 bytes, MD5 `97d2d03b254c5fd0d9a4f62925a67e46` matched). Data © OpenStreetMap contributors, ODbL 1.0 (https://www.openstreetmap.org/copyright).
 
