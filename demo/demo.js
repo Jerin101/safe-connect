@@ -35,7 +35,8 @@ function locate(lat, lon, label) {
   here = { lat, lon, union: best, up: best ? best.up : ctr.upazila_en, d, ctr, upBn, dBn: DISTBN[d] || d, places: null,
     label: label || (best ? `${best.bn}, ${upBn}` : `${upBn}, ${DISTBN[d] || d}`) };
   loadPlaces(here);
-  store.set('demo-here', JSON.stringify({ lat, lon, label: here.label }));
+  // Remember only an area picked from a list (a public centre), never a GPS point: coordinates are never stored.
+  if (label) store.set('demo-here', JSON.stringify({ lat, lon, label: here.label })); else store.set('demo-here', '');
   $('#areaTxt').textContent = here.label; const st = $('#areaTxt2'); if (st) st.textContent = here.label;
   render();
 }
