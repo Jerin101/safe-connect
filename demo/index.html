@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'">
+<title>SafeConnect ডেমো</title>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="demo.css">
+<script src="vendor/leaflet/leaflet.js" defer></script>
+<script type="module" src="demo.js"></script>
+</head>
+<body>
+<div class="demo-bar">এটা নতুন ডিজাইনের ডেমো · <a href="../">আসল সাইটে যান</a></div>
+<div class="shell">
+  <aside class="rail" aria-label="প্রধান মেনু (বড় স্ক্রিন)">
+    <span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>SafeConnect</span>
+    <button class="area" type="button" data-open-area><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span id="areaTxt2">এলাকা বাছুন</span></button>
+    <div id="railNav" class="railnav"></div>
+    <a class="call999" href="tel:999">৯৯৯-এ কল করুন</a>
+    <p class="small push-down">ডেমো · জরুরি নম্বর সরকারি উৎস থেকে · জায়গা © OpenStreetMap contributors (ODbL)</p>
+  </aside>
+  <div>
+    <header class="top">
+      <span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+      <button class="area" type="button" id="areaBtn" data-open-area aria-label="এলাকা বদলান"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span id="areaTxt">এলাকা বাছুন</span></button>
+      <a class="call999" href="tel:999" aria-label="৯৯৯-এ কল করুন">৯৯৯</a>
+    </header>
+    <main id="view" aria-live="polite"></main>
+  </div>
+</div>
+<nav class="dock" aria-label="প্রধান মেনু"><div class="in" id="dockNav"></div></nav>
+
+<dialog id="areaDlg" aria-labelledby="areaDlgT"><div class="dlg">
+  <h2 id="areaDlgT">আপনি কোথায়?</h2>
+  <button class="btn solid center" type="button" id="gpsBtn">আমার লোকেশন দিয়ে খুঁজুন</button>
+  <p class="small" id="gpsMsg">লোকেশন শুধু এই ফোনে হিসাব হয়, কোথাও পাঠানো হয় না।</p>
+  <p class="eyebrow">অথবা নমুনা জায়গা</p>
+  <div id="presetList" class="stack"></div>
+  <p class="eyebrow">অথবা যেকোনো জেলা ও উপজেলা</p>
+  <div class="row2"><select id="distSel" aria-label="জেলা"></select><select id="upSel" aria-label="উপজেলা"></select></div>
+  <button class="btn center" type="button" id="goUp">এই উপজেলায় যান</button>
+  <button class="btn ghost center" type="button" id="areaClose">বন্ধ করুন</button>
+</div></dialog>
+</body>
+</html>
