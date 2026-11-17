@@ -372,7 +372,7 @@
   {
    "id": "padma-bogra-15",
    "name_bn": null,
-   "name_en": "FUMAI ASHRAFI FILLING STATION",
+   "name_en": "FARHAN FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -397,7 +397,7 @@
   {
    "id": "padma-bogra-16",
    "name_bn": null,
-   "name_en": "JOSNA FILLING STATION",
+   "name_en": "FUMAI ASHRAFI FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -422,7 +422,7 @@
   {
    "id": "padma-bogra-17",
    "name_bn": null,
-   "name_en": "M.H.KHAN & PARTNERS",
+   "name_en": "JOSNA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -447,7 +447,7 @@
   {
    "id": "padma-bogra-18",
    "name_bn": null,
-   "name_en": "M.R. FILLING STATION",
+   "name_en": "M.H.KHAN & PARTNERS",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -472,7 +472,7 @@
   {
    "id": "padma-bogra-19",
    "name_bn": null,
-   "name_en": "M/S,FATEMA F/S",
+   "name_en": "M.R. FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -497,7 +497,7 @@
   {
    "id": "padma-bogra-20",
    "name_bn": null,
-   "name_en": "M/S.BANU FILLING STATION",
+   "name_en": "M/S,FATEMA F/S",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -522,7 +522,7 @@
   {
    "id": "padma-bogra-21",
    "name_bn": null,
-   "name_en": "M/S.BOGRA C N G FILLING STATION",
+   "name_en": "M/S.BANU FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -547,7 +547,7 @@
   {
    "id": "padma-bogra-22",
    "name_bn": null,
-   "name_en": "MEHARA SERVICE STATION",
+   "name_en": "M/S.BOGRA C N G FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -572,7 +572,7 @@
   {
    "id": "padma-bogra-23",
    "name_bn": null,
-   "name_en": "MITALI F.S.",
+   "name_en": "MEHARA SERVICE STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -597,7 +597,7 @@
   {
    "id": "padma-bogra-24",
    "name_bn": null,
-   "name_en": "MOHATI FILLING STATION",
+   "name_en": "MITALI F.S.",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -622,7 +622,7 @@
   {
    "id": "padma-bogra-25",
    "name_bn": null,
-   "name_en": "NAHAR CNG REFUELING STATION",
+   "name_en": "MOHATI FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -647,7 +647,7 @@
   {
    "id": "padma-bogra-26",
    "name_bn": null,
-   "name_en": "NIRALA FILLING STATION",
+   "name_en": "NAHAR CNG REFUELING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -672,7 +672,7 @@
   {
    "id": "padma-bogra-27",
    "name_bn": null,
-   "name_en": "NORIMEX FILLING STATION",
+   "name_en": "NIRALA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -697,7 +697,7 @@
   {
    "id": "padma-bogra-28",
    "name_bn": null,
-   "name_en": "RAKHA FILLING STATION",
+   "name_en": "NORIMEX FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -722,7 +722,7 @@
   {
    "id": "padma-bogra-29",
    "name_bn": null,
-   "name_en": "RONI FILLING STATION",
+   "name_en": "RAKHA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -747,7 +747,7 @@
   {
    "id": "padma-bogra-30",
    "name_bn": null,
-   "name_en": "TUHIN FILLING STATION",
+   "name_en": "RONI FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -771,6 +771,31 @@
   },
   {
    "id": "padma-bogra-31",
+   "name_bn": null,
+   "name_en": "TUHIN FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Rajshahi",
+   "district": "Bogra",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 41,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-bogra-32",
    "name_bn": null,
    "name_en": null,
    "name_hidden": true,

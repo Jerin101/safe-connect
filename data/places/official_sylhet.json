@@ -422,7 +422,7 @@
   {
    "id": "padma-sylhet-17",
    "name_bn": null,
-   "name_en": "NOOR FILLING STATION",
+   "name_en": "MIDWAY FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -447,6 +447,31 @@
   {
    "id": "padma-sylhet-18",
    "name_bn": null,
+   "name_en": "NOOR FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Sylhet",
+   "district": "Sylhet",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 30,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-sylhet-19",
+   "name_bn": null,
    "name_en": "ORIENTAL AUTO ENG WORKS & TRANS.",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -470,7 +495,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-sylhet-19",
+   "id": "padma-sylhet-20",
    "name_bn": null,
    "name_en": "ORIENTAL AUTO ENGG. & TRANSPORT",
    "name_hidden": null,
@@ -495,7 +520,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-sylhet-20",
+   "id": "padma-sylhet-21",
    "name_bn": null,
    "name_en": "PARUA FILLING STATION",
    "name_hidden": null,
@@ -520,7 +545,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-sylhet-21",
+   "id": "padma-sylhet-22",
    "name_bn": null,
    "name_en": "PROVATI FILLING STATION",
    "name_hidden": null,
@@ -545,7 +570,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-sylhet-22",
+   "id": "padma-sylhet-23",
    "name_bn": null,
    "name_en": "RAHMAN & CO.",
    "name_hidden": null,
@@ -570,34 +595,9 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-sylhet-23",
-   "name_bn": null,
-   "name_en": "SAIMON TRADERS",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Sylhet",
-   "district": "Sylhet",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 30,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
    "id": "padma-sylhet-24",
    "name_bn": null,
-   "name_en": "SHAFQUAT TRADERS",
+   "name_en": "SAIMON TRADERS",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -647,7 +647,7 @@
   {
    "id": "padma-sylhet-26",
    "name_bn": null,
-   "name_en": "SHAH PARAN F.S.",
+   "name_en": "SHAFQUAT TRADERS",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -672,7 +672,7 @@
   {
    "id": "padma-sylhet-27",
    "name_bn": null,
-   "name_en": "SITARA FILLING STATION",
+   "name_en": "SHAH PARAN F.S.",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -697,7 +697,7 @@
   {
    "id": "padma-sylhet-28",
    "name_bn": null,
-   "name_en": "SOLAIMAN BAKTH FILLING STATION",
+   "name_en": "SITARA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -722,7 +722,7 @@
   {
    "id": "padma-sylhet-29",
    "name_bn": null,
-   "name_en": "SUGADHA F-S & SERVICE CENTRE",
+   "name_en": "SOLAIMAN BAKTH FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -747,7 +747,7 @@
   {
    "id": "padma-sylhet-30",
    "name_bn": null,
-   "name_en": "SUPREME FILLING STATION",
+   "name_en": "SUGADHA F-S & SERVICE CENTRE",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -772,7 +772,7 @@
   {
    "id": "padma-sylhet-31",
    "name_bn": null,
-   "name_en": "SURMA PETROLEUM",
+   "name_en": "SUPREME FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -797,7 +797,7 @@
   {
    "id": "padma-sylhet-32",
    "name_bn": null,
-   "name_en": "SYED RAISUDDIN AHMED & CO",
+   "name_en": "SURMA PETROLEUM",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -822,7 +822,7 @@
   {
    "id": "padma-sylhet-33",
    "name_bn": null,
-   "name_en": "UTTARA PETROLEUM",
+   "name_en": "SYED RAISUDDIN AHMED & CO",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -888,7 +888,7 @@
    "source": "official",
    "list": "padma_2019",
    "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 31,
+   "page": 30,
    "flags": [
     "source_older_than_2_years"
    ],
@@ -896,6 +896,31 @@
   },
   {
    "id": "padma-sylhet-36",
+   "name_bn": null,
+   "name_en": "UTTARA PETROLEUM",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Sylhet",
+   "district": "Sylhet",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 31,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-sylhet-37",
    "name_bn": null,
    "name_en": null,
    "name_hidden": true,
@@ -920,7 +945,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-sylhet-37",
+   "id": "padma-sylhet-38",
    "name_bn": null,
    "name_en": null,
    "name_hidden": true,

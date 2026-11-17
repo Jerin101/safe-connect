@@ -47,31 +47,6 @@
   {
    "id": "padma-jamalpur-2",
    "name_bn": null,
-   "name_en": "FARHAN FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Mymensingh",
-   "district": "Jamalpur",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 41,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-jamalpur-3",
-   "name_bn": null,
    "name_en": "JABED FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -95,7 +70,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jamalpur-4",
+   "id": "padma-jamalpur-3",
    "name_bn": null,
    "name_en": "JHEENAI F.S.",
    "name_hidden": null,
@@ -120,7 +95,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jamalpur-5",
+   "id": "padma-jamalpur-4",
    "name_bn": null,
    "name_en": "KHAJA PETROLEUM",
    "name_hidden": null,
@@ -145,7 +120,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jamalpur-6",
+   "id": "padma-jamalpur-5",
    "name_bn": null,
    "name_en": "KHWAJA PETROLEUM",
    "name_hidden": null,
@@ -170,7 +145,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jamalpur-7",
+   "id": "padma-jamalpur-6",
    "name_bn": null,
    "name_en": "MUMU MITHI FILLING STATION",
    "name_hidden": null,
@@ -195,7 +170,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jamalpur-8",
+   "id": "padma-jamalpur-7",
    "name_bn": null,
    "name_en": "PARTNERS FILLING STATION",
    "name_hidden": null,
@@ -220,7 +195,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jamalpur-9",
+   "id": "padma-jamalpur-8",
    "name_bn": null,
    "name_en": "PETROLINK F.S.",
    "name_hidden": null,
@@ -245,7 +220,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jamalpur-10",
+   "id": "padma-jamalpur-9",
    "name_bn": null,
    "name_en": null,
    "name_hidden": true,
