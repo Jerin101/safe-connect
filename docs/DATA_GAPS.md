@@ -251,6 +251,13 @@ official address would fix them.
   Eidgaon, Sonaimuri).
 - OSM borders are rough in places: e.g. Gopalpur/Walia (Lalpur) shows as Baraigram, Kalihati health complex as Ghatail.
 
+**Places with no name (kept on purpose).** 2,028 places of the kinds that are never dropped have no name in OSM.
+Because they have no name, they are not checked for duplicates: 357 lie within 50 m of a *named* place of the same kind
+(110 pharmacies, 94 ATMs, 60 fuel, 25 hospitals, 20 banks, 17 ghats, 15 police, 6 clinics, 5 fire, 5 bus), most likely
+the same place drawn twice in OSM (a building and a point), and 175 lie within 10 m of another unnamed one (91 ATMs,
+which can be real machines in one booth). Needs a decision: drop an unnamed place that is next to a named one of the
+same kind?
+
 Also found while matching (not changed here):
 
 - OSM has **Khetlal** upazila (Joypurhat, relation 14326728), but `data/areas_bangladesh.json` lists only 4 Joypurhat

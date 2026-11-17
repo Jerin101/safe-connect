@@ -29,8 +29,9 @@ file under 120 KB gzip). Manual files also have `verified_by`, `location_approx`
   convenience, general, mall, marketplace · workshops = car_repair, motorcycle_repair, motorcycle, bicycle, mobile_phone,
   and the repair crafts (car_repair, motorcycle_repair, bicycle, electronics_repair, mobile_phone_repair, shoemaker,
   tailor) · fuel_transport = fuel, bus_station, ferry_terminal · money = bank, atm · public_offices = police,
-  fire_station · other_services = every other `craft=*`, with its own subtype (sawmill, photographer…; `unspecified`
-  for `craft=yes`). Crafts have `osm_key: "craft"`.
+  fire_station · other_services = every other `craft=*`; for a craft, `subcategory` is the craft value (sawmill,
+  photographer…; `unspecified` for `craft=yes`) and `osm_key` is `"craft"`. Of the repair crafts, the data has tailor,
+  electronics_repair and shoemaker today.
 - **OSM places**: the same kind of place with the same Bangla *or* English name within 100 m is kept once (node
   first). **Places without a name** are kept for hospital, clinic, pharmacy, fuel, atm, bank, police, fire_station,
   bus_station and ferry_terminal, with `unnamed: true` and no name: show `unnamed_labels[subcategory]` from the file
