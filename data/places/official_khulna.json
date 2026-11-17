@@ -197,7 +197,7 @@
   {
    "id": "padma-khulna-8",
    "name_bn": null,
-   "name_en": "M/S.MIM F/S",
+   "name_en": "LATIF PETROLEUM SERVICE",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -222,7 +222,7 @@
   {
    "id": "padma-khulna-9",
    "name_bn": null,
-   "name_en": "MARIA FILLING STATION",
+   "name_en": "M/S.MIM F/S",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -247,7 +247,7 @@
   {
    "id": "padma-khulna-10",
    "name_bn": null,
-   "name_en": "METROPOLITON FILLING STATION",
+   "name_en": "MARIA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -272,7 +272,7 @@
   {
    "id": "padma-khulna-11",
    "name_bn": null,
-   "name_en": "MIM FILLING STATION",
+   "name_en": "METROPOLITON FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -297,7 +297,7 @@
   {
    "id": "padma-khulna-12",
    "name_bn": null,
-   "name_en": "MIRERDANGA PETROL SERVICE",
+   "name_en": "MIM FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -322,7 +322,7 @@
   {
    "id": "padma-khulna-13",
    "name_bn": null,
-   "name_en": "MIRERDANGA PETROLEUM SERVICE",
+   "name_en": "MIRERDANGA PETROL SERVICE",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -347,7 +347,7 @@
   {
    "id": "padma-khulna-14",
    "name_bn": null,
-   "name_en": "RENA FILLING STATION",
+   "name_en": "MIRERDANGA PETROLEUM SERVICE",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -372,7 +372,7 @@
   {
    "id": "padma-khulna-15",
    "name_bn": null,
-   "name_en": "RUPA PETROLEUM & CNG",
+   "name_en": "RENA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -397,7 +397,7 @@
   {
    "id": "padma-khulna-16",
    "name_bn": null,
-   "name_en": "SULTANA FILLING STATION",
+   "name_en": "RUPA PETROLEUM & CNG",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -422,6 +422,31 @@
   {
    "id": "padma-khulna-17",
    "name_bn": null,
+   "name_en": "SULTANA FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Khulna",
+   "district": "Khulna",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 50,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-khulna-18",
+   "name_bn": null,
    "name_en": null,
    "name_hidden": true,
    "category": "fuel_transport",
@@ -445,7 +470,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-khulna-18",
+   "id": "padma-khulna-19",
    "name_bn": null,
    "name_en": null,
    "name_hidden": true,
