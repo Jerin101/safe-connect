@@ -389,8 +389,8 @@ class OfficialListRules(unittest.TestCase):
         self.assertEqual(self.check(address_en="DHAKA-CHATTOGRAM HIGHWAY, MIRSHARAI"), [])
 
     def test_hidden_person_name(self):
-        lists = {"padma_2019": dict(self.LISTS["padma_2019"], hidden_name_label_bn="পেট্রোল/সিএনজি পাম্প (পদ্মা অয়েলের ডিলার)",
-                                    hidden_name_label_en="Petrol/CNG pump (Padma Oil dealer)")}
+        lists = {"padma_2019": dict(self.LISTS["padma_2019"], hidden_name_label_bn="পেট্রোল পাম্প (পদ্মা অয়েলের ডিলার)",
+                                    hidden_name_label_en="Petrol pump (Padma Oil dealer)")}
         chk = lambda **c: errors(R.check_official_place(dict(self.BASE, **c), "Noakhali", {"Begumganj"}, lists))
         self.assertEqual(chk(name_en=None, name_hidden=True), [])
         self.assertTrue(chk(name_hidden=True))                              # hidden but the name is still there

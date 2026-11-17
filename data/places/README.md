@@ -72,7 +72,7 @@ certificate checks on), run the five commands, and review the diff.
 Built outside the repo by `E:\Projects\SafeConnect-Files\official-lists\tools\build_fuel_lists.py` from the PDFs
 (Padma's is text; Meghna's is a scan, read with OCR). Each file names its lists (`lists`: the company's `*.gov.bd` page,
 the PDF's own address and SHA-256, the list date, the badge, and a label for a hidden name). Per place: `name_en` (or `name_hidden: true` when the list
-gives only a person's name: show the list's `hidden_name_label_bn/_en`, e.g. "পেট্রোল/সিএনজি পাম্প (পদ্মা অয়েলের
+gives only a person's name: show the list's `hidden_name_label_bn/_en`, e.g. "পেট্রোল পাম্প (পদ্মা অয়েলের
 ডিলার)"), `district`, `upazila` (only when the address names exactly one upazila of that district; a bare district
 name does not count as Sadar), `page` (the PDF page), `flags` (`source_older_than_2_years` for Padma). The PDF groups
 Padma's stations by sales area: a station moves to another district only when its address names that district and
