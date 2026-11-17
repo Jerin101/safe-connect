@@ -236,19 +236,19 @@ class ImportManualPlaces(unittest.TestCase):
         code, out = self.run_import(FIXTURE)
         self.assertEqual(code, 1, out)
         doc = json.load(open(os.path.join(self.tmp, "places", "manual_noakhali.json"), encoding="utf-8"))
-        self.assertEqual([p["id"] for p in doc["places"]], ["man-noakhali-1", "man-noakhali-2", "man-noakhali-3", "man-noakhali-8"])
-        p1, p2, p3, _ = doc["places"]
+        self.assertEqual([p["id"] for p in doc["places"]], ["man-noakhali-1", "man-noakhali-2", "man-noakhali-3"])
+        p1, p2, p3 = doc["places"]
         self.assertTrue(p1["location_approx"])
         self.assertIsNone(p1["lat"])
         self.assertEqual((p2["district"], p2["upazila"], p2["source"], p2["location_approx"]), ("Noakhali", "Begumganj", "user", False))
         self.assertEqual(p3["phone"], "01712345678")
-        expected = {5: "Google", 6: "plus code", 7: "checked_on", 8: "Facebook page", 10: "Google", 11: "official_list needs", 12: "phone number only", 13: "used twice",
+        expected = {9: "outside Begumganj", 5: "Google", 6: "plus code", 7: "checked_on", 8: "Facebook page", 10: "Google", 11: "official_list needs", 12: "phone number only", 13: "used twice",
                     14: "Google", 15: "Google"}
         for row, text in expected.items():
             self.assertTrue(any(line.startswith(f"ERROR   row {row}:") and text in line for line in out.splitlines()),
                             f"row {row} should fail with {text!r}\n{out}")
-        self.assertTrue(any(l.startswith("WARNING row 9:") and "km from the centre of Begumganj" in l for l in out.splitlines()), out)
-        self.assertIn("4 places written", out)
+        # with the real upazila shapes (#221) a pin in Hatiya labelled Begumganj is an error, not only a warning
+        self.assertIn("3 places written", out)
 
     def test_unquoted_comma_and_lat_without_lon(self):
         bad = os.path.join(self.tmp, "bad.csv")

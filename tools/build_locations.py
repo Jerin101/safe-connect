@@ -6,6 +6,9 @@ Sources
   * OpenStreetMap Nominatim points from collect_locations.py (ODbL) for unions BBS names don't match
 
 Usage: python build_locations.py <bgd_admin_boundaries.geojson.zip> <data folder> <osm locations_raw.json> <output locations.json>
+       python build_locations.py --shapes-only <bgd_admin_boundaries.geojson.zip> <data folder>
+         (rebuilds only the upazila shapes in <data folder>/locations.json, matched by BBS pcode; every other
+          line of the file stays as it is)
 """
 import difflib, json, math, os, re, sys, zipfile
 
@@ -18,7 +21,12 @@ def save_json(path, obj, **kw):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, **kw)
 
-HDX_ZIP, DATA, OSM_RAW, OUT = sys.argv[1:5]
+SHAPES_ONLY = len(sys.argv) > 1 and sys.argv[1] == "--shapes-only"
+if SHAPES_ONLY:
+    HDX_ZIP, DATA = sys.argv[2:4]
+    OSM_RAW = OUT = None
+else:
+    HDX_ZIP, DATA, OSM_RAW, OUT = sys.argv[1:5]
 PILOT = {"Noakhali": "contacts_noakhali.json", "Cox's Bazar": "contacts_coxsbazar.json"}
 SIMPLIFY_DEG = 0.0015          # ~150 m: small file, still accurate enough to find the upazila
 # Union names whose BBS spelling is too different for the automatic match (checked by hand).
@@ -82,13 +90,41 @@ def simplify(points, tol):
 
 
 def ring(coords):
-    pts = simplify([(round(x, 5), round(y, 5)) for x, y in coords], SIMPLIFY_DEG)
-    return [[round(x, 4), round(y, 4)] for x, y in pts]
+    """Simplified closed ring. A closed ring starts and ends on the same point, so Ramer-Douglas-Peucker on the whole
+    ring measures every point against a line of length 0 and keeps only the two ends (that collapsed every shape into
+    2 identical points, #221). So: split the ring at the point farthest from its start, simplify both halves, join."""
+    pts = [(round(x, 5), round(y, 5)) for x, y in coords]
+    if len(pts) > 1 and pts[0] == pts[-1]:
+        pts = pts[:-1]
+    if len(pts) < 3:
+        return [[round(x, 4), round(y, 4)] for x, y in pts]
+    far = max(range(len(pts)), key=lambda i: math.hypot(pts[i][0] - pts[0][0], pts[i][1] - pts[0][1]))
+    half1 = simplify(pts[:far + 1], SIMPLIFY_DEG)
+    half2 = simplify(pts[far:] + [pts[0]], SIMPLIFY_DEG)
+    out = half1[:-1] + half2                       # ends on pts[0] again: a closed ring
+    if len(out) < 4:                               # a tiny island: keep it unsimplified rather than lose it
+        out = pts + [pts[0]]
+    return [[round(x, 4), round(y, 4)] for x, y in out]
 
 
 z = zipfile.ZipFile(HDX_ZIP)
-bbs_points = [f["properties"] for f in json.loads(z.read("bgd_adminpoints.geojson"))["features"]]
 bbs_upazilas = [f for f in json.loads(z.read("bgd_admin3.geojson"))["features"] if f["properties"]["adm2_name"] in PILOT]
+if SHAPES_ONLY:
+    path = os.path.join(DATA, "locations.json")
+    loc = load_json(path)
+    by_pcode = {f["properties"]["adm3_pcode"]: f for f in bbs_upazilas}
+    for u in loc["upazilas"]:
+        f = by_pcode.get(u["pcode"])
+        if not f:
+            sys.exit(f"pcode {u['pcode']} ({u['upazila_en']}) is not in the HDX file: stop, nothing written")
+        g = f["geometry"]
+        polys = g["coordinates"] if g["type"] == "MultiPolygon" else [g["coordinates"]]
+        u["polygons"] = [[ring(r) for r in poly[:1]] for poly in polys]
+    save_json(path, loc, ensure_ascii=False, separators=(",", ":"))
+    print(f"{len(loc['upazilas'])} upazila shapes rebuilt, "
+          f"{sum(len(r) for u in loc['upazilas'] for p in u['polygons'] for r in p)} points")
+    sys.exit(0)
+bbs_points = [f["properties"] for f in json.loads(z.read("bgd_adminpoints.geojson"))["features"]]
 osm = load_json(OSM_RAW)
 osm_union = {(u["district"], u["upazila_en"], u["union_bn"]): u for u in osm["unions"] if "lat" in u}
 
