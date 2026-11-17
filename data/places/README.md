@@ -69,7 +69,7 @@ certificate checks on), run the five commands, and review the diff.
 
 ## Official fuel lists (`official_<district>.json`)
 
-Built outside the repo by `E:\Projects\SafeConnect-Files\official-lists	oolsuild_fuel_lists.py` from the PDFs
+Built outside the repo by `E:\Projects\SafeConnect-Files\official-lists\tools\build_fuel_lists.py` from the PDFs
 (Padma's is text; Meghna's is a scan, read with OCR). Each file names its lists (`lists`: the company's `*.gov.bd` page,
 the PDF's own address and SHA-256, the list date, the badge). Per place: `name_en`, `address_en`, `district`, `upazila`
 (only when the address names exactly one upazila of that district; a bare district name does not count as Sadar),
