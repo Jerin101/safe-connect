@@ -597,7 +597,7 @@
   {
    "id": "padma-comilla-24",
    "name_bn": null,
-   "name_en": "M/S.MST.FEROZA BEGUM",
+   "name_en": "M/S.SHAFIQUL HAIDER & CO.",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -622,7 +622,7 @@
   {
    "id": "padma-comilla-25",
    "name_bn": null,
-   "name_en": "M/S.SHAFIQUL HAIDER & CO.",
+   "name_en": "MADINA CORPORATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -647,7 +647,7 @@
   {
    "id": "padma-comilla-26",
    "name_bn": null,
-   "name_en": "MADINA CORPORATION",
+   "name_en": "MAINAMATI VIEW",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -697,7 +697,7 @@
   {
    "id": "padma-comilla-28",
    "name_bn": null,
-   "name_en": "MAINAMATI VIEW",
+   "name_en": "MASTER & SONS.",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -722,7 +722,7 @@
   {
    "id": "padma-comilla-29",
    "name_bn": null,
-   "name_en": "MASTER & SONS.",
+   "name_en": "NAYEMUL FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -747,7 +747,7 @@
   {
    "id": "padma-comilla-30",
    "name_bn": null,
-   "name_en": "NAYEMUL FILLING STATION",
+   "name_en": "RAHAT FILLING CENTRE",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -772,7 +772,7 @@
   {
    "id": "padma-comilla-31",
    "name_bn": null,
-   "name_en": "RAHAT FILLING CENTRE",
+   "name_en": "SAFIQUL HAIDAR & CO.",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -797,7 +797,7 @@
   {
    "id": "padma-comilla-32",
    "name_bn": null,
-   "name_en": "SAFIQUL HAIDAR & CO.",
+   "name_en": "SONALI FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -822,7 +822,7 @@
   {
    "id": "padma-comilla-33",
    "name_bn": null,
-   "name_en": "SONALI FILLING STATION",
+   "name_en": "SUJAN FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -847,7 +847,7 @@
   {
    "id": "padma-comilla-34",
    "name_bn": null,
-   "name_en": "SUJAN FILLING STATION",
+   "name_en": "YUSUF HIGHWAY FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -872,8 +872,8 @@
   {
    "id": "padma-comilla-35",
    "name_bn": null,
-   "name_en": "YUSUF HIGHWAY FILLING STATION",
-   "name_hidden": null,
+   "name_en": null,
+   "name_hidden": true,
    "category": "fuel_transport",
    "subcategory": "fuel",
    "lat": null,

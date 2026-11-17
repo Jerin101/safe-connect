@@ -72,7 +72,7 @@
   {
    "id": "padma-noakhali-3",
    "name_bn": null,
-   "name_en": "M/S.ABDUL HOQUE",
+   "name_en": "SONAPUR F. STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -97,8 +97,8 @@
   {
    "id": "padma-noakhali-4",
    "name_bn": null,
-   "name_en": "SONAPUR F. STATION",
-   "name_hidden": null,
+   "name_en": null,
+   "name_hidden": true,
    "category": "fuel_transport",
    "subcategory": "fuel",
    "lat": null,

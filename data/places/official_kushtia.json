@@ -172,7 +172,7 @@
   {
    "id": "padma-kushtia-7",
    "name_bn": null,
-   "name_en": "JAYOTI FILLING STATION",
+   "name_en": "M/S.MRS INDUSTRIES LTD. FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -181,7 +181,7 @@
    "location_approx": true,
    "division": "Khulna",
    "district": "Kushtia",
-   "upazila": "Mirpur",
+   "upazila": "Kushtia Sadar",
    "union": null,
    "phone": null,
    "hours": null,
@@ -197,7 +197,7 @@
   {
    "id": "padma-kushtia-8",
    "name_bn": null,
-   "name_en": "JOYTI FILLING STATION",
+   "name_en": "JAYOTI FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -222,7 +222,7 @@
   {
    "id": "padma-kushtia-9",
    "name_bn": null,
-   "name_en": "ANOWARA FILLING STATION",
+   "name_en": "JOYTI FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -231,7 +231,7 @@
    "location_approx": true,
    "division": "Khulna",
    "district": "Kushtia",
-   "upazila": null,
+   "upazila": "Mirpur",
    "union": null,
    "phone": null,
    "hours": null,
@@ -247,7 +247,7 @@
   {
    "id": "padma-kushtia-10",
    "name_bn": null,
-   "name_en": "DARSANA FILLING STATION",
+   "name_en": "ANOWARA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -272,7 +272,7 @@
   {
    "id": "padma-kushtia-11",
    "name_bn": null,
-   "name_en": "JIBAN NAGAR FILLING STAT.",
+   "name_en": "DARSANA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -297,7 +297,7 @@
   {
    "id": "padma-kushtia-12",
    "name_bn": null,
-   "name_en": "M. A. RAZZAQ & SONS",
+   "name_en": "JIBAN NAGAR FILLING STAT.",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -322,7 +322,7 @@
   {
    "id": "padma-kushtia-13",
    "name_bn": null,
-   "name_en": "M/S.MRS INDUSTRIES LTD. FILLING STATION",
+   "name_en": "M. A. RAZZAQ & SONS",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

@@ -72,7 +72,7 @@
   {
    "id": "padma-chuadanga-3",
    "name_bn": null,
-   "name_en": "DAMURHUDA FILLING STATION",
+   "name_en": "M/S.HIGHWAY FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -81,7 +81,7 @@
    "location_approx": true,
    "division": "Khulna",
    "district": "Chuadanga",
-   "upazila": "Damurhuda",
+   "upazila": "Chuadanga Sadar",
    "union": null,
    "phone": null,
    "hours": null,
@@ -97,7 +97,7 @@
   {
    "id": "padma-chuadanga-4",
    "name_bn": null,
-   "name_en": "DARSHANA FILLING STATION",
+   "name_en": "DAMURHUDA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -122,7 +122,7 @@
   {
    "id": "padma-chuadanga-5",
    "name_bn": null,
-   "name_en": "S. B. FILLING STATION",
+   "name_en": "DARSHANA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -147,7 +147,7 @@
   {
    "id": "padma-chuadanga-6",
    "name_bn": null,
-   "name_en": "BROTHERS FILLING STATION",
+   "name_en": "S. B. FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -156,7 +156,7 @@
    "location_approx": true,
    "division": "Khulna",
    "district": "Chuadanga",
-   "upazila": null,
+   "upazila": "Damurhuda",
    "union": null,
    "phone": null,
    "hours": null,
@@ -172,7 +172,7 @@
   {
    "id": "padma-chuadanga-7",
    "name_bn": null,
-   "name_en": "KARPASDANGA FILLING STATION",
+   "name_en": "BROTHERS FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -197,7 +197,7 @@
   {
    "id": "padma-chuadanga-8",
    "name_bn": null,
-   "name_en": "M/S.HIGHWAY FILLING STATION",
+   "name_en": "KARPASDANGA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

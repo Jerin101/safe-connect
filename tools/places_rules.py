@@ -388,6 +388,22 @@ ACCOUNT_NO = re.compile(r"(?<![0-9])[0-9]{7}(?![0-9])")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
+def older_than_2_years(day, today):
+    """day, today: YYYY-MM-DD. True when day is more than two years before today."""
+    d, t = datetime.date.fromisoformat(day), datetime.date.fromisoformat(today)
+    try:
+        limit = t.replace(year=t.year - 2)
+    except ValueError:                                   # 29 February
+        limit = t.replace(year=t.year - 2, day=28)
+    return d < limit
+
+
+# a shown dealer name that is only a person's name (a title + words, no business word)
+PERSON_ONLY_NAME = re.compile(r"^(M\s*/\s*S\.?\s*)?(MD|MR|MRS|MST|MOHD|HAJI|AL-?HAJJ?|ALHAJ|MOHAMMED|MOHAMMAD|MUHAMMAD)\b[.\sA-Z'-]*$", re.I)
+NAME_BUSINESS = re.compile(r"FILLING|STATION|PUMP|SERVIC|ENTERPRISE|TRAD|STORE|AGENC|CORP|SONS|BROTHERS|CNG|PETRO|OIL|"
+                           r"FUEL|AUTO|MOTOR|LTD|LIMITED|COMPANY|\bCO\b|&", re.I)
+
+
 def check_official_list(lid, meta):
     """One entry of the file's "lists": the government page, the file and its SHA-256, the list date, the badge."""
     res = []
@@ -396,13 +412,15 @@ def check_official_list(lid, meta):
     if not OFFICIAL.match(meta.get("source_url") or ""):
         res.append(("error", f"{lid}: source_url must be the company's *.gov.bd page"))
     sf = meta.get("source_file") or {}
-    if not (sf.get("url") or "").startswith("https://") or is_banned_url(sf.get("url") or ""):
+    fh = host(sf.get("url") or "")
+    if not (sf.get("url") or "").startswith("https://") or is_banned_url(sf.get("url") or "") \
+            or fh.endswith("googleusercontent.com") or fh.endswith("googleapis.com"):
         res.append(("error", f"{lid}: source_file.url must be the https file the page links to"))
     if not SHA256.match(sf.get("sha256") or ""):
         res.append(("error", f"{lid}: source_file.sha256 missing"))
     if not ISO_DATE.match(meta.get("list_date") or ""):
         res.append(("error", f"{lid}: list_date must be YYYY-MM-DD"))
-    elif meta["list_date"] < "2024-11-17" and not (meta.get("badge_bn") and meta.get("badge_en")):
+    elif older_than_2_years(meta["list_date"], datetime.date.today().isoformat()) and not (meta.get("badge_bn") and meta.get("badge_en")):
         res.append(("error", f"{lid}: a list older than 2 years needs badge_bn and badge_en"))
     return res
 
@@ -436,12 +454,17 @@ def check_official_place(p, district_en, upazilas, lists):
         res.append(("error", "source_url must be the list's page"))
     if p.get("phone") is not None:
         res.append(("error", "no phone numbers from the lists"))
+    if "address_en" in p or "address_bn" in p:
+        res.append(("error", "the address text of an official list is never kept (it often holds the owner's name)"))
+    if p.get("name_en") and PERSON_ONLY_NAME.match(p["name_en"]) and not NAME_BUSINESS.search(p["name_en"]):
+        res.append(("error", "name_en is only a person's name: use name_hidden"))
     for k in ("name_en", "address_en"):
         if ACCOUNT_NO.search(p.get(k) or ""):
             res.append(("error", f"{k} has a 7-digit number (an account number is never kept)"))
     if PERSON_IN_TEXT.search(p.get("address_en") or ""):
         res.append(("error", "address_en names a person: drop the address text"))
-    old = (lists.get(p.get("list")) or {}).get("list_date", "9999") < "2024-11-17"
+    ld = (lists.get(p.get("list")) or {}).get("list_date")
+    old = bool(ld and ISO_DATE.match(ld) and older_than_2_years(ld, p.get("checked_on") or datetime.date.today().isoformat()))
     if old != ("source_older_than_2_years" in (p.get("flags") or [])):
         res.append(("error", "flag source_older_than_2_years must match the list date"))
     return res

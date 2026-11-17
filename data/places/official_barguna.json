@@ -68,6 +68,31 @@
     "source_older_than_2_years"
    ],
    "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-barguna-3",
+   "name_bn": null,
+   "name_en": "M/S.S.& B FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Barisal",
+   "district": "Barguna",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 62,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
   }
  ]
 }

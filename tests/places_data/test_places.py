@@ -362,17 +362,13 @@ class Validator(unittest.TestCase):
             shutil.rmtree(tmp)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class OfficialListRules(unittest.TestCase):
     LISTS = {"padma_2019": {"source_url": "https://pocl.gov.bd/pages/static-pages/x", "list_date": "2019-07-23",
                             "badge_bn": "২০১৯ সালের সরকারি তালিকা, এখন বদলে থাকতে পারে", "badge_en": "2019 official list, may have changed",
                             "source_file": {"url": "https://objectstorage.example.gov.bd/x.pdf", "sha256": "a" * 64}}}
     BASE = {"id": "padma-noakhali-1", "name_en": "TEST FILLING STATION", "category": "fuel_transport", "subcategory": "fuel",
             "lat": None, "lon": None, "location_approx": True, "district": "Noakhali", "upazila": "Begumganj", "union": None,
-            "address_en": "EKHLASPUR BEGUMGONJ", "phone": None, "source": "official", "list": "padma_2019",
+            "phone": None, "checked_on": "2026-11-17", "source": "official", "list": "padma_2019",
             "source_url": "https://pocl.gov.bd/pages/static-pages/x", "flags": ["source_older_than_2_years"]}
 
     def check(self, **changes):
@@ -386,7 +382,9 @@ class OfficialListRules(unittest.TestCase):
         self.assertTrue(self.check(address_en="CHOWKBAZAR, NEW A/C=1210707"))
         self.assertTrue(self.check(address_en="MD. EMDADUL HAQUE DIARBAGHAIL"))
         self.assertTrue(self.check(address_en="C/O. A.H.SARKER DAUDKANDI"))
-        self.assertEqual(self.check(address_en="DHAKA-CHATTOGRAM HIGHWAY, MIRSHARAI"), [])
+        self.assertTrue(self.check(address_en="DHAKA-CHATTOGRAM HIGHWAY, MIRSHARAI"))   # address text is never kept
+        self.assertTrue(self.check(name_en="M/S.MST.FEROZA BEGUM"))                  # a person-only name
+        self.assertEqual(self.check(name_en="MD. YUNUS & CO."), [])                   # a company named after a person
 
     def test_hidden_person_name(self):
         lists = {"padma_2019": dict(self.LISTS["padma_2019"], hidden_name_label_bn="পেট্রোল পাম্প (পদ্মা অয়েলের ডিলার)",
@@ -409,3 +407,7 @@ class OfficialListRules(unittest.TestCase):
         self.assertTrue(errors(R.check_official_list("padma_2019", meta)))
         meta = dict(self.LISTS["padma_2019"], source_file={"url": "https://drive.google.com/file/d/x", "sha256": "a" * 64})
         self.assertTrue(errors(R.check_official_list("padma_2019", meta)))
+
+
+if __name__ == "__main__":
+    unittest.main()

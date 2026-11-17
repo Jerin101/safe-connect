@@ -47,7 +47,7 @@
   {
    "id": "padma-feni-2",
    "name_bn": null,
-   "name_en": "ABDUL KHALEGUE & SONS",
+   "name_en": "ABDUL KHALEQUE & SONS",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -56,7 +56,7 @@
    "location_approx": true,
    "division": "Chittagong",
    "district": "Feni",
-   "upazila": null,
+   "upazila": "Feni Sadar",
    "union": null,
    "phone": null,
    "hours": null,
@@ -72,7 +72,7 @@
   {
    "id": "padma-feni-3",
    "name_bn": null,
-   "name_en": "ABDUL KHALEQUE & SONS",
+   "name_en": "ABDUL KHALEGUE & SONS",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

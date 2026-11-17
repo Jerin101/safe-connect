@@ -72,7 +72,7 @@
   {
    "id": "padma-panchagarh-3",
    "name_bn": null,
-   "name_en": "M/S.MAHI FILLING STATION",
+   "name_en": "MAHIR FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -81,7 +81,7 @@
    "location_approx": true,
    "division": "Rangpur",
    "district": "Panchagarh",
-   "upazila": null,
+   "upazila": "Panchagarh Sadar",
    "union": null,
    "phone": null,
    "hours": null,
@@ -97,7 +97,7 @@
   {
    "id": "padma-panchagarh-4",
    "name_bn": null,
-   "name_en": "MAHIR FILLING STATION",
+   "name_en": "M/S.MAHI FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

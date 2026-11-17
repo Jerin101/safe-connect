@@ -22,6 +22,56 @@
   {
    "id": "padma-gazipur-1",
    "name_bn": null,
+   "name_en": "M/S ERA FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Gazipur",
+   "upazila": "Gazipur Sadar",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 4,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-gazipur-2",
+   "name_bn": null,
+   "name_en": "M/S.SAGAR SHAIKOT CNG F/S",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Gazipur",
+   "upazila": "Gazipur Sadar",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 4,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-gazipur-3",
+   "name_bn": null,
    "name_en": "M/S.TAHER & SONS(PVT) LIMITED",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -45,7 +95,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-gazipur-2",
+   "id": "padma-gazipur-4",
    "name_bn": null,
    "name_en": "M/S. MOLLAH FILLING STATION",
    "name_hidden": null,
@@ -70,7 +120,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-gazipur-3",
+   "id": "padma-gazipur-5",
    "name_bn": null,
    "name_en": "KAZI TRADERS",
    "name_hidden": null,
@@ -95,7 +145,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-gazipur-4",
+   "id": "padma-gazipur-6",
    "name_bn": null,
    "name_en": "M/S.KAZI TRADERS F/S & CNG",
    "name_hidden": null,
@@ -120,7 +170,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-gazipur-5",
+   "id": "padma-gazipur-7",
    "name_bn": null,
    "name_en": "HONGKONG FILLING STATION",
    "name_hidden": null,
@@ -145,7 +195,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-gazipur-6",
+   "id": "padma-gazipur-8",
    "name_bn": null,
    "name_en": "KAZI TRADERS",
    "name_hidden": null,
@@ -170,59 +220,9 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-gazipur-7",
-   "name_bn": null,
-   "name_en": "M/S ERA FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Gazipur",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 4,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-gazipur-8",
-   "name_bn": null,
-   "name_en": "M/S.F.F. ENTERPRISE",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Gazipur",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 4,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
    "id": "padma-gazipur-9",
    "name_bn": null,
-   "name_en": "M/S.SAGAR SHAIKOT CNG F/S",
+   "name_en": "M/S.F.F. ENTERPRISE",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

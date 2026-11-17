@@ -47,6 +47,31 @@
   {
    "id": "padma-satkhira-2",
    "name_bn": null,
+   "name_en": "JHAWDANGA FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Khulna",
+   "district": "Satkhira",
+   "upazila": "Satkhira Sadar",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 52,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-satkhira-3",
+   "name_bn": null,
    "name_en": "MADINA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -70,7 +95,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-satkhira-3",
+   "id": "padma-satkhira-4",
    "name_bn": null,
    "name_en": "ASHA PETROLEUM",
    "name_hidden": null,
@@ -95,7 +120,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-satkhira-4",
+   "id": "padma-satkhira-5",
    "name_bn": null,
    "name_en": "DELMA FILLING STATION UNIT-2",
    "name_hidden": null,
@@ -120,34 +145,9 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-satkhira-5",
-   "name_bn": null,
-   "name_en": "HOSSAIN FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Khulna",
-   "district": "Satkhira",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 52,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
    "id": "padma-satkhira-6",
    "name_bn": null,
-   "name_en": "JHAWDANGA FILLING STATION",
+   "name_en": "HOSSAIN FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

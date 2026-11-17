@@ -272,7 +272,7 @@
   {
    "id": "padma-rangpur-11",
    "name_bn": null,
-   "name_en": "SONALI FILLING STATION",
+   "name_en": "M/S.HAJI FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -281,7 +281,7 @@
    "location_approx": true,
    "division": "Rangpur",
    "district": "Rangpur",
-   "upazila": "Taraganj",
+   "upazila": "Rangpur Sadar",
    "union": null,
    "phone": null,
    "hours": null,
@@ -297,7 +297,7 @@
   {
    "id": "padma-rangpur-12",
    "name_bn": null,
-   "name_en": "THE ARISTOCRAT FILLING LIMITED",
+   "name_en": "SONALI FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -322,6 +322,31 @@
   {
    "id": "padma-rangpur-13",
    "name_bn": null,
+   "name_en": "THE ARISTOCRAT FILLING LIMITED",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Rangpur",
+   "district": "Rangpur",
+   "upazila": "Taraganj",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 43,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-rangpur-14",
+   "name_bn": null,
    "name_en": null,
    "name_hidden": true,
    "category": "fuel_transport",
@@ -345,7 +370,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-rangpur-14",
+   "id": "padma-rangpur-15",
    "name_bn": null,
    "name_en": "ALAM FILLING CENTER",
    "name_hidden": null,
@@ -370,7 +395,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-rangpur-15",
+   "id": "padma-rangpur-16",
    "name_bn": null,
    "name_en": "B.S.MOTORS",
    "name_hidden": null,
@@ -395,7 +420,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-rangpur-16",
+   "id": "padma-rangpur-17",
    "name_bn": null,
    "name_en": "CHAND PETROLEUM",
    "name_hidden": null,
@@ -420,7 +445,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-rangpur-17",
+   "id": "padma-rangpur-18",
    "name_bn": null,
    "name_en": "CHAND PETROLEUM LIMITED",
    "name_hidden": null,
@@ -445,7 +470,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-rangpur-18",
+   "id": "padma-rangpur-19",
    "name_bn": null,
    "name_en": "DYNAMIC FILLING STATION",
    "name_hidden": null,
@@ -470,34 +495,9 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-rangpur-19",
-   "name_bn": null,
-   "name_en": "EMAJUDDIN KHAN & SONS.",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Rangpur",
-   "district": "Rangpur",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 43,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
    "id": "padma-rangpur-20",
    "name_bn": null,
-   "name_en": "M/S.HAJI FILLING STATION",
+   "name_en": "EMAJUDDIN KHAN & SONS.",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

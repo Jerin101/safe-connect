@@ -47,7 +47,7 @@
   {
    "id": "padma-maulvibazar-2",
    "name_bn": null,
-   "name_en": "M/S.HAJI ABDUL BARI SAMRU",
+   "name_en": "RUNIA PETROLEUM",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -72,8 +72,8 @@
   {
    "id": "padma-maulvibazar-3",
    "name_bn": null,
-   "name_en": "RUNIA PETROLEUM",
-   "name_hidden": null,
+   "name_en": null,
+   "name_hidden": true,
    "category": "fuel_transport",
    "subcategory": "fuel",
    "lat": null,

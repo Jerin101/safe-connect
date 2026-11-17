@@ -147,6 +147,56 @@
   {
    "id": "padma-lalmonirhat-6",
    "name_bn": null,
+   "name_en": "M/S.HOSSAIN BROTHERS F/S",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Rangpur",
+   "district": "Lalmonirhat",
+   "upazila": "Lalmonirhat Sadar",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 47,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-lalmonirhat-7",
+   "name_bn": null,
+   "name_en": "M/S.LIMON & BROTHERS FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Rangpur",
+   "district": "Lalmonirhat",
+   "upazila": "Lalmonirhat Sadar",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 47,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-lalmonirhat-8",
+   "name_bn": null,
    "name_en": "ALHAJ J.M. FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -170,7 +220,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-lalmonirhat-7",
+   "id": "padma-lalmonirhat-9",
    "name_bn": null,
    "name_en": "M/S SHARMILA FILLING STATION",
    "name_hidden": null,
@@ -195,7 +245,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-lalmonirhat-8",
+   "id": "padma-lalmonirhat-10",
    "name_bn": null,
    "name_en": "FATEMA FILLING STATION",
    "name_hidden": null,
@@ -220,59 +270,9 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-lalmonirhat-9",
-   "name_bn": null,
-   "name_en": "M/S G.M.TRADING FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Rangpur",
-   "district": "Lalmonirhat",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 47,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-lalmonirhat-10",
-   "name_bn": null,
-   "name_en": "M/S.HOSSAIN BROTHERS F/S",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Rangpur",
-   "district": "Lalmonirhat",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 47,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
    "id": "padma-lalmonirhat-11",
    "name_bn": null,
-   "name_en": "M/S.LIMON & BROTHERS FILLING STATION",
+   "name_en": "M/S G.M.TRADING FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

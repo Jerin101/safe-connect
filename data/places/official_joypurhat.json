@@ -72,6 +72,31 @@
   {
    "id": "padma-joypurhat-3",
    "name_bn": null,
+   "name_en": "JOYPUR FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Rajshahi",
+   "district": "Joypurhat",
+   "upazila": "Joypurhat Sadar",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 42,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-joypurhat-4",
+   "name_bn": null,
    "name_en": "M/S.M.R.FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -95,7 +120,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-joypurhat-4",
+   "id": "padma-joypurhat-5",
    "name_bn": null,
    "name_en": "AZAD FILLING STATION",
    "name_hidden": null,
@@ -107,31 +132,6 @@
    "division": "Rajshahi",
    "district": "Joypurhat",
    "upazila": "Panchbibi",
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 42,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-joypurhat-5",
-   "name_bn": null,
-   "name_en": "JOYPUR FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Rajshahi",
-   "district": "Joypurhat",
-   "upazila": null,
    "union": null,
    "phone": null,
    "hours": null,
