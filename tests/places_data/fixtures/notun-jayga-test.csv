@@ -1,0 +1,15 @@
+row_id,name_bn,name_en,category,subcategory,district,upazila,union,address_bn,lat,lon,location_source,phone,hours,verified_by,source_url,checked_by,checked_on,note
+1,TEST ফিলিং স্টেশন এক,TEST Filling Station One,fuel_transport,fuel,Noakhali,Begumganj,,,,,,,,official_list,https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db,tasmintoshi,2026-11-15,made-up test row
+2,TEST দোকান দুই,,shops,general,নোয়াখালী,বেগমগঞ্জ,,,22.93091,91.09426,visited_gps,,,visited,,jerin101,2026-11-15,made-up test row
+3,,TEST Workshop Three,workshops,motorcycle_repair,Noakhali,Begumganj,,,,,,01712345678,সকাল ৯টা–রাত ৯টা,owner_page,https://www.facebook.com/testworkshop.example,tasmintoshi,2026-11-15,made-up test row
+4,TEST খারাপ চার,,shops,general,Noakhali,Begumganj,,,,,,,,owner_page,https://maps.app.goo.gl/abcdEFGH,tasmintoshi,2026-11-15,bad: Google short link
+5,TEST খারাপ পাঁচ,,shops,general,Noakhali,Begumganj,,,,,,,,visited,,tasmintoshi,2026-11-15,bad: plus code V3P8+2F in the note
+6,TEST খারাপ ছয়,,shops,general,Noakhali,Begumganj,,,,,,,,visited,,tasmintoshi,,bad: no checked_on
+7,TEST খারাপ সাত,,shops,general,Noakhali,Begumganj,,,,,,,,owner_page,https://www.facebook.com/groups/somegroup,tasmintoshi,2026-11-15,bad: a group is not the shop's page
+8,TEST খারাপ আট,,shops,general,Noakhali,Begumganj,,,22.34816,91.0914,visited_gps,,,visited,,tasmintoshi,2026-11-15,bad: the pin is in Hatiya
+9,TEST খারাপ নয়,,shops,general,Noakhali,Begumganj,,,,,,,,owner_page,https://www.google.com.bd/maps/place/x,tasmintoshi,2026-11-15,bad: google.com.bd
+10,TEST খারাপ দশ,,fuel_transport,fuel,Noakhali,Begumganj,,,,,,,,official_list,https://example.com/list.pdf,tasmintoshi,2026-11-15,bad: official_list on a non-government site
+11,TEST খারাপ এগারো,,shops,general,Noakhali,Begumganj,,,,,,01712345678,,visited,,tasmintoshi,2026-11-15,bad: a phone number without a published source
+1,TEST খারাপ বারো,,shops,general,Noakhali,Begumganj,,,,,,,,visited,,tasmintoshi,2026-11-15,bad: row_id 1 used twice
+13,TEST খারাপ তেরো,,shops,general,Noakhali,Begumganj,,,,,,,,owner_page,https://g.page/someshop,tasmintoshi,2026-11-15,bad: g.page
+14,TEST খারাপ চোদ্দ,,shops,general,Noakhali,Begumganj,,,,,,,,owner_page,https://docs.google.com/spreadsheets/d/x,tasmintoshi,2026-11-15,bad: a Google Sheet is not a source

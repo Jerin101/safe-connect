@@ -20,3 +20,5 @@ jobs:
           python-version: "3.12"
       - name: Check data files
         run: python tools/validate_data.py data
+      - name: Places tests (rules, manual import, validator)
+        run: python -m unittest discover -s tests/places_data

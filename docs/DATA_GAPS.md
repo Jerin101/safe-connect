@@ -183,3 +183,86 @@ can add it to `data/aliases.json` as "local name, added by the team", with who a
 - **3 BBS unions spelled differently from ours:** Nhila (our হ্নীলা), Teknaf (our টেকনাফ সদর) and Patali Machhuakhali
   (our পিএমখালী). All three have an official village page already, so nothing is missing; the collector does not guess
   them.
+
+## 14. Upazilas with no centre, and other limits of the places data
+
+`data/upazila_centres.json` gives a centre to 471 of the 510 upazilas in `data/areas_bangladesh.json`. For each
+OpenStreetMap `admin_level=6` boundary (ODbL, © OpenStreetMap contributors) the centre is, in this order: the BBS/HDX
+centre in `data/locations.json` (pilot upazilas, as the site uses it; 17), the boundary's `admin_centre` node
+(58), an OSM town/village node with the upazila's name (367), the upazila's police station or health
+complex (7), and only then the middle of the shape (22). Each must lie inside the boundary.
+
+**39 upazilas have no centre** (no OSM boundary and no `data/locations.json` centre), so a place there with no
+known location is listed without a pin; no centre is guessed. Most are newer upazilas that OSM has not drawn yet; the
+Dhaka entries are city areas that OSM draws as one Dhaka Metropolitan polygon. **Kushtia Sadar and Mirpur**: OSM has one
+polygon named মিরপুর (relation 17674651, 690 km²) that covers both, so it is not used for either.
+
+| Division | District | Upazila |
+|---|---|---|
+| Barisal | Patuakhali | Dumki (দুমকি) |
+| Chittagong | Brahmanbaria | Bijoynagar (বিজয়নগর) |
+| Chittagong | Brahmanbaria | Ashuganj (আশুগঞ্জ) |
+| Chittagong | Comilla | Comilla Sadar Dakshin (কুমিল্লা সদর দক্ষিণ) |
+| Chittagong | Comilla | Meghna (মেঘনা) |
+| Chittagong | Comilla | Titas (তিতাস) |
+| Chittagong | Comilla | Lalmai (লালমাই) |
+| Chittagong | Khagrachhari | Guimara (গুইমারা) |
+| Chittagong | Chittagong | Karnaphuli (কর্ণফুলী) |
+| Chittagong | Lakshmipur | Chandraganj (চন্দ্রগঞ্জ) |
+| Chittagong | Feni | Fulgazi (ফুলগাজী) |
+| Dhaka | Dhaka | Tejgaon Unnon Circle (তেজগাঁও উন্নয়ন সার্কেল) |
+| Dhaka | Dhaka | Badda (বাড্ডা) |
+| Dhaka | Dhaka | Bangshal (বংশাল) |
+| Dhaka | Dhaka | Biman Bandar (বিমান বন্দর) |
+| Dhaka | Dhaka | Banani (বনানী) |
+| Dhaka | Dhaka | Cantonment (সেনানিবাস) |
+| Dhaka | Dhaka | Chak Bazar (চকবাজার) |
+| Dhaka | Dhaka | Dakshinkhan (দক্ষিনখান) |
+| Dhaka | Dhaka | Darus Salam (দারুস সালাম) |
+| Dhaka | Dhaka | Demra (ডেমরা) |
+| Dhaka | Faridpur | Saltha (সালথা) |
+| Dhaka | Madaripur | Dasar (ডাসার) |
+| Dhaka | Rajbari | Kalukhali (কালুখালী) |
+| Dhaka | Tangail | Dhanbari (ধনবাড়ী) |
+| Khulna | Meherpur | Mujib Nagar (মুজিবনগর) |
+| Khulna | Kushtia | Kushtia Sadar (কুষ্টিয়া সদর) |
+| Khulna | Kushtia | Mirpur (মিরপুর) |
+| Rajshahi | Bogra | Mokamtala (মোকামতলা) |
+| Rajshahi | Natore | Naldanga (নলডাঙ্গা) |
+| Rangpur | Thakurgaon | Bhulli (ভূল্লী) |
+| Rangpur | Thakurgaon | Ruhia (রুহিয়া) |
+| Sylhet | Habiganj | Shayestaganj (শায়েস্তাগঞ্জ) |
+| Sylhet | Habiganj | Sayestaganj (শায়েস্তাগঞ্জ) |
+| Sylhet | Maulvibazar | Juri (জুড়ী) |
+| Sylhet | Sunamganj | Dakshin Sunamganj (দক্ষিণ সুনামগঞ্জ) |
+| Sylhet | Sunamganj | Madhyanagar (মধ্যনগর) |
+| Sylhet | Sylhet | Osmaninagar (ওসমানীনগর) |
+| Sylhet | Sylhet | Dakshin Surma (দক্ষিণ সুরমা) |
+
+**Centres that may be off.** 22 centres are the middle of the shape, because OSM has no town node or office named after
+the upazila. For the coastal Taltali and Rangabali this can be near the water. A town node or an
+official address would fix them.
+
+**Upazila of an OSM place.** It comes from the OSM boundary, so:
+
+- 9,197 of 25,007 places (37%) have no upazila (OSM has no upazila or city-thana boundary there, mostly city areas; per district in `docs/COVERAGE.md`): Dhaka 6,731 of 7,628, Chittagong 1,629 of 2,903, Rangpur 373 of 546, Rajshahi 213 of 362, Khulna 131 of 451.
+- New upazilas still lie inside their old upazila's OSM boundary, so their places get the old name (e.g. Ashuganj →
+  Brahmanbaria Sadar, Guimara → Matiranga, Fulgazi → Chhagalnaiya, Dhanbari → Madhupur; also Kalukhali, Kabirhat,
+  Eidgaon, Sonaimuri).
+- OSM borders are rough in places: e.g. Gopalpur/Walia (Lalpur) shows as Baraigram, Kalihati health complex as Ghatail.
+
+**Places with no name (kept on purpose).** 2,028 places of the kinds that are never dropped have no name in OSM.
+Because they have no name, they are not checked for duplicates: 357 lie within 50 m of a *named* place of the same kind
+(110 pharmacies, 94 ATMs, 60 fuel, 25 hospitals, 20 banks, 17 ghats, 15 police, 6 clinics, 5 fire, 5 bus), most likely
+the same place drawn twice in OSM (a building and a point), and 175 lie within 10 m of another unnamed one (91 ATMs,
+which can be real machines in one booth). Needs a decision: drop an unnamed place that is next to a named one of the
+same kind?
+
+Also found while matching (not changed here):
+
+- OSM has **Khetlal** upazila (Joypurhat, relation 14326728), but `data/areas_bangladesh.json` lists only 4 Joypurhat
+  upazilas (no Khetlal), so OSM places there get no upazila.
+- `data/areas_bangladesh.json` lists Habiganj's **Shayestaganj** twice (also as "Sayestaganj").
+- **The upazila shapes in `data/locations.json` are collapsed**: every ring has 2 identical points (since c94f085,
+  22 Oct). `js/location.js` therefore never finds a position inside a shape and always uses the nearest upazila centre
+  (within `PILOT_MAX_KM`), which can be the wrong upazila near a border. Needs its own fix.

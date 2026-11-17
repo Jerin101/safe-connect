@@ -1,0 +1,1023 @@
+{
+ "source": "osm",
+ "extract": "Geofabrik bangladesh-latest.osm.pbf (OpenStreetMap data of 2026-11-13, MD5 97d2d03b254c5fd0d9a4f62925a67e46)",
+ "extract_date": "2026-11-13",
+ "license": "ODbL-1.0",
+ "attribution": "© OpenStreetMap contributors",
+ "attribution_url": "https://www.openstreetmap.org/copyright",
+ "unnamed_labels": {
+  "hospital": {
+   "bn": "হাসপাতাল (নাম জানা নেই)",
+   "en": "Hospital (name not known)"
+  },
+  "clinic": {
+   "bn": "ক্লিনিক (নাম জানা নেই)",
+   "en": "Clinic (name not known)"
+  },
+  "pharmacy": {
+   "bn": "ফার্মেসি (নাম জানা নেই)",
+   "en": "Pharmacy (name not known)"
+  },
+  "fuel": {
+   "bn": "পেট্রোল/সিএনজি পাম্প (নাম জানা নেই)",
+   "en": "Petrol/CNG pump (name not known)"
+  },
+  "atm": {
+   "bn": "এটিএম (নাম জানা নেই)",
+   "en": "ATM (name not known)"
+  },
+  "bank": {
+   "bn": "ব্যাংক (নাম জানা নেই)",
+   "en": "Bank (name not known)"
+  },
+  "police": {
+   "bn": "থানা বা ফাঁড়ি (নাম জানা নেই)",
+   "en": "Police station or outpost (name not known)"
+  },
+  "fire_station": {
+   "bn": "ফায়ার সার্ভিস (নাম জানা নেই)",
+   "en": "Fire station (name not known)"
+  },
+  "bus_station": {
+   "bn": "বাস স্ট্যান্ড (নাম জানা নেই)",
+   "en": "Bus stand (name not known)"
+  },
+  "ferry_terminal": {
+   "bn": "ঘাট (নাম জানা নেই)",
+   "en": "Ferry ghat (name not known)"
+  }
+ },
+ "max_gzip_bytes": 122880,
+ "districts": [
+  {
+   "division": "Barisal",
+   "district_en": "Barguna",
+   "district_bn": "বরগুনা",
+   "places": 192,
+   "unnamed": 11,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "barguna.json",
+     "places": 192,
+     "gzip_bytes": 6705
+    }
+   ]
+  },
+  {
+   "division": "Barisal",
+   "district_en": "Barisal",
+   "district_bn": "বরিশাল",
+   "places": 298,
+   "unnamed": 39,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "barisal.json",
+     "places": 298,
+     "gzip_bytes": 11214
+    }
+   ]
+  },
+  {
+   "division": "Barisal",
+   "district_en": "Bhola",
+   "district_bn": "ভোলা",
+   "places": 333,
+   "unnamed": 6,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "bhola.json",
+     "places": 333,
+     "gzip_bytes": 10976
+    }
+   ]
+  },
+  {
+   "division": "Barisal",
+   "district_en": "Jhalokati",
+   "district_bn": "ঝালকাঠি",
+   "places": 54,
+   "unnamed": 16,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "jhalokati.json",
+     "places": 54,
+     "gzip_bytes": 2894
+    }
+   ]
+  },
+  {
+   "division": "Barisal",
+   "district_en": "Patuakhali",
+   "district_bn": "পটুয়াখালী",
+   "places": 187,
+   "unnamed": 13,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "patuakhali.json",
+     "places": 187,
+     "gzip_bytes": 7110
+    }
+   ]
+  },
+  {
+   "division": "Barisal",
+   "district_en": "Pirojpur",
+   "district_bn": "পিরোজপুর",
+   "places": 119,
+   "unnamed": 31,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "pirojpur.json",
+     "places": 119,
+     "gzip_bytes": 5020
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Brahmanbaria",
+   "district_bn": "ব্রাহ্মণবাড়িয়া",
+   "places": 105,
+   "unnamed": 7,
+   "without_upazila": 1,
+   "files": [
+    {
+     "file": "brahmanbaria.json",
+     "places": 105,
+     "gzip_bytes": 4960
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Comilla",
+   "district_bn": "কুমিল্লা",
+   "places": 476,
+   "unnamed": 39,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "comilla.json",
+     "places": 476,
+     "gzip_bytes": 18655
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Khagrachhari",
+   "district_bn": "খাগড়াছড়ি",
+   "places": 41,
+   "unnamed": 3,
+   "without_upazila": 1,
+   "files": [
+    {
+     "file": "khagrachhari.json",
+     "places": 41,
+     "gzip_bytes": 2599
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Noakhali",
+   "district_bn": "নোয়াখালী",
+   "places": 156,
+   "unnamed": 10,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "noakhali.json",
+     "places": 156,
+     "gzip_bytes": 6195
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Rangamati",
+   "district_bn": "রাঙ্গামাটি",
+   "places": 64,
+   "unnamed": 8,
+   "without_upazila": 2,
+   "files": [
+    {
+     "file": "rangamati.json",
+     "places": 64,
+     "gzip_bytes": 3539
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Chandpur",
+   "district_bn": "চাঁদপুর",
+   "places": 63,
+   "unnamed": 4,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "chandpur.json",
+     "places": 63,
+     "gzip_bytes": 3493
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Bandarban",
+   "district_bn": "বান্দরবান",
+   "places": 44,
+   "unnamed": 11,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "bandarban.json",
+     "places": 44,
+     "gzip_bytes": 2472
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Chittagong",
+   "district_bn": "চট্টগ্রাম",
+   "places": 2903,
+   "unnamed": 148,
+   "without_upazila": 1629,
+   "files": [
+    {
+     "file": "chittagong.json",
+     "places": 2903,
+     "gzip_bytes": 109793
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Lakshmipur",
+   "district_bn": "লক্ষ্মীপুর",
+   "places": 20,
+   "unnamed": 5,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "lakshmipur.json",
+     "places": 20,
+     "gzip_bytes": 1702
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Cox's Bazar",
+   "district_bn": "কক্সবাজার",
+   "places": 347,
+   "unnamed": 67,
+   "without_upazila": 6,
+   "files": [
+    {
+     "file": "coxsbazar.json",
+     "places": 347,
+     "gzip_bytes": 12504
+    }
+   ]
+  },
+  {
+   "division": "Chittagong",
+   "district_en": "Feni",
+   "district_bn": "ফেনী",
+   "places": 121,
+   "unnamed": 6,
+   "without_upazila": 2,
+   "files": [
+    {
+     "file": "feni.json",
+     "places": 121,
+     "gzip_bytes": 5961
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Dhaka",
+   "district_bn": "ঢাকা",
+   "places": 7628,
+   "unnamed": 641,
+   "without_upazila": 6731,
+   "files": [
+    {
+     "file": "dhaka-1.json",
+     "places": 897,
+     "gzip_bytes": 31661
+    },
+    {
+     "file": "dhaka-2.json",
+     "places": 3365,
+     "gzip_bytes": 98820
+    },
+    {
+     "file": "dhaka-3.json",
+     "places": 3366,
+     "gzip_bytes": 99728
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Faridpur",
+   "district_bn": "ফরিদপুর",
+   "places": 298,
+   "unnamed": 28,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "faridpur.json",
+     "places": 298,
+     "gzip_bytes": 10871
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Gazipur",
+   "district_bn": "গাজীপুর",
+   "places": 693,
+   "unnamed": 90,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "gazipur.json",
+     "places": 693,
+     "gzip_bytes": 25364
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Gopalganj",
+   "district_bn": "গোপালগঞ্জ",
+   "places": 75,
+   "unnamed": 9,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "gopalganj.json",
+     "places": 75,
+     "gzip_bytes": 3697
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Kishoregonj",
+   "district_bn": "কিশোরগঞ্জ",
+   "places": 222,
+   "unnamed": 8,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "kishoregonj.json",
+     "places": 222,
+     "gzip_bytes": 8855
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Madaripur",
+   "district_bn": "মাদারীপুর",
+   "places": 99,
+   "unnamed": 17,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "madaripur.json",
+     "places": 99,
+     "gzip_bytes": 4994
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Manikganj",
+   "district_bn": "মানিকগঞ্জ",
+   "places": 177,
+   "unnamed": 14,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "manikganj.json",
+     "places": 177,
+     "gzip_bytes": 7541
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Munshiganj",
+   "district_bn": "মুন্সিগঞ্জ",
+   "places": 246,
+   "unnamed": 36,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "munshiganj.json",
+     "places": 246,
+     "gzip_bytes": 9543
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Narayanganj",
+   "district_bn": "নারায়ণগঞ্জ",
+   "places": 439,
+   "unnamed": 77,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "narayanganj.json",
+     "places": 439,
+     "gzip_bytes": 16247
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Narsingdi",
+   "district_bn": "নরসিংদী",
+   "places": 189,
+   "unnamed": 15,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "narsingdi.json",
+     "places": 189,
+     "gzip_bytes": 7682
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Rajbari",
+   "district_bn": "রাজবাড়ী",
+   "places": 59,
+   "unnamed": 8,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "rajbari.json",
+     "places": 59,
+     "gzip_bytes": 3031
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Shariatpur",
+   "district_bn": "শরীয়তপুর",
+   "places": 116,
+   "unnamed": 12,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "shariatpur.json",
+     "places": 116,
+     "gzip_bytes": 5620
+    }
+   ]
+  },
+  {
+   "division": "Dhaka",
+   "district_en": "Tangail",
+   "district_bn": "টাঙ্গাইল",
+   "places": 623,
+   "unnamed": 50,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "tangail.json",
+     "places": 623,
+     "gzip_bytes": 21765
+    }
+   ]
+  },
+  {
+   "division": "Khulna",
+   "district_en": "Khulna",
+   "district_bn": "খুলনা",
+   "places": 451,
+   "unnamed": 84,
+   "without_upazila": 131,
+   "files": [
+    {
+     "file": "khulna.json",
+     "places": 451,
+     "gzip_bytes": 15031
+    }
+   ]
+  },
+  {
+   "division": "Khulna",
+   "district_en": "Narail",
+   "district_bn": "নড়াইল",
+   "places": 127,
+   "unnamed": 17,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "narail.json",
+     "places": 127,
+     "gzip_bytes": 4757
+    }
+   ]
+  },
+  {
+   "division": "Khulna",
+   "district_en": "Meherpur",
+   "district_bn": "মেহেরপুর",
+   "places": 41,
+   "unnamed": 0,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "meherpur.json",
+     "places": 41,
+     "gzip_bytes": 2487
+    }
+   ]
+  },
+  {
+   "division": "Khulna",
+   "district_en": "Chuadanga",
+   "district_bn": "চুয়াডাঙ্গা",
+   "places": 31,
+   "unnamed": 0,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "chuadanga.json",
+     "places": 31,
+     "gzip_bytes": 2189
+    }
+   ]
+  },
+  {
+   "division": "Khulna",
+   "district_en": "Kushtia",
+   "district_bn": "কুষ্টিয়া",
+   "places": 91,
+   "unnamed": 10,
+   "without_upazila": 78,
+   "files": [
+    {
+     "file": "kushtia.json",
+     "places": 91,
+     "gzip_bytes": 4368
+    }
+   ]
+  },
+  {
+   "division": "Khulna",
+   "district_en": "Satkhira",
+   "district_bn": "সাতক্ষীরা",
+   "places": 278,
+   "unnamed": 17,
+   "without_upazila": 4,
+   "files": [
+    {
+     "file": "satkhira.json",
+     "places": 278,
+     "gzip_bytes": 9137
+    }
+   ]
+  },
+  {
+   "division": "Khulna",
+   "district_en": "Jessore",
+   "district_bn": "যশোর",
+   "places": 388,
+   "unnamed": 48,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "jessore.json",
+     "places": 388,
+     "gzip_bytes": 13756
+    }
+   ]
+  },
+  {
+   "division": "Khulna",
+   "district_en": "Magura",
+   "district_bn": "মাগুরা",
+   "places": 55,
+   "unnamed": 1,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "magura.json",
+     "places": 55,
+     "gzip_bytes": 2980
+    }
+   ]
+  },
+  {
+   "division": "Khulna",
+   "district_en": "Bagerhat",
+   "district_bn": "বাগেরহাট",
+   "places": 290,
+   "unnamed": 44,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "bagerhat.json",
+     "places": 290,
+     "gzip_bytes": 10137
+    }
+   ]
+  },
+  {
+   "division": "Khulna",
+   "district_en": "Jhenaidah",
+   "district_bn": "ঝিনাইদহ",
+   "places": 162,
+   "unnamed": 12,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "jhenaidah.json",
+     "places": 162,
+     "gzip_bytes": 6744
+    }
+   ]
+  },
+  {
+   "division": "Rajshahi",
+   "district_en": "Bogra",
+   "district_bn": "বগুড়া",
+   "places": 784,
+   "unnamed": 31,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "bogra.json",
+     "places": 784,
+     "gzip_bytes": 28576
+    }
+   ]
+  },
+  {
+   "division": "Rajshahi",
+   "district_en": "Joypurhat",
+   "district_bn": "জয়পুরহাট",
+   "places": 82,
+   "unnamed": 1,
+   "without_upazila": 6,
+   "files": [
+    {
+     "file": "joypurhat.json",
+     "places": 82,
+     "gzip_bytes": 4214
+    }
+   ]
+  },
+  {
+   "division": "Rajshahi",
+   "district_en": "Naogaon",
+   "district_bn": "নওগাঁ",
+   "places": 333,
+   "unnamed": 4,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "naogaon.json",
+     "places": 333,
+     "gzip_bytes": 13846
+    }
+   ]
+  },
+  {
+   "division": "Rajshahi",
+   "district_en": "Natore",
+   "district_bn": "নাটোর",
+   "places": 356,
+   "unnamed": 12,
+   "without_upazila": 2,
+   "files": [
+    {
+     "file": "natore.json",
+     "places": 356,
+     "gzip_bytes": 14789
+    }
+   ]
+  },
+  {
+   "division": "Rajshahi",
+   "district_en": "Chapai Nababganj",
+   "district_bn": "চাঁপাই নাবাবগঞ্জ",
+   "places": 149,
+   "unnamed": 8,
+   "without_upazila": 1,
+   "files": [
+    {
+     "file": "chapainababganj.json",
+     "places": 149,
+     "gzip_bytes": 6875
+    }
+   ]
+  },
+  {
+   "division": "Rajshahi",
+   "district_en": "Pabna",
+   "district_bn": "পাবনা",
+   "places": 189,
+   "unnamed": 8,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "pabna.json",
+     "places": 189,
+     "gzip_bytes": 7909
+    }
+   ]
+  },
+  {
+   "division": "Rajshahi",
+   "district_en": "Rajshahi",
+   "district_bn": "রাজশাহী",
+   "places": 362,
+   "unnamed": 22,
+   "without_upazila": 213,
+   "files": [
+    {
+     "file": "rajshahi.json",
+     "places": 362,
+     "gzip_bytes": 13239
+    }
+   ]
+  },
+  {
+   "division": "Rajshahi",
+   "district_en": "Sirajganj",
+   "district_bn": "সিরাজগঞ্জ",
+   "places": 169,
+   "unnamed": 7,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "sirajganj.json",
+     "places": 169,
+     "gzip_bytes": 7534
+    }
+   ]
+  },
+  {
+   "division": "Rangpur",
+   "district_en": "Dinajpur",
+   "district_bn": "দিনাজপুর",
+   "places": 351,
+   "unnamed": 36,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "dinajpur.json",
+     "places": 351,
+     "gzip_bytes": 13149
+    }
+   ]
+  },
+  {
+   "division": "Rangpur",
+   "district_en": "Gaibandha",
+   "district_bn": "গাইবান্ধা",
+   "places": 123,
+   "unnamed": 7,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "gaibandha.json",
+     "places": 123,
+     "gzip_bytes": 5510
+    }
+   ]
+  },
+  {
+   "division": "Rangpur",
+   "district_en": "Kurigram",
+   "district_bn": "কুড়িগ্রাম",
+   "places": 157,
+   "unnamed": 6,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "kurigram.json",
+     "places": 157,
+     "gzip_bytes": 6790
+    }
+   ]
+  },
+  {
+   "division": "Rangpur",
+   "district_en": "Lalmonirhat",
+   "district_bn": "লালমনিরহাট",
+   "places": 123,
+   "unnamed": 4,
+   "without_upazila": 5,
+   "files": [
+    {
+     "file": "lalmonirhat.json",
+     "places": 123,
+     "gzip_bytes": 5450
+    }
+   ]
+  },
+  {
+   "division": "Rangpur",
+   "district_en": "Nilphamari",
+   "district_bn": "নীলফামারী",
+   "places": 262,
+   "unnamed": 11,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "nilphamari.json",
+     "places": 262,
+     "gzip_bytes": 10278
+    }
+   ]
+  },
+  {
+   "division": "Rangpur",
+   "district_en": "Panchagarh",
+   "district_bn": "পঞ্চগড়",
+   "places": 208,
+   "unnamed": 5,
+   "without_upazila": 3,
+   "files": [
+    {
+     "file": "panchagarh.json",
+     "places": 208,
+     "gzip_bytes": 8679
+    }
+   ]
+  },
+  {
+   "division": "Rangpur",
+   "district_en": "Rangpur",
+   "district_bn": "রংপুর",
+   "places": 546,
+   "unnamed": 30,
+   "without_upazila": 373,
+   "files": [
+    {
+     "file": "rangpur.json",
+     "places": 546,
+     "gzip_bytes": 18470
+    }
+   ]
+  },
+  {
+   "division": "Rangpur",
+   "district_en": "Thakurgaon",
+   "district_bn": "ঠাকুরগাঁও",
+   "places": 134,
+   "unnamed": 4,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "thakurgaon.json",
+     "places": 134,
+     "gzip_bytes": 5893
+    }
+   ]
+  },
+  {
+   "division": "Sylhet",
+   "district_en": "Habiganj",
+   "district_bn": "হবিগঞ্জ",
+   "places": 139,
+   "unnamed": 4,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "habiganj.json",
+     "places": 139,
+     "gzip_bytes": 6272
+    }
+   ]
+  },
+  {
+   "division": "Sylhet",
+   "district_en": "Maulvibazar",
+   "district_bn": "মৌলভীবাজার",
+   "places": 163,
+   "unnamed": 10,
+   "without_upazila": 4,
+   "files": [
+    {
+     "file": "maulvibazar.json",
+     "places": 163,
+     "gzip_bytes": 6882
+    }
+   ]
+  },
+  {
+   "division": "Sylhet",
+   "district_en": "Sunamganj",
+   "district_bn": "সুনামগঞ্জ",
+   "places": 125,
+   "unnamed": 20,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "sunamganj.json",
+     "places": 125,
+     "gzip_bytes": 5068
+    }
+   ]
+  },
+  {
+   "division": "Sylhet",
+   "district_en": "Sylhet",
+   "district_bn": "সিলেট",
+   "places": 567,
+   "unnamed": 58,
+   "without_upazila": 4,
+   "files": [
+    {
+     "file": "sylhet.json",
+     "places": 567,
+     "gzip_bytes": 19388
+    }
+   ]
+  },
+  {
+   "division": "Mymensingh",
+   "district_en": "Netrakona",
+   "district_bn": "নেত্রকোণা",
+   "places": 258,
+   "unnamed": 25,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "netrakona.json",
+     "places": 258,
+     "gzip_bytes": 10208
+    }
+   ]
+  },
+  {
+   "division": "Mymensingh",
+   "district_en": "Jamalpur",
+   "district_bn": "জামালপুর",
+   "places": 170,
+   "unnamed": 10,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "jamalpur.json",
+     "places": 170,
+     "gzip_bytes": 7175
+    }
+   ]
+  },
+  {
+   "division": "Mymensingh",
+   "district_en": "Mymensingh",
+   "district_bn": "ময়মনসিংহ",
+   "places": 712,
+   "unnamed": 41,
+   "without_upazila": 1,
+   "files": [
+    {
+     "file": "mymensingh.json",
+     "places": 712,
+     "gzip_bytes": 27029
+    }
+   ]
+  },
+  {
+   "division": "Mymensingh",
+   "district_en": "Sherpur",
+   "district_bn": "শেরপুর",
+   "places": 244,
+   "unnamed": 2,
+   "without_upazila": 0,
+   "files": [
+    {
+     "file": "sherpur.json",
+     "places": 244,
+     "gzip_bytes": 9577
+    }
+   ]
+  }
+ ]
+}
