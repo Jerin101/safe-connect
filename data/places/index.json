@@ -19,8 +19,8 @@
    "en": "Pharmacy (name not known)"
   },
   "fuel": {
-   "bn": "পেট্রোল পাম্প (নাম জানা নেই)",
-   "en": "Fuel station (name not known)"
+   "bn": "পেট্রোল/সিএনজি পাম্প (নাম জানা নেই)",
+   "en": "Petrol/CNG pump (name not known)"
   },
   "atm": {
    "bn": "এটিএম (নাম জানা নেই)",
@@ -31,16 +31,16 @@
    "en": "Bank (name not known)"
   },
   "police": {
-   "bn": "পুলিশ (নাম জানা নেই)",
-   "en": "Police (name not known)"
+   "bn": "থানা বা ফাঁড়ি (নাম জানা নেই)",
+   "en": "Police station or outpost (name not known)"
   },
   "fire_station": {
-   "bn": "ফায়ার স্টেশন (নাম জানা নেই)",
+   "bn": "ফায়ার সার্ভিস (নাম জানা নেই)",
    "en": "Fire station (name not known)"
   },
   "bus_station": {
    "bn": "বাস স্ট্যান্ড (নাম জানা নেই)",
-   "en": "Bus station (name not known)"
+   "en": "Bus stand (name not known)"
   },
   "ferry_terminal": {
    "bn": "ঘাট (নাম জানা নেই)",
@@ -60,7 +60,7 @@
     {
      "file": "barguna.json",
      "places": 192,
-     "gzip_bytes": 6646
+     "gzip_bytes": 6705
     }
    ]
   },
@@ -75,7 +75,7 @@
     {
      "file": "barisal.json",
      "places": 298,
-     "gzip_bytes": 11152
+     "gzip_bytes": 11214
     }
    ]
   },
@@ -90,7 +90,7 @@
     {
      "file": "bhola.json",
      "places": 333,
-     "gzip_bytes": 10920
+     "gzip_bytes": 10976
     }
    ]
   },
@@ -105,7 +105,7 @@
     {
      "file": "jhalokati.json",
      "places": 54,
-     "gzip_bytes": 2839
+     "gzip_bytes": 2894
     }
    ]
   },
@@ -120,7 +120,7 @@
     {
      "file": "patuakhali.json",
      "places": 187,
-     "gzip_bytes": 7055
+     "gzip_bytes": 7110
     }
    ]
   },
@@ -135,7 +135,7 @@
     {
      "file": "pirojpur.json",
      "places": 119,
-     "gzip_bytes": 4963
+     "gzip_bytes": 5020
     }
    ]
   },
@@ -150,7 +150,7 @@
     {
      "file": "brahmanbaria.json",
      "places": 105,
-     "gzip_bytes": 4910
+     "gzip_bytes": 4960
     }
    ]
   },
@@ -165,7 +165,7 @@
     {
      "file": "comilla.json",
      "places": 476,
-     "gzip_bytes": 18601
+     "gzip_bytes": 18655
     }
    ]
   },
@@ -180,7 +180,7 @@
     {
      "file": "khagrachhari.json",
      "places": 41,
-     "gzip_bytes": 2549
+     "gzip_bytes": 2599
     }
    ]
   },
@@ -195,7 +195,7 @@
     {
      "file": "noakhali.json",
      "places": 156,
-     "gzip_bytes": 6132
+     "gzip_bytes": 6195
     }
    ]
   },
@@ -210,7 +210,7 @@
     {
      "file": "rangamati.json",
      "places": 64,
-     "gzip_bytes": 3481
+     "gzip_bytes": 3539
     }
    ]
   },
@@ -225,7 +225,7 @@
     {
      "file": "chandpur.json",
      "places": 63,
-     "gzip_bytes": 3431
+     "gzip_bytes": 3493
     }
    ]
   },
@@ -240,7 +240,7 @@
     {
      "file": "bandarban.json",
      "places": 44,
-     "gzip_bytes": 2415
+     "gzip_bytes": 2472
     }
    ]
   },
@@ -255,7 +255,7 @@
     {
      "file": "chittagong.json",
      "places": 2903,
-     "gzip_bytes": 109727
+     "gzip_bytes": 109793
     }
    ]
   },
@@ -270,7 +270,7 @@
     {
      "file": "lakshmipur.json",
      "places": 20,
-     "gzip_bytes": 1650
+     "gzip_bytes": 1702
     }
    ]
   },
@@ -285,7 +285,7 @@
     {
      "file": "coxsbazar.json",
      "places": 347,
-     "gzip_bytes": 12451
+     "gzip_bytes": 12504
     }
    ]
   },
@@ -300,7 +300,7 @@
     {
      "file": "feni.json",
      "places": 121,
-     "gzip_bytes": 5907
+     "gzip_bytes": 5961
     }
    ]
   },
@@ -315,17 +315,17 @@
     {
      "file": "dhaka-1.json",
      "places": 897,
-     "gzip_bytes": 31599
+     "gzip_bytes": 31661
     },
     {
      "file": "dhaka-2.json",
      "places": 3365,
-     "gzip_bytes": 98757
+     "gzip_bytes": 98820
     },
     {
      "file": "dhaka-3.json",
      "places": 3366,
-     "gzip_bytes": 99661
+     "gzip_bytes": 99728
     }
    ]
   },
@@ -340,7 +340,7 @@
     {
      "file": "faridpur.json",
      "places": 298,
-     "gzip_bytes": 10811
+     "gzip_bytes": 10871
     }
    ]
   },
@@ -355,7 +355,7 @@
     {
      "file": "gazipur.json",
      "places": 693,
-     "gzip_bytes": 25300
+     "gzip_bytes": 25364
     }
    ]
   },
@@ -370,7 +370,7 @@
     {
      "file": "gopalganj.json",
      "places": 75,
-     "gzip_bytes": 3641
+     "gzip_bytes": 3697
     }
    ]
   },
@@ -385,7 +385,7 @@
     {
      "file": "kishoregonj.json",
      "places": 222,
-     "gzip_bytes": 8801
+     "gzip_bytes": 8855
     }
    ]
   },
@@ -400,7 +400,7 @@
     {
      "file": "madaripur.json",
      "places": 99,
-     "gzip_bytes": 4936
+     "gzip_bytes": 4994
     }
    ]
   },
@@ -415,7 +415,7 @@
     {
      "file": "manikganj.json",
      "places": 177,
-     "gzip_bytes": 7481
+     "gzip_bytes": 7541
     }
    ]
   },
@@ -430,7 +430,7 @@
     {
      "file": "munshiganj.json",
      "places": 246,
-     "gzip_bytes": 9499
+     "gzip_bytes": 9543
     }
    ]
   },
@@ -445,7 +445,7 @@
     {
      "file": "narayanganj.json",
      "places": 439,
-     "gzip_bytes": 16180
+     "gzip_bytes": 16247
     }
    ]
   },
@@ -460,7 +460,7 @@
     {
      "file": "narsingdi.json",
      "places": 189,
-     "gzip_bytes": 7628
+     "gzip_bytes": 7682
     }
    ]
   },
@@ -475,7 +475,7 @@
     {
      "file": "rajbari.json",
      "places": 59,
-     "gzip_bytes": 2982
+     "gzip_bytes": 3031
     }
    ]
   },
@@ -490,7 +490,7 @@
     {
      "file": "shariatpur.json",
      "places": 116,
-     "gzip_bytes": 5571
+     "gzip_bytes": 5620
     }
    ]
   },
@@ -505,7 +505,7 @@
     {
      "file": "tangail.json",
      "places": 623,
-     "gzip_bytes": 21706
+     "gzip_bytes": 21765
     }
    ]
   },
@@ -520,7 +520,7 @@
     {
      "file": "khulna.json",
      "places": 451,
-     "gzip_bytes": 14972
+     "gzip_bytes": 15031
     }
    ]
   },
@@ -535,7 +535,7 @@
     {
      "file": "narail.json",
      "places": 127,
-     "gzip_bytes": 4702
+     "gzip_bytes": 4757
     }
    ]
   },
@@ -550,7 +550,7 @@
     {
      "file": "meherpur.json",
      "places": 41,
-     "gzip_bytes": 2443
+     "gzip_bytes": 2487
     }
    ]
   },
@@ -565,7 +565,7 @@
     {
      "file": "chuadanga.json",
      "places": 31,
-     "gzip_bytes": 2130
+     "gzip_bytes": 2189
     }
    ]
   },
@@ -580,7 +580,7 @@
     {
      "file": "kushtia.json",
      "places": 91,
-     "gzip_bytes": 4307
+     "gzip_bytes": 4368
     }
    ]
   },
@@ -595,7 +595,7 @@
     {
      "file": "satkhira.json",
      "places": 278,
-     "gzip_bytes": 9078
+     "gzip_bytes": 9137
     }
    ]
   },
@@ -610,7 +610,7 @@
     {
      "file": "jessore.json",
      "places": 388,
-     "gzip_bytes": 13692
+     "gzip_bytes": 13756
     }
    ]
   },
@@ -625,7 +625,7 @@
     {
      "file": "magura.json",
      "places": 55,
-     "gzip_bytes": 2922
+     "gzip_bytes": 2980
     }
    ]
   },
@@ -640,7 +640,7 @@
     {
      "file": "bagerhat.json",
      "places": 290,
-     "gzip_bytes": 10080
+     "gzip_bytes": 10137
     }
    ]
   },
@@ -655,7 +655,7 @@
     {
      "file": "jhenaidah.json",
      "places": 162,
-     "gzip_bytes": 6682
+     "gzip_bytes": 6744
     }
    ]
   },
@@ -670,7 +670,7 @@
     {
      "file": "bogra.json",
      "places": 784,
-     "gzip_bytes": 28528
+     "gzip_bytes": 28576
     }
    ]
   },
@@ -685,7 +685,7 @@
     {
      "file": "joypurhat.json",
      "places": 82,
-     "gzip_bytes": 4150
+     "gzip_bytes": 4214
     }
    ]
   },
@@ -700,7 +700,7 @@
     {
      "file": "naogaon.json",
      "places": 333,
-     "gzip_bytes": 13791
+     "gzip_bytes": 13846
     }
    ]
   },
@@ -715,7 +715,7 @@
     {
      "file": "natore.json",
      "places": 356,
-     "gzip_bytes": 14739
+     "gzip_bytes": 14789
     }
    ]
   },
@@ -730,7 +730,7 @@
     {
      "file": "chapainababganj.json",
      "places": 149,
-     "gzip_bytes": 6822
+     "gzip_bytes": 6875
     }
    ]
   },
@@ -745,7 +745,7 @@
     {
      "file": "pabna.json",
      "places": 189,
-     "gzip_bytes": 7865
+     "gzip_bytes": 7909
     }
    ]
   },
@@ -760,7 +760,7 @@
     {
      "file": "rajshahi.json",
      "places": 362,
-     "gzip_bytes": 13180
+     "gzip_bytes": 13239
     }
    ]
   },
@@ -775,7 +775,7 @@
     {
      "file": "sirajganj.json",
      "places": 169,
-     "gzip_bytes": 7477
+     "gzip_bytes": 7534
     }
    ]
   },
@@ -790,7 +790,7 @@
     {
      "file": "dinajpur.json",
      "places": 351,
-     "gzip_bytes": 13089
+     "gzip_bytes": 13149
     }
    ]
   },
@@ -805,7 +805,7 @@
     {
      "file": "gaibandha.json",
      "places": 123,
-     "gzip_bytes": 5457
+     "gzip_bytes": 5510
     }
    ]
   },
@@ -820,7 +820,7 @@
     {
      "file": "kurigram.json",
      "places": 157,
-     "gzip_bytes": 6732
+     "gzip_bytes": 6790
     }
    ]
   },
@@ -835,7 +835,7 @@
     {
      "file": "lalmonirhat.json",
      "places": 123,
-     "gzip_bytes": 5392
+     "gzip_bytes": 5450
     }
    ]
   },
@@ -850,7 +850,7 @@
     {
      "file": "nilphamari.json",
      "places": 262,
-     "gzip_bytes": 10228
+     "gzip_bytes": 10278
     }
    ]
   },
@@ -865,7 +865,7 @@
     {
      "file": "panchagarh.json",
      "places": 208,
-     "gzip_bytes": 8627
+     "gzip_bytes": 8679
     }
    ]
   },
@@ -880,7 +880,7 @@
     {
      "file": "rangpur.json",
      "places": 546,
-     "gzip_bytes": 18412
+     "gzip_bytes": 18470
     }
    ]
   },
@@ -895,7 +895,7 @@
     {
      "file": "thakurgaon.json",
      "places": 134,
-     "gzip_bytes": 5835
+     "gzip_bytes": 5893
     }
    ]
   },
@@ -910,7 +910,7 @@
     {
      "file": "habiganj.json",
      "places": 139,
-     "gzip_bytes": 6225
+     "gzip_bytes": 6272
     }
    ]
   },
@@ -925,7 +925,7 @@
     {
      "file": "maulvibazar.json",
      "places": 163,
-     "gzip_bytes": 6823
+     "gzip_bytes": 6882
     }
    ]
   },
@@ -940,7 +940,7 @@
     {
      "file": "sunamganj.json",
      "places": 125,
-     "gzip_bytes": 5016
+     "gzip_bytes": 5068
     }
    ]
   },
@@ -955,7 +955,7 @@
     {
      "file": "sylhet.json",
      "places": 567,
-     "gzip_bytes": 19337
+     "gzip_bytes": 19388
     }
    ]
   },
@@ -970,7 +970,7 @@
     {
      "file": "netrakona.json",
      "places": 258,
-     "gzip_bytes": 10144
+     "gzip_bytes": 10208
     }
    ]
   },
@@ -985,7 +985,7 @@
     {
      "file": "jamalpur.json",
      "places": 170,
-     "gzip_bytes": 7114
+     "gzip_bytes": 7175
     }
    ]
   },
@@ -1000,7 +1000,7 @@
     {
      "file": "mymensingh.json",
      "places": 712,
-     "gzip_bytes": 26981
+     "gzip_bytes": 27029
     }
    ]
   },
@@ -1015,7 +1015,7 @@
     {
      "file": "sherpur.json",
      "places": 244,
-     "gzip_bytes": 9516
+     "gzip_bytes": 9577
     }
    ]
   }

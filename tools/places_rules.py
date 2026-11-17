@@ -31,12 +31,12 @@ UNNAMED_LABELS = {
     "hospital": {"bn": "হাসপাতাল (নাম জানা নেই)", "en": "Hospital (name not known)"},
     "clinic": {"bn": "ক্লিনিক (নাম জানা নেই)", "en": "Clinic (name not known)"},
     "pharmacy": {"bn": "ফার্মেসি (নাম জানা নেই)", "en": "Pharmacy (name not known)"},
-    "fuel": {"bn": "পেট্রোল পাম্প (নাম জানা নেই)", "en": "Fuel station (name not known)"},
+    "fuel": {"bn": "পেট্রোল/সিএনজি পাম্প (নাম জানা নেই)", "en": "Petrol/CNG pump (name not known)"},
     "atm": {"bn": "এটিএম (নাম জানা নেই)", "en": "ATM (name not known)"},
     "bank": {"bn": "ব্যাংক (নাম জানা নেই)", "en": "Bank (name not known)"},
-    "police": {"bn": "পুলিশ (নাম জানা নেই)", "en": "Police (name not known)"},
-    "fire_station": {"bn": "ফায়ার স্টেশন (নাম জানা নেই)", "en": "Fire station (name not known)"},
-    "bus_station": {"bn": "বাস স্ট্যান্ড (নাম জানা নেই)", "en": "Bus station (name not known)"},
+    "police": {"bn": "থানা বা ফাঁড়ি (নাম জানা নেই)", "en": "Police station or outpost (name not known)"},
+    "fire_station": {"bn": "ফায়ার সার্ভিস (নাম জানা নেই)", "en": "Fire station (name not known)"},
+    "bus_station": {"bn": "বাস স্ট্যান্ড (নাম জানা নেই)", "en": "Bus stand (name not known)"},
     "ferry_terminal": {"bn": "ঘাট (নাম জানা নেই)", "en": "Ferry ghat (name not known)"},
 }
 KEEP_UNNAMED = set(UNNAMED_LABELS)

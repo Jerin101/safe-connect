@@ -4,7 +4,7 @@ Places by category for all 64 districts (MASTER_PLAN "Phase 3: Places data"). Tw
 
 | File | What | Source label |
 |---|---|---|
-| `<district>.json` (Dhaka: `dhaka-1.json` … `dhaka-3.json`) | Places from OpenStreetMap | "OpenStreetMap, যাচাই করা নয়" |
+| `<district>.json` (Dhaka: `dhaka-1.json` … `dhaka-3.json`) | Places from OpenStreetMap | "OpenStreetMap থেকে, যাচাই করা হয়নি" |
 | `manual_<district>.json` | Places checked by the team (Sheet tab "নতুন জায়গা") | by `verified_by`: official list / owner's page / visited |
 | `index.json` | Which OSM files exist per district, place counts, gzip sizes, OSM credit | – |
 
