@@ -1,0 +1,10 @@
+# Line endings: every text file is stored and checked out with LF, on Windows too (repo cleanup, final queue step 4).
+* text=auto eol=lf
+
+# Binary files: never changed
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.woff2 binary
