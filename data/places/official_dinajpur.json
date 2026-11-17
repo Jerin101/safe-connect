@@ -172,31 +172,6 @@
   {
    "id": "padma-dinajpur-7",
    "name_bn": null,
-   "name_en": "ZAMAN FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Rangpur",
-   "district": "Dinajpur",
-   "upazila": "Fulbari",
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 48,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dinajpur-8",
-   "name_bn": null,
    "name_en": "KHANDAKAR BADRE AREFIN FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -220,7 +195,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-9",
+   "id": "padma-dinajpur-8",
    "name_bn": null,
    "name_en": "HILL FILLING STATION",
    "name_hidden": null,
@@ -245,7 +220,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-10",
+   "id": "padma-dinajpur-9",
    "name_bn": null,
    "name_en": "RYAN FILLING STATION",
    "name_hidden": null,
@@ -270,7 +245,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-11",
+   "id": "padma-dinajpur-10",
    "name_bn": null,
    "name_en": "SADIA FILLING STATION",
    "name_hidden": null,
@@ -295,7 +270,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-12",
+   "id": "padma-dinajpur-11",
    "name_bn": null,
    "name_en": "A.S. FILLING STATION",
    "name_hidden": null,
@@ -320,7 +295,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-13",
+   "id": "padma-dinajpur-12",
    "name_bn": null,
    "name_en": "REAL FILLING STATION",
    "name_hidden": null,
@@ -345,7 +320,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-14",
+   "id": "padma-dinajpur-13",
    "name_bn": null,
    "name_en": "RIFAT FILLING STATION",
    "name_hidden": null,
@@ -370,7 +345,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-15",
+   "id": "padma-dinajpur-14",
    "name_bn": null,
    "name_en": "A.S.M. FILLING STATION",
    "name_hidden": null,
@@ -395,7 +370,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-16",
+   "id": "padma-dinajpur-15",
    "name_bn": null,
    "name_en": "ASIA FILLING STATION",
    "name_hidden": null,
@@ -420,7 +395,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-17",
+   "id": "padma-dinajpur-16",
    "name_bn": null,
    "name_en": "AWLIAPUKUR FILLING STATION",
    "name_hidden": null,
@@ -445,7 +420,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-18",
+   "id": "padma-dinajpur-17",
    "name_bn": null,
    "name_en": "CHOWDHURI & CO.",
    "name_hidden": null,
@@ -470,9 +445,34 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-19",
+   "id": "padma-dinajpur-18",
    "name_bn": null,
    "name_en": "DINAJPUR PETROLEUM SERV.",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Rangpur",
+   "district": "Dinajpur",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 48,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-dinajpur-19",
+   "name_bn": null,
+   "name_en": "DINAJPUR PETROLEUM SERVICE",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -522,7 +522,7 @@
   {
    "id": "padma-dinajpur-21",
    "name_bn": null,
-   "name_en": "DINAJPUR PETROLEUM SERVICE",
+   "name_en": "M.H.FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -547,7 +547,7 @@
   {
    "id": "padma-dinajpur-22",
    "name_bn": null,
-   "name_en": "M.H.FILLING STATION",
+   "name_en": "M.R.FILLING CENTRE",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -572,7 +572,7 @@
   {
    "id": "padma-dinajpur-23",
    "name_bn": null,
-   "name_en": "M.R.FILLING CENTRE",
+   "name_en": "M/S BELY FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -597,7 +597,7 @@
   {
    "id": "padma-dinajpur-24",
    "name_bn": null,
-   "name_en": "M/S BELY FILLING STATION",
+   "name_en": "M/S.FAHIM FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -622,7 +622,7 @@
   {
    "id": "padma-dinajpur-25",
    "name_bn": null,
-   "name_en": "M/S.FAHIM FILLING STATION",
+   "name_en": "M/S.KAHAROL F/S",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -647,7 +647,7 @@
   {
    "id": "padma-dinajpur-26",
    "name_bn": null,
-   "name_en": "M/S.KAHAROL F/S",
+   "name_en": "M/S.MISKHA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -672,7 +672,7 @@
   {
    "id": "padma-dinajpur-27",
    "name_bn": null,
-   "name_en": "M/S.MISKHA FILLING STATION",
+   "name_en": "M/S.RASHID & BROTHER F/S",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -697,7 +697,7 @@
   {
    "id": "padma-dinajpur-28",
    "name_bn": null,
-   "name_en": "M/S.RASHID & BROTHER F/S",
+   "name_en": "M/S.SAMATA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -722,7 +722,7 @@
   {
    "id": "padma-dinajpur-29",
    "name_bn": null,
-   "name_en": "M/S.SAMATA FILLING STATION",
+   "name_en": "PIONEER FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -747,7 +747,7 @@
   {
    "id": "padma-dinajpur-30",
    "name_bn": null,
-   "name_en": "PIONEER FILLING STATION",
+   "name_en": "SALIM FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -772,31 +772,6 @@
   {
    "id": "padma-dinajpur-31",
    "name_bn": null,
-   "name_en": "SALIM FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Rangpur",
-   "district": "Dinajpur",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 48,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dinajpur-32",
-   "name_bn": null,
    "name_en": "SONALI FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -820,7 +795,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dinajpur-33",
+   "id": "padma-dinajpur-32",
    "name_bn": null,
    "name_en": "SUFIA FILLING STATION",
    "name_hidden": null,
