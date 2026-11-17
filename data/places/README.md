@@ -6,6 +6,7 @@ Places by category for all 64 districts (MASTER_PLAN "Phase 3: Places data"). Tw
 |---|---|---|
 | `<district>.json` (Dhaka: `dhaka-1.json` … `dhaka-3.json`) | Places from OpenStreetMap | "OpenStreetMap থেকে, যাচাই করা হয়নি" |
 | `manual_<district>.json` | Places checked by the team (Sheet tab "নতুন জায়গা") | by `verified_by`: official list / owner's page / visited |
+| `official_<district>.json` | Fuel stations from the state oil companies' dealer lists (Padma 2019, Meghna 2025) | "সরকারি তালিকা" + the list's badge (Padma: "২০১৯ সালের সরকারি তালিকা, এখন বদলে থাকতে পারে") |
 | `index.json` | Which OSM files exist per district, place counts, gzip sizes, OSM credit | – |
 
 `<district>` is the district's English name in lower case with only the letters (`coxsbazar`, `chapainababganj`), as in `data/landmarks/`.
@@ -65,3 +66,14 @@ python tools/validate_data.py data                                              
 
 Only the generated JSON is committed. To refresh: download the extract again from download.geofabrik.de (once,
 certificate checks on), run the five commands, and review the diff.
+
+## Official fuel lists (`official_<district>.json`)
+
+Built outside the repo by `E:\Projects\SafeConnect-Files\official-lists	oolsuild_fuel_lists.py` from the PDFs
+(Padma's is text; Meghna's is a scan, read with OCR). Each file names its lists (`lists`: the company's `*.gov.bd` page,
+the PDF's own address and SHA-256, the list date, the badge). Per place: `name_en`, `address_en`, `district`, `upazila`
+(only when the address names exactly one upazila of that district; a bare district name does not count as Sadar),
+`page` (the PDF page), `flags` (`source_older_than_2_years` for Padma). The lists have no location, so `lat`/`lon` are
+null and `location_approx` is true: pin at the upazila centre with "আনুমানিক অবস্থান", or no pin when the upazila is
+not known. **Never kept:** account numbers (A/C No) and owner names; an address that names a person is dropped
+(the upazila found from it is kept).

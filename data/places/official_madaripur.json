@@ -1,0 +1,96 @@
+{
+ "district_en": "Madaripur",
+ "district_bn": "মাদারীপুর",
+ "division": "Dhaka",
+ "note": "Fuel stations from the official dealer lists of the state oil companies. No location in the lists: show the upazila centre with \"আনুমানিক অবস্থান\" (or no pin when the upazila is not known). Upazila only when the address names it. Account numbers and owner names are not kept.",
+ "lists": {
+  "padma_2019": {
+   "name": "Padma Oil PLC: ডিলার (ফিলিং স্টেশান)",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "list_date": "2019-07-23",
+   "badge_bn": "২০১৯ সালের সরকারি তালিকা, এখন বদলে থাকতে পারে",
+   "badge_en": "2019 official list, may have changed",
+   "source_file": {
+    "url": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-pocl/2024/12/09db3dd319ab47fe9a603c709b61b940.pdf",
+    "sha256": "a5d5b7593f7980f3d2006c582e689ad2d0532d034b28d8dabc4b057d4ed90466"
+   }
+  }
+ },
+ "places": [
+  {
+   "id": "padma-madaripur-1",
+   "name_bn": null,
+   "name_en": "M/S.RABEYA FILLING STATION",
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Madaripur",
+   "upazila": "Rajoir",
+   "union": null,
+   "address_en": "BAJITPUR,RAJOIR MADARIPUR",
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 16,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-madaripur-2",
+   "name_bn": null,
+   "name_en": "S.R. FILLING STATION",
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Madaripur",
+   "upazila": "Rajoir",
+   "union": null,
+   "address_en": "SANERPAR, RAJOIR MADARIPUR",
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 16,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-madaripur-3",
+   "name_bn": null,
+   "name_en": "ARIAL KHA FILLING STATION",
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Madaripur",
+   "upazila": null,
+   "union": null,
+   "address_en": "MAHISHER CHAR, UZ- MADARIPUT SADAR MADARIPUR",
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 16,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  }
+ ]
+}
