@@ -619,11 +619,17 @@ const FBERR = { 'permission-denied': 'নিরাপত্তা নিয়�
 const errText = (e) => FBERR[e && e.code] || (navigator.onLine ? 'কাজটা হয়নি। একটু পর আবার চেষ্টা করুন।' : FBERR.unavailable);
 const agoBn = (ms) => { const m = Math.max(1, Math.round((Date.now() - ms) / 60000)); return m < 60 ? `${bn(m)} মিনিট আগে` : m < 1440 ? `${bn(Math.round(m / 60))} ঘণ্টা আগে` : `${bn(Math.round(m / 1440))} দিন আগে`; };
 // The signed-in person with a verified email, or null after showing a sign-in button in `box`.
-async function needUser(box) {
+const WHY = {
+  report: 'এটা জানাতে সাইন ইন লাগে, যাতে কেউ ভুয়া খবর না দিতে পারে। আপনার নাম বা ইমেইল কেউ দেখবে না।',
+  call: 'ডাকতে সাইন ইন লাগে, যাতে যিনি আসবেন তিনি জানেন ডাকটা আসল। যিনি নেবেন তিনি আপনার নাম দেখবেন না, শুধু ডাকার জায়গা।',
+  history: 'আপনার আগের ডাক দেখতে সাইন ইন লাগে।',
+  drive: 'সেবা দিতে (চালক, কারিগর, স্বেচ্ছাসেবক) বা অ্যাডমিনের কাজে সাইন ইন লাগে।',
+};
+async function needUser(box, why = WHY.report) {
   const [fb] = await FB();
   const u = await fb.currentUser();
   if (!u) {
-    box.innerHTML = `<div class="note">${icon('info')}<p>এটা জানাতে সাইন ইন লাগে, যাতে কেউ ভুয়া খবর না দিতে পারে। আপনার নাম বা ইমেইল কেউ দেখবে না।</p></div>
+    box.innerHTML = `<div class="note">${icon('info')}<p>${esc(why)}</p></div>
       <div><button class="btn solid" type="button" data-signin>Google দিয়ে সাইন ইন</button></div>`;
     return null;
   }
@@ -811,7 +817,7 @@ document.addEventListener('click', async (ev) => {
   if ('issueSend' in t.dataset) { sendIssueNow(); return; }
   if (t.dataset.metoo) { meTooNow(t.dataset.metoo); return; }
   if (t.dataset.pst) { sendPlace(t.dataset.pst); return; }
-  if ('signin' in t.dataset) { try { const [fb] = await FB(); await fb.signInGoogle(); toast('সাইন ইন হয়েছে। এবার আবার চাপুন।'); } catch (e) { toast('সাইন ইন হয়নি'); } return; }
+  if ('signin' in t.dataset) { try { const [fb] = await FB(); await fb.signInGoogle(); toast('সাইন ইন হয়েছে।'); render(); } catch (e) { toast('সাইন ইন হয়নি'); } return; }
   if ('gdMake' in t.dataset) { makeGd(); return; }
   if ('print' in t.dataset) { window.print(); return; }
   if (t.dataset.tripGo) {
@@ -844,6 +850,7 @@ const SIM = new URLSearchParams(location.search).has('sim');   // presentation o
 Object.assign(FBERR, { 'signed-out': 'আগে সাইন ইন করুন।', taken: 'অন্য কেউ আগেই নিয়েছেন।', 'limit-wait': '১ মিনিট পর আবার চেষ্টা করুন।',
   'limit-day': 'আজ ১০ বার ডাকা হয়ে গেছে, কাল আবার।', norates: 'এই সেবার ভাড়া এখনো অ্যাডমিন ঠিক করেননি, তাই এখন ডাকা যাচ্ছে না।' });
 const r5 = (x) => Math.round(x * 1e5) / 1e5;
+const noRates = () => !rates || !Object.keys(rates).length;   // not read yet, or read before an admin set them
 let RM = null, HP = null;        // js/ride.js, hasPhone
 let rates = null;                // { type: {base, perKm, perMin, minFare} } from Firestore
 let callF = { type: 'cng', pick: null, drop: null, pickLabel: '', dropLabel: '', picking: 'drop', online: null };
@@ -912,7 +919,7 @@ async function callMount() {
   try { if (!RM) { const [, rm, rp] = await RIDE(); RM = rm; HP = rp.hasPhone; if (tab === 'call') { render(); return; } } } catch (e) { $('#callMsg') && ($('#callMsg').textContent = errText(e)); return; }
   if (!callF.pick || callF.pick.area !== here.label) callF = { ...callF, pick: { lat: here.lat, lon: here.lon, area: here.label }, drop: null, dropLabel: '' };
   drawRideMap();
-  if (!rates) { try { const [[fb]] = await RIDE(); rates = await fb.readRates(); } catch { rates = {}; } if (tab === 'call' && !ride) paintEst(); }
+  if (noRates()) { try { const [[fb]] = await RIDE(); rates = await fb.readRates(); } catch { rates = {}; } if (tab === 'call' && !ride) paintEst(); }
   // a ride left open on this phone (another tab, a reload)
   if (!ride) {
     const id = store.get('sc-ride');
@@ -1017,7 +1024,7 @@ function riderPanel() {
 async function followRide(id, role) {
   const [[fb]] = await RIDE();
   stopRide(); rideRole = role;
-  if (!rates) { try { rates = await fb.readRates(); } catch { rates = {}; } }
+  if (noRates()) { try { rates = await fb.readRates(); } catch { rates = {}; } }
   rideUnsub = fb.watchRide(id, (r) => onRide(r), (e) => { const m = $('#rideMsg') || $('#jobMsg'); if (m) m.textContent = errText(e); });
 }
 async function onRide(r) {
@@ -1082,8 +1089,12 @@ async function gotPos(lat, lon, sim) {
 
 async function callGo() {
   const msg = $('#callMsg'); msg.textContent = '';
-  const t = RM.typeOf(callF.type), rt = rates && rates[callF.type];
+  const t = RM.typeOf(callF.type);
   callF.pickLabel = $('#pickLabel').value.trim(); if (t.dest) callF.dropLabel = $('#dropLabel').value.trim();
+  // sign-in first (it must always be reachable), then the rates as they are now
+  try { if (!(await needUser(msg, WHY.call))) return; } catch (e) { msg.textContent = errText(e); return; }
+  if (noRates() || !rates[callF.type]) { try { const [[fb]] = await RIDE(); rates = await fb.readRates(); paintEst(); } catch { /* the check below says it */ } }
+  const rt = rates && rates[callF.type];
   if (!rt) { msg.textContent = FBERR.norates; return; }
   if (callF.pickLabel.length < 2) { msg.textContent = 'কোথা থেকে ডাকছেন, একটা চেনা জায়গার নাম লিখুন।'; $('#pickLabel').focus(); return; }
   if (t.dest && !callF.drop) { msg.textContent = 'গন্তব্য বাছুন: ম্যাপে চাপ দিন বা একটা জায়গা বাছুন।'; return; }
@@ -1091,7 +1102,6 @@ async function callGo() {
   if ([callF.pickLabel, callF.dropLabel].some(HP)) { msg.textContent = 'ফোন নম্বর লিখবেন না। যিনি নেবেন তিনি অ্যাপেই আপনাকে দেখবেন।'; return; }
   msg.textContent = 'পাঠানো হচ্ছে…';
   try {
-    if (!(await needUser(msg))) return;
     const [[fb, cm]] = await RIDE();
     const estM = t.dest ? RM.estimateMetres(callF.pick, callF.drop) : 0;
     const f = { type: callF.type, district: cm.districtKey(here.d), pickup: { lat: r5(callF.pick.lat), lon: r5(callF.pick.lon), label: callF.pickLabel.slice(0, 80) },
@@ -1105,7 +1115,7 @@ async function callGo() {
 async function showHistory() {
   const box = $('#hist'); box.innerHTML = '<div class="skeleton"></div>';
   try {
-    if (!(await needUser(box))) return;
+    if (!(await needUser(box, WHY.history))) return;
     const [[fb]] = await RIDE(); const list = (await fb.myRides('rider')).slice(0, 10);
     box.innerHTML = list.length ? `<div class="rows">${list.map((r) => `<div class="r"><span class="sq ${TYPE_TINT[r.type]}">${icon(TYPE_IC[r.type])}</span><div><div class="t">${esc(tName(r.type).split(' (')[0])} · ${esc(r.pickup?.label || '')}${r.drop ? ' → ' + esc(r.drop.label) : ''}</div>
       <div class="m">${r.createdAt ? agoBn(r.createdAt) : ''} · ${esc(RM.STATUS_BN[r.status])}${r.fare != null ? ' · ' + tk(r.fare) : ''}</div></div>${r.status === 'paid' ? `<button class="btn ghost" type="button" data-copy="${esc(RM.receiptText(r, bn))}">রসিদ</button>` : '<span></span>'}</div>`).join('')}</div>`
@@ -1126,9 +1136,9 @@ async function driveMount() {
   try {
     if (!RM) { const [, rm, rp] = await RIDE(); RM = rm; HP = rp.hasPhone; }
     const card = document.createElement('section'); card.className = 'card'; box.replaceChildren(card);
-    const u = await needUser(card); if (!u) return;
+    const u = await needUser(card, WHY.drive); if (!u) return;
     const [[fb]] = await RIDE();
-    if (!rates) { try { rates = await fb.readRates(); } catch { rates = {}; } }
+    if (noRates()) { try { rates = await fb.readRates(); } catch { rates = {}; } }
     prov = await fb.myProvider();
     isAdm = (await fb.roleOf(u, 'bn')) === 'admin';
     if (isAdm) { try { pend = await fb.pendingProviders(); } catch { pend = []; } }
