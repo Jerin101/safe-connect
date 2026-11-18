@@ -817,7 +817,8 @@ document.addEventListener('click', async (ev) => {
   if ('issueSend' in t.dataset) { sendIssueNow(); return; }
   if (t.dataset.metoo) { meTooNow(t.dataset.metoo); return; }
   if (t.dataset.pst) { sendPlace(t.dataset.pst); return; }
-  if ('signin' in t.dataset) { try { const [fb] = await FB(); await fb.signInGoogle(); toast('সাইন ইন হয়েছে।'); render(); } catch (e) { toast('সাইন ইন হয়নি'); } return; }
+  if ('signin' in t.dataset) { try { const [fb] = await FB(); await fb.signInGoogle(); // ডাকুন pages rebuild themselves (their fields live in callF); elsewhere a half-typed form must stay as it is
+      if (tab === 'call' || tab === 'drive') { toast('সাইন ইন হয়েছে।'); render(); } else toast('সাইন ইন হয়েছে। এবার আবার চাপুন।'); } catch (e) { toast('সাইন ইন হয়নি'); } return; }
   if ('gdMake' in t.dataset) { makeGd(); return; }
   if ('print' in t.dataset) { window.print(); return; }
   if (t.dataset.tripGo) {
