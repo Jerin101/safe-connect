@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:rules": "firebase emulators:exec --only firestore --project demo-safeconnect \"node --test tests/rules/firestore.rules.test.mjs\""
+    "test:rules": "firebase emulators:exec --only firestore --project demo-safeconnect \"node --test --test-concurrency=1 tests/rules/firestore.rules.test.mjs tests/rules/community.rules.test.mjs tests/rules/ride.rules.test.mjs\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^6.0.0",

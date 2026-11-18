@@ -85,12 +85,13 @@ const SERVICES = [
   { id: 'trade', n: 'ট্রেড লাইসেন্স', en: 'trade license byabsa', where: 'union', link: null, docs: ['জাতীয় পরিচয়পত্র', 'দোকান বা অফিসের ভাড়ার চুক্তি বা মালিকানার কাগজ', 'ছবি'] },
 ];
 const CATS = [
-  { id: 'health', n: 'স্বাস্থ্য' }, { id: 'union', n: 'ইউনিয়ন পরিষদ' }, { id: 'bazar', n: 'বাজার' },
-  { id: 'edu', n: 'স্কুল-কলেজ' }, { id: 'spot', n: 'দর্শনীয় স্থান' }, { id: 'pharmacy', n: 'ফার্মেসি' },
-  { id: 'fuel', n: 'ফিলিং স্টেশন' }, { id: 'atm', n: 'ব্যাংক/ATM' }, { id: 'workshop', n: 'ওয়ার্কশপ' },
-  { id: 'shelter', n: 'আশ্রয়কেন্দ্র' }, { id: 'shop', n: 'দোকান' }, { id: 'ghat', n: 'ঘাট ও বাস' }, { id: 'police', n: 'থানা ও ফায়ার' }, { id: 'other', n: 'অন্যান্য সেবা' },
+  { id: 'health', n: 'হাসপাতাল ও ক্লিনিক' }, { id: 'pharmacy', n: 'ফার্মেসি' }, { id: 'fuel', n: 'ফিলিং স্টেশন' }, { id: 'shop', n: 'দোকান ও সুপারশপ' },
+  { id: 'bazar', n: 'বাজার' }, { id: 'atm', n: 'ব্যাংক/ATM' }, { id: 'workshop', n: 'ওয়ার্কশপ' }, { id: 'ghat', n: 'যাতায়াত: বাস, ঘাট, রেল' },
+  { id: 'police', n: 'থানা ও ফায়ার' }, { id: 'post', n: 'পোস্ট অফিস' }, { id: 'spot', n: 'দর্শনীয় স্থান' }, { id: 'stay', n: 'হোটেল ও খাবার' },
+  { id: 'edu', n: 'স্কুল-কলেজ' }, { id: 'worship', n: 'উপাসনালয়' }, { id: 'shelter', n: 'আশ্রয়কেন্দ্র' }, { id: 'union', n: 'ইউনিয়ন পরিষদ' },
+  { id: 'other', n: 'অন্যান্য সেবা' },
 ];
-const GQ = { health: 'hospital', pharmacy: 'pharmacy', fuel: 'filling station petrol pump', atm: 'ATM bank', workshop: 'workshop mechanic', shelter: 'cyclone shelter', shop: 'shop', ghat: 'bus stand ghat', bazar: 'bazar', edu: 'school', spot: 'tourist spot', union: 'union parishad', police: 'police station', other: 'service' };
+const GQ = { health: 'hospital', pharmacy: 'pharmacy', fuel: 'filling station petrol pump', atm: 'ATM bank', workshop: 'workshop mechanic', shelter: 'cyclone shelter', shop: 'shop', ghat: 'bus stand ghat', bazar: 'bazar', edu: 'school', spot: 'tourist spot', union: 'union parishad', police: 'police station', other: 'service', post: 'post office', stay: 'hotel restaurant', worship: 'mosque temple' };
 const unionOf = (name, up) => D.unions.find((u) => u.bn === name && (!up || u.up === up));
 
 const placeCache = new Map();
@@ -116,15 +117,25 @@ const OSMCAT = {
   workshop: (p) => p.category === 'workshops',
   shop: (p) => p.category === 'shops' && p.subcategory !== 'marketplace',
   bazar: (p) => p.subcategory === 'marketplace',
-  ghat: (p) => ['bus_station', 'ferry_terminal'].includes(p.subcategory),
-  police: (p) => p.category === 'public_offices',
+  ghat: (p) => ['bus_station', 'ferry_terminal', 'railway_station'].includes(p.subcategory),
+  police: (p) => p.category === 'public_offices' && p.subcategory !== 'post_office',
+  post: (p) => p.subcategory === 'post_office',
+  spot: (p) => p.category === 'tourism',
+  stay: (p) => p.category === 'stay_food',
+  edu: (p) => p.category === 'education',
+  worship: (p) => p.category === 'worship',
+  shelter: (p) => p.category === 'shelter',
   other: (p) => p.category === 'other_services',
 };
 const SUBBN = { hospital: 'হাসপাতাল', clinic: 'ক্লিনিক', doctors: 'ডাক্তারের চেম্বার', pharmacy: 'ফার্মেসি', chemist: 'ফার্মেসি', fuel: 'পেট্রোল/সিএনজি পাম্প',
   bank: 'ব্যাংক', atm: 'এটিএম', supermarket: 'সুপারশপ', convenience: 'মুদি দোকান', general: 'দোকান', mall: 'শপিং মল', marketplace: 'বাজার',
   bus_station: 'বাস স্ট্যান্ড', ferry_terminal: 'ঘাট', police: 'থানা বা ফাঁড়ি', fire_station: 'ফায়ার সার্ভিস', car_repair: 'গাড়ি মেরামত',
   motorcycle_repair: 'মোটরসাইকেল মেরামত', motorcycle: 'মোটরসাইকেলের দোকান', bicycle: 'সাইকেল', mobile_phone: 'মোবাইলের দোকান',
-  electronics_repair: 'ইলেকট্রনিক্স মেরামত', mobile_phone_repair: 'মোবাইল মেরামত', shoemaker: 'জুতা মেরামত', tailor: 'দর্জি' };
+  electronics_repair: 'ইলেকট্রনিক্স মেরামত', mobile_phone_repair: 'মোবাইল মেরামত', shoemaker: 'জুতা মেরামত', tailor: 'দর্জি', railway_station: 'রেলস্টেশন', post_office: 'পোস্ট অফিস', attraction: 'দর্শনীয় স্থান', viewpoint: 'ভিউপয়েন্ট',
+  beach: 'সৈকত', museum: 'জাদুঘর', park: 'পার্ক', zoo: 'চিড়িয়াখানা', theme_park: 'বিনোদন পার্ক', picnic_site: 'পিকনিক স্পট', waterfall: 'ঝরনা', island: 'দ্বীপ',
+  hotel: 'হোটেল', guest_house: 'গেস্ট হাউস', resort: 'রিসোর্ট', motel: 'মোটেল', restaurant: 'রেস্টুরেন্ট', cafe: 'ক্যাফে', fast_food: 'ফাস্ট ফুড',
+  school: 'স্কুল', college: 'কলেজ', university: 'বিশ্ববিদ্যালয়', madrasa: 'মাদ্রাসা', mosque: 'মসজিদ', temple: 'মন্দির', church: 'গির্জা',
+  pagoda: 'প্যাগোডা', place_of_worship: 'উপাসনালয়', shelter: 'আশ্রয়কেন্দ্র', cyclone_shelter: 'ঘূর্ণিঝড় আশ্রয়কেন্দ্র' };
 const placeName = (p) => p.name_bn || p.name_en || (PIDX.unnamed_labels[p.subcategory] || {}).bn || SUBBN[p.subcategory] || 'নাম জানা নেই';
 
 // The list for one category: official numbers (pilot districts), landmarks from union pages (pilot), and places from
@@ -156,9 +167,9 @@ function nearby(cat) {
       const c = p.upazila && CEN.centres.find((x) => x.district === p.district && (x.upazila_en === p.upazila || (p.upazila === 'Sadar' && (x.upazila_en === p.district || /sadar/i.test(x.upazila_en)))));
       const upb = c ? c.upazila_bn : '';
       out.push({ name: p.name_hidden ? p.list.hidden_name_label_bn : (p.name_bn || p.name_en), sub: `পেট্রোল পাম্প · ${upb || here.dBn + ' জেলা'}`, src: p.source_url,
-        lat: c ? c.lat : null, lon: c ? c.lon : null, approx: !!c, noLoc: !c, q: `${p.name_en || 'filling station'} ${upb || ''} ${here.dBn}`.trim(), official: true, badge: p.list.badge_bn });
+        pid: p.id, lat: c ? c.lat : null, lon: c ? c.lon : null, approx: !!c, noLoc: !c, q: `${p.name_en || 'filling station'} ${upb || ''} ${here.dBn}`.trim(), official: true, badge: p.list.badge_bn });
     }
-    for (const p of here.places) if (OSMCAT[cat](p) && p.source !== 'official') out.push({ name: placeName(p), sub: `${SUBBN[p.subcategory] || p.subcategory}${p.upazila ? ' · ' + (UPBN[p.upazila] || UPBN_ALL[`${p.district}|${p.upazila}`] || p.upazila) : ''}`, src: p.source_url, lat: p.lat, lon: p.lon, osm: true });
+    for (const p of here.places) if (OSMCAT[cat](p) && p.source !== 'official') out.push({ name: placeName(p), sub: `${SUBBN[p.subcategory] || p.subcategory}${p.upazila ? ' · ' + (UPBN[p.upazila] || UPBN_ALL[`${p.district}|${p.upazila}`] || p.upazila) : ''}`, src: p.source_url, lat: p.lat, lon: p.lon, osm: true, pid: p.id });
   }
   for (const p of out) p.km = p.noLoc ? null : hav(here, p);
   // Official rows only when they are near (the pilot lists cover two districts). Places with no location (an official
@@ -169,6 +180,11 @@ function nearby(cat) {
 
 /* ---------- own icon set (inline SVG, 24×24, stroke) ---------- */
 const P = {
+  bed: '<path d="M3 19V7"/><path d="M3 15h18v4"/><path d="M21 15v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="12" r="2"/>',
+  dome: '<path d="M5 20v-8a7 7 0 0 1 14 0v8"/><path d="M3 20h18"/><path d="M12 5V3"/><path d="M10 20v-4a2 2 0 0 1 4 0v4"/>',
+  mail: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 8l9 6 9-6"/>',
+  train: '<rect x="6" y="3" width="12" height="13" rx="3"/><path d="M6 10h12"/><path d="M8 20l2-4M16 20l-2-4"/><path d="M9 13.5v.1M15 13.5v.1"/>',
+  hands: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
   home: '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
   pin: '<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
   gov: '<path d="M3 9l9-5 9 5"/><path d="M5 9v9M9.5 9v9M14.5 9v9M19 9v9"/><path d="M3 20h18"/>',
@@ -216,27 +232,29 @@ const P = {
 const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n] || P.info}</svg>`;
 
 /* category → icon + tint */
-const CI = { health: ['health', 't-ok'], union: ['gov', ''], bazar: ['basket', 't-sun'], edu: ['cap', ''], spot: ['wave', ''], pharmacy: ['pill', 't-ok'],
-  fuel: ['fuel', 't-sun'], atm: ['bank', ''], workshop: ['wrench', 't-sun'], shelter: ['shelter', 't-sos'], shop: ['store', 't-sun'], ghat: ['boat', ''], police: ['shield', ''], other: ['wrench', ''] };
+const CI = { health: ['health', 't-ok'], union: ['gov', ''], bazar: ['basket', 't-sun'], edu: ['cap', ''], spot: ['wave', 't-ok'], pharmacy: ['pill', 't-ok'],
+  fuel: ['fuel', 't-sun'], atm: ['bank', ''], workshop: ['wrench', 't-sun'], shelter: ['shelter', 't-sos'], shop: ['store', 't-sun'], ghat: ['bus', ''], police: ['shield', ''], other: ['wrench', ''], post: ['mail', ''], stay: ['bed', 't-sun'], worship: ['dome', ''] };
 const sq = (c, size = '') => `<span class="sq ${CI[c] ? CI[c][1] : ''}">${icon(CI[c] ? CI[c][0] : 'pin', size)}</span>`;
 
 /* ---------- rendering ---------- */
 let tab = 'today', cat = 'health', svc = null, situ = null;
 const TABS = [
-  { id: 'today', n: 'আজ', ic: 'home' }, { id: 'near', n: 'কাছে', ic: 'pin' }, { id: 'services', n: 'সেবা', ic: 'gov' },
-  { id: 'search', n: 'খুঁজুন', ic: 'search' }, { id: 'sos', n: 'বিপদে', ic: 'alert' },
+  { id: 'today', n: 'আজ', ic: 'home' }, { id: 'near', n: 'কাছে', ic: 'pin' }, { id: 'call', n: 'ডাকুন', ic: 'car' }, { id: 'issues', n: 'সমস্যা', ic: 'flag' },
+  { id: 'services', n: 'সেবা', ic: 'gov' }, { id: 'sos', n: 'বিপদে', ic: 'alert' },
 ];
 const ext = 'target="_blank" rel="noopener noreferrer"';
 const callBtn = (p, solid = true) => p ? `<a class="btn ${solid ? 'solid' : ''}" href="tel:${esc(p)}">${icon('phone', 'sm')}<span class="num">${bn(p)}</span></a>` : '';
 const srcLink = (s) => s ? `<a class="btn ghost" href="${esc(s)}" ${ext}>উৎস ${icon('ext', 'sm')}</a>` : '';
 const srcTag = (p) => p.official ? `<span class="badge off">সরকারি তালিকা</span>${p.badge ? `<span class="badge sample">${esc(p.badge)}</span>` : ''}` : p.osm ? '<span class="badge osm">OpenStreetMap, যাচাই করা হয়নি</span>' : p.off ? '<span class="badge off">সরকারি উৎস</span>' : '';
 
-function placeRow(p) {
+let lastItems = [];
+function placeRow(p, i) {
   return `<div class="r">${sq(p.cat)}
     <div><div class="t">${esc(p.name)}${srcTag(p)}</div><div class="m">${esc(p.sub || '')}</div></div>
     <div class="dist">${p.noLoc ? '<small>অবস্থান জানা নেই</small>' : p.approx ? `${p.km < 1.5 ? 'এই উপজেলায়' : '~' + distTxt(p.km)}<small>আনুমানিক অবস্থান</small>` : `${distTxt(p.km)}<small>${walkTxt(p.km)}</small>`}</div>
     <div class="acts">${callBtn(p.phone)}<a class="btn" href="${esc(dirLink(p))}" ${ext}>${icon('nav', 'sm')}${p.noLoc ? 'Google Maps-এ খুঁজুন' : 'পথ দেখান'}</a>
-      <button class="btn" type="button" data-share="${esc(p.name + (p.phone ? ' ' + p.phone : ''))}">${icon('share', 'sm')}শেয়ার</button>${srcLink(p.src)}</div></div>`;
+      <button class="btn" type="button" data-share="${esc(p.name + (p.phone ? ' ' + p.phone : ''))}">${icon('share', 'sm')}শেয়ার</button>${srcLink(p.src)}
+      ${p.noLoc || i === undefined ? '' : `<button class="btn ghost" type="button" data-dest="${i}">${cat === 'spot' ? 'গন্তব্য দেখুন' : 'বিস্তারিত'} ${icon('chev', 'sm')}</button>`}</div></div>`;
 }
 function contactRows(list) {
   const rows = list.filter((x) => x && x.c && x.c.p);
@@ -262,7 +280,7 @@ function viewToday() {
   const s = sunTimes(here.lat, here.lon), h = new Date().getHours();
   const hi = h < 5 ? 'শুভ রাত্রি' : h < 12 ? 'শুভ সকাল' : h < 17 ? 'শুভ দুপুর' : 'শুভ সন্ধ্যা';
   const c = CON();
-  const NEEDS = ['health', 'pharmacy', 'fuel', 'shop', 'atm', 'workshop', 'ghat', 'police'];
+  const NEEDS = ['health', 'pharmacy', 'fuel', 'shop', 'bazar', 'atm', 'workshop', 'ghat', 'police', 'post', 'stay', 'spot'];
   return `<section class="card hero"><p class="small">${hi} · ${esc(here.label)}</p><h1>আজ আপনার এলাকায়</h1>
       <div class="bento">
         <div class="cell"><span>${icon('sunrise', 'sm')}সূর্যোদয়</span><b>${s.rise}</b></div>
@@ -271,11 +289,17 @@ function viewToday() {
         <div class="cell"><span>${icon('flag', 'sm')}ঘূর্ণিঝড় সংকেত</span><b>—</b><span>শীঘ্রই আসছে</span></div>
       </div>
       <p class="small">সূর্যোদয়-সূর্যাস্ত ফোনেই হিসাব হয়, ইন্টারনেট লাগে না। আবহাওয়া আর সংকেত আসবে আবহাওয়া অধিদপ্তর থেকে (পর্ব ৩)।</p></section>
+    <section class="card"><div class="sec-head"><h2>${esc(here.dBn)} জেলা</h2><button class="link" type="button" data-open-area>জেলা বদলান${icon('chev', 'sm')}</button></div>
+      <p class="muted">৬৪ জেলার যেকোনোটা বেছে নিন: সেখানকার দরকারি জায়গা, দর্শনীয় স্থান আর সাহায্যের নম্বর দেখাবে।</p>
+      <div class="pills"><button class="pill" type="button" data-cat="spot">${icon('wave', 'sm')}এই জেলার দর্শনীয় স্থান</button><button class="pill" type="button" data-tab-go="help">${icon('hands', 'sm')}সাহায্য ও হেল্পলাইন</button></div></section>
     <section class="card"><div class="sec-head"><h2>কী দরকার?</h2><button class="link" type="button" data-tab-go="near">সব বিভাগ${icon('chev', 'sm')}</button></div>
       <div class="needs">${NEEDS.map((id) => { const k = CATS.find((x) => x.id === id); return `<button class="need" type="button" data-cat="${id}">${sq(id)}${k.n}</button>`; }).join('')}</div></section>
     <section class="card"><div class="sec-head"><h2>সরকারি সেবা সহজে</h2><button class="link" type="button" data-tab-go="services">সব সেবা${icon('chev', 'sm')}</button></div>
       <div class="pills">${SERVICES.slice(0, 5).map((x) => `<button class="pill" type="button" data-svc="${x.id}">${esc(x.n)}</button>`).join('')}</div></section>
-    <section class="card"><h2>নিরাপদে পৌঁছানো</h2><p class="muted">রওনা দেওয়ার সময় আর পৌঁছে এক চাপে পরিবারকে জানান। SMS-এ যায়, ইন্টারনেট লাগে না।</p>
+    <section class="card"><div class="sec-head"><h2>এলাকার সমস্যা</h2><button class="link" type="button" data-tab-go="issues">সব দেখুন${icon('chev', 'sm')}</button></div>
+      <p class="muted">রাস্তা ভাঙা, জলাবদ্ধতা, নষ্ট সড়কবাতি? জানান। স্বেচ্ছাসেবক যাচাই করে অফিসকে জানাবেন, আর সমাধান পর্যন্ত সবাই অবস্থা দেখবেন।</p>
+      <div class="pills"><button class="btn solid" type="button" data-issue-new>${icon('flag', 'sm')}সমস্যা জানান</button><button class="btn" type="button" data-tab-go="issues">"আমিও" দিন</button></div></section>
+    <section class="card"><h2>নিরাপদে পৌঁছানো</h2><p class="muted">রওনা দিন, কতক্ষণ লাগবে বলুন। পরিবার একটা লিংক পাবে: সময় পার হলেও "পৌঁছেছি" না এলে তাদের ফোনে লাল সতর্কতা দেখাবে।</p>
       <div class="pills"><button class="btn solid" type="button" data-trip="start">${icon('bus', 'sm')}রওনা দিলাম</button><button class="btn" type="button" data-trip="arrived">${icon('check', 'sm')}পৌঁছেছি</button></div></section>
     <section class="card"><div class="sec-head"><h2>এলাকার জরুরি নম্বর</h2><button class="link" type="button" data-tab-go="sos">সব নম্বর${icon('chev', 'sm')}</button></div>
       ${contactRows([{ label: `${here.upBn} থানা`, c: c.police, ic: 'shield' }, { label: 'উপজেলা স্বাস্থ্য কমপ্লেক্স', c: c.health, ic: 'health' }])}</section>`;
@@ -286,10 +310,10 @@ function viewNear() {
   if (!here) return needHere();
   const k = CATS.find((x) => x.id === cat), osmCat = !!OSMCAT[cat], loading = osmCat && !here.places;
   const items = loading ? [] : nearby(cat).map((p) => ({ ...p, cat }));
-  const pilotOnly = ['union', 'edu', 'spot'].includes(cat) && !here.union;
+  const pilotOnly = cat === 'union' && !here.union;
   const gq = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${GQ[cat] || k.n} ${here.upBn} ${here.dBn}`)}`;
   const empty = `<div class="note">${icon('info')}<p>${pilotOnly ? 'এই তথ্য এখন শুধু নোয়াখালী আর কক্সবাজারের জন্য আছে; বাকি জেলায় আসছে।'
-    : cat === 'shelter' ? 'আশ্রয়কেন্দ্রের সরকারি তালিকা আসছে (দুর্যোগ ব্যবস্থাপনা অধিদপ্তর)।'
+    : cat === 'shelter' && !items.length ? 'এই এলাকার আশ্রয়কেন্দ্রের তালিকা এখনো নেই; সরকারি তালিকা (দুর্যোগ ব্যবস্থাপনা অধিদপ্তর) আসছে। দুর্যোগের আগাম বার্তা: ১০৯০।'
     : `${esc(here.upBn)}-এর কাছে এখনো কোনো ${esc(k.n)} আমাদের তালিকায় নেই। OpenStreetMap-এ এই এলাকার তথ্য কম; সরকারি তালিকা আর স্বেচ্ছাসেবকদের তথ্য যোগ হচ্ছে।`}</p></div>`;
   return `<section class="card"><p class="eyebrow">আমার কাছে · ${esc(here.dBn)}</p><h1>${esc(k.n)}</h1><p class="muted">${esc(here.label)} থেকে দূরত্ব, কাছেরটা আগে। দূরত্ব ফোনেই হিসাব হয়, লোকেশন কোথাও যায় না।</p>
       <div class="scroller" role="group" aria-label="বিভাগ">${CATS.map((x) => `<button class="pill" type="button" data-cat="${x.id}" aria-pressed="${x.id === cat}">${icon(CI[x.id][0], 'sm')}${x.n}</button>`).join('')}</div>
@@ -297,12 +321,55 @@ function viewNear() {
       <a class="btn ghost" href="${esc(gq)}" ${ext}>Google Maps-এ আরও দেখুন ${icon('ext', 'sm')}</a></div></section>
     ${mapOn ? `<section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="ম্যাপ"></div></div><p class="small">ম্যাপ দেখতে ইন্টারনেট লাগে; ম্যাপের ছবি OpenStreetMap থেকে আসে। নিচের তালিকা নেট ছাড়াও চলে।</p></section>` : ''}
     <section class="card">${loading ? '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'
-      : items.length ? `<div class="rows">${items.map(placeRow).join('')}</div>` : empty}
+      : items.length ? `<div class="rows">${(lastItems = items).map((p, i) => placeRow(p, i)).join('')}</div>` : empty}
       ${['bazar', 'edu', 'spot'].includes(cat) && items.some((p) => p.approx) ? '<p class="small">"আনুমানিক": জায়গাটার নিজের অবস্থান এখনো নেই, তাই তার ইউনিয়ন বা উপজেলার কেন্দ্র থেকে দূরত্ব দেখানো হচ্ছে।</p>' : ''}
       ${items.some((p) => p.official) ? '<p class="small">ফিলিং স্টেশন: পদ্মা অয়েল (২০১৯) আর মেঘনা পেট্রোলিয়ামের (২০২৫) সরকারি ডিলার তালিকা। তালিকায় অবস্থান নেই, তাই উপজেলার কেন্দ্র থেকে আনুমানিক দূরত্ব; উপজেলা জানা না থাকলে "অবস্থান জানা নেই"। যমুনা অয়েলের তালিকা এখনো যোগ হয়নি।</p>' : ''}
       ${items.some((p) => p.osm) ? '<p class="small">জায়গা © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> (ODbL), ১৩ নভেম্বর ২০২৬-এর তথ্য। ফোন নম্বর রাখা হয়নি, কারণ সেগুলো সরকারি উৎসের না।</p>' : ''}</section>`;
 }
 
+const HELPGROUPS = [
+  ['এখনই বিপদ', ['emergency', 'fire', 'police']], ['নারী ও শিশু', ['women_children']], ['স্বাস্থ্য', ['health']],
+  ['দুর্যোগ, নদী ও সাগর', ['disaster', 'coast_river']], ['পর্যটক', ['tourist_police']], ['আইনি সহায়তা', ['legal']],
+  ['তথ্য ও সরকারি সেবা', ['information', 'anti_corruption']],
+];
+function viewHelp() {
+  const row = (r) => `<div class="r"><span class="sq ${['emergency', 'fire'].includes(r.c) ? 't-sos' : ''}">${icon(r.c === 'health' ? 'health' : r.c === 'fire' ? 'alert' : 'phone')}</span>
+    <div><div class="t">${esc(r.n)}<span class="badge off">সরকারি উৎস</span></div></div><span></span><div class="acts">${callBtn(r.p, ['emergency'].includes(r.c))}${srcLink(r.s)}</div></div>`;
+  return `<section class="card"><p class="eyebrow">সাহায্য</p><h1>সাহায্য ও হেল্পলাইন</h1><p class="muted">সব নম্বর সরকারি পাতা থেকে, প্রতিটার পাশে উৎস। বেশিরভাগ বিনা খরচে, ২৪ ঘণ্টা।</p></section>
+    ${HELPGROUPS.map(([g, cs]) => { const rs = D.national.filter((r) => cs.includes(r.c)); return rs.length ? `<section class="card"><h2>${esc(g)}</h2><div class="rows">${rs.map(row).join('')}</div></section>` : ''; }).join('')}
+    ${here ? `<section class="card"><h2>${esc(here.upBn)}-এর সরকারি নম্বর</h2>${contactRows(localContacts())}</section>` : ''}
+    <section class="card"><h2>কাছের সাহায্যের জায়গা</h2><div class="pills">${['health', 'pharmacy', 'police', 'shelter'].map((k) => `<button class="pill" type="button" data-cat="${k}">${icon(CI[k][0], 'sm')}${CATS.find((x) => x.id === k).n}</button>`).join('')}</div></section>`;
+}
+
+// ---- Destination page: one place (a tourist spot, or any place) with what is around it ----
+let dest = null;
+const AROUND = [['stay', 'থাকা ও খাওয়া'], ['health', 'হাসপাতাল ও ক্লিনিক'], ['pharmacy', 'ফার্মেসি'], ['atm', 'ব্যাংক/ATM'], ['fuel', 'ফিলিং স্টেশন'], ['police', 'থানা'], ['ghat', 'যাতায়াত']];
+function aroundDest(d, k, km = 5) {
+  if (!here.places || !OSMCAT[k]) return [];
+  return here.places.filter((p) => OSMCAT[k](p) && p.lat != null && p.source !== 'official').map((p) => ({ name: placeName(p), sub: SUBBN[p.subcategory] || '', lat: p.lat, lon: p.lon, src: p.source_url, osm: true, cat: k, km: hav(d, p) }))
+    .filter((p) => p.km <= km && p.km > 0.01).sort((a, b) => a.km - b.km).slice(0, 3);
+}
+function viewDest() {
+  if (!dest) { tab = 'near'; return viewNear(); }
+  const d = dest, groups = AROUND.map(([k, n]) => [k, n, aroundDest(d, k)]).filter((g) => g[2].length);
+  const trip = `রওনা দিলাম ${d.name}-এর দিকে (${here.dBn})। পৌঁছে জানাব।`;
+  return `<button class="link" type="button" data-tab-go="near">${icon('back', 'sm')}তালিকায় ফিরুন</button>
+    <section class="card"><p class="eyebrow">${d.cat === 'spot' ? 'গন্তব্য' : 'জায়গা'} · ${esc(here.dBn)}</p><h1>${esc(d.name)}</h1>
+      <p class="muted">${esc(d.sub || '')}</p><div>${srcTag(d)}</div>
+      <p><b>${d.approx ? '~' : ''}${distTxt(d.km)}</b> <span class="muted">${esc(here.label)} থেকে${d.approx ? ' (আনুমানিক)' : ''}</span></p>
+      <div class="pills"><a class="btn solid" href="${esc(dirLink(d))}" ${ext}>${icon('nav', 'sm')}পথ দেখান</a>
+        <button class="btn" type="button" data-share="${esc(d.name + ', ' + here.dBn)}">${icon('share', 'sm')}শেয়ার</button>
+        <button class="btn" type="button" data-trip-dest="${esc(trip)}">${icon('bus', 'sm')}এখানে যাচ্ছি (পরিবারকে SMS)</button>${srcLink(d.src)}</div></section>
+    ${d.pid ? `<section class="card"><h2>এখন কেমন?</h2><p class="muted" id="pstText">মানুষের জানানো খবর দেখা হচ্ছে…</p>
+      <div class="pills">${(d.cat === 'fuel' ? ['fuel_yes', 'fuel_no', 'open_night'] : ['open', 'closed', 'open_night']).map((v) => `<button class="pill" type="button" data-pst="${v}">${esc(PV[v])}</button>`).join('')}</div>
+      <p class="small" id="pstMsg">আপনি এখানে থাকলে জানান: অন্যরা কাজে লাগাবে। সাইন ইন লাগে; আপনার নাম কেউ দেখবে না।</p></section>` : ''}
+    <section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="গন্তব্যের ম্যাপ"></div></div><p class="small">ম্যাপ দেখতে ইন্টারনেট লাগে; ম্যাপের ছবি OpenStreetMap থেকে আসে।</p></section>
+    <section class="card"><h2>এর কাছে (৫ কিমির মধ্যে)</h2>
+      ${groups.length ? groups.map(([k, n, xs]) => `<h3>${esc(n)}</h3><div class="rows">${xs.map((p) => `<div class="r">${sq(k)}<div><div class="t">${esc(p.name)}</div><div class="m">${esc(p.sub)}</div></div><div class="dist">${distTxt(p.km)}<small>গন্তব্য থেকে</small></div>
+        <div class="acts"><a class="btn" href="${esc(dirLink(p))}" ${ext}>${icon('nav', 'sm')}পথ দেখান</a></div></div>`).join('')}</div>`).join('')
+        : `<div class="note">${icon('info')}<p>এর কাছে থাকা-খাওয়া, হাসপাতাল বা ATM-এর তথ্য এখনো আমাদের তালিকায় নেই।</p></div>`}
+      <p class="small">জায়গা © OpenStreetMap contributors (ODbL), যাচাই করা হয়নি। বিপদে ৯৯৯; পর্যটক হলে ট্যুরিস্ট পুলিশ ০১৩২০২২২২২২।</p></section>`;
+}
 const SVC_IC = { birth: 'doc', death: 'doc', citizen: 'doc', heir: 'doc', mutation: 'gov', nid: 'doc', trade: 'store' };
 function viewServices() {
   if (svc) {
@@ -319,12 +386,17 @@ function viewServices() {
     return `<button class="link" type="button" data-svc="">${icon('back', 'sm')}সব সেবা</button>
       <section class="card"><p class="eyebrow">সরকারি সেবা</p><h1>${esc(s.n)}</h1>
         <h3>কোথায় যাবেন</h3>${where}
-        <h3>কী লাগবে</h3><ol class="steps">${s.docs.map((d) => `<li>${esc(d)}</li>`).join('')}</ol>
+        <h3>কী লাগবে <span class="small">(যা আছে টিক দিন)</span></h3><div class="checks">${s.docs.map((d, i) => `<label class="check"><input type="checkbox" id="ck${i}"> ${esc(d)}</label>`).join('')}</div>
         ${s.link ? `<a class="btn solid" href="${esc(s.link)}" ${ext}>${icon('globe', 'sm')}অনলাইনে আবেদন: ${esc(s.link.replace('https://', ''))}</a>` : '<p class="small">এই সেবার অনলাইন আবেদন নেই, অফিসে গিয়ে করতে হয়।</p>'}
         <div class="note">${icon('info')}<p>সাধারণ তথ্য। ফি আর কাগজের সর্বশেষ তালিকা আবেদনের আগে সরকারি পাতায় বা অফিসে মিলিয়ে নিন। দালালের কাছে যাবেন না।</p></div></section>`;
   }
-  return `<section class="card"><p class="eyebrow">সরকারি সেবা সহজে</p><h1>কোথায় যাবেন, কী লাগবে</h1><p class="muted">অনলাইনে হয় কি না, আর আপনার এলাকার অফিসের নম্বর।</p>
+  return `<section class="card"><div class="sec-head"><h2>কিছু হারিয়েছে?</h2><span class="sq t-sun">${icon('doc')}</span></div>
+      <p class="muted">মোবাইল, NID, কার্ড বা কাগজ হারালে থানায় সাধারণ ডায়েরি (জিডি) করতে হয়। কয়েকটা প্রশ্নের উত্তর দিন, আবেদনের খসড়া তৈরি হবে। সব ফোনেই থাকে, কোথাও যায় না।</p>
+      <div><button class="btn solid" type="button" data-tab-go="gd">${icon('doc', 'sm')}জিডির খসড়া বানান</button></div></section>
+    <section class="card"><p class="eyebrow">সরকারি সেবা সহজে</p><h1>কোথায় যাবেন, কী লাগবে</h1><p class="muted">অনলাইনে হয় কি না, আর আপনার এলাকার অফিসের নম্বর।</p>
       <div>${SERVICES.map((x) => `<button class="hit" type="button" data-svc="${x.id}"><span class="sq">${icon(SVC_IC[x.id])}</span><span><span class="t w600">${esc(x.n)}</span><br><span class="small">${x.where === 'union' ? 'ইউনিয়ন পরিষদ' : 'উপজেলা অফিস'}${x.link ? ' · অনলাইনেও' : ''}</span></span>${icon('chev', 'chev')}</button>`).join('')}</div></section>
+    <section class="card"><div class="sec-head"><h2>সাহায্য ও হেল্পলাইন</h2><button class="link" type="button" data-tab-go="help">সব ${bn(D.national.length)}টা${icon('chev', 'sm')}</button></div>
+      <p class="muted">নারী ও শিশু, স্বাস্থ্য, আইনি সহায়তা, দুর্যোগ, পর্যটক, পাসপোর্ট, ভূমি, বিদ্যুৎ…</p></section>
     <section class="card"><h2>আরও সরকারি হেল্পলাইন</h2><div class="rows">${D.national.filter((r) => ['16122', '333', '16445', '16999', '16699'].includes(r.p)).map((r) => `<div class="r"><span class="sq">${icon('phone')}</span><div><div class="t">${esc(r.n)}</div></div><span></span><div class="acts">${callBtn(r.p, false)}</div></div>`).join('')}</div></section>`;
 }
 
@@ -349,6 +421,8 @@ function viewSos() {
       ${s.cats.length ? `<div class="pills">${s.cats.map((k) => `<button class="pill" type="button" data-cat="${k}">${icon(CI[k][0], 'sm')}কাছের ${CATS.find((y) => y.id === k).n}</button>`).join('')}</div>` : ''}</section>`;
   }
   return `<a class="sosbig" href="tel:999"><span class="ring">${icon('phone', 'lg')}</span><span><b>৯৯৯-এ কল করুন</b><span>পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স · বিনা খরচে</span></span></a>
+    <section class="card"><h2>পরিবারকে এক চাপে জানান</h2><p class="muted">ঘূর্ণিঝড়, বন্যা বা যেকোনো বিপদে: SMS যায় আপনার ফোন থেকে, নেট লাগে না।</p>
+      <div class="pills"><button class="btn solid" type="button" data-safe="ok">${icon('check', 'sm')}আমি নিরাপদ</button><button class="btn danger" type="button" data-safe="help">${icon('alert', 'sm')}সাহায্য দরকার</button><button class="btn" type="button" data-safe="shelter">${icon('shelter', 'sm')}আশ্রয়কেন্দ্রে যাচ্ছি</button></div></section>
     <section class="card"><h2>কী হয়েছে?</h2><div class="pills">${SITU.map((x) => `<button class="pill" type="button" data-situ="${x.id}" aria-pressed="${x.id === situ}">${icon(x.ic, 'sm')}${x.n}</button>`).join('')}</div>
       ${!here ? '<p class="muted">এলাকা বাছলে সেখানকার নম্বরও দেখাবে।</p>' : ''}</section>
     ${situHtml}
@@ -414,13 +488,20 @@ const hitsHtml = () => !q ? '<p class="muted">উপরে লিখুন, ব�
   : `<p class="muted">পাওয়া যায়নি। লোকেশন দিয়ে খুঁজুন, বা উপজেলার নাম লিখুন।</p><div><button class="btn solid" type="button" data-open-area>${icon('locate', 'sm')}লোকেশন দিয়ে খুঁজুন</button></div>`;
 
 /* ---------- glue ---------- */
-const VIEWS = { today: viewToday, near: viewNear, services: viewServices, sos: viewSos, search: viewSearch };
-const navHtml = () => TABS.map((t) => `<button class="navbtn ${t.id === 'sos' ? 'sos' : ''}" type="button" data-tab="${t.id}" aria-current="${t.id === tab ? 'page' : 'false'}">${icon(t.ic)}<span>${t.n}</span></button>`).join('');
+const VIEWS = { today: viewToday, near: viewNear, services: viewServices, sos: viewSos, search: viewSearch, help: viewHelp, dest: viewDest };
+const navHtml = () => TABS.map((t) => `<button class="navbtn ${t.id === 'sos' ? 'sos' : ''}" type="button" data-tab="${t.id}" aria-current="${t.id === tab || (t.id === 'near' && tab === 'dest') || (t.id === 'services' && (tab === 'help' || tab === 'gd')) || (t.id === 'today' && (tab === 'tripset' || tab === 'trip')) || (t.id === 'call' && tab === 'drive') ? 'page' : 'false'}">${icon(t.ic)}<span>${t.n}</span></button>`).join('');
 let mapObj = null;
 function render() {
   if (mapObj) { mapObj.remove(); mapObj = null; }
+  if (rideMap) { rideMap.remove(); rideMap = null; }
   $('#view').innerHTML = VIEWS[tab]();
   if (tab === 'near' && mapOn) drawMap();
+  if (tab === 'dest') { drawDestMap(); loadPlaceStatus(); }
+  if (tab === 'issues') loadIssues();
+  if (tab === 'trip') tickTrip();
+  if (tab === 'call') callMount();
+  if (tab === 'drive') driveMount();
+  for (const b of document.querySelectorAll('[data-tab="search"].hsearch')) b.setAttribute('aria-current', String(tab === 'search'));
   $('#dockNav').innerHTML = navHtml(); $('#railNav').innerHTML = navHtml();
 }
 function setTab(t) { tab = t; render(); window.scrollTo(0, 0); }
@@ -464,12 +545,14 @@ document.addEventListener('click', (ev) => {
   if (t.dataset.share) return copy(t.dataset.share);
   if (t.dataset.copy) return copy(t.dataset.copy);
   if ('map' in t.dataset) { mapOn = !mapOn; render(); return; }
+  if (t.dataset.dest) { dest = lastItems[Number(t.dataset.dest)]; if (dest) { tab = 'dest'; render(); window.scrollTo(0, 0); } return; }
+  if (t.dataset.tripDest) { situ = null; tab = 'sos'; render(); $('#sosOut').innerHTML = smsBlock(t.dataset.tripDest); return; }
   if (t.id === 'goUp') { const c = CEN.centres[Number($('#upSel').value)]; if (c) { $('#areaDlg').close(); locate(c.lat, c.lon, `${c.upazila_bn}, ${DISTBN[c.district]}`); } return; }
   if ('openArea' in t.dataset) return $('#areaDlg').showModal();
   if (t.dataset.trip) {
     if (!here) return $('#areaDlg').showModal();
-    const msg = t.dataset.trip === 'start' ? `রওনা দিলাম, ${here.label} থেকে। পৌঁছে জানাব। না জানালে ${CON().police ? `${here.upBn} থানা: ${CON().police.p}` : '৯৯৯-এ কল কোরো'}` : `নিরাপদে পৌঁছেছি। চিন্তা কোরো না।`;
-    situ = null; tab = 'sos'; render(); $('#sosOut').innerHTML = smsBlock(msg); return;
+    if (t.dataset.trip === 'start') { tab = 'tripset'; render(); window.scrollTo(0, 0); return; }
+    situ = null; tab = 'sos'; render(); $('#sosOut').innerHTML = smsBlock('নিরাপদে পৌঁছেছি। চিন্তা কোরো না।'); return;
   }
   if (t.id === 'sosMake') {
     store.set('demo-people', $('#people').value);
@@ -506,6 +589,731 @@ for (const d of [...new Set(CEN.centres.map((c) => c.district))].sort((a, b) => 
 $('#distSel').value = 'Noakhali'; fillUps();
 $('#distSel').addEventListener('change', fillUps);
 $('#presetList').innerHTML = PRESETS.map((p, i) => `<button class="opt" type="button" data-preset="${i}">${icon('pin','sm')}${esc(p.n)}</button>`).join('');
+$('#areaDlg').addEventListener('click', (e) => { if (e.target.id === 'areaDlg') e.target.close(); });
+
+function drawDestMap() {
+  const el = $('#map'); if (!el || !window.L || !dest) return;
+  if (!navigator.onLine) { el.textContent = 'ইন্টারনেট নেই, তাই ম্যাপ দেখানো যাচ্ছে না।'; return; }
+  mapObj = L.map(el).setView([dest.lat, dest.lon], 14);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(mapObj);
+  const css = getComputedStyle(document.documentElement), brand = css.getPropertyValue('--brand').trim() || '#0b4a4e', sun = css.getPropertyValue('--sun').trim() || '#b86e0a';
+  const pts = [[dest.lat, dest.lon]];
+  for (const [k] of AROUND) for (const p of aroundDest(dest, k)) {
+    const b = document.createElement('b'); b.textContent = p.name;
+    L.circleMarker([p.lat, p.lon], { radius: 6, color: brand, weight: 2, fillColor: brand, fillOpacity: 0.35 }).addTo(mapObj).bindPopup(b); pts.push([p.lat, p.lon]);
+  }
+  const t = document.createElement('b'); t.textContent = dest.name;
+  L.circleMarker([dest.lat, dest.lon], { radius: 10, color: '#ffffff', weight: 3, fillColor: sun, fillOpacity: 1 }).addTo(mapObj).bindPopup(t).openPopup();
+  if (pts.length > 1) mapObj.fitBounds(pts, { padding: [28, 28], maxZoom: 15 });
+}
+
+/* ===================== v4: features that help people act (impact plan) ===================== */
+// Firebase loads only after a tap that needs it (the site's own js/firebase.js and js/community.js); help, lists,
+// the GD draft, trips and the SMS buttons never wait for it and work with no internet.
+let fbP = null;
+const FB = () => (fbP ||= Promise.all([import('../js/firebase.js'), import('../js/community.js')]));
+const PV = { open: 'এখন খোলা', closed: 'এখন বন্ধ', fuel_yes: 'তেল আছে', fuel_no: 'তেল নেই', open_night: 'রাতেও খোলা' };
+const FBERR = { 'permission-denied': 'নিরাপত্তা নিয়মে কাজটা আটকেছে। পাতাটা রিলোড দিয়ে আবার চেষ্টা করুন; না হলে অ্যাডমিনকে জানান।',
+  'limit-wait': '১ মিনিট পর আবার চেষ্টা করুন।', 'limit-day': 'আজ ১০টা জানানো হয়ে গেছে, কাল আবার।', already: 'আপনি আগেই "আমিও" দিয়েছেন। ধন্যবাদ!',
+  unverified: 'আগে ইমেইল যাচাই করুন (Google দিয়ে সাইন ইন করলে লাগে না)।', unavailable: 'ইন্টারনেট লাগবে। নেট এলে আবার চেষ্টা করুন।' };
+const errText = (e) => FBERR[e && e.code] || (navigator.onLine ? 'কাজটা হয়নি। একটু পর আবার চেষ্টা করুন।' : FBERR.unavailable);
+const agoBn = (ms) => { const m = Math.max(1, Math.round((Date.now() - ms) / 60000)); return m < 60 ? `${bn(m)} মিনিট আগে` : m < 1440 ? `${bn(Math.round(m / 60))} ঘণ্টা আগে` : `${bn(Math.round(m / 1440))} দিন আগে`; };
+// The signed-in person with a verified email, or null after showing a sign-in button in `box`.
+async function needUser(box) {
+  const [fb] = await FB();
+  const u = await fb.currentUser();
+  if (!u) {
+    box.innerHTML = `<div class="note">${icon('info')}<p>এটা জানাতে সাইন ইন লাগে, যাতে কেউ ভুয়া খবর না দিতে পারে। আপনার নাম বা ইমেইল কেউ দেখবে না।</p></div>
+      <div><button class="btn solid" type="button" data-signin>Google দিয়ে সাইন ইন</button></div>`;
+    return null;
+  }
+  if (!(await fb.isVerified())) throw { code: 'unverified' };
+  return u;
+}
+
+/* ---- "এখন কেমন?" on a place's page ---- */
+async function loadPlaceStatus() {
+  const el = $('#pstText'); if (!el || !dest || !dest.pid) return;
+  if (!navigator.onLine) { el.textContent = 'ইন্টারনেট নেই, তাই মানুষের জানানো খবর দেখা যাচ্ছে না।'; return; }
+  try {
+    const [fb, cm] = await FB(); const st = await fb.readPlaceStatus(dest.pid);
+    if (!$('#pstText')) return;
+    $('#pstText').textContent = cm.placeStatusText(st, Date.now(), bn) || 'গত ৬ ঘণ্টায় কেউ জানায়নি। আপনি জানালে অন্যরা উপকৃত হবেন।';
+    dest.st = st;
+  } catch (e) { if ($('#pstText')) $('#pstText').textContent = 'খবর দেখা যায়নি: ' + errText(e); }
+}
+const placeSent = new Map();   // this visit only: person|place -> when they last answered (the rules allow one per 30 min)
+async function sendPlace(value) {
+  const box = $('#pstMsg');
+  box.textContent = 'পাঠানো হচ্ছে…';
+  try {
+    const u = await needUser(box); if (!u) return;
+    const key = `${u.uid}|${dest.pid}`;
+    if (Date.now() - (placeSent.get(key) || 0) < 30 * 60000) { box.textContent = 'আপনি এইমাত্র জানিয়েছেন। ৩০ মিনিট পর আবার জানাতে পারবেন।'; return; }
+    const [fb, cm] = await FB();
+    const old = dest.st || await fb.readPlaceStatus(dest.pid);
+    await fb.sendPlaceStatus(dest.pid, value, cm.nextPlaceStatus(old, value, Date.now()));
+    placeSent.set(key, Date.now()); box.textContent = 'ধন্যবাদ! আপনার খবর যোগ হয়েছে।'; await loadPlaceStatus();
+  } catch (e) { box.textContent = e && e.code === 'permission-denied' ? 'জানানো যায়নি: গত ৩০ মিনিটে এই জায়গার খবর দিয়ে থাকলে একটু পরে আবার চেষ্টা করুন।' : errText(e); }
+}
+
+/* ---- "সমস্যা জানান, সমাধান দেখুন" ---- */
+let issuesState = { key: '', list: null, err: '', form: false };
+const STEPS = ['open', 'verified', 'sent', 'working', 'solved'];
+const STEPBN = { open: 'জানানো', verified: 'যাচাই', sent: 'অফিসে', working: 'কাজ চলছে', solved: 'সমাধান' };
+function stepper(st) {
+  if (st === 'closed') return '<span class="badge sample">বন্ধ (কারণ লেখা আছে)</span>';
+  const k = STEPS.indexOf(st);
+  return `<ol class="stepper" aria-label="অবস্থা">${STEPS.map((x, i) => `<li class="${i < k ? 'done' : i === k ? 'now' : ''}">${STEPBN[x]}</li>`).join('')}</ol>`;
+}
+function viewIssues() {
+  if (!here) return needHere();
+  const st = issuesState;
+  const cats = ISSUE_CATS.map(([k, n]) => `<option value="${k}">${esc(n)}</option>`).join('');
+  const form = st.form ? `<section class="card" id="issueForm"><h2>নতুন সমস্যা জানান</h2>
+      <p class="muted">${esc(here.upBn)}, ${esc(here.dBn)} · নাম, ফোন নম্বর বা বাড়ির ঠিকানা লিখবেন না: সবার জন্য খোলা পাতায় দেখাবে।</p>
+      <label for="isCat">কী সমস্যা</label><select id="isCat">${cats}</select>
+      <label for="isUnion">ইউনিয়ন বা ওয়ার্ড (জানা থাকলে)</label><input type="search" id="isUnion" maxlength="80" placeholder="নিশ্চিত না হলে খালি রাখুন">
+      <label for="isLand">কাছের চেনা জায়গা</label><input type="search" id="isLand" placeholder="যেমন: কাশেম বাজারের মোড়, প্রাইমারি স্কুলের সামনে" maxlength="80">
+      <label for="isText">কী হয়েছে, কবে থেকে</label><textarea id="isText" rows="3" maxlength="300" placeholder="যেমন: দুই সপ্তাহ ধরে রাস্তায় হাঁটুপানি, স্কুলের বাচ্চারা যেতে পারছে না।"></textarea>
+      <div class="pills"><button class="btn solid" type="button" data-issue-send>জমা দিন</button><button class="btn ghost" type="button" data-issue-cancel>বাদ দিন</button></div>
+      <div id="issueMsg" class="small" role="status"></div></section>` : '';
+  const list = st.err ? `<div class="note">${icon('info')}<p>${esc(st.err)}</p></div><div><button class="btn" type="button" data-issue-reload>আবার চেষ্টা</button></div>`
+    : !st.list ? '<div class="skeleton"></div><div class="skeleton"></div>'
+    : !st.list.length ? `<p class="muted">${esc(here.upBn)}-এ এখনো কোনো সমস্যা জানানো হয়নি। প্রথম জন হোন।</p>`
+    : `<div class="rows">${st.list.map((x) => `<div class="r issue"><span class="sq ${x.status === 'solved' ? 't-ok' : 't-sun'}">${icon('flag')}</span>
+        <div><div class="t">${esc(ISSUE_BN[x.category] || x.category)} · ${esc(x.landmark)}</div><div class="m">${esc(x.union ? x.union + ' · ' : '')}${x.createdAt ? agoBn(x.createdAt) : ''}</div>
+        <p class="issue-text">${esc(x.text)}</p>${stepper(x.status)}${x.statusNote ? `<p class="small">${icon('info', 'sm')} ${esc(x.statusNote)}</p>` : ''}</div><span></span>
+        <div class="acts"><button class="btn" type="button" data-metoo="${esc(x.id)}">${icon('hands', 'sm')}আমিও (${bn(x.metoo || 0)})</button>
+        <button class="btn ghost" type="button" data-share="${esc(`${ISSUE_BN[x.category] || ''}: ${x.landmark}, ${here.upBn} — SafeConnect-এ "আমিও" দিন`)}">${icon('share', 'sm')}শেয়ার</button></div></div>`).join('')}</div>`;
+  return `<section class="card"><p class="eyebrow">সমস্যা জানান, সমাধান দেখুন</p><h1>${esc(here.upBn)}-এর সমস্যা</h1>
+      <p class="muted">জানানো → স্বেচ্ছাসেবকের যাচাই → অফিসে → কাজ চলছে → সমাধান। প্রতিটা ধাপ সবাই দেখে। একই সমস্যা আগে থাকলে নতুন না লিখে "আমিও" দিন।</p>
+      ${st.form ? '' : `<div class="pills"><button class="btn solid" type="button" data-issue-new>${icon('flag', 'sm')}নতুন সমস্যা জানান</button><button class="link" type="button" data-open-area>উপজেলা বদলান${icon('chev', 'sm')}</button></div>`}</section>
+    ${form}<section class="card"><h2>জানানো সমস্যা</h2>${list}<p class="small" id="issueRowMsg" role="status"></p></section>`;
+}
+const ISSUE_CATS = [['road', 'রাস্তা ভাঙা'], ['water', 'খাবার পানি'], ['drain', 'জলাবদ্ধতা বা ড্রেন'], ['light', 'সড়কবাতি নষ্ট'], ['garbage', 'ময়লা'],
+  ['power', 'বিদ্যুৎ'], ['health', 'স্বাস্থ্যসেবা'], ['safety', 'নিরাপত্তা'], ['place', 'জায়গার তথ্য ভুল বা বন্ধ'], ['other', 'অন্য সমস্যা']];
+const ISSUE_BN = Object.fromEntries(ISSUE_CATS);
+const issueKey = () => `${here.d}|${here.up}`;
+async function loadIssues(force) {
+  if (!here) return;
+  if (!force && issuesState.key === issueKey() && (issuesState.list || issuesState.err || issuesState.loading)) return;
+  issuesState = { ...issuesState, key: issueKey(), list: null, err: '', loading: true };
+  if (!navigator.onLine) { issuesState.err = 'ইন্টারনেট নেই। জানানো সমস্যার তালিকা দেখতে নেট লাগে।'; if (tab === 'issues') render(); return; }
+  try { const [fb, cm] = await FB(); issuesState.list = await fb.listIssues(cm.districtKey(here.d), here.up); }
+  catch (e) { issuesState.err = 'তালিকা আনা যায়নি: ' + errText(e); }
+  issuesState.loading = false;
+  if (tab === 'issues') render();
+}
+async function sendIssueNow() {
+  const msg = $('#issueMsg'), [fb, cm] = await FB();
+  const d = { category: $('#isCat').value, district: here.d, upazila: here.up, union: $('#isUnion').value, landmark: $('#isLand').value, text: $('#isText').value };
+  const ok = cm.checkIssue(d); if (!ok.ok) { msg.textContent = ok.error; return; }
+  msg.textContent = 'পাঠানো হচ্ছে…';
+  try {
+    if (!(await needUser(msg))) return;
+    await fb.sendIssue(cm.issueFields(d));
+    issuesState.form = false; toast('ধন্যবাদ! সমস্যাটা জানানো হয়েছে।'); await loadIssues(true);
+  } catch (e) { msg.textContent = errText(e); }
+}
+async function meTooNow(id) {
+  const msg = $('#issueRowMsg'); msg.textContent = '';
+  try {
+    if (!(await needUser(msg))) return;
+    const [fb] = await FB(); await fb.meToo(id); toast('"আমিও" যোগ হয়েছে।'); await loadIssues(true);
+  } catch (e) { msg.textContent = errText(e); }
+}
+
+/* ---- নিরাপদে পৌঁছানো: a link the family opens; red when the time is over (no server) ---- */
+let trip = null;
+function viewTripSet() {
+  const opts = [[15, '১৫ মিনিট'], [30, '৩০ মিনিট'], [60, '১ ঘণ্টা'], [120, '২ ঘণ্টা'], [240, '৪ ঘণ্টা']];
+  return `<button class="link" type="button" data-tab-go="today">${icon('back', 'sm')}ফিরুন</button>
+    <section class="card"><p class="eyebrow">নিরাপদে পৌঁছানো</p><h1>কতক্ষণ লাগবে?</h1>
+      <p class="muted">পরিবার একটা SMS পাবে, তাতে একটা লিংক থাকবে। লিংকে সময় গোনা হবে। সময় পার হলেও আপনার "পৌঁছেছি" SMS না পেলে লিংকটা লাল হয়ে বলবে: এখনই ফোন করুন।</p>
+      <label for="tripTo">কোথায় যাচ্ছেন (চাইলে)</label><input type="search" id="tripTo" maxlength="40" placeholder="যেমন: মাইজদী কলেজ">
+      <div class="pills">${opts.map(([m, n]) => `<button class="pill" type="button" data-trip-go="${m}">${n}</button>`).join('')}</div>
+      <p class="small">লিংকে থাকে শুধু রওনার সময়, কতক্ষণ লাগবে আর আপনার লেখা জায়গার নাম। আপনার লোকেশন থাকে না।</p>
+      <div id="sosOut"></div></section>`;
+}
+function tripFromHash() {
+  const m = location.hash.match(/^#trip=(\d{10}),(\d{1,4}),([^#]{0,1500})$/);
+  if (!m) return;
+  let label = ''; try { label = decodeURIComponent(m[3] || '').slice(0, 80); } catch { /* a broken link: no label */ }
+  trip = { start: Number(m[1]) * 1000, mins: Math.min(Number(m[2]), 1440), label };
+  tab = 'trip';
+}
+function viewTrip() {
+  if (!trip) return viewToday();
+  const due = trip.start + trip.mins * 60000, left = due - Date.now(), late = left < 0;
+  const hhmm = (ms) => { const d = new Date(ms), h = d.getHours(), w = h < 4 ? 'রাত' : h < 6 ? 'ভোর' : h < 12 ? 'সকাল' : h < 15 ? 'দুপুর' : h < 18 ? 'বিকাল' : h < 20 ? 'সন্ধ্যা' : 'রাত';
+    return `${w} ${bn(h % 12 || 12)}:${bn(String(d.getMinutes()).padStart(2, '0'))}`; };
+  return `<section class="card ${late ? 'trip-late' : 'hero'}"><p class="small">নিরাপদে পৌঁছানো · পরিবারের জন্য</p>
+      <h1>${late ? 'সময় পার হয়ে গেছে' : 'পথে আছে'}</h1>
+      <p>${esc(trip.label || 'রওনা দিয়েছে')}। রওনা ${hhmm(trip.start)}, পৌঁছানোর কথা ${hhmm(due)}।</p>
+      <p class="big-count" id="tripCount">${late ? `${bn(Math.round(-left / 60000))} মিনিট দেরি` : `আর ${bn(Math.ceil(left / 60000))} মিনিট`}</p>
+      ${late ? '<p>"পৌঁছেছি" SMS না পেয়ে থাকলে এখনই ফোন করুন। ফোনে না পেলে ৯৯৯।</p>' : '<p class="small">পৌঁছে গেলে সে "পৌঁছেছি" SMS পাঠাবে। এই পাতা খোলা রাখলে সময় গোনা চলবে।</p>'}</section>
+    ${late ? `<a class="sosbig" href="tel:999"><span class="ring">${icon('phone', 'lg')}</span><span><b>৯৯৯-এ কল করুন</b><span>পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স · বিনা খরচে</span></span></a>` : ''}`;
+}
+let tripTimer = null;
+function tickTrip() { clearInterval(tripTimer); tripTimer = setInterval(() => { if (tab === 'trip') render(); else clearInterval(tripTimer); }, 30000); }
+
+/* ---- জিডির খসড়া (stays on the phone; nothing is stored or sent) ---- */
+const LOST = ['মোবাইল ফোন', 'জাতীয় পরিচয়পত্র (NID)', 'পাসপোর্ট', 'ব্যাংক বা এটিএম কার্ড', 'শিক্ষাগত সার্টিফিকেট', 'ড্রাইভিং লাইসেন্স', 'অন্য কিছু'];
+function viewGd() {
+  const thana = here ? `${here.upBn} থানা` : '';
+  return `<button class="link" type="button" data-tab-go="services">${icon('back', 'sm')}সব সেবা</button>
+    <section class="card"><p class="eyebrow">কাগজ সহায়ক</p><h1>জিডির খসড়া</h1>
+      <p class="muted">তথ্যগুলো শুধু এই ফোনে থাকে, কোথাও পাঠানো বা রাখা হয় না। খসড়া কপি বা প্রিন্ট করে থানায় নিয়ে যান।</p>
+      <label for="gdWhat">কী হারিয়েছে</label><select id="gdWhat">${LOST.map((x) => `<option>${x}</option>`).join('')}</select>
+      <label for="gdDetail">বিবরণ (চাইলে: রং, মডেল, কার্ড বা NID নম্বরের শেষ ৪ সংখ্যা)</label><input type="search" id="gdDetail" maxlength="120">
+      <label for="gdWhere">কোথায় হারিয়েছে</label><input type="search" id="gdWhere" maxlength="80" placeholder="যেমন: চৌমুহনী বাসস্ট্যান্ড">
+      <div class="row2"><div><label for="gdDate">কবে</label><input type="date" id="gdDate"></div><div><label for="gdTime">আনুমানিক সময়</label><input type="time" id="gdTime"></div></div>
+      <label for="gdThana">কোন থানায় জমা দেবেন</label><input type="search" id="gdThana" value="${esc(thana)}" maxlength="60">
+      <label for="gdName">আপনার নাম</label><input type="search" id="gdName" maxlength="60">
+      <label for="gdFather">পিতা বা স্বামীর নাম</label><input type="search" id="gdFather" maxlength="60">
+      <label for="gdAddr">আপনার ঠিকানা</label><input type="search" id="gdAddr" maxlength="120">
+      <div><button class="btn solid" type="button" data-gd-make>${icon('doc', 'sm')}খসড়া তৈরি করুন</button></div>
+      <div id="gdOut"></div>
+      <div class="note">${icon('info')}<p>থানায় নিজেদের ফরম থাকলে সেটাই মানুন। জিডি করতে কোনো টাকা লাগে না। পরিচয়পত্রের কপি সাথে নিন। মোবাইল হারালে অপারেটরের হেল্পলাইনে ফোন করে সিম বন্ধ করুন।</p></div></section>`;
+}
+function makeGd() {
+  const v = (id) => ($('#' + id).value || '').trim(), blank = '..................';
+  const date = v('gdDate') ? new Date(v('gdDate')).toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' }) : blank;
+  const time = v('gdTime') ? (() => { const [h, m] = v('gdTime').split(':').map(Number); const w = h < 4 ? 'রাত' : h < 6 ? 'ভোর' : h < 12 ? 'সকাল' : h < 15 ? 'দুপুর' : h < 18 ? 'বিকাল' : h < 20 ? 'সন্ধ্যা' : 'রাত'; return `${w} ${bn(h % 12 || 12)}:${bn(String(m).padStart(2, '0'))}`; })() : blank;
+  const what = v('gdWhat') + (v('gdDetail') ? ` (${v('gdDetail')})` : '');
+  const text = `বরাবর,
+অফিসার ইনচার্জ
+${v('gdThana') || blank}${here ? ', ' + here.dBn : ''}
+
+বিষয়: ${v('gdWhat')} হারানো প্রসঙ্গে সাধারণ ডায়েরি।
+
+জনাব,
+বিনীত নিবেদন এই যে, আমি ${v('gdName') || blank}, পিতা/স্বামী: ${v('gdFather') || blank}, ঠিকানা: ${v('gdAddr') || blank}। গত ${date} আনুমানিক ${time} সময়ে ${v('gdWhere') || blank} এলাকায় আমার ${what} হারিয়ে যায়। অনেক খোঁজাখুঁজি করেও পাওয়া যায়নি।
+
+ভবিষ্যতে এটি নিয়ে কোনো সমস্যা হলে আইনগত সহায়তার জন্য বিষয়টি সাধারণ ডায়েরিভুক্ত করার অনুরোধ করছি।
+
+বিনীত,
+${v('gdName') || blank}
+মোবাইল: ${blank}
+তারিখ: ${new Date().toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+  $('#gdOut').innerHTML = `<pre class="okbox gd-text">${esc(text)}</pre><div class="pills"><button class="btn solid" type="button" data-copy="${esc(text)}">${icon('copy', 'sm')}কপি</button>
+    <button class="btn" type="button" data-share="${esc(text)}">${icon('share', 'sm')}শেয়ার</button><button class="btn" type="button" data-print>প্রিন্ট</button></div>
+    <p class="small">"মোবাইল" লাইনে নিজের নম্বর হাতে লিখুন। ভুল থাকলে উপরে বদলে আবার "খসড়া তৈরি করুন" চাপুন।</p>`;
+}
+
+Object.assign(VIEWS, { issues: viewIssues, tripset: viewTripSet, trip: viewTrip, gd: viewGd });
+document.addEventListener('click', async (ev) => {
+  const t = ev.target.closest('button, a'); if (!t) return;
+  if ('issueNew' in t.dataset) { issuesState.form = true; if (tab !== 'issues') { tab = 'issues'; } render(); $('#issueForm')?.scrollIntoView({ block: 'start' }); return; }
+  if ('issueCancel' in t.dataset) { issuesState.form = false; render(); return; }
+  if ('issueReload' in t.dataset) { loadIssues(true); return; }
+  if ('issueSend' in t.dataset) { sendIssueNow(); return; }
+  if (t.dataset.metoo) { meTooNow(t.dataset.metoo); return; }
+  if (t.dataset.pst) { sendPlace(t.dataset.pst); return; }
+  if ('signin' in t.dataset) { try { const [fb] = await FB(); await fb.signInGoogle(); toast('সাইন ইন হয়েছে। এবার আবার চাপুন।'); } catch (e) { toast('সাইন ইন হয়নি'); } return; }
+  if ('gdMake' in t.dataset) { makeGd(); return; }
+  if ('print' in t.dataset) { window.print(); return; }
+  if (t.dataset.tripGo) {
+    const mins = Number(t.dataset.tripGo), to = ($('#tripTo').value || '').trim().slice(0, 40);
+    const link = `https://jerin101.github.io/safe-connect/demo/#trip=${Math.floor(Date.now() / 1000)},${mins},${encodeURIComponent(to ? `${to}-এর দিকে, ${here ? here.label : ''} থেকে` : (here ? `${here.label} থেকে` : ''))}`;
+    const msg = `রওনা দিলাম${to ? ' ' + to + '-এর দিকে' : ''}। ${bn(mins)} মিনিটের মধ্যে পৌঁছানোর কথা। পৌঁছে জানাব। এই লিংকে সময় দেখো: ${link}`;
+    $('#sosOut').innerHTML = smsBlock(msg); return;
+  }
+  if (t.dataset.safe) {
+    const where = here ? `${here.label}` : '';
+    const sh = here && here.places ? nearby('shelter')[0] : null;
+    const msg = { ok: `আমি নিরাপদ আছি। চিন্তা কোরো না। (${where})`,
+      help: `আমার সাহায্য দরকার। এলাকা: ${where}। ফোনে না পেলে ৯৯৯-এ জানাও।`,
+      shelter: `আমি আশ্রয়কেন্দ্রে যাচ্ছি${sh ? ': ' + sh.name : ''}। এলাকা: ${where}। পৌঁছে জানাব।` }[t.dataset.safe];
+    const out = $('#sosOut'); if (out) { out.innerHTML = smsBlock(msg); out.scrollIntoView({ block: 'center' }); }
+  }
+});
+
+
+/* ===================== v5: "ডাকুন" — call a vehicle, a technician or a helper; both sides on a live map; the bill ===================== */
+// The rider asks (type, pickup, destination) → nearby approved providers of that type in the district see it → one
+// accepts → both see each other on the map until the trip ends → the provider ends the trip, the bill is computed from
+// the rates (js/ride.js; firestore.rules check the same arithmetic) → cash, "টাকা পেয়েছি", receipt, rating.
+// Live positions exist only during accepted → arrived → on_trip, only for those two people, and are deleted at the end.
+const RIDE = () => Promise.all([FB(), import('../js/ride.js'), import('../js/reports.js')]);
+P.car = '<path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18v2H3z"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/><path d="M5 11h14"/>';
+const TYPE_IC = { ambulance: 'amb', cng: 'car', bike: 'bike', technician: 'wrench', help: 'hands' };
+const TYPE_TINT = { ambulance: 't-sos', cng: '', bike: 't-sun', technician: 't-sun', help: 't-ok' };
+const SIM = new URLSearchParams(location.search).has('sim');   // presentation only: positions move along a line, labelled on the page
+Object.assign(FBERR, { 'signed-out': 'আগে সাইন ইন করুন।', taken: 'অন্য কেউ আগেই নিয়েছেন।', 'limit-wait': '১ মিনিট পর আবার চেষ্টা করুন।',
+  'limit-day': 'আজ ১০ বার ডাকা হয়ে গেছে, কাল আবার।', norates: 'এই সেবার ভাড়া এখনো অ্যাডমিন ঠিক করেননি, তাই এখন ডাকা যাচ্ছে না।' });
+const r5 = (x) => Math.round(x * 1e5) / 1e5;
+let RM = null, HP = null;        // js/ride.js, hasPhone
+let rates = null;                // { type: {base, perKm, perMin, minFare} } from Firestore
+let callF = { type: 'cng', pick: null, drop: null, pickLabel: '', dropLabel: '', picking: 'drop', online: null };
+let ride = null, rideRole = null, rideUnsub = null, liveUnsub = null, other = null, mine = null;
+let rideMap = null, mk = {};
+let geoId = null, lastSent = null, track = null, simTimer = null, simPos = null;
+let prov;                        // provider entry: undefined = not loaded yet, null = none
+let reqs = [], reqUnsub = null, myJobs = null, isAdm = false, pend = null, pvOnline = false;
+
+const tName = (t) => (RM ? RM.typeOf(t).bn : t);
+const tWho = (t) => (RM ? RM.typeOf(t).who : 'সেবাদাতা');
+const tk = (n) => `${bn(n)} টাকা`;
+const kmTxt = (m) => (m < 1000 ? `${bn(Math.round(m / 10) * 10)} মিটার` : `${bn((m / 1000).toFixed(1))} কিমি`);
+function stopGeo() { if (geoId != null) navigator.geolocation.clearWatch(geoId); geoId = null; clearInterval(simTimer); simTimer = null; }
+function stopRide() { stopGeo(); if (rideUnsub) rideUnsub(); if (liveUnsub) liveUnsub(); rideUnsub = liveUnsub = null; other = mine = null; lastSent = null; track = null; simPos = null; }
+
+/* ---------- the rider's page ---------- */
+function viewCall() {
+  if (!here) return needHere();
+  if (ride && rideRole === 'rider') {
+    return `<section class="card"><p class="eyebrow">ডাকুন · ${esc(tName(ride.type))}</p><div id="ridePanel">${riderPanel()}</div></section>
+      <div class="mapwrap"><div id="rmap" class="rmap"></div></div>${SIM ? simNote() : ''}`;
+  }
+  const t = RM ? RM.typeOf(callF.type) : { dest: true, who: 'চালক' };
+  const types = (RM ? RM.RIDE_TYPES : []).map((x) => `<button class="tcard" type="button" data-rtype="${x.id}" aria-pressed="${x.id === callF.type}">${`<span class="sq ${TYPE_TINT[x.id]}">${icon(TYPE_IC[x.id])}</span>`}<span>${esc(x.bn.split(' (')[0])}</span></button>`).join('');
+  const quick = quickDrops();
+  return `<section class="card hero"><p class="small">ডাকুন · ${esc(here.label)}</p><h1>যা দরকার, কাছের মানুষকে ডাকুন</h1>
+      <p class="muted">গাড়ি, অ্যাম্বুলেন্স, কারিগর বা বিপদে সাহায্যকারী। কে আসছেন, কোথায় আছেন, কত ভাড়া: সব ম্যাপে আর বিলে দেখবেন। ভাড়া অ্যাডমিনের ঠিক করা হারে, আগেই আন্দাজ দেখাবে।</p></section>
+    <section class="card"><h2>কী দরকার?</h2><div class="tgrid">${types || '<div class="skeleton"></div>'}</div>
+      ${callF.type === 'ambulance' || callF.type === 'help' ? `<div class="note">${icon('alert')}<p>জীবন ঝুঁকিতে থাকলে আগে <a href="tel:999">৯৯৯</a>-এ কল করুন। এখানে ডাকা তার বদলে নয়, পাশাপাশি।</p></div>` : ''}</section>
+    <section class="card"><h2>কোথায়?</h2>
+      <label for="pickLabel">কোথা থেকে (চেনা জায়গা)</label><input type="search" id="pickLabel" maxlength="80" value="${esc(callF.pickLabel)}" placeholder="যেমন: মাইজদী বাজার, জামে মসজিদের সামনে">
+      <div class="pills"><button class="btn" type="button" data-call-gps>${icon('locate', 'sm')}আমার লোকেশন</button>${t.dest ? `<button class="pill" type="button" data-pickmode="pick" aria-pressed="${callF.picking === 'pick'}">ম্যাপে: ডাকার জায়গা</button><button class="pill" type="button" data-pickmode="drop" aria-pressed="${callF.picking === 'drop'}">ম্যাপে: গন্তব্য</button>` : ''}</div>
+      ${t.dest ? `<label for="dropLabel">কোথায় যাবেন</label><input type="search" id="dropLabel" maxlength="80" value="${esc(callF.dropLabel)}" placeholder="ম্যাপে চাপ দিন, বা নিচের একটা বাছুন">
+      ${quick.length ? `<div class="pills">${quick.map((p, i) => `<button class="pill" type="button" data-qdrop="${i}">${esc(p.name)}</button>`).join('')}</div>` : ''}` : `<p class="small">${esc(t.who)} আপনার কাছে আসবেন; গন্তব্য লাগবে না।</p>`}
+      <div class="mapwrap"><div id="rmap" class="rmap"></div></div>
+      <div id="est">${estHtml()}</div>
+      <button class="btn solid big" type="button" data-call-go>${icon(TYPE_IC[callF.type], 'sm')}${esc(t.who)} ডাকুন</button>
+      <div id="callMsg" class="small" role="status"></div>
+      <p class="small">ডাকার জায়গা আর গন্তব্য এই যাত্রার রেকর্ডে থাকে (রসিদের জন্য); দেখেন আপনি, যিনি নিলেন আর অ্যাডমিন; ডাক খোলা থাকা পর্যন্ত এই জেলার অনুমোদিত সেবাদাতারাও দেখেন। লাইভ লোকেশন শুধু যাত্রার সময় দুজনে দেখেন, শেষ হলে মুছে যায়।</p></section>
+    <section class="card"><div class="sec-head"><h2>আমার আগের ডাক</h2><button class="link" type="button" data-call-hist>দেখুন${icon('chev', 'sm')}</button></div><div id="hist"></div></section>
+    <section class="card"><h2>সেবা দিতে চান?</h2><p class="muted">সিএনজি, বাইক বা অ্যাম্বুলেন্স চালান, ইলেকট্রিশিয়ান-প্লাম্বার-মেকানিক, বা বিপদে মানুষের পাশে দাঁড়াতে চান? আবেদন করুন; অনুমোদনের পর কাছের ডাক পাবেন।</p>
+      <div><button class="btn" type="button" data-tab-go="drive">${icon('wrench', 'sm')}আমি সেবা দিই</button></div></section>${SIM ? simNote() : ''}`;
+}
+const simNote = () => `<div class="note">${icon('info')}<p>প্রেজেন্টেশন মোড (?sim): ম্যাপে চলাচল নকল, আসল GPS নয়।</p></div>`;
+// Destination shortcuts from the places list (ambulance: hospitals; others: bazars and bus stands).
+function quickDrops() {
+  try {
+    const cats = callF.type === 'ambulance' ? ['health'] : ['bazar', 'ghat'];
+    return cats.flatMap((c) => nearby(c).filter((p) => p.lat && !p.noLoc).slice(0, 3)).slice(0, 4);
+  } catch { return []; }
+}
+function estHtml() {
+  if (!RM) return '';
+  const t = RM.typeOf(callF.type), rt = rates && rates[callF.type];
+  if (!rates) return '<div class="skeleton"></div>';
+  if (!rt) return `<div class="note">${icon('info')}<p>${FBERR.norates}</p></div>`;
+  if (t.dest && !callF.drop) return `<p class="small">গন্তব্য বাছলে ভাড়ার আন্দাজ দেখাবে। হার: শুরু ${tk(rt.base)} + প্রতি কিমি ${tk(rt.perKm)} · সর্বনিম্ন ${tk(rt.minFare)}</p>`;
+  const m = t.dest ? RM.estimateMetres(callF.pick, callF.drop) : 0, f = RM.fare(rt, m, 0);
+  const on = callF.online == null ? '' : callF.online.length ? `${bn(callF.online.length)} জন ${esc(t.who)} এই জেলায় এখন কাজে আছেন` : `এই মুহূর্তে এই জেলায় কোনো ${esc(t.who)} অনলাইনে নেই; ডাকলে যিনি অনলাইনে আসবেন তিনি দেখবেন`;
+  return `<div class="bill"><div><span>আনুমানিক ভাড়া</span><b>${callF.type === 'help' ? 'বিনামূল্যে' : tk(f)}</b></div>
+    ${t.dest ? `<div><span>দূরত্ব (রাস্তায় আন্দাজ)</span><b>${kmTxt(m)}</b></div><div><span>সময়</span><b>${bn(RM.etaMinutes(m, callF.type))} মিনিট</b></div>` : ''}</div>
+    <p class="small">${on ? on + ' · ' : ''}শেষ ভাড়া হবে আসল দূরত্ব আর অপেক্ষা (প্রথম ৩ মিনিট ফ্রি) দিয়ে। নগদে দেবেন।</p>`;
+}
+async function callMount() {
+  try { if (!RM) { const [, rm, rp] = await RIDE(); RM = rm; HP = rp.hasPhone; if (tab === 'call') { render(); return; } } } catch (e) { $('#callMsg') && ($('#callMsg').textContent = errText(e)); return; }
+  if (!callF.pick || callF.pick.area !== here.label) callF = { ...callF, pick: { lat: here.lat, lon: here.lon, area: here.label }, drop: null, dropLabel: '' };
+  drawRideMap();
+  if (!rates) { try { const [[fb]] = await RIDE(); rates = await fb.readRates(); } catch { rates = {}; } if (tab === 'call' && !ride) paintEst(); }
+  // a ride left open on this phone (another tab, a reload)
+  if (!ride) {
+    const id = store.get('sc-ride');
+    if (id) { try { const [[fb]] = await RIDE(); if (await fb.currentUser()) followRide(id, 'rider'); } catch { /* signed out: nothing to show */ } }
+  }
+  refreshOnline();
+}
+async function refreshOnline() {
+  try {
+    const [[fb, cm]] = await RIDE(); if (!(await fb.currentUser())) return;
+    callF.online = await fb.onlineCount(callF.type, cm.districtKey(here.d)); paintEst();
+  } catch { /* not verified, or offline: the line is just not shown */ }
+}
+const paintEst = () => { const el = $('#est'); if (el) el.innerHTML = estHtml(); };
+
+// The live map: pickup, destination, and the two people. Markers are moved in place (no re-render).
+function drawRideMap() {
+  const el = $('#rmap'); if (!el || !window.L) return;
+  if (rideMap) { rideMap.remove(); rideMap = null; } mk = {};
+  if (!navigator.onLine) { el.textContent = 'ইন্টারনেট নেই, তাই ম্যাপ দেখানো যাচ্ছে না।'; return; }
+  const r = ride || { pickup: callF.pick, drop: callF.drop };
+  rideMap = L.map(el).setView([r.pickup ? r.pickup.lat : here.lat, r.pickup ? r.pickup.lon : here.lon], 14);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(rideMap);
+  if (!ride) rideMap.on('click', (e) => {
+    const p = { lat: r5(e.latlng.lat), lon: r5(e.latlng.lng) };
+    if (!RM || !RM.inBangladesh(p.lat, p.lon)) return;
+    if (callF.picking === 'pick' || !RM.typeOf(callF.type).dest) { callF.pick = { ...p, area: here.label }; } else { callF.drop = p; if (!$('#dropLabel').value.trim()) $('#dropLabel').value = 'ম্যাপে বাছাই করা জায়গা'; }
+    paintMarkers(); paintEst();
+  });
+  paintMarkers(true);
+}
+const COL = () => { const c = getComputedStyle(document.documentElement); return { brand: c.getPropertyValue('--brand').trim() || '#0b4a4e', sos: c.getPropertyValue('--sos').trim() || '#cc2f2b', sun: c.getPropertyValue('--sun').trim() || '#b86e0a', ok: c.getPropertyValue('--ok').trim() || '#1f7a4f' }; };
+function setMk(key, p, style, label) {
+  if (!rideMap) return;
+  if (!p) { if (mk[key]) { mk[key].remove(); delete mk[key]; } return; }
+  if (mk[key]) { mk[key].setLatLng([p.lat, p.lon]); return; }
+  // a DOM node, not a string: Leaflet puts a string in as HTML, and providerName is chosen by the provider
+  const tip = document.createElement('span'); tip.textContent = label;
+  mk[key] = L.circleMarker([p.lat, p.lon], { weight: 3, fillOpacity: 1, color: '#ffffff', ...style }).addTo(rideMap).bindTooltip(tip, { permanent: key === 'prov' || key === 'me', direction: 'top', offset: [0, -8] });
+}
+function paintMarkers(fit) {
+  if (!rideMap) return;
+  const c = COL(), r = ride || { pickup: callF.pick, drop: callF.drop, type: callF.type };
+  const live = ride && RM && RM.LIVE.includes(ride.status);
+  const provPos = rideRole === 'provider' ? mine : other, riderPos = rideRole === 'rider' ? mine : other;
+  setMk('pick', r.pickup, { radius: 8, fillColor: c.brand }, 'ডাকার জায়গা');
+  setMk('drop', r.drop, { radius: 8, fillColor: c.sun }, 'গন্তব্য');
+  setMk('prov', live || ride?.status === 'on_trip' ? provPos : null, { radius: 11, fillColor: c.ok }, rideRole === 'provider' ? 'আপনি' : `${tWho(r.type)}${ride && ride.providerName ? ': ' + ride.providerName : ''}`);
+  setMk('me', live && ride.status !== 'on_trip' ? riderPos : null, { radius: 9, fillColor: c.sos }, rideRole === 'rider' ? 'আপনি' : 'যাত্রী');
+  if (fit || (ride && live)) {
+    const pts = Object.values(mk).map((m) => m.getLatLng());
+    if (pts.length > 1) rideMap.fitBounds(L.latLngBounds(pts), { padding: [36, 36], maxZoom: 16 });
+  }
+}
+
+// The rider's panel: what is happening now, and the one or two buttons that make sense at this step.
+const RSTEPS = ['requested', 'accepted', 'arrived', 'on_trip', 'completed', 'paid'];
+function rideStepper(st) {
+  if (st === 'cancelled') return `<span class="badge sample">${RM.STATUS_BN.cancelled}</span>`;
+  const k = RSTEPS.indexOf(st), lab = { requested: 'ডাকা', accepted: 'আসছেন', arrived: 'পৌঁছেছেন', on_trip: 'চলছে', completed: 'বিল', paid: 'পরিশোধ' };
+  return `<ol class="stepper" aria-label="অবস্থা">${RSTEPS.map((x, i) => `<li class="${i < k ? 'done' : i === k ? 'now' : ''}">${lab[x]}</li>`).join('')}</ol>`;
+}
+function provLine(r) { return `<div class="rows"><div class="r"><span class="sq ${TYPE_TINT[r.type]}">${icon(TYPE_IC[r.type])}</span><div><div class="t">${esc(r.providerName || '')}</div><div class="m">${esc(r.vehicle || '')}</div></div><span></span></div></div>`; }
+function billHtml(r) {
+  const rt = rates && rates[r.type]; if (!rt) return `<div class="okbox">মোট ভাড়া: ${tk(r.fare || 0)}</div>`;
+  const p = RM.fareParts(rt, r.distM || 0, r.waitMin || 0);
+  const odd = !RM.billLooksRight(rt, r.distM || 0, r.waitMin || 0, r.fare || 0) || RM.distanceSuspicious(r.estM || 0, r.distM || 0);
+  return `<div class="bill rows-bill"><div><span>শুরু</span><b>${tk(p.base)}</b></div><div><span>দূরত্ব ${bn(p.km.toFixed(1))} কিমি × ${tk(rt.perKm)}</span><b>${tk(p.distance)}</b></div>
+    <div><span>অপেক্ষা ${bn(r.waitMin || 0)} মিনিট (৩ ফ্রি)</span><b>${tk(p.waiting)}</b></div><div class="total"><span>মোট (৫ টাকায় রাউন্ড, সর্বনিম্ন ${tk(rt.minFare)})</span><b>${tk(r.fare || 0)}</b></div></div>
+    ${odd ? `<div class="note">${icon('alert')}<p>দূরত্ব আন্দাজের চেয়ে অনেক বেশি। ঠিক মনে না হলে "বিল ভুল" চাপুন; অ্যাডমিন দেখবেন।</p></div>` : ''}`;
+}
+function riderPanel() {
+  const r = ride; if (!r || !RM) return '<div class="skeleton"></div>';
+  const t = RM.typeOf(r.type), rt = rates && rates[r.type];
+  let body = '';
+  if (r.status === 'requested') body = `<h2>কাছের ${esc(t.who)} খোঁজা হচ্ছে…</h2><p class="muted">${esc(r.pickup.label)}${r.drop ? ' → ' + esc(r.drop.label) : ''} · আনুমানিক ${r.type === 'help' ? 'বিনামূল্যে' : tk(r.estFare)}</p>
+    <p class="small">যিনি নেবেন তাঁর নাম আর ${r.type === 'technician' || r.type === 'help' ? 'পরিচয়' : 'গাড়ির নম্বর'} এখানে দেখাবে, আর ম্যাপে তাঁকে আসতে দেখবেন।</p>
+    <div class="pills"><button class="btn ghost" type="button" data-ride-cancel>বাতিল (কোনো চার্জ নেই)</button></div>`;
+  else if (r.status === 'accepted' || r.status === 'arrived') {
+    const far = other ? RM.metres(other, r.pickup) : null;
+    body = `<h2>${r.status === 'arrived' ? `${esc(t.who)} পৌঁছে গেছেন` : `${esc(t.who)} আসছেন`}</h2>${provLine(r)}
+      ${r.status === 'accepted' ? `<p class="muted">${far == null ? 'অবস্থান আসছে…' : `${kmTxt(far)} দূরে · প্রায় ${bn(RM.etaMinutes(far * RM.ROAD_FACTOR, r.type))} মিনিট`}</p>` : `<p class="muted">${esc(r.pickup.label)}-এ অপেক্ষা করছেন। প্রথম ৩ মিনিট অপেক্ষা ফ্রি।</p>`}
+      <div class="pills"><button class="btn ghost" type="button" data-ride-cancel>বাতিল${r.status === 'arrived' && rt ? ` (চার্জ ${tk(RM.cancelFee(rt, 'arrived'))})` : ' (কোনো চার্জ নেই)'}</button></div>`;
+  } else if (r.status === 'on_trip') body = `<h2>${r.type === 'technician' ? 'কাজ চলছে' : r.type === 'help' ? 'সাহায্য চলছে' : 'যাত্রা চলছে'}</h2>${provLine(r)}
+      ${r.drop ? `<p class="muted">${esc(r.drop.label)}-এর দিকে</p>` : ''}
+      <div class="pills"><button class="btn" type="button" data-ride-family>${icon('msg', 'sm')}পরিবারকে জানান</button></div><div id="sosOut"></div>`;
+  else if (r.status === 'completed') body = `<h2>বিল</h2>${provLine(r)}${billHtml(r)}<p class="muted">${esc(t.who)}কে নগদ ${tk(r.fare || 0)} দিন। তিনি "টাকা পেয়েছি" চাপলে রসিদ আসবে।</p>
+      ${'billOk' in r ? `<p class="small">আপনি বলেছেন: ${r.billOk ? 'বিল ঠিক আছে' : 'বিল ভুল মনে হচ্ছে'}</p>` : `<div class="pills"><button class="btn" type="button" data-bill-ok="1">${icon('check', 'sm')}বিল ঠিক আছে</button><button class="btn ghost" type="button" data-bill-ok="0">বিল ভুল মনে হচ্ছে</button></div>`}`;
+  else if (r.status === 'paid') {
+    const txt = RM.receiptText(r, bn);
+    body = `<h2>পরিশোধ হয়েছে · ধন্যবাদ!</h2><pre class="okbox gd-text">${esc(txt)}</pre>
+      <div class="pills"><button class="btn" type="button" data-copy="${esc(txt)}">${icon('copy', 'sm')}রসিদ কপি</button><button class="btn" type="button" data-share="${esc(txt)}">${icon('share', 'sm')}শেয়ার</button></div>
+      ${'rating' in r ? `<p class="small">আপনার রেটিং: ${'★'.repeat(r.rating)}</p>` : `<p class="muted">${esc(t.who)} কেমন ছিলেন?</p><div class="stars">${[1, 2, 3, 4, 5].map((n) => `<button class="star" type="button" data-rate="${n}" aria-label="${bn(n)} তারা">★</button>`).join('')}</div>`}
+      ${'billOk' in r ? '' : `<div class="pills"><button class="btn ghost" type="button" data-bill-ok="0">বিল ভুল মনে হচ্ছে</button></div>`}
+      <div><button class="btn solid" type="button" data-ride-new>নতুন ডাক</button></div>`;
+  } else body = `<h2>বাতিল হয়েছে</h2><p class="muted">${r.cancelledBy === 'provider' ? `${esc(t.who)} বাতিল করেছেন। আবার ডাকুন, অন্য কেউ নেবেন।` : 'আপনি বাতিল করেছেন।'}${r.cancelFee ? ` চার্জ: ${tk(r.cancelFee)} (নগদ)।` : ''}</p>
+      <div><button class="btn solid" type="button" data-ride-new>নতুন ডাক</button></div>`;
+  return `${rideStepper(r.status)}${body}<div id="rideMsg" class="small" role="status"></div>`;
+}
+
+// Follow one ride (rider or provider): the ride document, the other person's live position, and our own GPS.
+async function followRide(id, role) {
+  const [[fb]] = await RIDE();
+  stopRide(); rideRole = role;
+  if (!rates) { try { rates = await fb.readRates(); } catch { rates = {}; } }
+  rideUnsub = fb.watchRide(id, (r) => onRide(r), (e) => { const m = $('#rideMsg') || $('#jobMsg'); if (m) m.textContent = errText(e); });
+}
+async function onRide(r) {
+  const [[fb]] = await RIDE();
+  const was = ride ? ride.status : null; ride = r;
+  if (!r) { stopRide(); ride = null; store.set('sc-ride', ''); return paintRide(); }
+  const live = RM.LIVE.includes(r.status);
+  if (live && !liveUnsub) liveUnsub = fb.watchLive(r.id, rideRole === 'rider' ? 'provider' : 'rider', (p) => { other = p; paintRide(true); }, () => {});
+  if (live) startGeo(); else { stopGeo(); if (liveUnsub) { liveUnsub(); liveUnsub = null; } other = null; }
+  if (['completed', 'paid', 'cancelled'].includes(r.status) && was && RM.LIVE.includes(was)) fb.clearLive(r.id);
+  if (rideRole === 'rider' && was && was !== r.status) toast(RM.STATUS_BN[r.status]);
+  if (rideRole === 'provider' && ['cancelled', 'paid'].includes(r.status)) {
+    if (r.status === 'cancelled' && r.cancelledBy === 'rider') toast(`যাত্রী বাতিল করেছেন${r.cancelFee ? `: চার্জ ${r.cancelFee} টাকা নিন` : ''}`);
+    stopRide(); ride = null; rideRole = null; try { myJobs = await fb.myRides('provider'); } catch { /* keep the old list */ } paintDrive(); return;
+  }
+  paintRide(true);   // any change of the ride itself (status, bill answer, rating) redraws the panel
+}
+function paintRide(statusChanged) {
+  if (rideRole === 'rider' && tab === 'call') {
+    if (!$('#ridePanel') || !ride) { render(); return; }
+    if (statusChanged || ride.status === 'accepted') $('#ridePanel').innerHTML = riderPanel();
+    paintMarkers();
+  } else if (rideRole === 'provider' && tab === 'drive') {
+    if (!$('#jobPanel')) { paintDrive(); return; }
+    if (statusChanged) $('#jobPanel').innerHTML = jobPanel(); else { const d = $('#jobDist'); if (d) d.innerHTML = jobDist(); }
+    paintMarkers();
+  }
+}
+
+// Our own position while the ride is live: real GPS (sent at most every 8 s and only after 25 m, or once a minute), or
+// in the presentation mode a point that moves 120 m every 3 s toward where it is going.
+function startGeo() {
+  if (geoId != null || simTimer) return;
+  if (SIM) {
+    const r = ride; simPos = simPos || (rideRole === 'provider' ? { lat: r5(r.pickup.lat + 0.012), lon: r5(r.pickup.lon + 0.009) } : { lat: r.pickup.lat, lon: r.pickup.lon });
+    const tick = () => {
+      if (!ride || !RM.LIVE.includes(ride.status)) return stopGeo();
+      if (rideRole === 'provider') {
+        const goal = ride.status === 'on_trip' ? (ride.drop || ride.pickup) : ride.pickup, d = RM.metres(simPos, goal);
+        if (ride.status !== 'arrived' && d > 1) { const f = Math.min(1, 120 / d); simPos = { lat: r5(simPos.lat + (goal.lat - simPos.lat) * f), lon: r5(simPos.lon + (goal.lon - simPos.lon) * f) }; }
+      }
+      gotPos(simPos.lat, simPos.lon, true);
+    };
+    tick(); simTimer = setInterval(tick, 3000); return;
+  }
+  if (!navigator.geolocation) return;
+  geoId = navigator.geolocation.watchPosition((p) => gotPos(r5(p.coords.latitude), r5(p.coords.longitude)), () => {
+    const m = $('#rideMsg') || $('#jobMsg'); if (m) m.textContent = 'লোকেশন পাওয়া যাচ্ছে না: ফোনের লোকেশন চালু করুন। ম্যাপে শুধু ডাকার জায়গা দেখাবে।';
+  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+}
+async function gotPos(lat, lon, sim) {
+  if (!ride || !RM.inBangladesh(lat, lon)) return;
+  const p = { lat, lon, at: Date.now() };
+  mine = p;
+  if (rideRole === 'provider' && ride.status === 'on_trip') track = RM.trackAdd(track, p);
+  // the rider stops sending once on the trip (they are in the vehicle; the provider's point shows both)
+  if (rideRole === 'rider' && ride.status === 'on_trip') { paintMarkers(); return; }
+  const due = !lastSent || (p.at - lastSent.at >= (sim ? 2500 : 8000) && RM.metres(lastSent, p) >= 25) || p.at - lastSent.at >= 60000;
+  if (due) { lastSent = p; try { const [[fb]] = await RIDE(); await fb.sendLive(ride.id, rideRole, lat, lon); } catch { /* the next point tries again */ } }
+  paintRide();
+}
+
+async function callGo() {
+  const msg = $('#callMsg'); msg.textContent = '';
+  const t = RM.typeOf(callF.type), rt = rates && rates[callF.type];
+  callF.pickLabel = $('#pickLabel').value.trim(); if (t.dest) callF.dropLabel = $('#dropLabel').value.trim();
+  if (!rt) { msg.textContent = FBERR.norates; return; }
+  if (callF.pickLabel.length < 2) { msg.textContent = 'কোথা থেকে ডাকছেন, একটা চেনা জায়গার নাম লিখুন।'; $('#pickLabel').focus(); return; }
+  if (t.dest && !callF.drop) { msg.textContent = 'গন্তব্য বাছুন: ম্যাপে চাপ দিন বা একটা জায়গা বাছুন।'; return; }
+  if (t.dest && callF.dropLabel.length < 2) { msg.textContent = 'গন্তব্যের নাম লিখুন।'; return; }
+  if ([callF.pickLabel, callF.dropLabel].some(HP)) { msg.textContent = 'ফোন নম্বর লিখবেন না। যিনি নেবেন তিনি অ্যাপেই আপনাকে দেখবেন।'; return; }
+  msg.textContent = 'পাঠানো হচ্ছে…';
+  try {
+    if (!(await needUser(msg))) return;
+    const [[fb, cm]] = await RIDE();
+    const estM = t.dest ? RM.estimateMetres(callF.pick, callF.drop) : 0;
+    const f = { type: callF.type, district: cm.districtKey(here.d), pickup: { lat: r5(callF.pick.lat), lon: r5(callF.pick.lon), label: callF.pickLabel.slice(0, 80) },
+      estM, estFare: RM.fare(rt, estM, 0) };
+    if (t.dest) f.drop = { lat: r5(callF.drop.lat), lon: r5(callF.drop.lon), label: callF.dropLabel.slice(0, 80) };
+    const id = await fb.requestRide(f);
+    store.set('sc-ride', id); ride = { id, ...f, status: 'requested' }; rideRole = 'rider'; render();
+    await followRide(id, 'rider');
+  } catch (e) { msg.textContent = errText(e); }
+}
+async function showHistory() {
+  const box = $('#hist'); box.innerHTML = '<div class="skeleton"></div>';
+  try {
+    if (!(await needUser(box))) return;
+    const [[fb]] = await RIDE(); const list = (await fb.myRides('rider')).slice(0, 10);
+    box.innerHTML = list.length ? `<div class="rows">${list.map((r) => `<div class="r"><span class="sq ${TYPE_TINT[r.type]}">${icon(TYPE_IC[r.type])}</span><div><div class="t">${esc(tName(r.type).split(' (')[0])} · ${esc(r.pickup?.label || '')}${r.drop ? ' → ' + esc(r.drop.label) : ''}</div>
+      <div class="m">${r.createdAt ? agoBn(r.createdAt) : ''} · ${esc(RM.STATUS_BN[r.status])}${r.fare != null ? ' · ' + tk(r.fare) : ''}</div></div>${r.status === 'paid' ? `<button class="btn ghost" type="button" data-copy="${esc(RM.receiptText(r, bn))}">রসিদ</button>` : '<span></span>'}</div>`).join('')}</div>`
+      : '<p class="muted">এখনো কিছু ডাকেননি।</p>';
+  } catch (e) { box.textContent = errText(e); }
+}
+
+/* ---------- the provider's page (and, for an admin, approvals and rates) ---------- */
+function viewDrive() {
+  if (!here) return needHere();
+  return `<button class="link" type="button" data-tab-go="call">${icon('back', 'sm')}ডাকুন</button>
+    <section class="card"><p class="eyebrow">সেবা দিন</p><h1>কাছের মানুষের ডাক নিন</h1>
+      <p class="muted">অনুমোদিত চালক, কারিগর ও স্বেচ্ছাসেবক তাঁর জেলার ডাক দেখেন। নিলে যাত্রী আপনাকে ম্যাপে দেখবেন, আপনি তাঁকে। শেষে বিল নিজে থেকে হিসাব হয়।</p></section>
+    <div id="drivePanel"><section class="card"><div class="skeleton"></div></section></div>${SIM ? simNote() : ''}`;
+}
+async function driveMount() {
+  const box = $('#drivePanel');
+  try {
+    if (!RM) { const [, rm, rp] = await RIDE(); RM = rm; HP = rp.hasPhone; }
+    const card = document.createElement('section'); card.className = 'card'; box.replaceChildren(card);
+    const u = await needUser(card); if (!u) return;
+    const [[fb]] = await RIDE();
+    if (!rates) { try { rates = await fb.readRates(); } catch { rates = {}; } }
+    prov = await fb.myProvider();
+    isAdm = (await fb.roleOf(u, 'bn')) === 'admin';
+    if (isAdm) { try { pend = await fb.pendingProviders(); } catch { pend = []; } }
+    if (prov && prov.approved) {
+      if (!reqUnsub) reqUnsub = fb.watchRequests(prov, (list) => { reqs = list; const el = $('#reqList'); if (el) el.innerHTML = reqHtml(); }, (e) => { const el = $('#reqList'); if (el) el.textContent = errText(e); });
+      myJobs = await fb.myRides('provider');
+      const act = myJobs.find((r) => ['accepted', 'arrived', 'on_trip', 'completed'].includes(r.status));
+      if (act && (!ride || ride.id !== act.id)) { ride = act; await followRide(act.id, 'provider'); }
+    }
+    paintDrive();
+  } catch (e) { box.innerHTML = `<section class="card"><p class="muted">${esc(errText(e))}</p></section>`; }
+}
+function paintDrive() {
+  const box = $('#drivePanel'); if (!box || tab !== 'drive') return;
+  const typeOpts = RM.RIDE_TYPES.map((x) => `<option value="${x.id}">${esc(x.bn)}</option>`).join('');
+  let html = '';
+  if (prov === null) html = `<section class="card"><h2>সেবাদাতা হিসেবে আবেদন</h2><p class="muted">জেলা: ${esc(here.dBn)} (উপরে এলাকা বদলালে বদলাবে)। ফোন নম্বর লিখবেন না: যাত্রী অ্যাপেই আপনাকে দেখবেন।</p>
+      <label for="pvType">কী সেবা দেবেন</label><select id="pvType">${typeOpts}</select>
+      <label for="pvName">আপনার নাম (যাত্রী দেখবেন)</label><input type="search" id="pvName" maxlength="60" placeholder="যেমন: রহিম মিয়া">
+      <label for="pvVeh">গাড়ির নম্বর বা কাজের পরিচয়</label><input type="search" id="pvVeh" maxlength="40" placeholder="যেমন: নোয়াখালী-থ-১২৩৪, বা ইলেকট্রিশিয়ান">
+      <div><button class="btn solid" type="button" data-pv-apply>আবেদন জমা দিন</button></div><div id="pvMsg" class="small" role="status"></div></section>`;
+  else if (prov && !prov.approved) html = `<section class="card"><h2>আবেদন জমা হয়েছে</h2><p class="muted">${esc(prov.name)} · ${esc(tName(prov.type))} · ${esc(prov.vehicle)}</p>
+      <p class="muted">অ্যাডমিন যাচাই করে অনুমোদন দিলে এখানেই ডাক দেখবেন।</p><div><button class="btn ghost" type="button" data-pv-withdraw>আবেদন তুলে নিন</button></div><div id="pvMsg" class="small" role="status"></div></section>`;
+  else if (prov) {
+    const job = ride && rideRole === 'provider' && ['accepted', 'arrived', 'on_trip', 'completed'].includes(ride.status);
+    html = `<section class="card"><div class="sec-head"><h2>${esc(prov.name)}</h2><span class="badge off">অনুমোদিত</span></div><p class="muted">${esc(tName(prov.type))} · ${esc(prov.vehicle)}</p>
+        <div class="pills"><button class="btn ${pvOnline ? '' : 'solid'}" type="button" data-pv-online>${pvOnline ? 'কাজ বন্ধ করুন' : 'কাজ শুরু (অনলাইন)'}</button></div>
+        <p class="small">${pvOnline ? 'অনলাইনে আছেন: যাত্রীরা দেখবেন এই জেলায় কতজন কাজে আছেন (আপনার জায়গা প্রায় ১০০ মিটার ঘুরিয়ে)।' : 'অনলাইনে না থাকলেও নতুন ডাক দেখবেন; অনলাইনে থাকলে যাত্রীরা জানবেন কেউ আছেন।'}</p></section>
+      ${job ? `<section class="card"><p class="eyebrow">এখনকার কাজ</p><div id="jobPanel">${jobPanel()}</div></section><div class="mapwrap"><div id="rmap" class="rmap"></div></div>`
+        : `<section class="card"><h2>নতুন ডাক</h2><div id="reqList">${reqHtml()}</div><div id="jobMsg" class="small" role="status"></div></section>`}
+      <section class="card"><h2>আয়</h2>${earnHtml()}</section>`;
+  }
+  if (isAdm) html += adminHtml();
+  box.innerHTML = html;
+  if (ride && rideRole === 'provider' && $('#rmap')) { drawRideMap(); }
+  if (isAdm) fillRateForm();
+}
+function reqHtml() {
+  if (!reqs.length) return `<p class="muted">এই মুহূর্তে ${esc(here.dBn)} জেলায় নতুন কোনো ডাক নেই। এই পাতা খোলা রাখুন: ডাক এলে নিজে থেকে দেখাবে।</p>`;
+  const from = mine || (here ? { lat: here.lat, lon: here.lon } : null);
+  return `<div class="rows">${reqs.map((r) => `<div class="r req"><span class="sq ${TYPE_TINT[r.type]}">${icon(TYPE_IC[r.type])}</span>
+    <div><div class="t">${esc(r.pickup.label)}${r.drop ? ' → ' + esc(r.drop.label) : ''}</div><div class="m">${from ? kmTxt(RM.metres(from, r.pickup)) + ' দূরে · ' : ''}${r.drop ? kmTxt(r.estM) + ' যাত্রা · ' : ''}${r.type === 'help' ? 'বিনামূল্যে' : 'আনুমানিক ' + tk(r.estFare)} · ${r.createdAt ? agoBn(r.createdAt) : 'এইমাত্র'}</div></div>
+    <button class="btn solid" type="button" data-pv-accept="${esc(r.id)}">নিন</button></div>`).join('')}</div>`;
+}
+const jobDist = () => (ride && ride.status === 'on_trip' && track ? `এ পর্যন্ত ${kmTxt(track.m)} চলেছে (GPS)` : ride && ride.status === 'accepted' && mine ? `যাত্রী ${kmTxt(RM.metres(mine, other || ride.pickup))} দূরে` : '');
+function jobPanel() {
+  const r = ride, t = RM.typeOf(r.type);
+  const where = `<p class="muted">${icon('pin', 'sm')} ${esc(r.pickup.label)}${r.drop ? ` → ${esc(r.drop.label)} (${kmTxt(r.estM)})` : ''}</p>`;
+  const nav = `<a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=${r.status === 'on_trip' && r.drop ? `${r.drop.lat},${r.drop.lon}` : `${r.pickup.lat},${r.pickup.lon}`}" ${ext}>${icon('nav', 'sm')}পথ দেখান</a>`;
+  let body = '';
+  if (r.status === 'accepted') body = `<h2>যাত্রীর কাছে যান</h2>${where}<p class="small" id="jobDist">${jobDist()}</p><div class="pills"><button class="btn solid" type="button" data-pv-step="arrived">পৌঁছেছি</button>${nav}<button class="btn ghost" type="button" data-pv-cancel>বাতিল</button></div>`;
+  else if (r.status === 'arrived') body = `<h2>যাত্রীর অপেক্ষা</h2>${where}<p class="small">প্রথম ৩ মিনিট অপেক্ষা ফ্রি, তারপর প্রতি মিনিট ${tk(rates[r.type]?.perMin || 0)}।</p><div class="pills"><button class="btn solid" type="button" data-pv-step="on_trip">${t.dest ? 'যাত্রা শুরু' : 'কাজ শুরু'}</button><button class="btn ghost" type="button" data-pv-cancel>বাতিল</button></div>`;
+  else if (r.status === 'on_trip') body = `<h2>${t.dest ? 'যাত্রা চলছে' : 'কাজ চলছে'}</h2>${where}<p class="small" id="jobDist">${jobDist()}</p><div class="pills"><button class="btn solid" type="button" data-pv-end>${t.dest ? 'গন্তব্যে পৌঁছেছি: বিল করুন' : 'কাজ শেষ: বিল করুন'}</button>${t.dest ? nav : ''}</div>`;
+  else if (r.status === 'completed') body = `<h2>নগদ ${tk(r.fare || 0)} নিন</h2>${billHtml(r)}${'billOk' in r ? `<p class="small">যাত্রী বলেছেন: ${r.billOk ? 'বিল ঠিক আছে' : 'বিল ভুল মনে হচ্ছে'}</p>` : ''}<div><button class="btn solid" type="button" data-pv-paid>টাকা পেয়েছি</button></div>`;
+  return `${rideStepper(r.status)}${body}<div id="jobMsg" class="small" role="status"></div>`;
+}
+function earnHtml() {
+  if (!myJobs) return '<div class="skeleton"></div>';
+  const paid = myJobs.filter((r) => r.status === 'paid'), day = new Date(); day.setHours(0, 0, 0, 0);
+  const today = paid.filter((r) => (r.paidAt || 0) >= day.getTime());
+  const sum = (l) => l.reduce((s, r) => s + (r.fare || 0), 0);
+  return `<div class="bento earn"><div class="cell"><span>আজ</span><b>${tk(sum(today))}</b><span>${bn(today.length)}টি কাজ</span></div><div class="cell"><span>মোট</span><b>${tk(sum(paid))}</b><span>${bn(paid.length)}টি কাজ</span></div></div>
+    ${paid.length ? `<div class="rows">${paid.slice(0, 5).map((r) => `<div class="r"><span class="sq t-ok">${icon('check')}</span><div><div class="t">${esc(r.pickup?.label || '')}${r.drop ? ' → ' + esc(r.drop.label) : ''}</div><div class="m">${r.paidAt ? agoBn(r.paidAt) : ''}${r.rating ? ' · ' + '★'.repeat(r.rating) : ''}</div></div><span class="dist">${tk(r.fare || 0)}</span></div>`).join('')}</div>` : ''}`;
+}
+function adminHtml() {
+  const typeOpts = RM.RIDE_TYPES.filter((x) => x.id !== 'help').map((x) => `<option value="${x.id}">${esc(x.bn.split(' (')[0])}</option>`).join('');
+  const missing = RM.RIDE_TYPES.filter((x) => !rates[x.id]).map((x) => x.bn.split(' (')[0]);
+  return `<section class="card"><p class="eyebrow">অ্যাডমিন</p><h2>অনুমোদনের অপেক্ষায়</h2>
+      ${!pend ? '<div class="skeleton"></div>' : !pend.length ? '<p class="muted">কেউ অপেক্ষায় নেই।</p>' : `<div class="rows">${pend.map((p) => `<div class="r"><span class="sq ${TYPE_TINT[p.type]}">${icon(TYPE_IC[p.type])}</span><div><div class="t">${esc(p.name)} · ${esc(tName(p.type).split(' (')[0])}</div><div class="m">${esc(p.vehicle)} · ${esc(p.district)}</div></div><button class="btn solid" type="button" data-pv-approve="${esc(p.id)}">অনুমোদন</button></div>`).join('')}</div>`}
+      <div id="admMsg" class="small" role="status"></div></section>
+    <section class="card"><p class="eyebrow">অ্যাডমিন</p><h2>ভাড়ার হার</h2>${missing.length ? `<div class="note">${icon('info')}<p>এখনো হার দেওয়া হয়নি: ${esc(missing.join(', '))}। হার না থাকলে ওই সেবা ডাকা যাবে না।</p></div>` : ''}
+      <label for="rtType">সেবা</label><select id="rtType">${typeOpts}</select>
+      <div class="row2"><div><label for="rtBase">শুরু (টাকা)</label><input type="tel" id="rtBase" inputmode="numeric"></div><div><label for="rtKm">প্রতি কিমি</label><input type="tel" id="rtKm" inputmode="numeric"></div>
+      <div><label for="rtMin">অপেক্ষা প্রতি মিনিট</label><input type="tel" id="rtMin" inputmode="numeric"></div><div><label for="rtMinF">সর্বনিম্ন ভাড়া</label><input type="tel" id="rtMinF" inputmode="numeric"></div></div>
+      <div class="pills"><button class="btn solid" type="button" data-rt-save>হার সংরক্ষণ</button><button class="btn ghost" type="button" data-rt-defaults>সব সেবায় নমুনা হার দিন</button></div>
+      <p class="small">প্রতিটা বদল অডিট লগে থাকে। "বিপদে সাহায্যকারী" সবসময় বিনামূল্যে।</p><div id="rtMsg" class="small" role="status"></div></section>`;
+}
+function fillRateForm() {
+  const t = $('#rtType')?.value; if (!t) return;
+  const r = rates[t] || RM.DEFAULT_RATES[t];
+  $('#rtBase').value = r.base; $('#rtKm').value = r.perKm; $('#rtMin').value = r.perMin; $('#rtMinF').value = r.minFare;
+}
+
+/* ---------- provider and admin actions ---------- */
+async function pvAction(t) {
+  const [[fb, cm]] = await RIDE();
+  const say = (sel, s) => { const m = $(sel); if (m) m.textContent = s; };
+  try {
+    if ('pvApply' in t.dataset) {
+      const name = $('#pvName').value.trim(), veh = $('#pvVeh').value.trim(), type = $('#pvType').value;
+      if (name.length < 2 || veh.length < 2) return say('#pvMsg', 'নাম আর গাড়ির নম্বর বা কাজের পরিচয় লিখুন।');
+      if (HP(name) || HP(veh)) return say('#pvMsg', 'ফোন নম্বর লিখবেন না।');
+      await fb.applyProvider({ name, type, vehicle: veh, district: cm.districtKey(here.d) });
+      prov = await fb.myProvider(); toast('আবেদন জমা হয়েছে'); return driveMount();
+    }
+    if ('pvWithdraw' in t.dataset) { await fb.withdrawProvider(); prov = null; return paintDrive(); }
+    if ('pvOnline' in t.dataset) {
+      if (pvOnline) { await fb.goOffline(); pvOnline = false; return paintDrive(); }
+      const at = await new Promise((ok) => {
+        if (SIM || !navigator.geolocation) return ok({ lat: here.lat, lon: here.lon });
+        navigator.geolocation.getCurrentPosition((p) => ok({ lat: p.coords.latitude, lon: p.coords.longitude }), () => ok({ lat: here.lat, lon: here.lon }), { timeout: 10000 });
+      });
+      await fb.goOnline(prov, RM.coarse(at.lat), RM.coarse(at.lon)); pvOnline = true; mine = mine || { ...at, at: Date.now() }; toast('আপনি অনলাইনে আছেন'); return paintDrive();
+    }
+    if (t.dataset.pvAccept) {
+      try { await fb.acceptRide(t.dataset.pvAccept, prov); } catch (e) { if (e.code === 'permission-denied') throw { code: 'taken' }; throw e; }
+      toast('ডাক নিলেন। যাত্রী এখন আপনাকে ম্যাপে দেখছেন।');
+      ride = reqs.find((r) => r.id === t.dataset.pvAccept) || null; if (ride) ride = { ...ride, status: 'accepted' };
+      await followRide(t.dataset.pvAccept, 'provider'); paintDrive(); return;
+    }
+    if (t.dataset.pvStep === 'arrived') { await fb.arrived(ride.id); return; }
+    if (t.dataset.pvStep === 'on_trip') { track = null; await fb.startTrip(ride.id); return; }
+    if ('pvEnd' in t.dataset) {
+      const r = ride, tp = RM.typeOf(r.type), rt = rates[r.type];
+      const max = (r.estM || 0) * 3 + 5000;
+      const distM = tp.dest ? Math.min(max, Math.round(track && track.m > 50 ? track.m : r.estM || 0)) : 0;
+      const waitMin = r.arrivedAt && r.startedAt ? Math.max(0, Math.floor((r.startedAt - r.arrivedAt) / 60000)) : 0;
+      await fb.completeRide(r.id, { distM, waitMin, fare: RM.fare(rt, distM, waitMin) }); return;
+    }
+    if ('pvPaid' in t.dataset) {
+      await fb.markPaid(ride.id); toast('টাকা পেয়েছেন। রসিদ যাত্রীর কাছে গেছে।');
+      stopRide(); ride = null; rideRole = null; myJobs = await fb.myRides('provider'); return paintDrive();
+    }
+    if ('pvCancel' in t.dataset) {
+      await fb.cancelRide(ride.id, 'provider', 0); await fb.clearLive(ride.id);
+      stopRide(); ride = null; rideRole = null; toast('বাতিল হয়েছে'); return paintDrive();
+    }
+    if (t.dataset.pvApprove) { await fb.approveProvider(t.dataset.pvApprove, true); pend = await fb.pendingProviders(); toast('অনুমোদন দেওয়া হয়েছে'); return paintDrive(); }
+    if ('rtSave' in t.dataset || 'rtDefaults' in t.dataset) {
+      const list = 'rtDefaults' in t.dataset ? Object.entries(RM.DEFAULT_RATES) : [[$('#rtType').value, { base: +$('#rtBase').value, perKm: +$('#rtKm').value, perMin: +$('#rtMin').value, minFare: +$('#rtMinF').value }]];
+      for (const [k, r] of list) {
+        if (![r.base, r.perKm, r.perMin, r.minFare].every((x) => Number.isInteger(x) && x >= 0)) return say('#rtMsg', 'শুধু পূর্ণ সংখ্যা (০ বা বেশি) লিখুন।');
+        await fb.setRates(k, k === 'help' ? { base: 0, perKm: 0, perMin: 0, minFare: 0 } : r);
+      }
+      rates = await fb.readRates(); toast('হার সংরক্ষণ হয়েছে'); return paintDrive();
+    }
+  } catch (e) {
+    const m = $('#jobMsg') || $('#pvMsg') || $('#admMsg') || $('#rtMsg');
+    if (m) m.textContent = errText(e); else toast(errText(e));
+  }
+}
+async function riderAction(t) {
+  const [[fb]] = await RIDE();
+  const m = $('#rideMsg');
+  try {
+    if ('rideCancel' in t.dataset) {
+      const fee = ride.status === 'arrived' && rates[ride.type] ? RM.cancelFee(rates[ride.type], 'arrived') : 0;
+      if (fee && !confirm(`${tWho(ride.type)} পৌঁছে গেছেন। এখন বাতিল করলে ${fee} টাকা দিতে হবে। বাতিল করবেন?`)) return;
+      await fb.cancelRide(ride.id, 'rider', fee); if (RM.LIVE.includes(ride.status)) await fb.clearLive(ride.id); return;
+    }
+    if (t.dataset.billOk) { await fb.billOk(ride.id, t.dataset.billOk === '1'); toast('ধন্যবাদ, জানানো হয়েছে'); return; }
+    if (t.dataset.rate) { await fb.rateRide(ride.id, Number(t.dataset.rate)); toast('ধন্যবাদ!'); return; }
+    if ('rideNew' in t.dataset) { stopRide(); ride = null; rideRole = null; store.set('sc-ride', ''); callF.drop = null; callF.dropLabel = ''; render(); return; }
+    if ('rideFamily' in t.dataset) {
+      const msg = `${tName(ride.type).split(' (')[0]}-এ যাচ্ছি: ${ride.pickup.label}${ride.drop ? ' থেকে ' + ride.drop.label : ''}। ${tWho(ride.type)}: ${ride.providerName} (${ride.vehicle})। পৌঁছে জানাব।`;
+      $('#sosOut').innerHTML = smsBlock(msg); return;
+    }
+  } catch (e) { if (m) m.textContent = errText(e); }
+}
+
+Object.assign(VIEWS, { call: viewCall, drive: viewDrive });
+document.addEventListener('click', async (ev) => {
+  const t = ev.target.closest('button, a'); if (!t) return;
+  const d = t.dataset;
+  if (d.rtype) { callF.type = d.rtype; callF.online = null; if (!RM.typeOf(d.rtype).dest) callF.drop = null; callF.pickLabel = $('#pickLabel')?.value || callF.pickLabel; render(); refreshOnline(); return; }
+  if (d.pickmode) { callF.picking = d.pickmode; callF.pickLabel = $('#pickLabel').value; callF.dropLabel = $('#dropLabel')?.value || ''; document.querySelectorAll('[data-pickmode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pickmode === d.pickmode))); return; }
+  if (d.qdrop) { const p = quickDrops()[Number(d.qdrop)]; if (p) { callF.drop = { lat: p.lat, lon: p.lon }; $('#dropLabel').value = p.name.slice(0, 80); paintMarkers(true); paintEst(); } return; }
+  if ('callGps' in d) {
+    const m = $('#callMsg'); if (!navigator.geolocation) { m.textContent = 'এই ব্রাউজারে লোকেশন নেই। ম্যাপে চাপ দিয়ে ডাকার জায়গা বাছুন।'; return; }
+    m.textContent = 'লোকেশন খোঁজা হচ্ছে…';
+    navigator.geolocation.getCurrentPosition((p) => {
+      const la = r5(p.coords.latitude), lo = r5(p.coords.longitude);
+      if (!RM.inBangladesh(la, lo)) { m.textContent = 'আপনি বাংলাদেশের বাইরে আছেন বলে মনে হচ্ছে।'; return; }
+      callF.pick = { lat: la, lon: lo, area: here.label }; m.textContent = 'ডাকার জায়গা: আপনার এখনকার লোকেশন।'; paintMarkers(true); paintEst();
+    }, () => { m.textContent = 'লোকেশন পাওয়া যায়নি। ম্যাপে চাপ দিয়ে ডাকার জায়গা বাছুন।'; }, { timeout: 15000, enableHighAccuracy: true });
+    return;
+  }
+  if ('callGo' in d) { callGo(); return; }
+  if ('callHist' in d) { showHistory(); return; }
+  if (['rideCancel', 'billOk', 'rate', 'rideNew', 'rideFamily'].some((k) => k in d)) { riderAction(t); return; }
+  if (Object.keys(d).some((k) => /^(pv|rt)[A-Z]/.test(k))) { pvAction(t); return; }
+});
+document.addEventListener('change', (ev) => { if (ev.target.id === 'rtType') fillRateForm(); });
+
+// Start (last, so every page above exists): a family trip link opens its page; otherwise the saved area.
+tripFromHash();
 try { const h = JSON.parse(store.get('demo-here') || 'null'); if (h) locate(h.lat, h.lon, h.label); else locate(PRESETS[0].lat, PRESETS[0].lon, PRESETS[0].n); } catch { locate(PRESETS[0].lat, PRESETS[0].lon, PRESETS[0].n); }
 render();
-$('#areaDlg').addEventListener('click', (e) => { if (e.target.id === 'areaDlg') e.target.close(); });

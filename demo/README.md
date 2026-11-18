@@ -32,3 +32,44 @@ on every value (a demo shortcut); the real pages (DEMO_TO_REAL_PLAN A1–A8) use
 host is tile.openstreetmap.org. Noakhali: pharmacies and hospitals from OSM, 24 pins on the map, pumps show the empty
 state (OSM has none in Noakhali, see docs/reports/OSM_GAPS.md). Sylhet (picked from the list): pharmacies and map;
 emergency numbers say "আসছে". Search: rangpur, sylhet, laboni, chowmuhoni, jonmo nibondhon.
+
+## v3 (17 Nov 2026, night)
+- **Any of the 64 districts** from the Today tab ("জেলা বদলান"), the area pill, or search.
+- **17 categories**, daily needs first: হাসপাতাল ও ক্লিনিক, ফার্মেসি, ফিলিং স্টেশন, দোকান ও সুপারশপ, বাজার, ব্যাংক/ATM, ওয়ার্কশপ,
+  যাতায়াত (বাস, ঘাট, রেল), থানা ও ফায়ার, পোস্ট অফিস, দর্শনীয় স্থান, হোটেল ও খাবার, স্কুল-কলেজ, উপাসনালয়, আশ্রয়কেন্দ্র, ইউনিয়ন পরিষদ, অন্যান্য সেবা.
+- **Filling stations** from Padma Oil's official list (#227): "আনুমানিক অবস্থান" at the upazila centre, or "অবস্থান জানা নেই".
+- **Destination page** ("গন্তব্য দেখুন" / "বিস্তারিত" on every place with a point): directions, share, "এখানে যাচ্ছি" SMS to family,
+  a map, and what is within 5 km: থাকা ও খাওয়া, হাসপাতাল, ফার্মেসি, ATM, ফিলিং স্টেশন, থানা, যাতায়াত.
+- **সাহায্য ও হেল্পলাইন** page: all 19 official national helplines by need (বিপদ, নারী ও শিশু, স্বাস্থ্য, দুর্যোগ, পর্যটক, আইনি, তথ্য),
+  each with its source, plus the area's official numbers.
+- The new categories (tourism, stay_food, education, worship, shelter, post_office, railway_station) fill in by
+  themselves when data PR 2c adds them to `data/places/`; until then they show an honest empty state.
+
+## v4 (18 Nov 2026): features that help people act
+- **সমস্যা জানান, সমাধান দেখুন** (tab "সমস্যা"): report a local problem (road, water, drain, light, …) with a landmark; others
+  press "আমিও"; the status moves জানানো → যাচাই → অফিসে → কাজ চলছে → সমাধান and everyone sees it. No name or phone on the page.
+- **এখন কেমন?** on a place's page: "এখন খোলা / বন্ধ / তেল আছে / তেল নেই", with how many people said it and when.
+- **নিরাপদে পৌঁছানো**: a family link that turns red when the time is over and "পৌঁছেছি" has not come.
+- **GD draft** for a lost item, and "আমি নিরাপদ" SMS buttons.
+
+## v5 (18 Nov 2026): ডাকুন — call a vehicle, a technician or a helper, with a live map and a bill
+- **Rider** (tab "ডাকুন"): choose সিএনজি, বাইক, অ্যাম্বুলেন্স, কারিগর or বিপদে সাহায্যকারী; pickup (area, "আমার লোকেশন", or a tap
+  on the map) and destination (a tap, or a nearby bazar/bus stand/hospital); the fare estimate from the admin's rates;
+  how many providers of that type are working in the district. After a provider accepts: their name and vehicle number,
+  their point moving on the map, distance and minutes away. Then the bill (start + km + waiting after 3 free minutes,
+  rounded up to 5 taka, minimum fare), "বিল ঠিক আছে / ভুল", cash, receipt (copy/share), rating, and history.
+- **Provider** ("আমি সেবা দিই"): apply (name, type, vehicle number or skill; the district is the chosen area), wait for
+  approval, go online, see new requests of their type in their district live, accept (the second provider is refused),
+  পৌঁছেছি → যাত্রা শুরু → বিল করুন (distance from GPS, waiting from the two times) → টাকা পেয়েছি; earnings today and total.
+- **Admin** (same page): approve providers and set the rates per type; both are written with an audit entry.
+- **Firestore rules** decide every step: who may take it, in which order, that the fare is within 5 taka of the formula
+  and the distance not more than 3 × the estimate + 5 km, at most 10 requests a day and 60 s apart.
+- **Location during a ride:** this is the one feature that sends positions. Only after the person taps "ডাকুন" / "নিন";
+  the live point (`rides/{id}/live/{rider|provider}`) is readable only by those two people, only while the ride is
+  accepted, arrived or on trip, and is deleted when it ends. The pickup and destination (with the person's own label)
+  stay in the ride record for the receipt; only the rider, the provider and an admin can read it. "Online" providers
+  are stored rounded to about 100 m. The page says this next to the button.
+- **Presentation mode:** add `?sim=1` to the address. Positions then move along a straight line (120 m every 3 s) instead
+  of GPS, so the live map can be shown with two browser windows on one laptop. The page says "নকল".
+- Tested: rules 146/146 in the emulator (27 for rides); a three-browser test (admin, driver, rider) from rates to receipt,
+  320/390/1280 px, no console errors.
