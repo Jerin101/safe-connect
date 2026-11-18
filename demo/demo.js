@@ -43,7 +43,8 @@ function locate(lat, lon, label) {
 function distTxt(km) { if (km < 1) return `${bn(Math.round(km * 1000 / 10) * 10)} মিটার`; return `${bn(km.toFixed(1))} কিমি`; }
 function walkTxt(km) { const m = Math.round(km / 5 * 60); return m <= 60 ? `হেঁটে ${bn(m)} মিনিট` : `গাড়িতে ${bn(Math.max(5, Math.round(km / 25 * 60)))} মিনিট`; }
 const CON = () => (here && D.upazilas[here.up] ? D.upazilas[here.up].contacts : {});
-const dirLink = (p) => p.lat ? `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.q)}`;
+const dirLink = (p) => (p.approx || p.noLoc) && p.q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.q)}` : dirLink0(p);
+const dirLink0 = (p) => p.lat ? `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.q)}`;
 
 /* ---------- sunrise / sunset (NOAA formula, on the phone) ---------- */
 function sunTimes(lat, lon, date = new Date()) {
@@ -86,10 +87,10 @@ const SERVICES = [
 const CATS = [
   { id: 'health', n: 'স্বাস্থ্য' }, { id: 'union', n: 'ইউনিয়ন পরিষদ' }, { id: 'bazar', n: 'বাজার' },
   { id: 'edu', n: 'স্কুল-কলেজ' }, { id: 'spot', n: 'দর্শনীয় স্থান' }, { id: 'pharmacy', n: 'ফার্মেসি' },
-  { id: 'fuel', n: 'পাম্প' }, { id: 'atm', n: 'ব্যাংক/ATM' }, { id: 'workshop', n: 'ওয়ার্কশপ' },
-  { id: 'shelter', n: 'আশ্রয়কেন্দ্র' }, { id: 'shop', n: 'দোকান' }, { id: 'ghat', n: 'ঘাট ও বাস' }, { id: 'police', n: 'থানা ও ফায়ার' },
+  { id: 'fuel', n: 'ফিলিং স্টেশন' }, { id: 'atm', n: 'ব্যাংক/ATM' }, { id: 'workshop', n: 'ওয়ার্কশপ' },
+  { id: 'shelter', n: 'আশ্রয়কেন্দ্র' }, { id: 'shop', n: 'দোকান' }, { id: 'ghat', n: 'ঘাট ও বাস' }, { id: 'police', n: 'থানা ও ফায়ার' }, { id: 'other', n: 'অন্যান্য সেবা' },
 ];
-const GQ = { health: 'hospital', pharmacy: 'pharmacy', fuel: 'petrol pump', atm: 'ATM bank', workshop: 'workshop mechanic', shelter: 'cyclone shelter', shop: 'shop', ghat: 'bus stand ghat', bazar: 'bazar', edu: 'school', spot: 'tourist spot', union: 'union parishad', police: 'police station' };
+const GQ = { health: 'hospital', pharmacy: 'pharmacy', fuel: 'filling station petrol pump', atm: 'ATM bank', workshop: 'workshop mechanic', shelter: 'cyclone shelter', shop: 'shop', ghat: 'bus stand ghat', bazar: 'bazar', edu: 'school', spot: 'tourist spot', union: 'union parishad', police: 'police station', other: 'service' };
 const unionOf = (name, up) => D.unions.find((u) => u.bn === name && (!up || u.up === up));
 
 const placeCache = new Map();
@@ -97,7 +98,12 @@ async function loadPlaces(h) {
   const ent = PIDX.districts.find((x) => x.district_en === h.d);
   if (!ent) { h.places = []; return; }
   try {
-    if (!placeCache.has(h.d)) placeCache.set(h.d, Promise.all(ent.files.map((f) => getJSON('../data/places/' + f.file))).then((fs) => fs.flatMap((f) => f.places)));
+    // OSM places, plus the official lists (Padma Oil's filling stations, #227) in official_<district>.json.
+    const slug = ent.files[0].file.replace(/(-\d+)?\.json$/, '');
+    if (!placeCache.has(h.d)) placeCache.set(h.d, Promise.all([
+      Promise.all(ent.files.map((f) => getJSON('../data/places/' + f.file))).then((fs) => fs.flatMap((f) => f.places)),
+      getJSON(`../data/places/official_${slug}.json`).then((o) => o.places.map((x) => ({ ...x, list: o.lists[x.list] }))).catch(() => []),
+    ]).then(([a, b]) => [...a, ...b]));
     const list = await placeCache.get(h.d);
     if (here === h) { h.places = list; if (tab === 'near') render(); }
   } catch { if (here === h) { h.places = []; h.placesErr = true; if (tab === 'near') render(); } }
@@ -112,6 +118,7 @@ const OSMCAT = {
   bazar: (p) => p.subcategory === 'marketplace',
   ghat: (p) => ['bus_station', 'ferry_terminal'].includes(p.subcategory),
   police: (p) => p.category === 'public_offices',
+  other: (p) => p.category === 'other_services',
 };
 const SUBBN = { hospital: 'হাসপাতাল', clinic: 'ক্লিনিক', doctors: 'ডাক্তারের চেম্বার', pharmacy: 'ফার্মেসি', chemist: 'ফার্মেসি', fuel: 'পেট্রোল/সিএনজি পাম্প',
   bank: 'ব্যাংক', atm: 'এটিএম', supermarket: 'সুপারশপ', convenience: 'মুদি দোকান', general: 'দোকান', mall: 'শপিং মল', marketplace: 'বাজার',
@@ -145,11 +152,19 @@ function nearby(cat) {
     }
   }
   if (OSMCAT[cat] && here.places) {
-    for (const p of here.places) if (OSMCAT[cat](p)) out.push({ name: placeName(p), sub: `${SUBBN[p.subcategory] || p.subcategory}${p.upazila ? ' · ' + (UPBN[p.upazila] || UPBN_ALL[`${p.district}|${p.upazila}`] || p.upazila) : ''}`, src: p.source_url, lat: p.lat, lon: p.lon, osm: true });
+    for (const p of here.places) if (OSMCAT[cat](p) && p.source === 'official') {
+      const c = p.upazila && CEN.centres.find((x) => x.district === p.district && (x.upazila_en === p.upazila || (p.upazila === 'Sadar' && (x.upazila_en === p.district || /sadar/i.test(x.upazila_en)))));
+      const upb = c ? c.upazila_bn : '';
+      out.push({ name: p.name_hidden ? p.list.hidden_name_label_bn : (p.name_bn || p.name_en), sub: `পেট্রোল পাম্প · ${upb || here.dBn + ' জেলা'}`, src: p.source_url,
+        lat: c ? c.lat : null, lon: c ? c.lon : null, approx: !!c, noLoc: !c, q: `${p.name_en || ''} ${upb || ''} ${here.dBn}`.trim(), official: p.list.badge_bn });
+    }
+    for (const p of here.places) if (OSMCAT[cat](p) && p.source !== 'official') out.push({ name: placeName(p), sub: `${SUBBN[p.subcategory] || p.subcategory}${p.upazila ? ' · ' + (UPBN[p.upazila] || UPBN_ALL[`${p.district}|${p.upazila}`] || p.upazila) : ''}`, src: p.source_url, lat: p.lat, lon: p.lon, osm: true });
   }
-  for (const p of out) p.km = hav(here, p);
-  // Official rows only when they are near (the pilot lists cover two districts).
-  return out.filter((p) => !p.off || p.km < 60).sort((a, b) => a.km - b.km).slice(0, 25);
+  for (const p of out) p.km = p.noLoc ? null : hav(here, p);
+  // Official rows only when they are near (the pilot lists cover two districts). Places with no location (an official
+  // list that names only the district) come after the ones with a distance.
+  const withLoc = out.filter((p) => !p.noLoc && (!p.off || p.km < 60)).sort((a, b) => a.km - b.km);
+  return [...withLoc, ...out.filter((p) => p.noLoc)].slice(0, 30);
 }
 
 /* ---------- own icon set (inline SVG, 24×24, stroke) ---------- */
@@ -202,7 +217,7 @@ const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hi
 
 /* category → icon + tint */
 const CI = { health: ['health', 't-ok'], union: ['gov', ''], bazar: ['basket', 't-sun'], edu: ['cap', ''], spot: ['wave', ''], pharmacy: ['pill', 't-ok'],
-  fuel: ['fuel', 't-sun'], atm: ['bank', ''], workshop: ['wrench', 't-sun'], shelter: ['shelter', 't-sos'], shop: ['store', 't-sun'], ghat: ['boat', ''], police: ['shield', ''] };
+  fuel: ['fuel', 't-sun'], atm: ['bank', ''], workshop: ['wrench', 't-sun'], shelter: ['shelter', 't-sos'], shop: ['store', 't-sun'], ghat: ['boat', ''], police: ['shield', ''], other: ['wrench', ''] };
 const sq = (c, size = '') => `<span class="sq ${CI[c] ? CI[c][1] : ''}">${icon(CI[c] ? CI[c][0] : 'pin', size)}</span>`;
 
 /* ---------- rendering ---------- */
@@ -214,13 +229,13 @@ const TABS = [
 const ext = 'target="_blank" rel="noopener noreferrer"';
 const callBtn = (p, solid = true) => p ? `<a class="btn ${solid ? 'solid' : ''}" href="tel:${esc(p)}">${icon('phone', 'sm')}<span class="num">${bn(p)}</span></a>` : '';
 const srcLink = (s) => s ? `<a class="btn ghost" href="${esc(s)}" ${ext}>উৎস ${icon('ext', 'sm')}</a>` : '';
-const srcTag = (p) => p.osm ? '<span class="badge osm">OpenStreetMap, যাচাই করা হয়নি</span>' : p.off ? '<span class="badge off">সরকারি উৎস</span>' : '';
+const srcTag = (p) => p.official ? `<span class="badge off">সরকারি তালিকা</span><span class="badge sample">${esc(p.official)}</span>` : p.osm ? '<span class="badge osm">OpenStreetMap, যাচাই করা হয়নি</span>' : p.off ? '<span class="badge off">সরকারি উৎস</span>' : '';
 
 function placeRow(p) {
   return `<div class="r">${sq(p.cat)}
     <div><div class="t">${esc(p.name)}${srcTag(p)}</div><div class="m">${esc(p.sub || '')}</div></div>
-    <div class="dist">${distTxt(p.km)}<small>${walkTxt(p.km)}${p.approx ? ' · আনুমানিক' : ''}</small></div>
-    <div class="acts">${callBtn(p.phone)}${p.sample ? '' : `<a class="btn" href="${esc(dirLink(p))}" ${ext}>${icon('nav', 'sm')}পথ দেখান</a>`}
+    <div class="dist">${p.noLoc ? '<small>অবস্থান জানা নেই</small>' : p.approx ? `${p.km < 1.5 ? 'এই উপজেলায়' : '~' + distTxt(p.km)}<small>আনুমানিক অবস্থান</small>` : `${distTxt(p.km)}<small>${walkTxt(p.km)}</small>`}</div>
+    <div class="acts">${callBtn(p.phone)}<a class="btn" href="${esc(dirLink(p))}" ${ext}>${icon('nav', 'sm')}${p.noLoc ? 'Google Maps-এ খুঁজুন' : 'পথ দেখান'}</a>
       <button class="btn" type="button" data-share="${esc(p.name + (p.phone ? ' ' + p.phone : ''))}">${icon('share', 'sm')}শেয়ার</button>${srcLink(p.src)}</div></div>`;
 }
 function contactRows(list) {
@@ -247,7 +262,7 @@ function viewToday() {
   const s = sunTimes(here.lat, here.lon), h = new Date().getHours();
   const hi = h < 5 ? 'শুভ রাত্রি' : h < 12 ? 'শুভ সকাল' : h < 17 ? 'শুভ দুপুর' : 'শুভ সন্ধ্যা';
   const c = CON();
-  const NEEDS = ['health', 'pharmacy', 'bazar', 'fuel', 'atm', 'workshop', 'union', 'shelter'];
+  const NEEDS = ['health', 'pharmacy', 'fuel', 'shop', 'atm', 'workshop', 'ghat', 'police'];
   return `<section class="card hero"><p class="small">${hi} · ${esc(here.label)}</p><h1>আজ আপনার এলাকায়</h1>
       <div class="bento">
         <div class="cell"><span>${icon('sunrise', 'sm')}সূর্যোদয়</span><b>${s.rise}</b></div>
@@ -284,6 +299,7 @@ function viewNear() {
     <section class="card">${loading ? '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'
       : items.length ? `<div class="rows">${items.map(placeRow).join('')}</div>` : empty}
       ${['bazar', 'edu', 'spot'].includes(cat) && items.some((p) => p.approx) ? '<p class="small">"আনুমানিক": জায়গাটার নিজের অবস্থান এখনো নেই, তাই তার ইউনিয়ন বা উপজেলার কেন্দ্র থেকে দূরত্ব দেখানো হচ্ছে।</p>' : ''}
+      ${items.some((p) => p.official) ? '<p class="small">ফিলিং স্টেশন: পদ্মা অয়েলের সরকারি ডিলার তালিকা (২০১৯)। তালিকায় লোকেশন নেই, তাই উপজেলার কেন্দ্র থেকে আনুমানিক দূরত্ব; উপজেলা জানা না থাকলে "অবস্থান জানা নেই"। মেঘনা আর যমুনার তালিকা আসছে।</p>' : ''}
       ${items.some((p) => p.osm) ? '<p class="small">জায়গা © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> (ODbL), ১৩ নভেম্বর ২০২৬-এর তথ্য। ফোন নম্বর রাখা হয়নি, কারণ সেগুলো সরকারি উৎসের না।</p>' : ''}</section>`;
 }
 
@@ -425,7 +441,7 @@ function drawMap() {
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(mapObj);
   const css = getComputedStyle(document.documentElement), brand = css.getPropertyValue('--brand').trim() || '#0b4a4e', sos = css.getPropertyValue('--sos').trim() || '#cc2f2b';
   const pts = [[here.lat, here.lon]];
-  for (const p of nearby(cat)) {
+  for (const p of nearby(cat).filter((x) => !x.noLoc)) {
     const box = document.createElement('div'), b = document.createElement('b'), s = document.createElement('div'), a = document.createElement('a');
     b.textContent = p.name; s.textContent = `${p.sub || ''} · ${distTxt(p.km)}`; a.textContent = 'পথ দেখান'; a.href = dirLink(p); a.target = '_blank'; a.rel = 'noopener noreferrer';
     box.append(b, s, a);
