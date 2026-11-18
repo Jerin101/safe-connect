@@ -16,9 +16,68 @@
     "url": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-pocl/2024/12/09db3dd319ab47fe9a603c709b61b940.pdf",
     "sha256": "a5d5b7593f7980f3d2006c582e689ad2d0532d034b28d8dabc4b057d4ed90466"
    }
+  },
+  "meghna_2025": {
+   "name": "Meghna Petroleum Limited: List of Filling Station",
+   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
+   "list_date": "2025-11-05",
+   "badge_bn": null,
+   "badge_en": null,
+   "hidden_name_label_bn": "পেট্রোল পাম্প (মেঘনা পেট্রোলিয়ামের ডিলার)",
+   "hidden_name_label_en": "Petrol pump (Meghna Petroleum dealer)",
+   "source_file": {
+    "url": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-mpl/2024/12/d4d863c85aa74ebe888328b92898640f.pdf",
+    "sha256": "2c596da55341e465fff23609aac2a7d2672e9da9f266076c46393fc934941422"
+   }
   }
  },
  "places": [
+  {
+   "id": "meghna-pirojpur-1",
+   "name_bn": null,
+   "name_en": "Howlader Filling Station",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Barisal",
+   "district": "Pirojpur",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "meghna_2025",
+   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
+   "page": 23,
+   "flags": [],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "meghna-pirojpur-2",
+   "name_bn": null,
+   "name_en": "Mohona Filling Station",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Barisal",
+   "district": "Pirojpur",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "meghna_2025",
+   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
+   "page": 23,
+   "flags": [],
+   "checked_on": "2026-11-17"
+  },
   {
    "id": "padma-pirojpur-1",
    "name_bn": null,
