@@ -949,7 +949,9 @@ function setMk(key, p, style, label) {
   if (!rideMap) return;
   if (!p) { if (mk[key]) { mk[key].remove(); delete mk[key]; } return; }
   if (mk[key]) { mk[key].setLatLng([p.lat, p.lon]); return; }
-  mk[key] = L.circleMarker([p.lat, p.lon], { weight: 3, fillOpacity: 1, color: '#ffffff', ...style }).addTo(rideMap).bindTooltip(label, { permanent: key === 'prov' || key === 'me', direction: 'top', offset: [0, -8] });
+  // a DOM node, not a string: Leaflet puts a string in as HTML, and providerName is chosen by the provider
+  const tip = document.createElement('span'); tip.textContent = label;
+  mk[key] = L.circleMarker([p.lat, p.lon], { weight: 3, fillOpacity: 1, color: '#ffffff', ...style }).addTo(rideMap).bindTooltip(tip, { permanent: key === 'prov' || key === 'me', direction: 'top', offset: [0, -8] });
 }
 function paintMarkers(fit) {
   if (!rideMap) return;
