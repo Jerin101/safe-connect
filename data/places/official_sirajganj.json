@@ -219,31 +219,6 @@
   {
    "id": "padma-sirajganj-1",
    "name_bn": null,
-   "name_en": "BHUIYAN FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Rajshahi",
-   "district": "Sirajganj",
-   "upazila": "Kazipur",
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 40,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-sirajganj-2",
-   "name_bn": null,
    "name_en": "SHAHID FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -267,7 +242,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-sirajganj-3",
+   "id": "padma-sirajganj-2",
    "name_bn": null,
    "name_en": "TANKIORRY SOMOBAY FILLING STATION",
    "name_hidden": null,
@@ -292,7 +267,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-sirajganj-4",
+   "id": "padma-sirajganj-3",
    "name_bn": null,
    "name_en": "NORTH BENGAL SAMOBAI FILLING STATION",
    "name_hidden": null,
@@ -317,7 +292,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-sirajganj-5",
+   "id": "padma-sirajganj-4",
    "name_bn": null,
    "name_en": "BOALIA FILLING STATION",
    "name_hidden": null,
@@ -342,9 +317,34 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-sirajganj-6",
+   "id": "padma-sirajganj-5",
    "name_bn": null,
    "name_en": "ABDUL AZIZ FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Rajshahi",
+   "district": "Sirajganj",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 40,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-sirajganj-6",
+   "name_bn": null,
+   "name_en": "BHUIYAN FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

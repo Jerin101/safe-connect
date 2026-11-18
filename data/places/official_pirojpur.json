@@ -35,7 +35,7 @@
   {
    "id": "meghna-pirojpur-1",
    "name_bn": null,
-   "name_en": "Mohona Filling Station",
+   "name_en": "Howlader Filling Station",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -44,7 +44,7 @@
    "location_approx": true,
    "division": "Barisal",
    "district": "Pirojpur",
-   "upazila": "Nazirpur",
+   "upazila": null,
    "union": null,
    "phone": null,
    "hours": null,
@@ -58,7 +58,7 @@
   {
    "id": "meghna-pirojpur-2",
    "name_bn": null,
-   "name_en": "Howlader Filling Station",
+   "name_en": "Mohona Filling Station",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

@@ -449,6 +449,52 @@
   {
    "id": "meghna-tangail-19",
    "name_bn": null,
+   "name_en": "Sakhipur Filling Station",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Tangail",
+   "upazila": "Sakhipur",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "meghna_2025",
+   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
+   "page": 15,
+   "flags": [],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "meghna-tangail-20",
+   "name_bn": null,
+   "name_en": "Swapno Filling Station",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Tangail",
+   "upazila": "Sakhipur",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "meghna_2025",
+   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
+   "page": 15,
+   "flags": [],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "meghna-tangail-21",
+   "name_bn": null,
    "name_en": "A.K.K. Filling Station",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -470,7 +516,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-tangail-20",
+   "id": "meghna-tangail-22",
    "name_bn": null,
    "name_en": "Bhuyapur Filling Station",
    "name_hidden": null,
@@ -493,7 +539,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-tangail-21",
+   "id": "meghna-tangail-23",
    "name_bn": null,
    "name_en": "Dhonbari Filling Staion",
    "name_hidden": null,
@@ -516,7 +562,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-tangail-22",
+   "id": "meghna-tangail-24",
    "name_bn": null,
    "name_en": "Hamid & Co.-2",
    "name_hidden": null,
@@ -539,7 +585,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-tangail-23",
+   "id": "meghna-tangail-25",
    "name_bn": null,
    "name_en": "Khan Filling Station",
    "name_hidden": null,
@@ -562,7 +608,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-tangail-24",
+   "id": "meghna-tangail-26",
    "name_bn": null,
    "name_en": "Maa Shuchana Filling Station",
    "name_hidden": null,
@@ -585,7 +631,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-tangail-25",
+   "id": "meghna-tangail-27",
    "name_bn": null,
    "name_en": "Nahid Filling Station",
    "name_hidden": null,
@@ -608,7 +654,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-tangail-26",
+   "id": "meghna-tangail-28",
    "name_bn": null,
    "name_en": "Purbadesh Filling Station",
    "name_hidden": null,
@@ -631,55 +677,9 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-tangail-27",
-   "name_bn": null,
-   "name_en": "Rayhan & Chowdhury Filling Station",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Tangail",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "meghna_2025",
-   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
-   "page": 15,
-   "flags": [],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "meghna-tangail-28",
-   "name_bn": null,
-   "name_en": "Sakhipur Filling Station",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Tangail",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "meghna_2025",
-   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
-   "page": 15,
-   "flags": [],
-   "checked_on": "2026-11-17"
-  },
-  {
    "id": "meghna-tangail-29",
    "name_bn": null,
-   "name_en": "Swapno Filling Station",
+   "name_en": "Rayhan & Chowdhury Filling Station",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

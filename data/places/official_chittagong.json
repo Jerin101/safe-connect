@@ -1352,31 +1352,6 @@
   {
    "id": "padma-chittagong-4",
    "name_bn": null,
-   "name_en": "A. WAZED & SONS",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Chittagong",
-   "district": "Chittagong",
-   "upazila": "Hathazari",
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 19,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-chittagong-5",
-   "name_bn": null,
    "name_en": "HAZI A. WAZED & SONS.",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -1394,6 +1369,31 @@
    "list": "padma_2019",
    "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
    "page": 20,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-chittagong-5",
+   "name_bn": null,
+   "name_en": null,
+   "name_hidden": true,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Chittagong",
+   "district": "Chittagong",
+   "upazila": "Hathazari",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 19,
    "flags": [
     "source_older_than_2_years"
    ],
@@ -1427,31 +1427,6 @@
   {
    "id": "padma-chittagong-7",
    "name_bn": null,
-   "name_en": null,
-   "name_hidden": true,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Chittagong",
-   "district": "Chittagong",
-   "upazila": "Hathazari",
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 19,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-chittagong-8",
-   "name_bn": null,
    "name_en": "SHAHPIR FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -1475,7 +1450,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-chittagong-9",
+   "id": "padma-chittagong-8",
    "name_bn": null,
    "name_en": null,
    "name_hidden": true,
@@ -1500,7 +1475,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-chittagong-10",
+   "id": "padma-chittagong-9",
    "name_bn": null,
    "name_en": "M/S.SHAH AMANAT CNG LTD.",
    "name_hidden": null,
@@ -1525,7 +1500,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-chittagong-11",
+   "id": "padma-chittagong-10",
    "name_bn": null,
    "name_en": "FIVE STAR FILLING STATION",
    "name_hidden": null,
@@ -1537,6 +1512,31 @@
    "division": "Chittagong",
    "district": "Chittagong",
    "upazila": "Rangunia",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 20,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-chittagong-11",
+   "name_bn": null,
+   "name_en": null,
+   "name_hidden": true,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Chittagong",
+   "district": "Chittagong",
+   "upazila": "Raozan",
    "union": null,
    "phone": null,
    "hours": null,
@@ -1577,31 +1577,6 @@
   {
    "id": "padma-chittagong-13",
    "name_bn": null,
-   "name_en": null,
-   "name_hidden": true,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Chittagong",
-   "district": "Chittagong",
-   "upazila": "Raozan",
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 20,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-chittagong-14",
-   "name_bn": null,
    "name_en": "M/S FUEL PLUS FILLING & SERVICING CENTER",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -1625,7 +1600,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-chittagong-15",
+   "id": "padma-chittagong-14",
    "name_bn": null,
    "name_en": "SAGARICA FILLING STATION",
    "name_hidden": null,
@@ -1637,6 +1612,31 @@
    "division": "Chittagong",
    "district": "Chittagong",
    "upazila": "Sitakunda",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 19,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-chittagong-15",
+   "name_bn": null,
+   "name_en": "A. WAZED & SONS",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Chittagong",
+   "district": "Chittagong",
+   "upazila": null,
    "union": null,
    "phone": null,
    "hours": null,

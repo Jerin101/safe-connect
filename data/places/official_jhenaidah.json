@@ -81,6 +81,29 @@
   {
    "id": "meghna-jhenaidah-3",
    "name_bn": null,
+   "name_en": "Mochik Filling Station",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Khulna",
+   "district": "Jhenaidah",
+   "upazila": "Kaliganj",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "meghna_2025",
+   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
+   "page": 19,
+   "flags": [],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "meghna-jhenaidah-4",
+   "name_bn": null,
    "name_en": "Anika Filling Station",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -102,7 +125,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-jhenaidah-4",
+   "id": "meghna-jhenaidah-5",
    "name_bn": null,
    "name_en": "Barsha Filling Station",
    "name_hidden": null,
@@ -125,7 +148,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-jhenaidah-5",
+   "id": "meghna-jhenaidah-6",
    "name_bn": null,
    "name_en": "Bonna Filling Station",
    "name_hidden": null,
@@ -148,7 +171,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-jhenaidah-6",
+   "id": "meghna-jhenaidah-7",
    "name_bn": null,
    "name_en": "Hatgopalpur Filling Station",
    "name_hidden": null,
@@ -171,7 +194,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-jhenaidah-7",
+   "id": "meghna-jhenaidah-8",
    "name_bn": null,
    "name_en": "J M Filling Station",
    "name_hidden": null,
@@ -194,7 +217,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-jhenaidah-8",
+   "id": "meghna-jhenaidah-9",
    "name_bn": null,
    "name_en": "Jobeda Filling Station",
    "name_hidden": null,
@@ -217,7 +240,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-jhenaidah-9",
+   "id": "meghna-jhenaidah-10",
    "name_bn": null,
    "name_en": "Langalbandh Filling Station",
    "name_hidden": null,
@@ -236,29 +259,6 @@
    "list": "meghna_2025",
    "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
    "page": 20,
-   "flags": [],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "meghna-jhenaidah-10",
-   "name_bn": null,
-   "name_en": "Mochik Filling Station",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Khulna",
-   "district": "Jhenaidah",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "meghna_2025",
-   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
-   "page": 19,
    "flags": [],
    "checked_on": "2026-11-17"
   },
@@ -334,7 +334,7 @@
   {
    "id": "meghna-jhenaidah-14",
    "name_bn": null,
-   "name_en": "Yiafad Filling Station",
+   "name_en": "Toton Filling Station",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -357,8 +357,8 @@
   {
    "id": "meghna-jhenaidah-15",
    "name_bn": null,
-   "name_en": null,
-   "name_hidden": true,
+   "name_en": "Yiafad Filling Station",
+   "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
    "lat": null,
@@ -424,6 +424,29 @@
    "checked_on": "2026-11-17"
   },
   {
+   "id": "meghna-jhenaidah-18",
+   "name_bn": null,
+   "name_en": null,
+   "name_hidden": true,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Khulna",
+   "district": "Jhenaidah",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "meghna_2025",
+   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
+   "page": 20,
+   "flags": [],
+   "checked_on": "2026-11-17"
+  },
+  {
    "id": "padma-jhenaidah-1",
    "name_bn": null,
    "name_en": "TAMIN FILLING STATION",
@@ -451,7 +474,7 @@
   {
    "id": "padma-jhenaidah-2",
    "name_bn": null,
-   "name_en": "PRINCE FILLING STATION",
+   "name_en": "M/S.S. R. FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -476,6 +499,31 @@
   {
    "id": "padma-jhenaidah-3",
    "name_bn": null,
+   "name_en": "PRINCE FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Khulna",
+   "district": "Jhenaidah",
+   "upazila": "Kaliganj",
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 55,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-jhenaidah-4",
+   "name_bn": null,
    "name_en": "BELY FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -499,7 +547,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jhenaidah-4",
+   "id": "padma-jhenaidah-5",
    "name_bn": null,
    "name_en": "J.V. FILLING STATION",
    "name_hidden": null,
@@ -524,7 +572,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jhenaidah-5",
+   "id": "padma-jhenaidah-6",
    "name_bn": null,
    "name_en": "JENAIDAH FILLING STATION",
    "name_hidden": null,
@@ -549,7 +597,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jhenaidah-6",
+   "id": "padma-jhenaidah-7",
    "name_bn": null,
    "name_en": "JENIDAH FILLING STATION",
    "name_hidden": null,
@@ -574,34 +622,9 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-jhenaidah-7",
-   "name_bn": null,
-   "name_en": "KHAN & SAGAR FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Khulna",
-   "district": "Jhenaidah",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 55,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
    "id": "padma-jhenaidah-8",
    "name_bn": null,
-   "name_en": "M/S.S. R. FILLING STATION",
+   "name_en": "KHAN & SAGAR FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",

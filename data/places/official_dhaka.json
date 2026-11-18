@@ -127,29 +127,6 @@
   {
    "id": "meghna-dhaka-5",
    "name_bn": null,
-   "name_en": null,
-   "name_hidden": true,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": "Demra",
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "meghna_2025",
-   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
-   "page": 10,
-   "flags": [],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "meghna-dhaka-6",
-   "name_bn": null,
    "name_en": "Karim Filling Station",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -171,7 +148,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-7",
+   "id": "meghna-dhaka-6",
    "name_bn": null,
    "name_en": "Anowar Filling Station",
    "name_hidden": null,
@@ -194,7 +171,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-8",
+   "id": "meghna-dhaka-7",
    "name_bn": null,
    "name_en": "Asulia CNG & Filling Station Limited",
    "name_hidden": null,
@@ -217,7 +194,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-9",
+   "id": "meghna-dhaka-8",
    "name_bn": null,
    "name_en": "BNS Filling Station Ltd.",
    "name_hidden": null,
@@ -240,7 +217,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-10",
+   "id": "meghna-dhaka-9",
    "name_bn": null,
    "name_en": "Jamuna CNG Filling Station",
    "name_hidden": null,
@@ -263,7 +240,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-11",
+   "id": "meghna-dhaka-10",
    "name_bn": null,
    "name_en": "Kamal CNG Filling Station",
    "name_hidden": null,
@@ -286,7 +263,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-12",
+   "id": "meghna-dhaka-11",
    "name_bn": null,
    "name_en": "Khanik Filling Station",
    "name_hidden": null,
@@ -309,7 +286,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-13",
+   "id": "meghna-dhaka-12",
    "name_bn": null,
    "name_en": "Millenium CNG Station",
    "name_hidden": null,
@@ -332,7 +309,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-14",
+   "id": "meghna-dhaka-13",
    "name_bn": null,
    "name_en": "Nabinagar Filling Station",
    "name_hidden": null,
@@ -355,7 +332,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-15",
+   "id": "meghna-dhaka-14",
    "name_bn": null,
    "name_en": "Nasim Filling Station",
    "name_hidden": null,
@@ -378,7 +355,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-16",
+   "id": "meghna-dhaka-15",
    "name_bn": null,
    "name_en": "Ricoh Filling Station",
    "name_hidden": null,
@@ -401,7 +378,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-17",
+   "id": "meghna-dhaka-16",
    "name_bn": null,
    "name_en": "Salam Filling Station",
    "name_hidden": null,
@@ -424,7 +401,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-18",
+   "id": "meghna-dhaka-17",
    "name_bn": null,
    "name_en": "Samvar Filling Station",
    "name_hidden": null,
@@ -447,7 +424,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-19",
+   "id": "meghna-dhaka-18",
    "name_bn": null,
    "name_en": "Savar CNG Filling Station",
    "name_hidden": null,
@@ -470,7 +447,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-20",
+   "id": "meghna-dhaka-19",
    "name_bn": null,
    "name_en": "Shah Alam Filling Station",
    "name_hidden": null,
@@ -493,7 +470,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-21",
+   "id": "meghna-dhaka-20",
    "name_bn": null,
    "name_en": "Talukder Filling Station",
    "name_hidden": null,
@@ -516,7 +493,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-22",
+   "id": "meghna-dhaka-21",
    "name_bn": null,
    "name_en": null,
    "name_hidden": true,
@@ -539,7 +516,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-23",
+   "id": "meghna-dhaka-22",
    "name_bn": null,
    "name_en": "Al Hossain Filling Station",
    "name_hidden": null,
@@ -562,7 +539,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-24",
+   "id": "meghna-dhaka-23",
    "name_bn": null,
    "name_en": "Al Sajada Filling Station",
    "name_hidden": null,
@@ -585,7 +562,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-25",
+   "id": "meghna-dhaka-24",
    "name_bn": null,
    "name_en": "Al-Mahmud Filling Station",
    "name_hidden": null,
@@ -608,7 +585,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-26",
+   "id": "meghna-dhaka-25",
    "name_bn": null,
    "name_en": "Bhai Bhai Filling Station",
    "name_hidden": null,
@@ -631,7 +608,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-27",
+   "id": "meghna-dhaka-26",
    "name_bn": null,
    "name_en": "Binimoy Service Station",
    "name_hidden": null,
@@ -654,7 +631,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-28",
+   "id": "meghna-dhaka-27",
    "name_bn": null,
    "name_en": "Burigongha Filling Station",
    "name_hidden": null,
@@ -677,7 +654,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-29",
+   "id": "meghna-dhaka-28",
    "name_bn": null,
    "name_en": "Cab Express (BD) Limited",
    "name_hidden": null,
@@ -700,7 +677,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-30",
+   "id": "meghna-dhaka-29",
    "name_bn": null,
    "name_en": "City Filling Station",
    "name_hidden": null,
@@ -723,7 +700,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-31",
+   "id": "meghna-dhaka-30",
    "name_bn": null,
    "name_en": "Crecent Automobile Ltd.",
    "name_hidden": null,
@@ -746,7 +723,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-32",
+   "id": "meghna-dhaka-31",
    "name_bn": null,
    "name_en": "Dhaka Filling Station",
    "name_hidden": null,
@@ -769,7 +746,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-33",
+   "id": "meghna-dhaka-32",
    "name_bn": null,
    "name_en": "East West Filling Station-1",
    "name_hidden": null,
@@ -792,7 +769,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-34",
+   "id": "meghna-dhaka-33",
    "name_bn": null,
    "name_en": "Esha Gerden Filling Station",
    "name_hidden": null,
@@ -815,7 +792,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-35",
+   "id": "meghna-dhaka-34",
    "name_bn": null,
    "name_en": "Hazi Md. Kafil Uddin Filling Station",
    "name_hidden": null,
@@ -838,7 +815,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-36",
+   "id": "meghna-dhaka-35",
    "name_bn": null,
    "name_en": "ITS CNG Filling Station & petrol Pump",
    "name_hidden": null,
@@ -861,7 +838,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-37",
+   "id": "meghna-dhaka-36",
    "name_bn": null,
    "name_en": "J.M Express Filling & Service Station",
    "name_hidden": null,
@@ -884,7 +861,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-38",
+   "id": "meghna-dhaka-37",
    "name_bn": null,
    "name_en": "Madina Filling Station",
    "name_hidden": null,
@@ -907,7 +884,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-39",
+   "id": "meghna-dhaka-38",
    "name_bn": null,
    "name_en": "Maxxon Limited",
    "name_hidden": null,
@@ -930,7 +907,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-40",
+   "id": "meghna-dhaka-39",
    "name_bn": null,
    "name_en": "Meghna Model Service Centre-1",
    "name_hidden": null,
@@ -953,7 +930,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-41",
+   "id": "meghna-dhaka-40",
    "name_bn": null,
    "name_en": "Nikunju Model Service Center",
    "name_hidden": null,
@@ -976,7 +953,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-42",
+   "id": "meghna-dhaka-41",
    "name_bn": null,
    "name_en": "Purnima Filling Station",
    "name_hidden": null,
@@ -995,6 +972,29 @@
    "list": "meghna_2025",
    "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
    "page": 7,
+   "flags": [],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "meghna-dhaka-42",
+   "name_bn": null,
+   "name_en": "Q. G. Samdani & Co.",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "meghna_2025",
+   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
+   "page": 8,
    "flags": [],
    "checked_on": "2026-11-17"
   },
@@ -1024,29 +1024,6 @@
   {
    "id": "meghna-dhaka-44",
    "name_bn": null,
-   "name_en": "Q. G. Samdani & Co.",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "meghna_2025",
-   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
-   "page": 8,
-   "flags": [],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "meghna-dhaka-45",
-   "name_bn": null,
    "name_en": "R. S. R Business Liners",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -1068,7 +1045,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-46",
+   "id": "meghna-dhaka-45",
    "name_bn": null,
    "name_en": "Rahman Service Station",
    "name_hidden": null,
@@ -1091,7 +1068,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-47",
+   "id": "meghna-dhaka-46",
    "name_bn": null,
    "name_en": "Rajdhani Filling Station",
    "name_hidden": null,
@@ -1114,7 +1091,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-48",
+   "id": "meghna-dhaka-47",
    "name_bn": null,
    "name_en": "Royal Filling Station",
    "name_hidden": null,
@@ -1137,7 +1114,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-49",
+   "id": "meghna-dhaka-48",
    "name_bn": null,
    "name_en": "Rozina Enterprise",
    "name_hidden": null,
@@ -1160,30 +1137,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-50",
-   "name_bn": null,
-   "name_en": "Rridi Filling Station",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "meghna_2025",
-   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
-   "page": 18,
-   "flags": [],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "meghna-dhaka-51",
+   "id": "meghna-dhaka-49",
    "name_bn": null,
    "name_en": "S. R. Enterprise",
    "name_hidden": null,
@@ -1206,7 +1160,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-52",
+   "id": "meghna-dhaka-50",
    "name_bn": null,
    "name_en": "S. S. Filling Station",
    "name_hidden": null,
@@ -1229,7 +1183,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-53",
+   "id": "meghna-dhaka-51",
    "name_bn": null,
    "name_en": "Sadi Filling Station",
    "name_hidden": null,
@@ -1252,7 +1206,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-54",
+   "id": "meghna-dhaka-52",
    "name_bn": null,
    "name_en": "Sam Associates Limited",
    "name_hidden": null,
@@ -1275,7 +1229,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-55",
+   "id": "meghna-dhaka-53",
    "name_bn": null,
    "name_en": "Santo CNG Filling Station",
    "name_hidden": null,
@@ -1298,7 +1252,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-56",
+   "id": "meghna-dhaka-54",
    "name_bn": null,
    "name_en": "Santu Filling Station",
    "name_hidden": null,
@@ -1321,7 +1275,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-57",
+   "id": "meghna-dhaka-55",
    "name_bn": null,
    "name_en": "Sarker Auto Filling Point Ltd.",
    "name_hidden": null,
@@ -1344,7 +1298,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-58",
+   "id": "meghna-dhaka-56",
    "name_bn": null,
    "name_en": "Seba Green Filling Station",
    "name_hidden": null,
@@ -1367,7 +1321,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-59",
+   "id": "meghna-dhaka-57",
    "name_bn": null,
    "name_en": "Shifat CNG Filling Station Co. Ltd.",
    "name_hidden": null,
@@ -1390,7 +1344,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-60",
+   "id": "meghna-dhaka-58",
    "name_bn": null,
    "name_en": "Sobhan Filling Station",
    "name_hidden": null,
@@ -1413,7 +1367,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-61",
+   "id": "meghna-dhaka-59",
    "name_bn": null,
    "name_en": "Sunny Filling Station",
    "name_hidden": null,
@@ -1436,7 +1390,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-62",
+   "id": "meghna-dhaka-60",
    "name_bn": null,
    "name_en": "Tanaka CNG Filling Station",
    "name_hidden": null,
@@ -1459,7 +1413,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-63",
+   "id": "meghna-dhaka-61",
    "name_bn": null,
    "name_en": "Tasin Filling Station",
    "name_hidden": null,
@@ -1482,7 +1436,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-64",
+   "id": "meghna-dhaka-62",
    "name_bn": null,
    "name_en": "The Padma Services Ltd.",
    "name_hidden": null,
@@ -1505,7 +1459,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-65",
+   "id": "meghna-dhaka-63",
    "name_bn": null,
    "name_en": "United Gas Filling Station Ltd.",
    "name_hidden": null,
@@ -1528,7 +1482,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-66",
+   "id": "meghna-dhaka-64",
    "name_bn": null,
    "name_en": "Unted Cab Limited",
    "name_hidden": null,
@@ -1551,7 +1505,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "meghna-dhaka-67",
+   "id": "meghna-dhaka-65",
    "name_bn": null,
    "name_en": "Zakir Enterprise",
    "name_hidden": null,
@@ -1570,6 +1524,52 @@
    "list": "meghna_2025",
    "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
    "page": 9,
+   "flags": [],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "meghna-dhaka-66",
+   "name_bn": null,
+   "name_en": null,
+   "name_hidden": true,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "meghna_2025",
+   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
+   "page": 7,
+   "flags": [],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "meghna-dhaka-67",
+   "name_bn": null,
+   "name_en": null,
+   "name_hidden": true,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "meghna_2025",
+   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
+   "page": 7,
    "flags": [],
    "checked_on": "2026-11-17"
   },
@@ -1615,7 +1615,7 @@
    "source": "official",
    "list": "meghna_2025",
    "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
-   "page": 7,
+   "page": 8,
    "flags": [],
    "checked_on": "2026-11-17"
   },
@@ -1638,7 +1638,7 @@
    "source": "official",
    "list": "meghna_2025",
    "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
-   "page": 7,
+   "page": 9,
    "flags": [],
    "checked_on": "2026-11-17"
   },
@@ -1661,30 +1661,7 @@
    "source": "official",
    "list": "meghna_2025",
    "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
-   "page": 8,
-   "flags": [],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "meghna-dhaka-72",
-   "name_bn": null,
-   "name_en": null,
-   "name_hidden": true,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "meghna_2025",
-   "source_url": "https://mpl.gov.bd/pages/static-pages/6922de45933eb65569e19700",
-   "page": 9,
+   "page": 10,
    "flags": [],
    "checked_on": "2026-11-17"
   },
@@ -1791,31 +1768,6 @@
   {
    "id": "padma-dhaka-5",
    "name_bn": null,
-   "name_en": "MOLLAH FILLING STATION & SERVILE CENTRE",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": "Cantonment",
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 2,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dhaka-6",
-   "name_bn": null,
    "name_en": "SUMATRA FILLING STATION",
    "name_hidden": null,
    "category": "fuel_transport",
@@ -1839,7 +1791,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-7",
+   "id": "padma-dhaka-6",
    "name_bn": null,
    "name_en": "TRUST FILLING STATION",
    "name_hidden": null,
@@ -1864,32 +1816,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-8",
-   "name_bn": null,
-   "name_en": "PURBACHAL GAS FILLING",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": "Darus Salam",
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 2,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dhaka-9",
+   "id": "padma-dhaka-7",
    "name_bn": null,
    "name_en": "CONTINENTAL CNG FILLING STATION",
    "name_hidden": null,
@@ -1914,7 +1841,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-10",
+   "id": "padma-dhaka-8",
    "name_bn": null,
    "name_en": "M/S.JAHANARA FILLING STATION",
    "name_hidden": null,
@@ -1939,7 +1866,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-11",
+   "id": "padma-dhaka-9",
    "name_bn": null,
    "name_en": "M/S.PAUL CNG LTD.",
    "name_hidden": null,
@@ -1964,7 +1891,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-12",
+   "id": "padma-dhaka-10",
    "name_bn": null,
    "name_en": "N.MULLIK FILLING STATION",
    "name_hidden": null,
@@ -1989,7 +1916,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-13",
+   "id": "padma-dhaka-11",
    "name_bn": null,
    "name_en": "ANWAR CNG FS & SERVICING CENTRE",
    "name_hidden": null,
@@ -2014,7 +1941,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-14",
+   "id": "padma-dhaka-12",
    "name_bn": null,
    "name_en": "DEWAN FILLING STATION",
    "name_hidden": null,
@@ -2039,7 +1966,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-15",
+   "id": "padma-dhaka-13",
    "name_bn": null,
    "name_en": "KAFILUDDIN FILLING STN.",
    "name_hidden": null,
@@ -2064,7 +1991,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-16",
+   "id": "padma-dhaka-14",
    "name_bn": null,
    "name_en": "M/S. MUKTA CNG & FILLING STATION",
    "name_hidden": null,
@@ -2089,7 +2016,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-17",
+   "id": "padma-dhaka-15",
    "name_bn": null,
    "name_en": "M/S.H.K.FILLING ST.& SERV. CENTRE",
    "name_hidden": null,
@@ -2114,7 +2041,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-18",
+   "id": "padma-dhaka-16",
    "name_bn": null,
    "name_en": "M/S.TANVIR F/S",
    "name_hidden": null,
@@ -2139,7 +2066,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-19",
+   "id": "padma-dhaka-17",
    "name_bn": null,
    "name_en": "MOMTAZ FILLING STATION",
    "name_hidden": null,
@@ -2164,7 +2091,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-20",
+   "id": "padma-dhaka-18",
    "name_bn": null,
    "name_en": "NADI FILLING STATION",
    "name_hidden": null,
@@ -2189,7 +2116,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-21",
+   "id": "padma-dhaka-19",
    "name_bn": null,
    "name_en": "OVI FILLING STATION",
    "name_hidden": null,
@@ -2214,7 +2141,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-22",
+   "id": "padma-dhaka-20",
    "name_bn": null,
    "name_en": "R & R ENTERPRISE",
    "name_hidden": null,
@@ -2239,57 +2166,57 @@
    "checked_on": "2026-11-17"
   },
   {
+   "id": "padma-dhaka-21",
+   "name_bn": null,
+   "name_en": "A. HYE & CO.",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 1,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-dhaka-22",
+   "name_bn": null,
+   "name_en": "A. HYE & CO.",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 1,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
    "id": "padma-dhaka-23",
-   "name_bn": null,
-   "name_en": "A. HYE & CO.",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 1,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dhaka-24",
-   "name_bn": null,
-   "name_en": "A. HYE & CO.",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 1,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dhaka-25",
    "name_bn": null,
    "name_en": "A.B.H. ENTERPRISE",
    "name_hidden": null,
@@ -2314,7 +2241,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-26",
+   "id": "padma-dhaka-24",
    "name_bn": null,
    "name_en": "A.S. FILLING STATION",
    "name_hidden": null,
@@ -2339,7 +2266,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-27",
+   "id": "padma-dhaka-25",
    "name_bn": null,
    "name_en": "ABDULLAH FILLING STATION",
    "name_hidden": null,
@@ -2364,7 +2291,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-28",
+   "id": "padma-dhaka-26",
    "name_bn": null,
    "name_en": "ABDULLAH FILLING STATION",
    "name_hidden": null,
@@ -2389,7 +2316,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-29",
+   "id": "padma-dhaka-27",
    "name_bn": null,
    "name_en": "AMAN ENTERPRISE",
    "name_hidden": null,
@@ -2414,7 +2341,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-30",
+   "id": "padma-dhaka-28",
    "name_bn": null,
    "name_en": "AMIN PETROL PUMP",
    "name_hidden": null,
@@ -2439,7 +2366,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-31",
+   "id": "padma-dhaka-29",
    "name_bn": null,
    "name_en": "AMTALI FILLING STATION",
    "name_hidden": null,
@@ -2464,7 +2391,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-32",
+   "id": "padma-dhaka-30",
    "name_bn": null,
    "name_en": "ANWARA FILLING STATION",
    "name_hidden": null,
@@ -2489,7 +2416,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-33",
+   "id": "padma-dhaka-31",
    "name_bn": null,
    "name_en": "AZIZ CORPORATION",
    "name_hidden": null,
@@ -2514,7 +2441,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-34",
+   "id": "padma-dhaka-32",
    "name_bn": null,
    "name_en": "AZIZ FILLING STATION",
    "name_hidden": null,
@@ -2539,7 +2466,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-35",
+   "id": "padma-dhaka-33",
    "name_bn": null,
    "name_en": "B.D POLICE CO-OPERATIVE SOCIETY LTD.",
    "name_hidden": null,
@@ -2564,7 +2491,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-36",
+   "id": "padma-dhaka-34",
    "name_bn": null,
    "name_en": "BANGLADESH PWD SPORTS CLUB",
    "name_hidden": null,
@@ -2589,7 +2516,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-37",
+   "id": "padma-dhaka-35",
    "name_bn": null,
    "name_en": "BENGAL INTERNATIONAL AGENCY",
    "name_hidden": null,
@@ -2614,7 +2541,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-38",
+   "id": "padma-dhaka-36",
    "name_bn": null,
    "name_en": "BORAK F/S & SERVICE CENTRE",
    "name_hidden": null,
@@ -2639,7 +2566,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-39",
+   "id": "padma-dhaka-37",
    "name_bn": null,
    "name_en": "CHOWDHURY & ASSOCIATES",
    "name_hidden": null,
@@ -2664,7 +2591,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-40",
+   "id": "padma-dhaka-38",
    "name_bn": null,
    "name_en": "CITY FILLING STATION",
    "name_hidden": null,
@@ -2689,7 +2616,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-41",
+   "id": "padma-dhaka-39",
    "name_bn": null,
    "name_en": "COMPORT FILLING & CNG REFUELING STATION",
    "name_hidden": null,
@@ -2714,7 +2641,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-42",
+   "id": "padma-dhaka-40",
    "name_bn": null,
    "name_en": "CONFIDENCE FILLING STATION",
    "name_hidden": null,
@@ -2739,7 +2666,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-43",
+   "id": "padma-dhaka-41",
    "name_bn": null,
    "name_en": "COSMO FILLING STATION",
    "name_hidden": null,
@@ -2764,57 +2691,57 @@
    "checked_on": "2026-11-17"
   },
   {
+   "id": "padma-dhaka-42",
+   "name_bn": null,
+   "name_en": "DENSO FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 1,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-dhaka-43",
+   "name_bn": null,
+   "name_en": "DENSO FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 1,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
    "id": "padma-dhaka-44",
-   "name_bn": null,
-   "name_en": "DENSO FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 1,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dhaka-45",
-   "name_bn": null,
-   "name_en": "DENSO FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 1,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dhaka-46",
    "name_bn": null,
    "name_en": "DHAKA DIST.POLICE WELFARETRUST",
    "name_hidden": null,
@@ -2839,7 +2766,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-47",
+   "id": "padma-dhaka-45",
    "name_bn": null,
    "name_en": "DIGHANTA FILLING STATION",
    "name_hidden": null,
@@ -2864,7 +2791,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-48",
+   "id": "padma-dhaka-46",
    "name_bn": null,
    "name_en": "G.F. TRADING",
    "name_hidden": null,
@@ -2889,7 +2816,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-49",
+   "id": "padma-dhaka-47",
    "name_bn": null,
    "name_en": "GANI FILLING STATION",
    "name_hidden": null,
@@ -2914,7 +2841,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-50",
+   "id": "padma-dhaka-48",
    "name_bn": null,
    "name_en": "GREEN VIEW PETROL PUMP",
    "name_hidden": null,
@@ -2939,7 +2866,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-51",
+   "id": "padma-dhaka-49",
    "name_bn": null,
    "name_en": "GULASHAN AUTOS",
    "name_hidden": null,
@@ -2964,7 +2891,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-52",
+   "id": "padma-dhaka-50",
    "name_bn": null,
    "name_en": "GUMATI FILLING STATION",
    "name_hidden": null,
@@ -2989,7 +2916,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-53",
+   "id": "padma-dhaka-51",
    "name_bn": null,
    "name_en": "GUMATI FILLING STN. & SERVICE CENTRE LTD",
    "name_hidden": null,
@@ -3014,7 +2941,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-54",
+   "id": "padma-dhaka-52",
    "name_bn": null,
    "name_en": "HAQ FILLING STATION",
    "name_hidden": null,
@@ -3039,57 +2966,57 @@
    "checked_on": "2026-11-17"
   },
   {
+   "id": "padma-dhaka-53",
+   "name_bn": null,
+   "name_en": "IDEAL FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 2,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-dhaka-54",
+   "name_bn": null,
+   "name_en": "IDEAL FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 2,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
    "id": "padma-dhaka-55",
-   "name_bn": null,
-   "name_en": "IDEAL FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 2,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dhaka-56",
-   "name_bn": null,
-   "name_en": "IDEAL FILLING STATION",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 2,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dhaka-57",
    "name_bn": null,
    "name_en": "JOYDEBPUR FILLING STATION",
    "name_hidden": null,
@@ -3114,7 +3041,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-58",
+   "id": "padma-dhaka-56",
    "name_bn": null,
    "name_en": "KABIRPUR FILLING STATION",
    "name_hidden": null,
@@ -3139,7 +3066,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-59",
+   "id": "padma-dhaka-57",
    "name_bn": null,
    "name_en": "KAMAL TRADING AGENCY",
    "name_hidden": null,
@@ -3164,7 +3091,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-60",
+   "id": "padma-dhaka-58",
    "name_bn": null,
    "name_en": "KHAKON FILLING STATION",
    "name_hidden": null,
@@ -3189,7 +3116,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-61",
+   "id": "padma-dhaka-59",
    "name_bn": null,
    "name_en": "KHALEQUE SERVICE STATION",
    "name_hidden": null,
@@ -3214,7 +3141,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-62",
+   "id": "padma-dhaka-60",
    "name_bn": null,
    "name_en": "KHAN & CHOWDHURY FILLING STATION",
    "name_hidden": null,
@@ -3239,7 +3166,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-63",
+   "id": "padma-dhaka-61",
    "name_bn": null,
    "name_en": "L. RAHMAN & OSMAN GHANI & SONS",
    "name_hidden": null,
@@ -3264,7 +3191,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-64",
+   "id": "padma-dhaka-62",
    "name_bn": null,
    "name_en": "LABANI ENTERPRISE LIMITED",
    "name_hidden": null,
@@ -3289,7 +3216,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-65",
+   "id": "padma-dhaka-63",
    "name_bn": null,
    "name_en": "M. AZIM ZULFIQUAR & SONS",
    "name_hidden": null,
@@ -3314,7 +3241,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-66",
+   "id": "padma-dhaka-64",
    "name_bn": null,
    "name_en": "M/S.CLEAN FUEL F/S",
    "name_hidden": null,
@@ -3339,7 +3266,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-67",
+   "id": "padma-dhaka-65",
    "name_bn": null,
    "name_en": "M/S.S.AHMED FOUNDATION CNG F/S & PETROL PUMP",
    "name_hidden": null,
@@ -3364,7 +3291,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-68",
+   "id": "padma-dhaka-66",
    "name_bn": null,
    "name_en": "M/S.SP FILLING STATION",
    "name_hidden": null,
@@ -3389,7 +3316,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-69",
+   "id": "padma-dhaka-67",
    "name_bn": null,
    "name_en": "MALIBAGH AUTO SERVICE",
    "name_hidden": null,
@@ -3414,7 +3341,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-70",
+   "id": "padma-dhaka-68",
    "name_bn": null,
    "name_en": "MARGARETT & SONS",
    "name_hidden": null,
@@ -3439,7 +3366,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-71",
+   "id": "padma-dhaka-69",
    "name_bn": null,
    "name_en": "MEHERA FILLING STATION",
    "name_hidden": null,
@@ -3464,7 +3391,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-72",
+   "id": "padma-dhaka-70",
    "name_bn": null,
    "name_en": "MIRPUR PETROL PUMP",
    "name_hidden": null,
@@ -3489,7 +3416,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-73",
+   "id": "padma-dhaka-71",
    "name_bn": null,
    "name_en": "MOLLAH FILLING STATION & SERVICE CENTRE",
    "name_hidden": null,
@@ -3514,9 +3441,59 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-74",
+   "id": "padma-dhaka-72",
+   "name_bn": null,
+   "name_en": "MOLLAH FILLING STATION & SERVILE CENTRE",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 2,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-dhaka-73",
    "name_bn": null,
    "name_en": "MOUCHAK BOYSCOUT FILLING STATION",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 1,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-dhaka-74",
+   "name_bn": null,
+   "name_en": "NESSA & SONS",
    "name_hidden": null,
    "category": "fuel_transport",
    "subcategory": "fuel",
@@ -3557,31 +3534,6 @@
    "source": "official",
    "list": "padma_2019",
    "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
-   "page": 1,
-   "flags": [
-    "source_older_than_2_years"
-   ],
-   "checked_on": "2026-11-17"
-  },
-  {
-   "id": "padma-dhaka-76",
-   "name_bn": null,
-   "name_en": "NESSA & SONS",
-   "name_hidden": null,
-   "category": "fuel_transport",
-   "subcategory": "fuel",
-   "lat": null,
-   "lon": null,
-   "location_approx": true,
-   "division": "Dhaka",
-   "district": "Dhaka",
-   "upazila": null,
-   "union": null,
-   "phone": null,
-   "hours": null,
-   "source": "official",
-   "list": "padma_2019",
-   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
    "page": 2,
    "flags": [
     "source_older_than_2_years"
@@ -3589,7 +3541,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-77",
+   "id": "padma-dhaka-76",
    "name_bn": null,
    "name_en": "OVI FILLING STATION",
    "name_hidden": null,
@@ -3614,7 +3566,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-78",
+   "id": "padma-dhaka-77",
    "name_bn": null,
    "name_en": "PALTAN SERVICE STATION",
    "name_hidden": null,
@@ -3639,7 +3591,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-79",
+   "id": "padma-dhaka-78",
    "name_bn": null,
    "name_en": "PALTAN SERVICE STATION",
    "name_hidden": null,
@@ -3664,7 +3616,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-80",
+   "id": "padma-dhaka-79",
    "name_bn": null,
    "name_en": "PATHAN FILLING STATION",
    "name_hidden": null,
@@ -3689,7 +3641,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-81",
+   "id": "padma-dhaka-80",
    "name_bn": null,
    "name_en": "PATHER BANDHU",
    "name_hidden": null,
@@ -3714,7 +3666,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-82",
+   "id": "padma-dhaka-81",
    "name_bn": null,
    "name_en": "PUBALI FILLING STATION",
    "name_hidden": null,
@@ -3739,7 +3691,7 @@
    "checked_on": "2026-11-17"
   },
   {
-   "id": "padma-dhaka-83",
+   "id": "padma-dhaka-82",
    "name_bn": null,
    "name_en": "PUBALI TRADERS",
    "name_hidden": null,
@@ -3758,6 +3710,31 @@
    "list": "padma_2019",
    "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
    "page": 1,
+   "flags": [
+    "source_older_than_2_years"
+   ],
+   "checked_on": "2026-11-17"
+  },
+  {
+   "id": "padma-dhaka-83",
+   "name_bn": null,
+   "name_en": "PURBACHAL GAS FILLING",
+   "name_hidden": null,
+   "category": "fuel_transport",
+   "subcategory": "fuel",
+   "lat": null,
+   "lon": null,
+   "location_approx": true,
+   "division": "Dhaka",
+   "district": "Dhaka",
+   "upazila": null,
+   "union": null,
+   "phone": null,
+   "hours": null,
+   "source": "official",
+   "list": "padma_2019",
+   "source_url": "https://pocl.gov.bd/pages/static-pages/6922dece933eb65569e1d7db",
+   "page": 2,
    "flags": [
     "source_older_than_2_years"
    ],
