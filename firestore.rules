@@ -166,7 +166,10 @@ service cloud.firestore {
         && incoming().keys().hasOnly(['actorUid', 'action', 'entity', 'entityId', 'at', 'meta'])
         && incoming().actorUid == request.auth.uid
         && ((incoming().action == 'REPORT_STATUS_CHANGED' && incoming().entity == 'reports')
-          || (incoming().action == 'ROLE_CHANGED' && incoming().entity == 'users'))
+          || (incoming().action == 'ROLE_CHANGED' && incoming().entity == 'users')
+          || (incoming().action == 'ISSUE_STATUS_CHANGED' && incoming().entity == 'issues')
+          || (incoming().action == 'PROVIDER_APPROVED' && incoming().entity == 'providers')
+          || (incoming().action == 'RATES_CHANGED' && incoming().entity == 'rates'))
         && incoming().entityId is string
         && incoming().entityId.matches('^[A-Za-z0-9_-]{1,128}$')
         && incoming().at == request.time
@@ -176,6 +179,269 @@ service cloud.firestore {
           && shortText(incoming().meta.get('to', ''), 20)))
         && changedWith(incoming().entity, incoming().entityId, auditId);
       allow update, delete: if false;
+    }
+
+    // ---------- community problems: "সমস্যা জানান, সমাধান দেখুন" (impact plan, feature 1) ----------
+    // Anyone, even signed out, can read a problem and its status: it names no person. Who reported it is kept in
+    // issueOwners/{issueId} (that person and admins only). Limits as for reports: a verified email, at most 10 a day,
+    // 60 s apart (issueLimits/{uid}). The problem, its owner entry and the limits are one batch and each checks the
+    // others (getAfter). Never a phone number in any text. Only an admin moves the status, with an audit entry
+    // (volunteers get this for their own union in P38).
+    function issuePath(id) { return /databases/$(database)/documents/issues/$(id); }
+    function ownerPath(id) { return /databases/$(database)/documents/issueOwners/$(id); }
+    function issueLimitsAfter() { return getAfter(/databases/$(database)/documents/issueLimits/$(request.auth.uid)).data; }
+    function placeText(v, min, max) { return v is string && v.size() >= min && v.size() <= max && noPhone(v); }
+
+    match /issues/{issueId} {
+      allow read: if true;
+      allow create: if signedIn() && verified()
+        && issueLimitsAfter().lastIssue == issueId && issueLimitsAfter().lastAt == request.time
+        && existsAfter(ownerPath(issueId)) && getAfter(ownerPath(issueId)).data.uid == request.auth.uid
+        && incoming().keys().hasOnly(['category', 'district', 'upazila', 'union', 'landmark', 'text', 'status', 'metoo', 'createdAt', 'updatedAt'])
+        && incoming().category in ['road', 'water', 'drain', 'light', 'garbage', 'power', 'health', 'safety', 'place', 'other']
+        && incoming().district is string && incoming().district.matches('^[a-z]{3,30}$')
+        && placeText(incoming().upazila, 2, 60)
+        && placeText(incoming().get('union', ''), 0, 80)
+        && placeText(incoming().landmark, 2, 80)
+        && placeText(incoming().text, 5, 300)
+        && incoming().status == 'open' && incoming().metoo == 0
+        && incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if
+        // "আমিও": one more, only together with this person's first "আমিও" for this problem (same batch).
+        (signedIn() && verified()
+          && changed().hasOnly(['metoo'])
+          && incoming().metoo == resource.data.metoo + 1
+          && !exists(/databases/$(database)/documents/issues/$(issueId)/metoo/$(request.auth.uid))
+          && existsAfter(/databases/$(database)/documents/issues/$(issueId)/metoo/$(request.auth.uid)))
+        // The status: an admin, with an audit entry that names the old and the new status.
+        || (isAdmin()
+          && changed().hasOnly(['status', 'statusNote', 'updatedAt', 'lastAuditId'])
+          && incoming().status in ['open', 'verified', 'sent', 'working', 'solved', 'closed']
+          && incoming().status != resource.data.status
+          && placeText(incoming().get('statusNote', ''), 0, 200)
+          && incoming().updatedAt == request.time
+          && audited('issues', issueId, 'ISSUE_STATUS_CHANGED')
+          && getAfter(/databases/$(database)/documents/audit/$(incoming().lastAuditId)).data.meta.from == resource.data.status
+          && getAfter(/databases/$(database)/documents/audit/$(incoming().lastAuditId)).data.meta.to == incoming().status);
+      allow delete: if false;
+
+      match /metoo/{uid} {
+        allow read: if isMe(uid);
+        allow create: if isMe(uid) && verified()
+          && incoming().keys().hasOnly(['at']) && incoming().at == request.time
+          && getAfter(issuePath(issueId)).data.metoo == get(issuePath(issueId)).data.metoo + 1;
+        allow update, delete: if false;
+      }
+    }
+
+    match /issueOwners/{issueId} {
+      allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
+      allow create: if signedIn() && verified()
+        && incoming().keys().hasOnly(['uid', 'at'])
+        && incoming().uid == request.auth.uid && incoming().at == request.time
+        && !exists(issuePath(issueId)) && existsAfter(issuePath(issueId));
+      allow update, delete: if false;
+    }
+
+    match /issueLimits/{uid} {
+      allow read: if isMe(uid);
+      allow create, update: if isMe(uid) && verified()
+        && incoming().keys().hasOnly(['day', 'count', 'lastAt', 'lastIssue'])
+        && incoming().day == today()
+        && incoming().lastAt == request.time
+        && incoming().count is int && incoming().count <= 10
+        && incoming().lastIssue is string
+        && !exists(issuePath(incoming().lastIssue)) && existsAfter(issuePath(incoming().lastIssue))
+        && getAfter(ownerPath(incoming().lastIssue)).data.uid == uid
+        && (resource == null
+          ? incoming().count == 1
+          : (request.time >= resource.data.lastAt + duration.value(60, 's')
+            && incoming().count == (resource.data.day == today() ? resource.data.count + 1 : 1)));
+      allow delete: if false;
+    }
+
+    // ---------- place status: "এখন খোলা? তেল আছে?" (impact plan, feature 5) ----------
+    // placeStatus/{placeId} is public and names nobody: the latest answer, how many people gave it, and when.
+    // Each person's own answer is in placeStatus/{placeId}/by/{uid} (only they read it), at most once in 30 minutes
+    // per place. The count grows only when the same answer comes again within 6 hours; a new answer starts at 1.
+    // Both writes are one batch and check each other.
+    match /placeStatus/{placeId} {
+      allow read: if true;
+      allow create, update: if signedIn() && verified()
+        && placeId.matches('^[a-z0-9-]{3,80}$')
+        && incoming().keys().hasOnly(['value', 'n', 'at'])
+        && incoming().value in ['open', 'closed', 'fuel_yes', 'fuel_no', 'open_night']
+        && incoming().at == request.time
+        && getAfter(/databases/$(database)/documents/placeStatus/$(placeId)/by/$(request.auth.uid)).data.at == request.time
+        && getAfter(/databases/$(database)/documents/placeStatus/$(placeId)/by/$(request.auth.uid)).data.value == incoming().value
+        && (resource == null || resource.data.value != incoming().value || request.time > resource.data.at + duration.value(6, 'h')
+          ? incoming().n == 1
+          : incoming().n == resource.data.n + 1);
+      allow delete: if false;
+
+      match /by/{uid} {
+        allow read: if isMe(uid);
+        allow create, update: if isMe(uid) && verified()
+          && incoming().keys().hasOnly(['value', 'at'])
+          && incoming().value in ['open', 'closed', 'fuel_yes', 'fuel_no', 'open_night']
+          && incoming().at == request.time
+          && (resource == null || request.time > resource.data.at + duration.value(30, 'm'))
+          && getAfter(/databases/$(database)/documents/placeStatus/$(placeId)).data.at == request.time;
+        allow delete: if false;
+      }
+    }
+
+    // ---------- "ডাকুন": service engine (vehicle, technician, nearby helper) with live map and bill ----------
+    // providers/{uid}: someone who drives, repairs or helps. They apply; only an admin approves (with an audit entry).
+    // rates/{type}: the fare rates, public, set by an admin (audit). rides/{id}: one request from asking to paying;
+    // each step can be taken only by the right person and only in order (requested → accepted → arrived → on_trip →
+    // completed → paid, or cancelled). rides/{id}/live/{rider|provider}: the live position, only for the two people
+    // of an active ride; it is deleted when the ride ends. online/{uid}: approved providers who are working now, with
+    // a rough position (about 100 m) for "nearby" counts. rideLimits/{uid}: at most 10 requests a day, 60 s apart.
+    function ridePath(id) { return /databases/$(database)/documents/rides/$(id); }
+    function provPath(uid) { return /databases/$(database)/documents/providers/$(uid); }
+    function rateOf(t) { return get(/databases/$(database)/documents/rates/$(t)).data; }
+    function myProv() { return get(provPath(request.auth.uid)).data; }
+    function rideTypes() { return ['ambulance', 'cng', 'bike', 'technician', 'help']; }
+    function inBd(lat, lon) { return lat is number && lon is number && lat >= 20.5 && lat <= 26.7 && lon >= 88.0 && lon <= 92.7; }
+    function placeMap(m) { return m is map && m.keys().hasOnly(['lat', 'lon', 'label']) && inBd(m.lat, m.lon) && placeText(m.label, 2, 80); }
+    function isProviderFor(r) {
+      return signedIn() && exists(provPath(request.auth.uid)) && myProv().approved == true
+        && myProv().type == r.type && myProv().district == r.district;
+    }
+    function rideLimitsAfter() { return getAfter(/databases/$(database)/documents/rideLimits/$(request.auth.uid)).data; }
+    function moved(from, to) { return resource.data.status == from && incoming().status == to; }
+    function now(f) { return incoming().get(f, null) == request.time; }
+    // The fare the rules accept: within 5 taka of max(minimum, base + perKm × km + perMin × (wait − 3)).
+    function fareOk(t, distM, waitMin, f) {
+      let rt = rateOf(t);
+      let raw = rt.base + rt.perKm * (distM / 1000.0) + rt.perMin * (waitMin > 3 ? waitMin - 3 : 0);
+      let want = raw > rt.minFare ? raw : rt.minFare;
+      return f is int && f >= 0 && (want <= 0 ? f == 0 : (f >= want && f <= want + 5));
+    }
+
+    match /providers/{uid} {
+      allow read: if isMe(uid) || isAdmin();
+      allow create: if isMe(uid) && verified()
+        && incoming().keys().hasOnly(['name', 'type', 'vehicle', 'district', 'approved', 'createdAt', 'updatedAt'])
+        && incoming().type in rideTypes()
+        && incoming().district is string && incoming().district.matches('^[a-z]{3,30}$')
+        && placeText(incoming().name, 2, 60) && placeText(incoming().vehicle, 2, 40)
+        && incoming().approved == false
+        && incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if (isMe(uid) && resource.data.approved == false
+          && changed().hasOnly(['name', 'vehicle', 'updatedAt'])
+          && placeText(incoming().name, 2, 60) && placeText(incoming().vehicle, 2, 40) && now('updatedAt'))
+        || (isAdmin() && uid != request.auth.uid
+          && changed().hasOnly(['approved', 'updatedAt', 'lastAuditId'])
+          && incoming().approved is bool && incoming().approved != resource.data.approved && now('updatedAt')
+          && audited('providers', uid, 'PROVIDER_APPROVED'));
+      allow delete: if isMe(uid) && resource.data.approved == false;
+    }
+
+    match /rates/{t} {
+      allow read: if true;
+      allow create, update: if isAdmin() && t in rideTypes()
+        && incoming().keys().hasOnly(['base', 'perKm', 'perMin', 'minFare', 'updatedAt', 'lastAuditId'])
+        && incoming().base is int && incoming().base >= 0 && incoming().base <= 10000
+        && incoming().perKm is int && incoming().perKm >= 0 && incoming().perKm <= 1000
+        && incoming().perMin is int && incoming().perMin >= 0 && incoming().perMin <= 100
+        && incoming().minFare is int && incoming().minFare >= 0 && incoming().minFare <= 20000
+        && (t != 'help' || (incoming().base == 0 && incoming().perKm == 0 && incoming().perMin == 0 && incoming().minFare == 0))
+        && now('updatedAt')
+        && audited('rates', t, 'RATES_CHANGED');
+      allow delete: if false;
+    }
+
+    match /online/{uid} {
+      allow read: if signedIn() && verified();
+      allow create, update: if isMe(uid) && exists(provPath(uid)) && myProv().approved == true
+        && incoming().keys().hasOnly(['type', 'district', 'lat', 'lon', 'at'])
+        && incoming().type == myProv().type && incoming().district == myProv().district
+        && inBd(incoming().lat, incoming().lon) && incoming().at == request.time;
+      allow delete: if isMe(uid);
+    }
+
+    match /rideLimits/{uid} {
+      allow read: if isMe(uid);
+      allow create, update: if isMe(uid) && verified()
+        && incoming().keys().hasOnly(['day', 'count', 'lastAt', 'lastRide'])
+        && incoming().day == today() && incoming().lastAt == request.time
+        && incoming().count is int && incoming().count <= 10
+        && incoming().lastRide is string
+        && !exists(ridePath(incoming().lastRide)) && existsAfter(ridePath(incoming().lastRide))
+        && getAfter(ridePath(incoming().lastRide)).data.riderUid == uid
+        && (resource == null
+          ? incoming().count == 1
+          : (request.time >= resource.data.lastAt + duration.value(60, 's')
+            && incoming().count == (resource.data.day == today() ? resource.data.count + 1 : 1)));
+      allow delete: if false;
+    }
+
+    match /rides/{rideId} {
+      allow read: if signedIn() && (resource.data.riderUid == request.auth.uid
+        || resource.data.get('providerUid', null) == request.auth.uid
+        || isAdmin()
+        || (resource.data.status == 'requested' && isProviderFor(resource.data)));
+      allow create: if signedIn() && verified()
+        && rideLimitsAfter().lastRide == rideId && rideLimitsAfter().lastAt == request.time
+        && incoming().keys().hasOnly(['riderUid', 'type', 'district', 'pickup', 'drop', 'estM', 'estFare', 'status', 'createdAt', 'updatedAt'])
+        && incoming().riderUid == request.auth.uid
+        && incoming().type in rideTypes() && exists(/databases/$(database)/documents/rates/$(incoming().type))
+        && incoming().district is string && incoming().district.matches('^[a-z]{3,30}$')
+        && placeMap(incoming().pickup)
+        && (!('drop' in incoming()) || placeMap(incoming().drop))
+        && incoming().estM is int && incoming().estM >= 0 && incoming().estM <= 300000
+        && incoming().estFare is int && incoming().estFare >= 0 && incoming().estFare <= 100000
+        && incoming().status == 'requested'
+        && incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if signedIn() && now('updatedAt') && (
+        // accept: an approved provider of this type and district, not the rider; only while nobody has it
+        (moved('requested', 'accepted') && isProviderFor(resource.data) && resource.data.riderUid != request.auth.uid
+          && changed().hasOnly(['status', 'providerUid', 'providerName', 'vehicle', 'acceptedAt', 'updatedAt'])
+          && incoming().providerUid == request.auth.uid && incoming().providerName == myProv().name
+          && incoming().vehicle == myProv().vehicle && now('acceptedAt'))
+        // the provider's steps
+        || (resource.data.get('providerUid', null) == request.auth.uid && (
+          (moved('accepted', 'arrived') && changed().hasOnly(['status', 'arrivedAt', 'updatedAt']) && now('arrivedAt'))
+          || (moved('arrived', 'on_trip') && changed().hasOnly(['status', 'startedAt', 'updatedAt']) && now('startedAt'))
+          || (moved('on_trip', 'completed')
+            && changed().hasOnly(['status', 'endedAt', 'distM', 'waitMin', 'fare', 'payStatus', 'updatedAt']) && now('endedAt')
+            && incoming().distM is int && incoming().distM >= 0 && incoming().distM <= resource.data.estM * 3 + 5000
+            && incoming().waitMin is int && incoming().waitMin >= 0
+            && incoming().waitMin <= (resource.data.startedAt.toMillis() - resource.data.arrivedAt.toMillis()) / 60000 + 1
+            && incoming().payStatus == 'pending'
+            && fareOk(resource.data.type, incoming().distM, incoming().waitMin, incoming().fare))
+          || (moved('completed', 'paid') && changed().hasOnly(['status', 'payStatus', 'paidAt', 'updatedAt'])
+            && incoming().payStatus == 'paid' && now('paidAt'))
+          || (resource.data.status in ['accepted', 'arrived'] && incoming().status == 'cancelled'
+            && changed().hasOnly(['status', 'cancelledBy', 'cancelFee', 'updatedAt'])
+            && incoming().cancelledBy == 'provider' && incoming().cancelFee == 0)))
+        // the rider's steps
+        || (resource.data.riderUid == request.auth.uid && (
+          (resource.data.status in ['requested', 'accepted', 'arrived'] && incoming().status == 'cancelled'
+            && changed().hasOnly(['status', 'cancelledBy', 'cancelFee', 'updatedAt']) && incoming().cancelledBy == 'rider'
+            && incoming().cancelFee == (resource.data.status == 'arrived' ? math.ceil(rateOf(resource.data.type).base / 10.0) * 5 : 0))
+          || (resource.data.status in ['completed', 'paid'] && !('billOk' in resource.data)
+            && changed().hasOnly(['billOk', 'updatedAt']) && incoming().billOk is bool)
+          || (resource.data.status == 'paid' && !('rating' in resource.data)
+            && changed().hasOnly(['rating', 'updatedAt']) && incoming().rating is int && incoming().rating >= 1 && incoming().rating <= 5)))
+      );
+      allow delete: if false;
+
+      match /live/{who} {
+        allow read: if signedIn() && (get(ridePath(rideId)).data.riderUid == request.auth.uid
+          || get(ridePath(rideId)).data.get('providerUid', null) == request.auth.uid);
+        allow create, update: if signedIn() && who in ['rider', 'provider']
+          && get(ridePath(rideId)).data.status in ['accepted', 'arrived', 'on_trip']
+          && ((who == 'rider' && get(ridePath(rideId)).data.riderUid == request.auth.uid)
+            || (who == 'provider' && get(ridePath(rideId)).data.get('providerUid', null) == request.auth.uid))
+          && incoming().keys().hasOnly(['lat', 'lon', 'at'])
+          && inBd(incoming().lat, incoming().lon) && incoming().at == request.time;
+        allow delete: if signedIn() && !(get(ridePath(rideId)).data.status in ['accepted', 'arrived', 'on_trip'])
+          && (get(ridePath(rideId)).data.riderUid == request.auth.uid
+            || get(ridePath(rideId)).data.get('providerUid', null) == request.auth.uid);
+      }
     }
 
     // Everything else is closed (volunteer collections open in P38).

@@ -8,7 +8,7 @@ import {
   createUserWithEmailAndPassword, sendEmailVerification, reload, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {
-  getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, writeBatch, query, where, orderBy, limit,
+  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, collection, getDocs, writeBatch, query, where, orderBy, limit, increment,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 
@@ -191,4 +191,161 @@ export async function listAudit({ action, actorUid, from, to } = {}) {
   if (to) parts.push(where('at', '<', new Date(to)));
   const snap = await getDocs(query(collection(db, 'audit'), ...parts, orderBy('at', 'desc'), limit(100)));
   return snap.docs.map((d) => { const x = d.data(); return { id: d.id, ...x, at: millis(x.at) }; });
+}
+
+// Community features (impact plan): problems with "আমিও", and place status. js/community.js builds the fields in
+// exactly the shape firestore.rules allow; here only the server times are added. Reads are public (no person in them).
+export const ISSUE_LIMIT = { perDay: 10, gapMs: 60000 };
+const asIssue = (d) => { const x = d.data(); return { id: d.id, ...x, createdAt: millis(x.createdAt), updatedAt: millis(x.updatedAt) }; };
+// A new problem, its owner entry and issueLimits/{uid} in one batch (the rules check all three).
+export async function sendIssue(fields) {
+  const user = auth.currentUser;
+  if (!user) throw Object.assign(new Error('signed-out'), { code: 'signed-out' });
+  const ref = doc(collection(db, 'issues'));
+  const limRef = doc(db, 'issueLimits', user.uid);
+  const snap = await getDoc(limRef);
+  const old = snap.exists() ? snap.data() : null, now = Date.now(), today = dayNumber(now);
+  if (old && millis(old.lastAt) && now < millis(old.lastAt) + ISSUE_LIMIT.gapMs) throw Object.assign(new Error('limit-wait'), { code: 'limit-wait' });
+  if (old && old.day === today && old.count >= ISSUE_LIMIT.perDay) throw Object.assign(new Error('limit-day'), { code: 'limit-day' });
+  const batch = writeBatch(db);
+  batch.set(ref, { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  batch.set(doc(db, 'issueOwners', ref.id), { uid: user.uid, at: serverTimestamp() });
+  batch.set(limRef, { day: today, count: old && old.day === today ? old.count + 1 : 1, lastAt: serverTimestamp(), lastIssue: ref.id });
+  await batch.commit();
+  return ref.id;
+}
+// Problems in one upazila (an equality filter only: no index needed), newest first, at most 30 reads.
+export async function listIssues(district, upazila) {
+  const snap = await getDocs(query(collection(db, 'issues'), where('district', '==', district), where('upazila', '==', upazila), limit(30)));
+  return snap.docs.map(asIssue).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+}
+// "আমিও": this person's own marker and +1 on the problem, in one batch; a second "আমিও" is refused by the rules.
+export async function meToo(issueId) {
+  const user = auth.currentUser;
+  if (!user) throw Object.assign(new Error('signed-out'), { code: 'signed-out' });
+  const mark = doc(db, 'issues', issueId, 'metoo', user.uid);
+  if ((await getDoc(mark)).exists()) throw Object.assign(new Error('already'), { code: 'already' });
+  const batch = writeBatch(db);
+  batch.set(mark, { at: serverTimestamp() });
+  batch.update(doc(db, 'issues', issueId), { metoo: increment(1) });
+  await batch.commit();
+}
+// Admins only: the new status and its audit entry in one batch.
+export async function setIssueStatus(issueId, audit, status, statusNote = '') {
+  const batch = writeBatch(db);
+  const auditRef = doc(collection(db, 'audit'));
+  batch.set(auditRef, { ...audit, at: serverTimestamp() });
+  const upd = { status, updatedAt: serverTimestamp(), lastAuditId: auditRef.id };
+  if (statusNote) upd.statusNote = statusNote;
+  batch.update(doc(db, 'issues', issueId), upd);
+  await batch.commit();
+}
+// Place status: the public summary and this person's own answer, in one batch.
+export async function readPlaceStatus(placeId) {
+  const snap = await getDoc(doc(db, 'placeStatus', placeId));
+  return snap.exists() ? snap.data() : null;
+}
+export async function sendPlaceStatus(placeId, value, next) {
+  const user = auth.currentUser;
+  if (!user) throw Object.assign(new Error('signed-out'), { code: 'signed-out' });
+  const batch = writeBatch(db);
+  batch.set(doc(db, 'placeStatus', placeId), { value, n: next.n, at: serverTimestamp() });
+  batch.set(doc(db, 'placeStatus', placeId, 'by', user.uid), { value, at: serverTimestamp() });
+  await batch.commit();
+}
+
+// "ডাকুন" (service engine, v5): providers, rates, requests, the two live positions and the bill. js/ride.js has the
+// fare and status logic; firestore.rules check every step (who, in which order, and that the fare matches the rates).
+const err = (code) => Object.assign(new Error(code), { code });
+const me = () => { const u = auth.currentUser; if (!u) throw err('signed-out'); return u; };
+const asRide = (d) => { const x = d.data(); const out = { id: d.id, ...x };
+  for (const k of ['createdAt', 'updatedAt', 'acceptedAt', 'arrivedAt', 'startedAt', 'endedAt', 'paidAt']) out[k] = millis(x[k]);
+  return out; };
+
+// The person's own provider entry (or null), and applying to be one (an admin approves it).
+export async function myProvider() {
+  const snap = await getDoc(doc(db, 'providers', me().uid));
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+export const applyProvider = ({ name, type, vehicle, district }) => setDoc(doc(db, 'providers', me().uid),
+  { name, type, vehicle, district, approved: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+export const withdrawProvider = () => deleteDoc(doc(db, 'providers', me().uid));
+// Admins only: providers waiting for approval, and approving one (with its audit entry, in one batch).
+export async function pendingProviders() {
+  const snap = await getDocs(query(collection(db, 'providers'), where('approved', '==', false), limit(50)));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data(), createdAt: millis(d.data().createdAt) }));
+}
+export async function approveProvider(uid, approved) {
+  const batch = writeBatch(db), auditRef = doc(collection(db, 'audit'));
+  batch.set(auditRef, { actorUid: me().uid, action: 'PROVIDER_APPROVED', entity: 'providers', entityId: uid,
+    meta: { from: approved ? 'pending' : 'approved', to: approved ? 'approved' : 'pending' }, at: serverTimestamp() });
+  batch.update(doc(db, 'providers', uid), { approved, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
+  await batch.commit();
+}
+
+// Rates: public; an admin changes them with an audit entry. Returns { type: { base, perKm, perMin, minFare } }.
+export async function readRates() {
+  const snap = await getDocs(collection(db, 'rates'));
+  return Object.fromEntries(snap.docs.map((d) => { const x = d.data(); return [d.id, { base: x.base, perKm: x.perKm, perMin: x.perMin, minFare: x.minFare }]; }));
+}
+export async function setRates(type, r) {
+  const batch = writeBatch(db), auditRef = doc(collection(db, 'audit'));
+  batch.set(auditRef, { actorUid: me().uid, action: 'RATES_CHANGED', entity: 'rates', entityId: type, at: serverTimestamp() });
+  batch.set(doc(db, 'rates', type), { base: r.base, perKm: r.perKm, perMin: r.perMin, minFare: r.minFare, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
+  await batch.commit();
+}
+
+// "আমি এখন কাজে আছি": an approved provider with a rough position (about 100 m); deleted when they stop.
+export const goOnline = (p, lat, lon) => setDoc(doc(db, 'online', me().uid), { type: p.type, district: p.district, lat, lon, at: serverTimestamp() });
+export const goOffline = () => deleteDoc(doc(db, 'online', me().uid));
+// How many providers of a type are working in a district in the last 30 minutes (equality filters only: no index).
+export async function onlineCount(type, district) {
+  const snap = await getDocs(query(collection(db, 'online'), where('type', '==', type), where('district', '==', district), limit(50)));
+  const fresh = Date.now() - 30 * 60000;
+  return snap.docs.filter((d) => (millis(d.data().at) || 0) > fresh).map((d) => ({ lat: d.data().lat, lon: d.data().lon }));
+}
+
+// A request and rideLimits/{uid} in one batch (at most 10 a day, 60 s apart; the rules check both).
+export const RIDE_LIMIT = { perDay: 10, gapMs: 60000 };
+export async function requestRide(fields) {
+  const user = me();
+  const ref = doc(collection(db, 'rides')), limRef = doc(db, 'rideLimits', user.uid);
+  const snap = await getDoc(limRef);
+  const old = snap.exists() ? snap.data() : null, now = Date.now(), today = dayNumber(now);
+  if (old && millis(old.lastAt) && now < millis(old.lastAt) + RIDE_LIMIT.gapMs) throw err('limit-wait');
+  if (old && old.day === today && old.count >= RIDE_LIMIT.perDay) throw err('limit-day');
+  const batch = writeBatch(db);
+  batch.set(ref, { ...fields, riderUid: user.uid, status: 'requested', createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  batch.set(limRef, { day: today, count: old && old.day === today ? old.count + 1 : 1, lastAt: serverTimestamp(), lastRide: ref.id });
+  await batch.commit();
+  return ref.id;
+}
+// Live updates of one ride, and of the open requests a provider may take (their type and district only).
+export const watchRide = (id, cb, onErr) => onSnapshot(doc(db, 'rides', id), (d) => cb(d.exists() ? asRide(d) : null), onErr);
+export const watchRequests = (p, cb, onErr) => onSnapshot(query(collection(db, 'rides'), where('status', '==', 'requested'),
+  where('type', '==', p.type), where('district', '==', p.district), limit(20)), (s) => cb(s.docs.map(asRide)), onErr);
+// The person's own rides (as rider or as provider), newest first; equality filter only.
+export async function myRides(as = 'rider') {
+  const snap = await getDocs(query(collection(db, 'rides'), where(as === 'rider' ? 'riderUid' : 'providerUid', '==', me().uid), limit(50)));
+  return snap.docs.map(asRide).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+const step = (id, f) => updateDoc(doc(db, 'rides', id), { ...f, updatedAt: serverTimestamp() });
+// Accepting fails for the second provider: the rules only allow it while the status is still "requested".
+export const acceptRide = (id, p) => step(id, { status: 'accepted', providerUid: me().uid, providerName: p.name, vehicle: p.vehicle, acceptedAt: serverTimestamp() });
+export const arrived = (id) => step(id, { status: 'arrived', arrivedAt: serverTimestamp() });
+export const startTrip = (id) => step(id, { status: 'on_trip', startedAt: serverTimestamp() });
+export const completeRide = (id, { distM, waitMin, fare }) => step(id, { status: 'completed', endedAt: serverTimestamp(), distM, waitMin, fare, payStatus: 'pending' });
+export const markPaid = (id) => step(id, { status: 'paid', payStatus: 'paid', paidAt: serverTimestamp() });
+export const cancelRide = (id, by, fee) => step(id, { status: 'cancelled', cancelledBy: by, cancelFee: fee });
+export const billOk = (id, ok) => step(id, { billOk: ok });
+export const rateRide = (id, rating) => step(id, { rating });
+
+// Live position: rides/{id}/live/{rider|provider}, only during accepted → arrived → on_trip, only the two people.
+export const sendLive = (id, who, lat, lon) => setDoc(doc(db, 'rides', id, 'live', who), { lat, lon, at: serverTimestamp() });
+export const watchLive = (id, who, cb, onErr) => onSnapshot(doc(db, 'rides', id, 'live', who),
+  (d) => cb(d.exists() ? { lat: d.data().lat, lon: d.data().lon, at: millis(d.data().at) } : null), onErr);
+// When the ride ends, both positions are deleted (either person may do it; nothing is kept).
+export async function clearLive(id) {
+  await Promise.allSettled([deleteDoc(doc(db, 'rides', id, 'live', 'rider')), deleteDoc(doc(db, 'rides', id, 'live', 'provider'))]);
 }

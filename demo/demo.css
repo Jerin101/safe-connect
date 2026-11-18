@@ -164,3 +164,46 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
 select { width: 100%; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 12px; padding: 10px 12px; font: 1rem var(--body); min-height: 44px; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* v4: problems, trip, GD */
+textarea { width: 100%; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 12px; padding: 12px 14px; font: 1rem var(--body); resize: vertical; }
+input[type=date], input[type=time] { width: 100%; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 12px; padding: 10px 12px; font: 1rem var(--body); min-height: 44px; }
+.issue-text { margin: 6px 0; line-height: 1.5; }
+.stepper { list-style: none; display: flex; flex-wrap: wrap; gap: 4px; padding: 0; margin: 6px 0 0; }
+.stepper li { font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.stepper li.done { background: var(--ok-soft); color: var(--ok); }
+.stepper li.now { background: var(--brand); color: var(--brand-ink); }
+.checks { display: grid; gap: 6px; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; font-size: .95rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; min-height: 44px; }
+.check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--brand); flex: none; }
+.trip-late { background: var(--sos); color: var(--sos-ink); border: 0; }
+.trip-late .small { color: var(--sos-ink); }
+.big-count { font: 800 2rem var(--display); margin: 4px 0; }
+.gd-text { font: .95rem/1.7 var(--body); white-space: pre-wrap; }
+nav.dock .in { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+/* v5: ডাকুন (service engine) */
+.hsearch { border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 999px; width: 40px; height: 40px; display: grid; place-items: center; cursor: pointer; flex: none; }
+.hsearch[aria-current="true"] { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.rail .railsearch { width: auto; height: auto; border: 0; background: none; border-radius: 12px; }
+.tgrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.tcard { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 14px; padding: 10px 4px; display: grid; justify-items: center; gap: 6px; font: 600 .78rem var(--body); cursor: pointer; text-align: center; line-height: 1.25; min-height: 44px; }
+.tcard .sq { width: 40px; height: 40px; border-radius: 12px; }
+.tcard[aria-pressed="true"] { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand) inset; background: var(--brand-soft); }
+@media (max-width: 420px) { .tgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+#ridePanel, #jobPanel { display: grid; gap: 10px; min-width: 0; }
+#drivePanel { display: grid; gap: 14px; min-width: 0; }
+.rmap { height: 300px; width: 100%; background: var(--surface-2); }
+.bill { display: grid; gap: 2px; background: var(--surface-2); border-radius: 12px; padding: 10px 14px; }
+.bill > div { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 4px 0; font-size: .92rem; }
+.bill > div span { color: var(--muted); }
+.bill > div b { font: 700 1.02rem var(--display); white-space: nowrap; }
+.bill > div.total { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 8px; }
+.bill > div.total b { font-size: 1.3rem; color: var(--brand); }
+.btn.big { justify-content: center; min-height: 52px; font-size: 1.05rem; }
+.stars { display: flex; gap: 6px; }
+.star { border: 1px solid var(--line); background: var(--surface-2); color: var(--sun); border-radius: 12px; width: 48px; height: 48px; font-size: 1.4rem; cursor: pointer; }
+.star:hover, .star:focus-visible { background: var(--sun-soft); }
+.bento.earn { grid-template-columns: 1fr 1fr; }
+.bento.earn .cell { background: var(--surface-2); }
+.leaflet-tooltip { font: 600 .78rem var(--body); }
+@media print { header.top, nav.dock, .rail, .demo-bar, .btn, .link, label, input, select, .note { display: none !important; } .card { border: 0; } }
