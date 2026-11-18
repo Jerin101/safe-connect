@@ -613,7 +613,7 @@ function drawDestMap() {
 let fbP = null;
 const FB = () => (fbP ||= Promise.all([import('../js/firebase.js'), import('../js/community.js')]));
 const PV = { open: 'এখন খোলা', closed: 'এখন বন্ধ', fuel_yes: 'তেল আছে', fuel_no: 'তেল নেই', open_night: 'রাতেও খোলা' };
-const FBERR = { 'permission-denied': 'এই ফিচারের নতুন নিরাপত্তা নিয়ম এখনো Firebase-এ চালু হয়নি (deploy বাকি)। চালু হলেই কাজ করবে।',
+const FBERR = { 'permission-denied': 'নিরাপত্তা নিয়মে কাজটা আটকেছে। পাতাটা রিলোড দিয়ে আবার চেষ্টা করুন; না হলে অ্যাডমিনকে জানান।',
   'limit-wait': '১ মিনিট পর আবার চেষ্টা করুন।', 'limit-day': 'আজ ১০টা জানানো হয়ে গেছে, কাল আবার।', already: 'আপনি আগেই "আমিও" দিয়েছেন। ধন্যবাদ!',
   unverified: 'আগে ইমেইল যাচাই করুন (Google দিয়ে সাইন ইন করলে লাগে না)।', unavailable: 'ইন্টারনেট লাগবে। নেট এলে আবার চেষ্টা করুন।' };
 const errText = (e) => FBERR[e && e.code] || (navigator.onLine ? 'কাজটা হয়নি। একটু পর আবার চেষ্টা করুন।' : FBERR.unavailable);
@@ -883,7 +883,7 @@ function viewCall() {
       <div id="est">${estHtml()}</div>
       <button class="btn solid big" type="button" data-call-go>${icon(TYPE_IC[callF.type], 'sm')}${esc(t.who)} ডাকুন</button>
       <div id="callMsg" class="small" role="status"></div>
-      <p class="small">ডাকার জায়গা আর গন্তব্য এই যাত্রার রেকর্ডে থাকে (রসিদের জন্য); দেখতে পারেন শুধু আপনি, যিনি নিলেন আর অ্যাডমিন। লাইভ লোকেশন শুধু যাত্রার সময় দুজনে দেখেন, শেষ হলে মুছে যায়।</p></section>
+      <p class="small">ডাকার জায়গা আর গন্তব্য এই যাত্রার রেকর্ডে থাকে (রসিদের জন্য); দেখেন আপনি, যিনি নিলেন আর অ্যাডমিন; ডাক খোলা থাকা পর্যন্ত এই জেলার অনুমোদিত সেবাদাতারাও দেখেন। লাইভ লোকেশন শুধু যাত্রার সময় দুজনে দেখেন, শেষ হলে মুছে যায়।</p></section>
     <section class="card"><div class="sec-head"><h2>আমার আগের ডাক</h2><button class="link" type="button" data-call-hist>দেখুন${icon('chev', 'sm')}</button></div><div id="hist"></div></section>
     <section class="card"><h2>সেবা দিতে চান?</h2><p class="muted">সিএনজি, বাইক বা অ্যাম্বুলেন্স চালান, ইলেকট্রিশিয়ান-প্লাম্বার-মেকানিক, বা বিপদে মানুষের পাশে দাঁড়াতে চান? আবেদন করুন; অনুমোদনের পর কাছের ডাক পাবেন।</p>
       <div><button class="btn" type="button" data-tab-go="drive">${icon('wrench', 'sm')}আমি সেবা দিই</button></div></section>${SIM ? simNote() : ''}`;
