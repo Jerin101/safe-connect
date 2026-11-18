@@ -156,7 +156,7 @@ function nearby(cat) {
       const c = p.upazila && CEN.centres.find((x) => x.district === p.district && (x.upazila_en === p.upazila || (p.upazila === 'Sadar' && (x.upazila_en === p.district || /sadar/i.test(x.upazila_en)))));
       const upb = c ? c.upazila_bn : '';
       out.push({ name: p.name_hidden ? p.list.hidden_name_label_bn : (p.name_bn || p.name_en), sub: `পেট্রোল পাম্প · ${upb || here.dBn + ' জেলা'}`, src: p.source_url,
-        lat: c ? c.lat : null, lon: c ? c.lon : null, approx: !!c, noLoc: !c, q: `${p.name_en || ''} ${upb || ''} ${here.dBn}`.trim(), official: p.list.badge_bn });
+        lat: c ? c.lat : null, lon: c ? c.lon : null, approx: !!c, noLoc: !c, q: `${p.name_en || 'filling station'} ${upb || ''} ${here.dBn}`.trim(), official: true, badge: p.list.badge_bn });
     }
     for (const p of here.places) if (OSMCAT[cat](p) && p.source !== 'official') out.push({ name: placeName(p), sub: `${SUBBN[p.subcategory] || p.subcategory}${p.upazila ? ' · ' + (UPBN[p.upazila] || UPBN_ALL[`${p.district}|${p.upazila}`] || p.upazila) : ''}`, src: p.source_url, lat: p.lat, lon: p.lon, osm: true });
   }
@@ -229,7 +229,7 @@ const TABS = [
 const ext = 'target="_blank" rel="noopener noreferrer"';
 const callBtn = (p, solid = true) => p ? `<a class="btn ${solid ? 'solid' : ''}" href="tel:${esc(p)}">${icon('phone', 'sm')}<span class="num">${bn(p)}</span></a>` : '';
 const srcLink = (s) => s ? `<a class="btn ghost" href="${esc(s)}" ${ext}>উৎস ${icon('ext', 'sm')}</a>` : '';
-const srcTag = (p) => p.official ? `<span class="badge off">সরকারি তালিকা</span><span class="badge sample">${esc(p.official)}</span>` : p.osm ? '<span class="badge osm">OpenStreetMap, যাচাই করা হয়নি</span>' : p.off ? '<span class="badge off">সরকারি উৎস</span>' : '';
+const srcTag = (p) => p.official ? `<span class="badge off">সরকারি তালিকা</span>${p.badge ? `<span class="badge sample">${esc(p.badge)}</span>` : ''}` : p.osm ? '<span class="badge osm">OpenStreetMap, যাচাই করা হয়নি</span>' : p.off ? '<span class="badge off">সরকারি উৎস</span>' : '';
 
 function placeRow(p) {
   return `<div class="r">${sq(p.cat)}
@@ -299,7 +299,7 @@ function viewNear() {
     <section class="card">${loading ? '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'
       : items.length ? `<div class="rows">${items.map(placeRow).join('')}</div>` : empty}
       ${['bazar', 'edu', 'spot'].includes(cat) && items.some((p) => p.approx) ? '<p class="small">"আনুমানিক": জায়গাটার নিজের অবস্থান এখনো নেই, তাই তার ইউনিয়ন বা উপজেলার কেন্দ্র থেকে দূরত্ব দেখানো হচ্ছে।</p>' : ''}
-      ${items.some((p) => p.official) ? '<p class="small">ফিলিং স্টেশন: পদ্মা অয়েলের সরকারি ডিলার তালিকা (২০১৯)। তালিকায় লোকেশন নেই, তাই উপজেলার কেন্দ্র থেকে আনুমানিক দূরত্ব; উপজেলা জানা না থাকলে "অবস্থান জানা নেই"। মেঘনা আর যমুনার তালিকা আসছে।</p>' : ''}
+      ${items.some((p) => p.official) ? '<p class="small">ফিলিং স্টেশন: পদ্মা অয়েল (২০১৯) আর মেঘনা পেট্রোলিয়ামের (২০২৫) সরকারি ডিলার তালিকা। তালিকায় অবস্থান নেই, তাই উপজেলার কেন্দ্র থেকে আনুমানিক দূরত্ব; উপজেলা জানা না থাকলে "অবস্থান জানা নেই"। যমুনা অয়েলের তালিকা এখনো যোগ হয়নি।</p>' : ''}
       ${items.some((p) => p.osm) ? '<p class="small">জায়গা © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> (ODbL), ১৩ নভেম্বর ২০২৬-এর তথ্য। ফোন নম্বর রাখা হয়নি, কারণ সেগুলো সরকারি উৎসের না।</p>' : ''}</section>`;
 }
 
