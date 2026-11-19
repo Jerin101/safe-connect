@@ -44,6 +44,31 @@ function distTxt(km) { if (km < 1) return `${bn(Math.round(km * 1000 / 10) * 10)
 function walkTxt(km) { const m = Math.round(km / 5 * 60); return m <= 60 ? `হেঁটে ${bn(m)} মিনিট` : `গাড়িতে ${bn(Math.max(5, Math.round(km / 25 * 60)))} মিনিট`; }
 const CON = () => (here && D.upazilas[here.up] ? D.upazilas[here.up].contacts : {});
 const dirLink = (p) => (p.approx || p.noLoc) && p.q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.q)}` : dirLink0(p);
+// Map tiles: OpenStreetMap (no key). CARTO, chosen first (19 Nov 2026), now answers "API KEY REQUIRED" without an
+// account key; in dark mode the tiles are darkened with a CSS filter (demo.css). The tile server sees which part of the
+// map is open, nothing else. No road-routing service: lines are straight, with the distance.
+const darkMode = () => { const t = document.documentElement.dataset.theme; return t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches); };
+const baseTiles = (m) => { m.getContainer().classList.toggle('map-dark', darkMode());
+  return L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(m); };
+// Markers are built from the page's own fixed icons (no data in the HTML); labels are DOM nodes with textContent.
+const pinIcon = (cls, ic) => L.divIcon({ className: `mpin ${cls}`, html: `<span class="mpin-in">${icon(ic, 'sm')}</span>`, iconSize: [34, 42], iconAnchor: [17, 41], tooltipAnchor: [0, -38] });
+const meIcon = () => L.divIcon({ className: 'mme', html: '<span class="mme-pulse"></span><span class="mme-dot"></span>', iconSize: [22, 22], iconAnchor: [11, 11], tooltipAnchor: [0, -12] });
+const tipNode = (text) => { const n = document.createElement('span'); n.textContent = text; return n; };
+const bearing = (a, b) => { const r = Math.PI / 180, dl = (b.lng - a.lng) * r;
+  const y = Math.sin(dl) * Math.cos(b.lat * r), x = Math.cos(a.lat * r) * Math.sin(b.lat * r) - Math.sin(a.lat * r) * Math.cos(b.lat * r) * Math.cos(dl);
+  return (Math.atan2(y, x) / r + 360) % 360; };
+// Move a marker smoothly to its new point (about 1 s), turning a vehicle toward where it goes.
+function glide(m, to) {
+  const from = m.getLatLng(); if (Math.abs(from.lat - to[0]) < 1e-7 && Math.abs(from.lng - to[1]) < 1e-7) return;
+  const rot = m.getElement && m.getElement() && m.getElement().querySelector('.mveh-rot');
+  if (rot && (Math.abs(from.lat - to[0]) + Math.abs(from.lng - to[1]) > 2e-5)) rot.style.transform = `rotate(${Math.round(bearing(from, { lat: to[0], lng: to[1] }))}deg)`;
+  cancelAnimationFrame(m.glideId);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { m.setLatLng(to); return; }
+  const t0 = performance.now(), dur = 950;
+  const step = (t) => { const k = Math.min(1, (t - t0) / dur), e = k * (2 - k);
+    m.setLatLng([from.lat + (to[0] - from.lat) * e, from.lng + (to[1] - from.lng) * e]); if (k < 1) m.glideId = requestAnimationFrame(step); };
+  m.glideId = requestAnimationFrame(step);
+}
 const dirLink0 = (p) => p.lat ? `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.q)}`;
 
 /* ---------- sunrise / sunset (NOAA formula, on the phone) ---------- */
@@ -252,9 +277,10 @@ function placeRow(p, i) {
   return `<div class="r">${sq(p.cat)}
     <div><div class="t">${esc(p.name)}${srcTag(p)}</div><div class="m">${esc(p.sub || '')}</div></div>
     <div class="dist">${p.noLoc ? '<small>অবস্থান জানা নেই</small>' : p.approx ? `${p.km < 1.5 ? 'এই উপজেলায়' : '~' + distTxt(p.km)}<small>আনুমানিক অবস্থান</small>` : `${distTxt(p.km)}<small>${walkTxt(p.km)}</small>`}</div>
-    <div class="acts">${callBtn(p.phone)}<a class="btn" href="${esc(dirLink(p))}" ${ext}>${icon('nav', 'sm')}${p.noLoc ? 'Google Maps-এ খুঁজুন' : 'পথ দেখান'}</a>
-      <button class="btn" type="button" data-share="${esc(p.name + (p.phone ? ' ' + p.phone : ''))}">${icon('share', 'sm')}শেয়ার</button>${srcLink(p.src)}
-      ${p.noLoc || i === undefined ? '' : `<button class="btn ghost" type="button" data-dest="${i}">${cat === 'spot' ? 'গন্তব্য দেখুন' : 'বিস্তারিত'} ${icon('chev', 'sm')}</button>`}</div></div>`;
+    <div class="acts">${callBtn(p.phone)}${p.noLoc || i === undefined
+      ? `<a class="btn" href="${esc(dirLink(p))}" ${ext}>${icon('nav', 'sm')}${p.noLoc ? 'Google Maps-এ খুঁজুন' : 'পথ দেখান'}</a>`
+      : `<button class="btn solid" type="button" data-dest="${i}">${icon('nav', 'sm')}পথ দেখান</button>`}
+      <button class="btn" type="button" data-share="${esc(p.name + (p.phone ? ' ' + p.phone : ''))}">${icon('share', 'sm')}শেয়ার</button>${srcLink(p.src)}</div></div>`;
 }
 function contactRows(list) {
   const rows = list.filter((x) => x && x.c && x.c.p);
@@ -319,7 +345,7 @@ function viewNear() {
       <div class="scroller" role="group" aria-label="বিভাগ">${CATS.map((x) => `<button class="pill" type="button" data-cat="${x.id}" aria-pressed="${x.id === cat}">${icon(CI[x.id][0], 'sm')}${x.n}</button>`).join('')}</div>
       <div class="pills"><button class="btn ${mapOn ? 'solid' : ''}" type="button" data-map>${icon('pin', 'sm')}${mapOn ? 'ম্যাপ লুকান' : 'ম্যাপে দেখুন'}</button>
       <a class="btn ghost" href="${esc(gq)}" ${ext}>Google Maps-এ আরও দেখুন ${icon('ext', 'sm')}</a></div></section>
-    ${mapOn ? `<section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="ম্যাপ"></div></div><p class="small">ম্যাপ দেখতে ইন্টারনেট লাগে; ম্যাপের ছবি OpenStreetMap থেকে আসে। নিচের তালিকা নেট ছাড়াও চলে।</p></section>` : ''}
+    ${mapOn ? `<section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="ম্যাপ"></div></div><p class="small">ম্যাপ দেখতে ইন্টারনেট লাগে; ম্যাপ © OpenStreetMap। নিচের তালিকা নেট ছাড়াও চলে।</p></section>` : ''}
     <section class="card">${loading ? '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'
       : items.length ? `<div class="rows">${(lastItems = items).map((p, i) => placeRow(p, i)).join('')}</div>` : empty}
       ${['bazar', 'edu', 'spot'].includes(cat) && items.some((p) => p.approx) ? '<p class="small">"আনুমানিক": জায়গাটার নিজের অবস্থান এখনো নেই, তাই তার ইউনিয়ন বা উপজেলার কেন্দ্র থেকে দূরত্ব দেখানো হচ্ছে।</p>' : ''}
@@ -349,24 +375,26 @@ function aroundDest(d, k, km = 5) {
   return here.places.filter((p) => OSMCAT[k](p) && p.lat != null && p.source !== 'official').map((p) => ({ name: placeName(p), sub: SUBBN[p.subcategory] || '', lat: p.lat, lon: p.lon, src: p.source_url, osm: true, cat: k, km: hav(d, p) }))
     .filter((p) => p.km <= km && p.km > 0.01).sort((a, b) => a.km - b.km).slice(0, 3);
 }
+let aroundList = [];   // the "এর কাছে" places on the place page, so their "পথ দেখান" opens them here too
 function viewDest() {
   if (!dest) { tab = 'near'; return viewNear(); }
+  aroundList = [];
   const d = dest, groups = AROUND.map(([k, n]) => [k, n, aroundDest(d, k)]).filter((g) => g[2].length);
   const trip = `রওনা দিলাম ${d.name}-এর দিকে (${here.dBn})। পৌঁছে জানাব।`;
   return `<button class="link" type="button" data-tab-go="near">${icon('back', 'sm')}তালিকায় ফিরুন</button>
     <section class="card"><p class="eyebrow">${d.cat === 'spot' ? 'গন্তব্য' : 'জায়গা'} · ${esc(here.dBn)}</p><h1>${esc(d.name)}</h1>
       <p class="muted">${esc(d.sub || '')}</p><div>${srcTag(d)}</div>
       <p><b>${d.approx ? '~' : ''}${distTxt(d.km)}</b> <span class="muted">${esc(here.label)} থেকে${d.approx ? ' (আনুমানিক)' : ''}</span></p>
-      <div class="pills"><a class="btn solid" href="${esc(dirLink(d))}" ${ext}>${icon('nav', 'sm')}পথ দেখান</a>
+      <div class="pills"><a class="btn" href="${esc(dirLink(d))}" ${ext}>${icon('nav', 'sm')}Google Maps-এ খুলুন ${icon('ext', 'sm')}</a>
         <button class="btn" type="button" data-share="${esc(d.name + ', ' + here.dBn)}">${icon('share', 'sm')}শেয়ার</button>
         <button class="btn" type="button" data-trip-dest="${esc(trip)}">${icon('bus', 'sm')}এখানে যাচ্ছি (পরিবারকে SMS)</button>${srcLink(d.src)}</div></section>
     ${d.pid ? `<section class="card"><h2>এখন কেমন?</h2><p class="muted" id="pstText">মানুষের জানানো খবর দেখা হচ্ছে…</p>
       <div class="pills">${(d.cat === 'fuel' ? ['fuel_yes', 'fuel_no', 'open_night'] : ['open', 'closed', 'open_night']).map((v) => `<button class="pill" type="button" data-pst="${v}">${esc(PV[v])}</button>`).join('')}</div>
       <p class="small" id="pstMsg">আপনি এখানে থাকলে জানান: অন্যরা কাজে লাগাবে। সাইন ইন লাগে; আপনার নাম কেউ দেখবে না।</p></section>` : ''}
-    <section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="গন্তব্যের ম্যাপ"></div></div><p class="small">ম্যাপ দেখতে ইন্টারনেট লাগে; ম্যাপের ছবি OpenStreetMap থেকে আসে।</p></section>
+    <section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="গন্তব্যের ম্যাপ"></div></div><p class="small">ম্যাপে ${esc(here.label)} থেকে সোজা লাইন; রাস্তা আলাদা হতে পারে। রাস্তা ধরে পথের জন্য "Google Maps-এ খুলুন"। ম্যাপ © OpenStreetMap।</p></section>
     <section class="card"><h2>এর কাছে (৫ কিমির মধ্যে)</h2>
       ${groups.length ? groups.map(([k, n, xs]) => `<h3>${esc(n)}</h3><div class="rows">${xs.map((p) => `<div class="r">${sq(k)}<div><div class="t">${esc(p.name)}</div><div class="m">${esc(p.sub)}</div></div><div class="dist">${distTxt(p.km)}<small>গন্তব্য থেকে</small></div>
-        <div class="acts"><a class="btn" href="${esc(dirLink(p))}" ${ext}>${icon('nav', 'sm')}পথ দেখান</a></div></div>`).join('')}</div>`).join('')
+        <div class="acts"><button class="btn" type="button" data-around="${aroundList.push(p) - 1}">${icon('nav', 'sm')}পথ দেখান</button></div></div>`).join('')}</div>`).join('')
         : `<div class="note">${icon('info')}<p>এর কাছে থাকা-খাওয়া, হাসপাতাল বা ATM-এর তথ্য এখনো আমাদের তালিকায় নেই।</p></div>`}
       <p class="small">জায়গা © OpenStreetMap contributors (ODbL), যাচাই করা হয়নি। বিপদে ৯৯৯; পর্যটক হলে ট্যুরিস্ট পুলিশ ০১৩২০২২২২২২।</p></section>`;
 }
@@ -493,7 +521,7 @@ const navHtml = () => TABS.map((t) => `<button class="navbtn ${t.id === 'sos' ? 
 let mapObj = null;
 function render() {
   if (mapObj) { mapObj.remove(); mapObj = null; }
-  if (rideMap) { rideMap.remove(); rideMap = null; }
+  if (rideMap) { rideMap.remove(); rideMap = null; lines = null; }
   $('#view').innerHTML = VIEWS[tab]();
   if (tab === 'near' && mapOn) drawMap();
   if (tab === 'dest') { drawDestMap(); loadPlaceStatus(); }
@@ -519,18 +547,19 @@ function drawMap() {
   const el = $('#map'); if (!el || !window.L || !here) return;
   if (!navigator.onLine) { el.textContent = 'ইন্টারনেট নেই, তাই ম্যাপ দেখানো যাচ্ছে না। নিচের তালিকা ব্যবহার করুন।'; return; }
   mapObj = L.map(el).setView([here.lat, here.lon], 13);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(mapObj);
-  const css = getComputedStyle(document.documentElement), brand = css.getPropertyValue('--brand').trim() || '#0b4a4e', sos = css.getPropertyValue('--sos').trim() || '#cc2f2b';
+  baseTiles(mapObj);
+  const brand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#0b4a4e';
   const pts = [[here.lat, here.lon]];
-  for (const p of nearby(cat).filter((x) => !x.noLoc)) {
-    const box = document.createElement('div'), b = document.createElement('b'), s = document.createElement('div'), a = document.createElement('a');
-    b.textContent = p.name; s.textContent = `${p.sub || ''} · ${distTxt(p.km)}`; a.textContent = 'পথ দেখান'; a.href = dirLink(p); a.target = '_blank'; a.rel = 'noopener noreferrer';
-    box.append(b, s, a);
+  lastItems.forEach((p, i) => {
+    if (p.noLoc) return;
+    const box = document.createElement('div'), b = document.createElement('b'), s = document.createElement('div'), a = document.createElement('button');
+    b.textContent = p.name; s.textContent = `${p.sub || ''} · ${distTxt(p.km)}`; a.textContent = 'পথ দেখান'; a.type = 'button'; a.className = 'btn solid'; a.dataset.dest = String(i);
+    box.className = 'mpop'; box.append(b, s, a);
     L.circleMarker([p.lat, p.lon], { radius: 7, color: brand, weight: 2, fillColor: brand, fillOpacity: 0.35 }).addTo(mapObj).bindPopup(box);
     pts.push([p.lat, p.lon]);
-  }
+  });
   // The chosen area on top; zoom to it and the 8 nearest places (far ones stay on the map, outside the first view).
-  L.circleMarker([here.lat, here.lon], { radius: 9, color: '#ffffff', weight: 3, fillColor: sos, fillOpacity: 1 }).addTo(mapObj).bindTooltip('বাছাই করা এলাকা');
+  L.marker([here.lat, here.lon], { icon: meIcon(), keyboard: false, zIndexOffset: 500 }).addTo(mapObj).bindTooltip(tipNode('বাছাই করা এলাকা'), { className: 'mtip' });
   if (pts.length > 1) mapObj.fitBounds(pts.slice(0, 9), { padding: [28, 28], maxZoom: 15 });
 }
 document.addEventListener('click', (ev) => {
@@ -546,6 +575,7 @@ document.addEventListener('click', (ev) => {
   if (t.dataset.copy) return copy(t.dataset.copy);
   if ('map' in t.dataset) { mapOn = !mapOn; render(); return; }
   if (t.dataset.dest) { dest = lastItems[Number(t.dataset.dest)]; if (dest) { tab = 'dest'; render(); window.scrollTo(0, 0); } return; }
+  if (t.dataset.around) { const p = aroundList[Number(t.dataset.around)]; if (p) { dest = { ...p, km: hav(here, p) }; tab = 'dest'; render(); window.scrollTo(0, 0); } return; }
   if (t.dataset.tripDest) { situ = null; tab = 'sos'; render(); $('#sosOut').innerHTML = smsBlock(t.dataset.tripDest); return; }
   if (t.id === 'goUp') { const c = CEN.centres[Number($('#upSel').value)]; if (c) { $('#areaDlg').close(); locate(c.lat, c.lon, `${c.upazila_bn}, ${DISTBN[c.district]}`); } return; }
   if ('openArea' in t.dataset) return $('#areaDlg').showModal();
@@ -591,20 +621,32 @@ $('#distSel').addEventListener('change', fillUps);
 $('#presetList').innerHTML = PRESETS.map((p, i) => `<button class="opt" type="button" data-preset="${i}">${icon('pin','sm')}${esc(p.n)}</button>`).join('');
 $('#areaDlg').addEventListener('click', (e) => { if (e.target.id === 'areaDlg') e.target.close(); });
 
+// A small label on top of a map (distance, minutes), written with textContent.
+function mapChip(mapEl, text) {
+  const wrap = mapEl.closest('.mapwrap') || mapEl.parentElement;
+  let c = wrap.querySelector('.mchip');
+  if (!text) { if (c) c.hidden = true; return; }
+  if (!c) { c = document.createElement('div'); c.className = 'mchip'; c.setAttribute('role', 'status'); wrap.append(c); }
+  c.hidden = false; c.textContent = text;
+}
 function drawDestMap() {
   const el = $('#map'); if (!el || !window.L || !dest) return;
   if (!navigator.onLine) { el.textContent = 'ইন্টারনেট নেই, তাই ম্যাপ দেখানো যাচ্ছে না।'; return; }
   mapObj = L.map(el).setView([dest.lat, dest.lon], 14);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(mapObj);
-  const css = getComputedStyle(document.documentElement), brand = css.getPropertyValue('--brand').trim() || '#0b4a4e', sun = css.getPropertyValue('--sun').trim() || '#b86e0a';
+  baseTiles(mapObj);
+  const brand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#0b4a4e';
   const pts = [[dest.lat, dest.lon]];
   for (const [k] of AROUND) for (const p of aroundDest(dest, k)) {
     const b = document.createElement('b'); b.textContent = p.name;
     L.circleMarker([p.lat, p.lon], { radius: 6, color: brand, weight: 2, fillColor: brand, fillOpacity: 0.35 }).addTo(mapObj).bindPopup(b); pts.push([p.lat, p.lon]);
   }
-  const t = document.createElement('b'); t.textContent = dest.name;
-  L.circleMarker([dest.lat, dest.lon], { radius: 10, color: '#ffffff', weight: 3, fillColor: sun, fillOpacity: 1 }).addTo(mapObj).bindPopup(t).openPopup();
-  if (pts.length > 1) mapObj.fitBounds(pts, { padding: [28, 28], maxZoom: 15 });
+  // from the chosen area: a dashed straight line and a chip with the distance (no road-routing service)
+  L.polyline([[here.lat, here.lon], [dest.lat, dest.lon]], { color: brand, weight: 4, opacity: 0.85, dashArray: '2 9', lineCap: 'round', interactive: false }).addTo(mapObj);
+  L.marker([here.lat, here.lon], { icon: meIcon(), keyboard: false }).addTo(mapObj).bindTooltip(tipNode(here.label), { className: 'mtip' });
+  L.marker([dest.lat, dest.lon], { icon: pinIcon('drop', 'flag'), keyboard: false, zIndexOffset: 800 }).addTo(mapObj).bindTooltip(tipNode(dest.name), { permanent: true, direction: 'auto', className: 'mtip' });
+  mapChip(el, `${dest.approx ? '~' : ''}${distTxt(dest.km)} সোজা দূরত্ব · ${walkTxt(dest.km)}`);
+  pts.push([here.lat, here.lon]);
+  mapObj.fitBounds(pts.length > 2 ? pts : [[here.lat, here.lon], [dest.lat, dest.lon]], { paddingTopLeft: [40, 50], paddingBottomRight: [40, 70], maxZoom: 16 });
 }
 
 /* ===================== v4: features that help people act (impact plan) ===================== */
@@ -960,11 +1002,11 @@ const paintEst = () => { const el = $('#est'); if (el) el.innerHTML = estHtml();
 // The live map: pickup, destination, and the two people. Markers are moved in place (no re-render).
 function drawRideMap() {
   const el = $('#rmap'); if (!el || !window.L) return;
-  if (rideMap) { rideMap.remove(); rideMap = null; } mk = {};
+  if (rideMap) { rideMap.remove(); rideMap = null; } mk = {}; lines = null; lastFitStatus = null;
   if (!navigator.onLine) { el.textContent = 'ইন্টারনেট নেই, তাই ম্যাপ দেখানো যাচ্ছে না।'; return; }
   const r = ride || { pickup: callF.pick, drop: callF.drop };
   rideMap = L.map(el).setView([r.pickup ? r.pickup.lat : here.lat, r.pickup ? r.pickup.lon : here.lon], 14);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(rideMap);
+  baseTiles(rideMap);
   if (!ride) rideMap.on('click', (e) => {
     const p = { lat: r5(e.latlng.lat), lon: r5(e.latlng.lng) };
     if (!RM || !RM.inBangladesh(p.lat, p.lon)) return;
@@ -974,26 +1016,50 @@ function drawRideMap() {
   paintMarkers(true);
 }
 const COL = () => { const c = getComputedStyle(document.documentElement); return { brand: c.getPropertyValue('--brand').trim() || '#0b4a4e', sos: c.getPropertyValue('--sos').trim() || '#cc2f2b', sun: c.getPropertyValue('--sun').trim() || '#b86e0a', ok: c.getPropertyValue('--ok').trim() || '#1f7a4f' }; };
-function setMk(key, p, style, label) {
+const vehIcon = (type) => L.divIcon({ className: 'mveh', html: `<span class="mveh-rot"><span class="mveh-arrow"></span></span><span class="mveh-in">${icon(TYPE_IC[type] || 'car', 'sm')}</span>`,
+  iconSize: [54, 54], iconAnchor: [27, 27], tooltipAnchor: [0, -28] });
+let lines = null;   // the dashed lines on the ride map
+let lastFitStatus = null;
+function setMk(key, p, makeIcon, label) {
   if (!rideMap) return;
   if (!p) { if (mk[key]) { mk[key].remove(); delete mk[key]; } return; }
-  if (mk[key]) { mk[key].setLatLng([p.lat, p.lon]); return; }
-  // a DOM node, not a string: Leaflet puts a string in as HTML, and providerName is chosen by the provider
-  const tip = document.createElement('span'); tip.textContent = label;
-  mk[key] = L.circleMarker([p.lat, p.lon], { weight: 3, fillOpacity: 1, color: '#ffffff', ...style }).addTo(rideMap).bindTooltip(tip, { permanent: key === 'prov' || key === 'me', direction: 'top', offset: [0, -8] });
+  if (mk[key]) { glide(mk[key], [p.lat, p.lon]); return; }
+  // the label is a DOM node, not a string: Leaflet puts a string in as HTML, and providerName is chosen by the provider
+  mk[key] = L.marker([p.lat, p.lon], { icon: makeIcon(), keyboard: false, zIndexOffset: key === 'prov' ? 1000 : key === 'me' ? 900 : 0 }).addTo(rideMap)
+    .bindTooltip(tipNode(label), { permanent: key === 'prov', direction: 'auto', className: 'mtip' });
+}
+function paintLines(r, provPos) {
+  if (!rideMap) return;
+  if (!lines) lines = L.layerGroup().addTo(rideMap);
+  lines.clearLayers();
+  const c = COL(), dash = (a, b, color, solid) => L.polyline([[a.lat, a.lon], [b.lat, b.lon]], { color, weight: solid ? 5 : 4, opacity: 0.9, dashArray: solid ? null : '2 9', lineCap: 'round', interactive: false }).addTo(lines);
+  const st = ride ? ride.status : 'new';
+  if (provPos && r.pickup && ['accepted', 'arrived'].includes(st)) dash(provPos, r.pickup, c.ok);
+  if (r.pickup && r.drop && ['new', 'requested', 'accepted', 'arrived'].includes(st)) dash(r.pickup, r.drop, c.brand);
+  if (provPos && r.drop && st === 'on_trip') dash(provPos, r.drop, c.brand);
+  // the chip: how far, about how many minutes
+  const el = $('#rmap'); if (!el || !RM) return;
+  const eta = (m) => `${kmTxt(m)} · ~${bn(RM.etaMinutes(m * RM.ROAD_FACTOR, r.type))} মিনিট`;
+  mapChip(el, provPos && st === 'accepted' ? `${tWho(r.type)} ${eta(RM.metres(provPos, r.pickup))} দূরে`
+    : st === 'arrived' ? `${tWho(r.type)} পৌঁছে গেছেন`
+    : provPos && r.drop && st === 'on_trip' ? `গন্তব্য ${eta(RM.metres(provPos, r.drop))}`
+    : !ride && r.pickup && r.drop ? `সোজা ${kmTxt(RM.metres(r.pickup, r.drop))} · রাস্তায় আন্দাজ ${kmTxt(RM.estimateMetres(r.pickup, r.drop))}` : '');
 }
 function paintMarkers(fit) {
   if (!rideMap) return;
-  const c = COL(), r = ride || { pickup: callF.pick, drop: callF.drop, type: callF.type };
+  const r = ride || { pickup: callF.pick, drop: callF.drop, type: callF.type };
   const live = ride && RM && RM.LIVE.includes(ride.status);
   const provPos = rideRole === 'provider' ? mine : other, riderPos = rideRole === 'rider' ? mine : other;
-  setMk('pick', r.pickup, { radius: 8, fillColor: c.brand }, 'ডাকার জায়গা');
-  setMk('drop', r.drop, { radius: 8, fillColor: c.sun }, 'গন্তব্য');
-  setMk('prov', live || ride?.status === 'on_trip' ? provPos : null, { radius: 11, fillColor: c.ok }, rideRole === 'provider' ? 'আপনি' : `${tWho(r.type)}${ride && ride.providerName ? ': ' + ride.providerName : ''}`);
-  setMk('me', live && ride.status !== 'on_trip' ? riderPos : null, { radius: 9, fillColor: c.sos }, rideRole === 'rider' ? 'আপনি' : 'যাত্রী');
-  if (fit || (ride && live)) {
-    const pts = Object.values(mk).map((m) => m.getLatLng());
-    if (pts.length > 1) rideMap.fitBounds(L.latLngBounds(pts), { padding: [36, 36], maxZoom: 16 });
+  setMk('pick', r.pickup, () => pinIcon('pick', 'pin'), 'ডাকার জায়গা');
+  setMk('drop', r.drop, () => pinIcon('drop', 'flag'), 'গন্তব্য');
+  setMk('prov', live || ride?.status === 'on_trip' ? provPos : null, () => vehIcon(r.type), rideRole === 'provider' ? 'আপনি' : `${tWho(r.type)}${ride && ride.providerName ? ': ' + ride.providerName : ''}`);
+  setMk('me', live && ride.status !== 'on_trip' ? riderPos : null, meIcon, rideRole === 'rider' ? 'আপনি' : 'যাত্রী');
+  paintLines(r, live || ride?.status === 'on_trip' ? provPos : null);
+  const pts = Object.values(mk).map((m) => m.getLatLng());
+  const st = ride ? ride.status : 'new', inner = rideMap.getBounds().pad(-0.12);
+  if (pts.length > 1 && (fit || st !== lastFitStatus || pts.some((p) => !inner.contains(p)))) {
+    rideMap.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [40, 40], paddingBottomRight: [40, 70], maxZoom: 16 });
+    lastFitStatus = st;
   }
 }
 
