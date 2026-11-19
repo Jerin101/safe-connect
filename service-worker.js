@@ -15,6 +15,7 @@ const FILES = [
   'css/preview.css',
   'manifest.json',
   'js/preview.js',
+  'js/icons.js',             // line icons (A1)
   'js/bipod.js',
   'js/prepare.js',
   'js/data.js',

@@ -25,7 +25,7 @@ Never block the screen with a welcome, pop-up or loading splash: 999 must be one
 ## 3. Page order (portal layout)
 1. Two-row header: logo · **999 button (always visible, every page)** · EN/বাংলা · night/day. Second row: menu (scrolls sideways on phones; the active tab is always in view, and the edge fades with an arrow where more tabs are hidden).
    On phones (≤ 430 px) the header shows the **current area (short name, one line)** instead of the logo, and night/day moves to the footer; "হোম" is the first tab (#108).
-2. Banner: greeting · "বিপদে আছেন?" · calm line · the 3 big actions: **999** (red), **প্রিয়জনকে লোকেশন পাঠান** (violet), **আমার কাছের সাহায্য** (soft violet). Visible without scrolling on a 360 px phone. On wide screens, the signal ring panel sits beside the text.
+2. Banner: greeting · "বিপদে আছেন?" · calm line · the 3 big actions: **999** (red), **প্রিয়জনকে লোকেশন পাঠান** (teal), **আমার কাছের সাহায্য** (soft teal). Visible without scrolling on a 360 px phone. On wide screens, the signal ring panel sits beside the text.
 3. National numbers row: one bordered row of quiet single-colour tiles (only 999's tile is soft red), numbers from `data/national_hotlines.json` (tap = call), plus "লোকেশন পাঠান" and "কাছের সাহায্য".
 4. Search band: "আপনার এলাকা কোথায়?" + one search box (any spelling, Bangla or English).
 5. Situation cards: "কী হয়েছে?" (night danger, lost/stolen → GD, storm/flood/fire).
@@ -41,7 +41,7 @@ Build each part from its own issue in milestone v1.0.
 - **Header:** logo · area picker ("এলাকা বেছে নিন") · **999 first** · সাইন ইন · EN/বাং · night/day. Second row: tabs with icons and a round search pill.
   On phones the area picker hides and the search pill sits above the tabs.
 - **Sidebar (desktop):** a QR card ("ফোনে রাখুন") and filters (district, type of service). On phones the filters go below the feed and the QR card is hidden.
-- **Banner:** greeting, "বিপদে আছেন?", one calm line, and the **3 big actions**, side by side on wide screens (999 red, send location violet, help near me soft violet).
+- **Banner:** greeting, "বিপদে আছেন?", one calm line, and the **3 big actions**, side by side on wide screens (999 red, send location teal, help near me soft teal).
 - **Rows of cards:** national numbers as big tiles that scroll sideways by hand (with arrows, never by themselves), "আপনার এলাকা কোথায়?" with example searches,
   known places, "কী হয়েছে?" cards, the two side cards.
 - **Sign-in:** a two-panel modal over the current page. Left: the red "বিপদে আছেন? সাইন ইন লাগবে না।" box (999, send location, help near me).
@@ -50,13 +50,16 @@ Build each part from its own issue in milestone v1.0.
 - Every rule in §5 "Must always be true" still applies to every v3 part.
 
 ## 4. Look (classy, calm, ours: `docs/SYSTEM_DESIGN.md` §7)
-- **Background:** warm white by day, near-black by night. Thin 1 px borders; soft shadows only on parts that float (cards over the banner, menus).
-- **One accent colour: violet**, for main buttons, links, focus rings and small accent eyebrows ("● জরুরি সাহায্য").
+- **Background:** warm off-white by day (`--bg` #F4F5F2), near-black by night (#0A0E0D). Thin 1 px borders; soft shadows only on parts that float (cards over the banner, menus).
+- **One accent colour: teal** (`--accent` #0B4A4E by day, #6FC7C3 by night; A1 of `docs/plans/DEMO_TO_REAL_PLAN.md`, Jerin's
+  decision of 18 Nov 2026; it replaced violet), for main buttons, links, focus rings and small accent eyebrows ("● জরুরি সাহায্য").
+  The old variable names stay (`--violet-1/2` is now the teal button gradient) until A8 removes the old screens.
   - **Red only for 999 and danger.**
   - **Amber only for warnings** (e.g. "পুরোনো তথ্য হতে পারে", the offline notice).
   - **Green only for "done"** (e.g. a tick, "ঠিক করা হয়েছে").
   - No other colours for decoration.
-- **Icons:** single-colour line icons in quiet tiles. No rainbow icon circles.
+- **Icons:** single-colour line icons in quiet tiles. No rainbow icon circles. The set is `js/icons.js` (the same icons as
+  `/demo/`): `icon('phone')` returns an `<svg class="sc-ic">` built with DOM calls (never `innerHTML`); sizes `--ic`, `--ic-sm`, `--ic-lg`.
 - **Every colour is a CSS variable** in `:root`, with night values in both dark-mode blocks. No colour written directly in a component.
 - **Fonts:** Manrope (English) + Noto Sans Bengali (Bangla), self-hosted (#50). No letter-spacing on Bangla text.
   Headlines can be two-tone: a bright first line and a softer second line ("বিপদে আছেন? / সরকারি নম্বর, এক জায়গায়।").
@@ -82,4 +85,5 @@ Build each part from its own issue in milestone v1.0.
 - [ ] Read every new sentence aloud: is it short, calm, true?
 - [ ] bangla-reviewer agent checked the Bangla
 - [ ] 360 px phone, night and day, Bangla and English
+- [ ] `node --test tests/design/contrast-test.mjs` passes (text at least 4.5:1 in day and night)
 - [ ] `tests/search-test.html` says 0 failed
