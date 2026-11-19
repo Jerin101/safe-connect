@@ -156,7 +156,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .badge.osm { background: var(--brand-soft); color: var(--brand); }
 .demo-bar { background: var(--sun-soft); color: var(--ink); font-size: .82rem; padding: 6px 16px; text-align: center; }
 .demo-bar a { color: var(--brand); font-weight: 600; }
-.mapwrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+.mapwrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); isolation: isolate; }
 #map { height: 340px; width: 100%; background: var(--surface-2); }
 .leaflet-container { font: inherit; }
 .skeleton { height: 64px; border-radius: 12px; background: linear-gradient(90deg, var(--surface-2), var(--line), var(--surface-2)); background-size: 200% 100%; animation: sh 1.2s infinite; }
