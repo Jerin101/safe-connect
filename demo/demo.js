@@ -625,6 +625,27 @@ const WHY = {
   history: 'আপনার আগের ডাক দেখতে সাইন ইন লাগে।',
   drive: 'সেবা দিতে (চালক, কারিগর, স্বেচ্ছাসেবক) বা অ্যাডমিনের কাজে সাইন ইন লাগে।',
 };
+// Why a Google sign-in did not happen, said plainly next to the button (a toast alone is gone in 2 seconds).
+const INAPP = /FBAN|FBAV|FB_IAB|Instagram|Messenger|WhatsApp|Line\/|; wv\)/i.test(navigator.userAgent);
+const SIGNIN_ERR = {
+  'auth/popup-blocked': 'ব্রাউজার পপআপ আটকে দিয়েছে। ঠিকানার ঘরের পাশে "পপআপ আটকানো" চিহ্নে চাপ দিয়ে এই সাইটের পপআপ চালু করুন, তারপর আবার চাপুন।',
+  'auth/popup-closed-by-user': 'সাইন ইনের জানালা বন্ধ হয়ে গেছে। আবার চাপুন, তারপর Google অ্যাকাউন্ট বাছুন।',
+  'auth/cancelled-popup-request': 'আগের সাইন ইন জানালা এখনো খোলা। সেটা শেষ করুন বা বন্ধ করে আবার চাপুন।',
+  'auth/unauthorized-domain': 'এই ঠিকানা থেকে সাইন ইনের অনুমতি Firebase-এ দেওয়া নেই। অ্যাডমিনকে জানান।',
+  'auth/operation-not-supported-in-this-environment': 'এই ব্রাউজারে Google সাইন ইন চলে না। Chrome বা Firefox-এ পাতাটা খুলুন।',
+  'auth/web-storage-unsupported': 'ব্রাউজারের কুকি বা স্টোরেজ বন্ধ। সেটিংসে চালু করুন, অথবা Chrome-এ খুলুন।',
+  'auth/network-request-failed': 'ইন্টারনেট সংযোগ নেই বা দুর্বল। নেট ঠিক হলে আবার চাপুন।',
+};
+function signinFailed(btn, e) {
+  const code = (e && e.code) || '';
+  const why = INAPP ? 'Messenger, Facebook বা WhatsApp-এর ভেতরের ব্রাউজারে Google সাইন ইন চলে না। উপরের ⋮ মেনু থেকে "Chrome-এ খুলুন" বাছুন, তারপর আবার চাপুন।'
+    : SIGNIN_ERR[code] || `সাইন ইন হয়নি${code ? ` (${code})` : ''}। আবার চেষ্টা করুন; না হলে Chrome-এ খুলুন।`;
+  toast(why);
+  const box = btn.closest('div') || btn.parentElement;
+  let p = box.nextElementSibling && box.nextElementSibling.classList.contains('signin-why') ? box.nextElementSibling : null;
+  if (!p) { p = document.createElement('p'); p.className = 'small signin-why'; p.setAttribute('role', 'status'); box.after(p); }
+  p.textContent = why;
+}
 async function needUser(box, why = WHY.report) {
   const [fb] = await FB();
   const u = await fb.currentUser();
@@ -818,7 +839,7 @@ document.addEventListener('click', async (ev) => {
   if (t.dataset.metoo) { meTooNow(t.dataset.metoo); return; }
   if (t.dataset.pst) { sendPlace(t.dataset.pst); return; }
   if ('signin' in t.dataset) { try { const [fb] = await FB(); await fb.signInGoogle(); // ডাকুন pages rebuild themselves (their fields live in callF); elsewhere a half-typed form must stay as it is
-      if (tab === 'call' || tab === 'drive') { toast('সাইন ইন হয়েছে।'); render(); } else toast('সাইন ইন হয়েছে। এবার আবার চাপুন।'); } catch (e) { toast('সাইন ইন হয়নি'); } return; }
+      if (tab === 'call' || tab === 'drive') { toast('সাইন ইন হয়েছে।'); render(); } else toast('সাইন ইন হয়েছে। এবার আবার চাপুন।'); } catch (e) { signinFailed(t, e); } return; }
   if ('gdMake' in t.dataset) { makeGd(); return; }
   if ('print' in t.dataset) { window.print(); return; }
   if (t.dataset.tripGo) {
