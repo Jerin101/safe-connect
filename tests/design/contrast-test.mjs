@@ -27,6 +27,10 @@ const PAIRS = [
   ['--ink', '--bg'], ['--ink', '--surface'], ['--ink', '--surface-2'], ['--ink-2', '--surface'], ['--muted', '--bg'], ['--muted', '--surface'],
   ['--link', '--bg'], ['--link', '--surface'], ['--accent-ink', '--accent'], ['--on-color', '--violet-1'], ['--on-color', '--violet-2'],
   ['--on-color', '--danger'], ['--on-color', '--red-1'], ['--on-color', '--red-2'], ['--foot-ink', '--foot-bg'], ['--foot-muted', '--foot-bg'],
+  // the two-tone gradient titles (.grad) on the page and on the soft banner backgrounds
+  ['--title-2', '--bg'], ['--title-2', '--tint'], ['--title-2', '--tint-2'], ['--title-3', '--bg'], ['--title-3', '--tint'], ['--title-3', '--tint-2'],
+  // white text on the coloured tiles and buttons
+  ['--on-color', '--teal-2'], ['--on-color', '--green-2'],
 ];
 
 for (const name of Object.keys(blocks)) {
@@ -45,7 +49,7 @@ test('both night blocks have the same colours', () => {
   assert.deepEqual(vars(blocks.nightAuto.slice(0, blocks.nightAuto.indexOf('}'))), vars(blocks.nightSwitch.slice(0, blocks.nightSwitch.indexOf('}'))));
 });
 
-test('one accent colour, teal: no violet left in the colour values', () => {
+test('the accent colour is teal in day and night', () => {
   for (const name of Object.keys(blocks)) {
     const a = theme(name)['--accent'];
     const [r, g, b] = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));

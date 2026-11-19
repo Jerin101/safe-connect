@@ -17,13 +17,13 @@
   --tint: #E0EDEB; --tint-2: #CFE4E1;
   --ink: #0F1A17; --ink-2: #33433E; --muted: #5A6863; --accent: #0B4A4E; --accent-ink: #FFFFFF; --link: #0B5E63;
   --danger: #D7263D; --danger-ink: #FFFFFF; --ok-soft: rgba(31, 122, 79, 0.10); --glow: rgba(11, 74, 78, 0.10);
-  --title-2: #0B4A4E; --title-3: #13858F;
+  --title-2: #0B4A4E; --title-3: #0E6E76;
   --sky-1: #D5ECE8; --sky-2: #EAF4EF; --sky-3: #FBEFDA; --sky-4: #F6C98A; --hill-1: #A9D4CC; --hill-2: #6FB3A8; --water: #D3EBE6;
   --stars: 0; --orb-1: #FFF8E1; --orb-2: #F0A64A;
   --red-1: #DC2650; --red-2: #B5103A; --red-ink: #C0123A; --amber-1: #FFC94D; --amber-2: #FF8F3F; --amber-ink: #2A1500;
   --violet-1: #11767C; --violet-2: #0B4A4E; --on-color: #FFFFFF;
   /* Reds (issue #72): white text on --danger, --red-1 and --red-2 is at least 4.5:1 in both themes; --red-ink is for red text on the page. */
-  --orange-1: #FF9B5C; --orange-2: #E8542E; --green-1: #3FC98A; --green-2: #14895A; --pink-1: #FF7AB8; --pink-2: #C8327E; --blue-1: #6FA8FF; --blue-2: #2E5BD6; --teal-1: #4FD6D0; --teal-2: #13858F; --slate-1: #9AA3C7; --slate-2: #59618A;
+  --orange-1: #FF9B5C; --orange-2: #E8542E; --green-1: #3FC98A; --green-2: #127A50; --pink-1: #FF7AB8; --pink-2: #C8327E; --blue-1: #6FA8FF; --blue-2: #2E5BD6; --teal-1: #4FD6D0; --teal-2: #11777F; --slate-1: #9AA3C7; --slate-2: #59618A;
   --warn: #8F5300; --warn-bg: #FBEFDA; --ok: #1F7A4F;
   --danger-soft: rgba(215, 38, 61, 0.09); --accent-soft: rgba(11, 74, 78, 0.09); --backdrop: rgba(4, 20, 18, 0.5);
   /* Google sign-in button: colours from Google's sign-in branding guidelines (light / dark theme). */

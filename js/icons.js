@@ -65,7 +65,7 @@ export function icon(name, { size = '', label = '' } = {}) {
     svg.setAttribute('role', 'img');
     const t = document.createElementNS(NS, 'title'); t.textContent = label; svg.append(t);
   } else svg.setAttribute('aria-hidden', 'true');
-  for (const [tag, attrs] of ICONS[name] || ICONS.info) {
+  for (const [tag, attrs] of Object.hasOwn(ICONS, name) ? ICONS[name] : ICONS.info) {
     const el = document.createElementNS(NS, tag);
     for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
     svg.append(el);
