@@ -215,8 +215,8 @@ nav.dock .in { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .mpin .mpin-in .i { transform: rotate(45deg); }
 .mpin.drop .mpin-in { background: var(--sun); color: #fff; }
 .mveh { background: none; border: 0; }
-.mveh-rot { position: absolute; inset: 0; transition: transform .6s ease; }
-.mveh-arrow { position: absolute; left: 50%; top: -4px; transform: translateX(-50%); border: 9px solid transparent; border-bottom: 13px solid var(--ok); }
+.mveh-rot { position: absolute; inset: 0; z-index: 1; transition: transform .6s ease; }
+.mveh-arrow { position: absolute; z-index: 1; left: 50%; top: -12px; transform: translateX(-50%); border: 9px solid transparent; border-top: 0; border-bottom: 13px solid var(--ok); }
 .mveh-in { position: absolute; inset: 7px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--bg);
   border: 3px solid #fff; box-shadow: 0 4px 12px rgb(0 0 0 / .35); }
 .mme { background: none; border: 0; }
