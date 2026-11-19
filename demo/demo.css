@@ -156,7 +156,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .badge.osm { background: var(--brand-soft); color: var(--brand); }
 .demo-bar { background: var(--sun-soft); color: var(--ink); font-size: .82rem; padding: 6px 16px; text-align: center; }
 .demo-bar a { color: var(--brand); font-weight: 600; }
-.mapwrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); isolation: isolate; }
+.mapwrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); isolation: isolate; position: relative; }
 #map { height: 340px; width: 100%; background: var(--surface-2); }
 .leaflet-container { font: inherit; }
 .skeleton { height: 64px; border-radius: 12px; background: linear-gradient(90deg, var(--surface-2), var(--line), var(--surface-2)); background-size: 200% 100%; animation: sh 1.2s infinite; }
@@ -207,3 +207,27 @@ nav.dock .in { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .bento.earn .cell { background: var(--surface-2); }
 .leaflet-tooltip { font: 600 .78rem var(--body); }
 @media print { header.top, nav.dock, .rail, .demo-bar, .btn, .link, label, input, select, .note { display: none !important; } .card { border: 0; } }
+
+/* premium map (19 Nov 2026): pins, vehicle, "you" dot, distance chip, labels */
+.mpin { background: none; border: 0; }
+.mpin .mpin-in { width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: grid; place-items: center;
+  background: var(--brand); color: var(--brand-ink); border: 2px solid #fff; box-shadow: 0 4px 10px rgb(0 0 0 / .3); }
+.mpin .mpin-in .i { transform: rotate(45deg); }
+.mpin.drop .mpin-in { background: var(--sun); color: #fff; }
+.mveh { background: none; border: 0; }
+.mveh-rot { position: absolute; inset: 0; transition: transform .6s ease; }
+.mveh-arrow { position: absolute; left: 50%; top: -3px; transform: translateX(-50%); border: 7px solid transparent; border-bottom: 10px solid var(--ok); }
+.mveh-in { position: absolute; inset: 6px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--bg);
+  border: 3px solid #fff; box-shadow: 0 4px 12px rgb(0 0 0 / .35); }
+.mme { background: none; border: 0; }
+.mme-dot { position: absolute; inset: 4px; border-radius: 50%; background: var(--brand); border: 3px solid #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .4); }
+.mme-pulse { position: absolute; inset: -8px; border-radius: 50%; background: color-mix(in srgb, var(--brand) 30%, transparent); animation: mpulse 2s ease-out infinite; }
+@keyframes mpulse { from { transform: scale(.5); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
+.mchip { position: absolute; z-index: 900; left: 50%; top: 10px; transform: translateX(-50%); max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 14px; font: 700 .86rem var(--body);
+  box-shadow: 0 4px 14px rgb(0 0 0 / .2); pointer-events: none; }
+.leaflet-tooltip.mtip { font: 600 .78rem var(--body); border-radius: 8px; border: 0; padding: 3px 8px; background: var(--surface); color: var(--ink); box-shadow: 0 2px 8px rgb(0 0 0 / .25); }
+.leaflet-tooltip.mtip::before { display: none; }
+.mpop { display: grid; gap: 4px; min-width: 160px; }
+.mpop .btn { justify-content: center; margin-top: 4px; }
+@media (prefers-reduced-motion: reduce) { .mme-pulse { animation: none; } .mveh-rot { transition: none; } }
