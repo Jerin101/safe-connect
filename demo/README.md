@@ -73,3 +73,10 @@ emergency numbers say "আসছে". Search: rangpur, sylhet, laboni, chowmuhon
   of GPS, so the live map can be shown with two browser windows on one laptop. The page says "নকল".
 - Tested: rules 146/146 in the emulator (27 for rides); a three-browser test (admin, driver, rider) from rates to receipt,
   320/390/1280 px, no console errors.
+
+## Map (19 Nov 2026)
+Ride-app look on the OpenStreetMap tiles (no key; CARTO's tiles now need an account key): pickup pin, destination flag,
+the provider as a vehicle that glides and turns toward where it goes, the person as a pulsing dot, dashed straight lines
+(no road-routing service) and a chip with distance and minutes. "পথ দেখান" on a place opens our own place page first
+(straight line from the chosen area and the distance); "Google Maps-এ খুলুন" is the second button. Dark mode darkens
+the tiles with a CSS filter.

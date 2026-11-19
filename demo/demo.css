@@ -216,14 +216,14 @@ nav.dock .in { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .mpin.drop .mpin-in { background: var(--sun); color: #fff; }
 .mveh { background: none; border: 0; }
 .mveh-rot { position: absolute; inset: 0; transition: transform .6s ease; }
-.mveh-arrow { position: absolute; left: 50%; top: -3px; transform: translateX(-50%); border: 7px solid transparent; border-bottom: 10px solid var(--ok); }
-.mveh-in { position: absolute; inset: 6px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--bg);
+.mveh-arrow { position: absolute; left: 50%; top: -4px; transform: translateX(-50%); border: 9px solid transparent; border-bottom: 13px solid var(--ok); }
+.mveh-in { position: absolute; inset: 7px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--bg);
   border: 3px solid #fff; box-shadow: 0 4px 12px rgb(0 0 0 / .35); }
 .mme { background: none; border: 0; }
 .mme-dot { position: absolute; inset: 4px; border-radius: 50%; background: var(--brand); border: 3px solid #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .4); }
 .mme-pulse { position: absolute; inset: -8px; border-radius: 50%; background: color-mix(in srgb, var(--brand) 30%, transparent); animation: mpulse 2s ease-out infinite; }
 @keyframes mpulse { from { transform: scale(.5); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
-.mchip { position: absolute; z-index: 900; left: 50%; top: 10px; transform: translateX(-50%); max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis;
+.mchip { position: absolute; z-index: 900; left: 50%; bottom: 30px; transform: translateX(-50%); max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis;
   white-space: nowrap; background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 14px; font: 700 .86rem var(--body);
   box-shadow: 0 4px 14px rgb(0 0 0 / .2); pointer-events: none; }
 .leaflet-tooltip.mtip { font: 600 .78rem var(--body); border-radius: 8px; border: 0; padding: 3px 8px; background: var(--surface); color: var(--ink); box-shadow: 0 2px 8px rgb(0 0 0 / .25); }
@@ -231,3 +231,9 @@ nav.dock .in { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .mpop { display: grid; gap: 4px; min-width: 160px; }
 .mpop .btn { justify-content: center; margin-top: 4px; }
 @media (prefers-reduced-motion: reduce) { .mme-pulse { animation: none; } .mveh-rot { transition: none; } }
+.mveh-in .i { width: 22px; height: 22px; }
+/* the credit on one small line; controls and tiles follow the dark theme */
+.leaflet-container .leaflet-control-attribution { font: 500 10px/1.5 var(--body); padding: 1px 6px; background: color-mix(in srgb, var(--surface) 80%, transparent); color: var(--muted); }
+.leaflet-container .leaflet-control-attribution a { color: var(--brand); }
+.map-dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.92) contrast(.9) saturate(.6); }
+.map-dark .leaflet-bar a { background: var(--surface); color: var(--ink); border-color: var(--line); }

@@ -44,11 +44,12 @@ function distTxt(km) { if (km < 1) return `${bn(Math.round(km * 1000 / 10) * 10)
 function walkTxt(km) { const m = Math.round(km / 5 * 60); return m <= 60 ? `হেঁটে ${bn(m)} মিনিট` : `গাড়িতে ${bn(Math.max(5, Math.round(km / 25 * 60)))} মিনিট`; }
 const CON = () => (here && D.upazilas[here.up] ? D.upazilas[here.up].contacts : {});
 const dirLink = (p) => (p.approx || p.noLoc) && p.q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.q)}` : dirLink0(p);
-// Map style (Jerin, 19 Nov 2026): CARTO Voyager, Dark Matter in dark mode; the data is OpenStreetMap's. The tile server
-// sees which part of the map is open, nothing else. No road-routing service: lines are straight, with the distance.
+// Map tiles: OpenStreetMap (no key). CARTO, chosen first (19 Nov 2026), now answers "API KEY REQUIRED" without an
+// account key; in dark mode the tiles are darkened with a CSS filter (demo.css). The tile server sees which part of the
+// map is open, nothing else. No road-routing service: lines are straight, with the distance.
 const darkMode = () => { const t = document.documentElement.dataset.theme; return t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches); };
-const baseTiles = (m) => L.tileLayer(`https://{s}.basemaps.cartocdn.com/${darkMode() ? 'dark_all' : 'rastertiles/voyager'}/{z}/{x}/{y}{r}.png`,
-  { subdomains: 'abcd', maxZoom: 20, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(m);
+const baseTiles = (m) => { m.getContainer().classList.toggle('map-dark', darkMode());
+  return L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(m); };
 // Markers are built from the page's own fixed icons (no data in the HTML); labels are DOM nodes with textContent.
 const pinIcon = (cls, ic) => L.divIcon({ className: `mpin ${cls}`, html: `<span class="mpin-in">${icon(ic, 'sm')}</span>`, iconSize: [34, 42], iconAnchor: [17, 41], tooltipAnchor: [0, -38] });
 const meIcon = () => L.divIcon({ className: 'mme', html: '<span class="mme-pulse"></span><span class="mme-dot"></span>', iconSize: [22, 22], iconAnchor: [11, 11], tooltipAnchor: [0, -12] });
@@ -344,7 +345,7 @@ function viewNear() {
       <div class="scroller" role="group" aria-label="বিভাগ">${CATS.map((x) => `<button class="pill" type="button" data-cat="${x.id}" aria-pressed="${x.id === cat}">${icon(CI[x.id][0], 'sm')}${x.n}</button>`).join('')}</div>
       <div class="pills"><button class="btn ${mapOn ? 'solid' : ''}" type="button" data-map>${icon('pin', 'sm')}${mapOn ? 'ম্যাপ লুকান' : 'ম্যাপে দেখুন'}</button>
       <a class="btn ghost" href="${esc(gq)}" ${ext}>Google Maps-এ আরও দেখুন ${icon('ext', 'sm')}</a></div></section>
-    ${mapOn ? `<section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="ম্যাপ"></div></div><p class="small">ম্যাপ দেখতে ইন্টারনেট লাগে; ম্যাপের ছবি CARTO থেকে, OpenStreetMap-এর তথ্যে। নিচের তালিকা নেট ছাড়াও চলে।</p></section>` : ''}
+    ${mapOn ? `<section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="ম্যাপ"></div></div><p class="small">ম্যাপ দেখতে ইন্টারনেট লাগে; ম্যাপ © OpenStreetMap। নিচের তালিকা নেট ছাড়াও চলে।</p></section>` : ''}
     <section class="card">${loading ? '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'
       : items.length ? `<div class="rows">${(lastItems = items).map((p, i) => placeRow(p, i)).join('')}</div>` : empty}
       ${['bazar', 'edu', 'spot'].includes(cat) && items.some((p) => p.approx) ? '<p class="small">"আনুমানিক": জায়গাটার নিজের অবস্থান এখনো নেই, তাই তার ইউনিয়ন বা উপজেলার কেন্দ্র থেকে দূরত্ব দেখানো হচ্ছে।</p>' : ''}
@@ -390,7 +391,7 @@ function viewDest() {
     ${d.pid ? `<section class="card"><h2>এখন কেমন?</h2><p class="muted" id="pstText">মানুষের জানানো খবর দেখা হচ্ছে…</p>
       <div class="pills">${(d.cat === 'fuel' ? ['fuel_yes', 'fuel_no', 'open_night'] : ['open', 'closed', 'open_night']).map((v) => `<button class="pill" type="button" data-pst="${v}">${esc(PV[v])}</button>`).join('')}</div>
       <p class="small" id="pstMsg">আপনি এখানে থাকলে জানান: অন্যরা কাজে লাগাবে। সাইন ইন লাগে; আপনার নাম কেউ দেখবে না।</p></section>` : ''}
-    <section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="গন্তব্যের ম্যাপ"></div></div><p class="small">ম্যাপে ${esc(here.label)} থেকে সোজা লাইন; রাস্তা আলাদা হতে পারে। রাস্তা ধরে পথের জন্য "Google Maps-এ খুলুন"। ম্যাপের ছবি CARTO থেকে, OpenStreetMap-এর তথ্যে।</p></section>
+    <section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="গন্তব্যের ম্যাপ"></div></div><p class="small">ম্যাপে ${esc(here.label)} থেকে সোজা লাইন; রাস্তা আলাদা হতে পারে। রাস্তা ধরে পথের জন্য "Google Maps-এ খুলুন"। ম্যাপ © OpenStreetMap।</p></section>
     <section class="card"><h2>এর কাছে (৫ কিমির মধ্যে)</h2>
       ${groups.length ? groups.map(([k, n, xs]) => `<h3>${esc(n)}</h3><div class="rows">${xs.map((p) => `<div class="r">${sq(k)}<div><div class="t">${esc(p.name)}</div><div class="m">${esc(p.sub)}</div></div><div class="dist">${distTxt(p.km)}<small>গন্তব্য থেকে</small></div>
         <div class="acts"><button class="btn" type="button" data-around="${aroundList.push(p) - 1}">${icon('nav', 'sm')}পথ দেখান</button></div></div>`).join('')}</div>`).join('')
@@ -642,10 +643,10 @@ function drawDestMap() {
   // from the chosen area: a dashed straight line and a chip with the distance (no road-routing service)
   L.polyline([[here.lat, here.lon], [dest.lat, dest.lon]], { color: brand, weight: 4, opacity: 0.85, dashArray: '2 9', lineCap: 'round', interactive: false }).addTo(mapObj);
   L.marker([here.lat, here.lon], { icon: meIcon(), keyboard: false }).addTo(mapObj).bindTooltip(tipNode(here.label), { className: 'mtip' });
-  L.marker([dest.lat, dest.lon], { icon: pinIcon('drop', 'flag'), keyboard: false, zIndexOffset: 800 }).addTo(mapObj).bindTooltip(tipNode(dest.name), { permanent: true, direction: 'top', className: 'mtip' });
+  L.marker([dest.lat, dest.lon], { icon: pinIcon('drop', 'flag'), keyboard: false, zIndexOffset: 800 }).addTo(mapObj).bindTooltip(tipNode(dest.name), { permanent: true, direction: 'auto', className: 'mtip' });
   mapChip(el, `${dest.approx ? '~' : ''}${distTxt(dest.km)} সোজা দূরত্ব · ${walkTxt(dest.km)}`);
   pts.push([here.lat, here.lon]);
-  mapObj.fitBounds(pts.length > 2 ? pts : [[here.lat, here.lon], [dest.lat, dest.lon]], { padding: [40, 40], maxZoom: 16 });
+  mapObj.fitBounds(pts.length > 2 ? pts : [[here.lat, here.lon], [dest.lat, dest.lon]], { paddingTopLeft: [40, 50], paddingBottomRight: [40, 70], maxZoom: 16 });
 }
 
 /* ===================== v4: features that help people act (impact plan) ===================== */
@@ -1001,7 +1002,7 @@ const paintEst = () => { const el = $('#est'); if (el) el.innerHTML = estHtml();
 // The live map: pickup, destination, and the two people. Markers are moved in place (no re-render).
 function drawRideMap() {
   const el = $('#rmap'); if (!el || !window.L) return;
-  if (rideMap) { rideMap.remove(); rideMap = null; } mk = {}; lines = null;
+  if (rideMap) { rideMap.remove(); rideMap = null; } mk = {}; lines = null; lastFitStatus = null;
   if (!navigator.onLine) { el.textContent = 'ইন্টারনেট নেই, তাই ম্যাপ দেখানো যাচ্ছে না।'; return; }
   const r = ride || { pickup: callF.pick, drop: callF.drop };
   rideMap = L.map(el).setView([r.pickup ? r.pickup.lat : here.lat, r.pickup ? r.pickup.lon : here.lon], 14);
@@ -1016,15 +1017,16 @@ function drawRideMap() {
 }
 const COL = () => { const c = getComputedStyle(document.documentElement); return { brand: c.getPropertyValue('--brand').trim() || '#0b4a4e', sos: c.getPropertyValue('--sos').trim() || '#cc2f2b', sun: c.getPropertyValue('--sun').trim() || '#b86e0a', ok: c.getPropertyValue('--ok').trim() || '#1f7a4f' }; };
 const vehIcon = (type) => L.divIcon({ className: 'mveh', html: `<span class="mveh-rot"><span class="mveh-arrow"></span></span><span class="mveh-in">${icon(TYPE_IC[type] || 'car', 'sm')}</span>`,
-  iconSize: [46, 46], iconAnchor: [23, 23], tooltipAnchor: [0, -24] });
+  iconSize: [54, 54], iconAnchor: [27, 27], tooltipAnchor: [0, -28] });
 let lines = null;   // the dashed lines on the ride map
+let lastFitStatus = null;
 function setMk(key, p, makeIcon, label) {
   if (!rideMap) return;
   if (!p) { if (mk[key]) { mk[key].remove(); delete mk[key]; } return; }
   if (mk[key]) { glide(mk[key], [p.lat, p.lon]); return; }
   // the label is a DOM node, not a string: Leaflet puts a string in as HTML, and providerName is chosen by the provider
   mk[key] = L.marker([p.lat, p.lon], { icon: makeIcon(), keyboard: false, zIndexOffset: key === 'prov' ? 1000 : key === 'me' ? 900 : 0 }).addTo(rideMap)
-    .bindTooltip(tipNode(label), { permanent: key === 'prov' || key === 'me', direction: 'top', className: 'mtip' });
+    .bindTooltip(tipNode(label), { permanent: key === 'prov', direction: 'auto', className: 'mtip' });
 }
 function paintLines(r, provPos) {
   if (!rideMap) return;
@@ -1034,7 +1036,7 @@ function paintLines(r, provPos) {
   const st = ride ? ride.status : 'new';
   if (provPos && r.pickup && ['accepted', 'arrived'].includes(st)) dash(provPos, r.pickup, c.ok);
   if (r.pickup && r.drop && ['new', 'requested', 'accepted', 'arrived'].includes(st)) dash(r.pickup, r.drop, c.brand);
-  if (provPos && r.drop && st === 'on_trip') dash(provPos, r.drop, c.brand, true);
+  if (provPos && r.drop && st === 'on_trip') dash(provPos, r.drop, c.brand);
   // the chip: how far, about how many minutes
   const el = $('#rmap'); if (!el || !RM) return;
   const eta = (m) => `${kmTxt(m)} · ~${bn(RM.etaMinutes(m * RM.ROAD_FACTOR, r.type))} মিনিট`;
@@ -1053,9 +1055,11 @@ function paintMarkers(fit) {
   setMk('prov', live || ride?.status === 'on_trip' ? provPos : null, () => vehIcon(r.type), rideRole === 'provider' ? 'আপনি' : `${tWho(r.type)}${ride && ride.providerName ? ': ' + ride.providerName : ''}`);
   setMk('me', live && ride.status !== 'on_trip' ? riderPos : null, meIcon, rideRole === 'rider' ? 'আপনি' : 'যাত্রী');
   paintLines(r, live || ride?.status === 'on_trip' ? provPos : null);
-  if (fit || (ride && live)) {
-    const pts = Object.values(mk).map((m) => m.getLatLng());
-    if (pts.length > 1) rideMap.fitBounds(L.latLngBounds(pts), { padding: [36, 36], maxZoom: 16 });
+  const pts = Object.values(mk).map((m) => m.getLatLng());
+  const st = ride ? ride.status : 'new', inner = rideMap.getBounds().pad(-0.12);
+  if (pts.length > 1 && (fit || st !== lastFitStatus || pts.some((p) => !inner.contains(p)))) {
+    rideMap.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [40, 40], paddingBottomRight: [40, 70], maxZoom: 16 });
+    lastFitStatus = st;
   }
 }
 
