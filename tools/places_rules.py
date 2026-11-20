@@ -17,9 +17,13 @@ OSM_SUBCATEGORIES = {
     "health": {"hospital", "clinic", "doctors", "pharmacy", "chemist"},
     "shops": {"supermarket", "convenience", "general", "mall", "marketplace"},
     "workshops": {"car_repair", "motorcycle_repair", "motorcycle", "bicycle", "mobile_phone"} | REPAIR_CRAFTS,
-    "fuel_transport": {"fuel", "bus_station", "ferry_terminal"},
+    "fuel_transport": {"fuel", "bus_station", "ferry_terminal", "railway_station"},
     "money": {"bank", "atm"},
-    "public_offices": {"police", "fire_station"},
+    "public_offices": {"police", "fire_station", "post_office"},
+    # R0 (#268, 2026-11-20): food and places to stay, tourist spots, cyclone/flood shelters (named only)
+    "stay_food": {"restaurant", "cafe", "fast_food", "hotel", "guest_house", "motel", "resort"},
+    "tourism": {"attraction", "viewpoint", "museum", "theme_park", "zoo", "picnic_site"},
+    "shelter": {"shelter"},
     "other_services": set(),          # any other craft=*, with its own subtype (e.g. sawmill, photographer)
 }
 CATEGORY_OF = {sub: cat for cat, subs in OSM_SUBCATEGORIES.items() for sub in subs}
@@ -38,6 +42,8 @@ UNNAMED_LABELS = {
     "fire_station": {"bn": "ফায়ার সার্ভিস (নাম জানা নেই)", "en": "Fire station (name not known)"},
     "bus_station": {"bn": "বাস স্ট্যান্ড (নাম জানা নেই)", "en": "Bus stand (name not known)"},
     "ferry_terminal": {"bn": "ঘাট (নাম জানা নেই)", "en": "Ferry ghat (name not known)"},
+    "post_office": {"bn": "পোস্ট অফিস (নাম জানা নেই)", "en": "Post office (name not known)"},
+    "railway_station": {"bn": "রেলস্টেশন (নাম জানা নেই)", "en": "Railway station (name not known)"},
 }
 KEEP_UNNAMED = set(UNNAMED_LABELS)
 

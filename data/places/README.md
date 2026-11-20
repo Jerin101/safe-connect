@@ -25,17 +25,21 @@ As in MASTER_PLAN: `id, name_bn, name_en, category, subcategory, lat, lon, divis
 phone, hours, source, source_url, checked_by, checked_on`. In the OSM files a key that is missing means null (to keep each
 file under 120 KB gzip). Manual files also have `verified_by`, `location_approx` and `location_source`.
 
-- **category**: `health`, `shops`, `workshops`, `fuel_transport`, `money`, `public_offices`, `other_services`.
+- **category**: `health`, `shops`, `workshops`, `fuel_transport`, `money`, `public_offices`, `other_services`, and since R0
+  (#268) `stay_food`, `tourism`, `shelter`.
 - **OSM subcategory** (the OSM tag): health = hospital, clinic, doctors, pharmacy, chemist · shops = supermarket,
   convenience, general, mall, marketplace · workshops = car_repair, motorcycle_repair, motorcycle, bicycle, mobile_phone,
   and the repair crafts (car_repair, motorcycle_repair, bicycle, electronics_repair, mobile_phone_repair, shoemaker,
-  tailor) · fuel_transport = fuel, bus_station, ferry_terminal · money = bank, atm · public_offices = police,
-  fire_station · other_services = every other `craft=*`; for a craft, `subcategory` is the craft value (sawmill,
+  tailor) · fuel_transport = fuel, bus_station, ferry_terminal, railway_station (`railway=station/halt`) · money = bank, atm ·
+  public_offices = police, fire_station, post_office · stay_food = restaurant, cafe, fast_food, hotel, guest_house, motel,
+  resort (`tourism=hostel` is left out: in Bangladesh it is mostly a student hostel; a place that is also a `shop=*` stays
+  that shop) · tourism = attraction, viewpoint, museum, theme_park, zoo, picnic_site · shelter = `amenity=shelter` only
+  when its name says cyclone or flood shelter (ঘূর্ণিঝড়, আশ্রয়কেন্দ্র, …; a bus shelter or gazebo is no refuge) · other_services = every other `craft=*`; for a craft, `subcategory` is the craft value (sawmill,
   photographer…; `unspecified` for `craft=yes`) and `osm_key` is `"craft"`. Of the repair crafts, the data has tailor,
   electronics_repair and shoemaker today.
 - **OSM places**: the same kind of place with the same Bangla *or* English name within 100 m is kept once (node
   first). **Places without a name** are kept for hospital, clinic, pharmacy, fuel, atm, bank, police, fire_station,
-  bus_station and ferry_terminal, with `unnamed: true` and no name: show `unnamed_labels[subcategory]` from the file
+  bus_station, ferry_terminal, post_office and railway_station, with `unnamed: true` and no name: show `unnamed_labels[subcategory]` from the file
   ("ফার্মেসি (নাম জানা নেই)"); other kinds need a name. Bangla text goes only in `name_bn`, English only in `name_en` ("Popular Pharmacy (পপুলার
   ফার্মেসী)" is split); names that are only coordinates, an address, "Test"/"Unnamed", or a private person's name with no
   business (outside `doctors`) are not used (the place is kept as unnamed if it is one of the kinds above). Places whose
