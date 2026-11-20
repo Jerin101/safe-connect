@@ -445,7 +445,8 @@ textarea { resize: vertical; line-height: 1.45; }
 .dock-btn[aria-current="page"] { color: var(--accent); }
 .dock-btn[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 50%; translate: -50% 0; width: 28px; height: 3px; border-radius: 0 0 3px 3px; background: currentColor; }
 .dock-btn.sos, .dock-btn.sos[aria-current="page"] { color: var(--red-ink); }
-body { padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom, 0px)); }
+body:has(> .dock) { padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom, 0px)); }   /* reset.html has no tabs */
+@media (max-width: 360px) { .dock-btn { font-size: 0.72rem; } .dock-btn span { overflow-wrap: anywhere; } }
 .toast { bottom: calc(var(--dock-h) + 12px + env(safe-area-inset-bottom, 0px)); }
 .hpill.hsearch { display: none; }
 @media (max-width: 760px) { .hpill.hsearch { display: grid; place-items: center; } .bar2 { display: none; } }
@@ -455,7 +456,7 @@ body { padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom, 0px)); }
   .dock-btn { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 10px 12px; border-radius: 10px; font-size: 0.95rem; text-align: left; }
   .dock-btn[aria-current="page"] { background: var(--tint); }
   .dock-btn[aria-current="page"]::before { display: none; }
-  body { padding-bottom: 0; }
+  body:has(> .dock) { padding-bottom: 0; }
   main, footer { margin-left: var(--rail-w); }
   .toast { bottom: 16px; }
 }
