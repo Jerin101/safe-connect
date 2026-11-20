@@ -5,16 +5,16 @@
 export const RIDE_TYPES = [
   // id, Bangla name, provider word, average speed (km/h) for the arrival estimate, needs a destination
   { id: 'ambulance', bn: 'অ্যাম্বুলেন্স', who: 'চালক', kmh: 30, dest: true },
-  { id: 'cng', bn: 'সিএনজি', who: 'চালক', kmh: 20, dest: true },
-  { id: 'bike', bn: 'বাইক', who: 'চালক', kmh: 25, dest: true },
-  { id: 'technician', bn: 'কারিগর (ইলেকট্রিশিয়ান, প্লাম্বার, মেকানিক)', who: 'কারিগর', kmh: 20, dest: false },
-  { id: 'help', bn: 'বিপদে কাছের সাহায্যকারী', who: 'স্বেচ্ছাসেবক', kmh: 15, dest: false },
+  { id: 'cng', bn: 'সিএনজি অটোরিকশা', who: 'চালক', kmh: 20, dest: true },
+  { id: 'bike', bn: 'মোটরবাইক রাইড', who: 'চালক', kmh: 25, dest: true },
+  { id: 'technician', bn: 'মিস্ত্রি ডাকুন (ইলেকট্রিক, পানি, মেকানিক)', who: 'মিস্ত্রি', kmh: 20, dest: false },
+  { id: 'help', bn: 'স্বেচ্ছাসেবক সাহায্য', who: 'স্বেচ্ছাসেবক', kmh: 15, dest: false },
   // pickup = the shop, drop = the person; the bill = the shop's receipt (up to the person's limit) + the delivery fare
-  { id: 'errand', bn: 'আনিয়ে দিন (ওষুধ, বাজার, দোকানের জিনিস)', who: 'ডেলিভারি রাইডার', kmh: 25, dest: true, errand: true, shop: true },
+  { id: 'errand', bn: 'কিনে এনে দিন', who: 'ডেলিভারি রাইডার', kmh: 25, dest: true, errand: true, shop: true },
   // pickup point: the order is already paid at the shop; the rider collects it and brings it (bill = delivery only)
-  { id: 'pickup', bn: 'তৈরি অর্ডার তুলে আনুন (দোকানে আগেই পরিশোধিত)', who: 'ডেলিভারি রাইডার', kmh: 25, dest: true, shop: true },
+  { id: 'pickup', bn: 'অর্ডার তুলে এনে দিন', who: 'ডেলিভারি রাইডার', kmh: 25, dest: true, shop: true },
   // a tow truck from the person (pickup) to a workshop or filling station (destination)
-  { id: 'towing', bn: 'টোয়িং (নষ্ট গাড়ি টেনে নেওয়া)', who: 'টোয়িং চালক', kmh: 20, dest: true },
+  { id: 'towing', bn: 'গাড়ি টেনে নেওয়া (টোয়িং)', who: 'টোয়িং চালক', kmh: 20, dest: true },
 ];
 export const typeOf = (id) => RIDE_TYPES.find((t) => t.id === id);
 // Example rates (admin sets the real ones in rates/{type}); "help" is never billed.

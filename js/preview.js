@@ -9,6 +9,7 @@ import { helpLink, parseHelp, buildSms, smsParts, minutesAgo, pickPolice } from 
 import { BRANDS, LIVE, CHECKED } from './prepare.js';
 import { icon as lineIcon } from './icons.js';
 import { initNear } from './near.js';
+import { initDakun } from './dakun.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -28,6 +29,7 @@ const store = { get(k) { try { return localStorage.getItem(k); } catch { return 
 let lang = store.get('sc-lang') || 'bn';
 let data = null, locations = null, current = null, areaIndex = [];
 let near = null;          // categories near the person (js/near.js), created by makeNear() at start-up
+let dakun = null;         // সেবা ডাকুন (js/dakun.js, R3), created by makeNear() too
 let homeState = null;     // home (R2): { a: the area, place: its pilot place for the official numbers, or null }
 let acctOn = false;       // signed in (for the account tab's name)
 let activeTab = 'home'; // header tab that gets aria-current="page"
@@ -424,8 +426,9 @@ function renderArea() {
 /* ---------- views ---------- */
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see index.html).
 function showView(name) {
-  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat']) $(view).hidden = name !== view;
+  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat', 'dakun']) $(view).hidden = name !== view;
   if (name !== 'cat') near?.close();   // the category map is closed when another page opens
+  if (name !== 'dakun') dakun?.close();
   // One sidebar for home and the area page (#108): it moves with the view; CSS shows it only on wide screens.
   const rail = $('rail');
   // After the content (999 first for keyboards and screen readers); CSS puts it on the left.
@@ -487,7 +490,7 @@ function goHome() {
 // #/ home · #/numbers · #/area (search) · #/area/<district>/<upazila>[/<union or town>[/<place id>]] · #/send
 // #/guide · #/about · #/faq · #/account · #/help/<lat>,<lng>,<time>[,<situation>] (বিপদ বার্তা, #134). Anything else opens home. The home sections carry data-pages="..."
 // in index.html: each page shows the sections that list its name, so no content or id is copied.
-const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare', 'c'];
+const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare', 'c', 'dakun'];
 const HEADING = { home: 'homeTitle', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
 let firstRoute = true;       // the first page after loading does not move focus
@@ -593,6 +596,14 @@ async function route() {
     showView('cat');
     await near.show($('cat'), rest);
     finish('home', () => near.title(rest), 'catTitle', intent);
+    return;
+  }
+  if (name === 'dakun') {
+    // সেবা ডাকুন (R3, #267): the eight services, the live map, the bill; Firebase loads only when it is needed
+    $('main').dataset.page = 'dakun';
+    showView('dakun');
+    await dakun.show($('dakun'));
+    finish('dakun', () => dakun.title(), 'dakunTitle', intent);
     return;
   }
   if (name === 'send') {
@@ -897,6 +908,14 @@ function pilotPlace(a) {
 // pilot districts (#myArea, with the saved union when it is in the same upazila), else 999 and the nearest
 // police station, fire station and hospital (#homeNums).
 let homeRun = 0, homePick = false;
+// The area for the header chip on any page (home sets it too, with its sections).
+async function syncArea() {
+  if (!near || $('main').dataset.page === 'home') return;
+  const a = await near.area();
+  const last = lastPlace();
+  homeState = { a, place: a ? (last && near.sameUpazila(last, a) ? last : pilotPlace(a)) : null };
+  renderChip();
+}
 // A newer saved area (auto location, search, clear): home redraws itself; other pages only update the my-area box.
 function refreshHome() { if ($('main').dataset.page === 'home') renderHome(); else { homeState = null; renderMyArea(); } }
 // The header area chip: the area picker on home (all 64 districts).
@@ -920,6 +939,7 @@ function makeNear() {
     texts: () => LANG[lang].page.near,
     rerender: () => route(),
     remembers,
+    callTo: (p, mode) => dakun.callTo(p, mode),   // সেবা ডাকুন from a place page (R3)
     // "আমার লোকেশন" in the area card: in the pilot districts the exact union is looked up on the phone, as with
     // "Find help near me"; the point stays in memory (lastFix) for "Send location"
     onGps: (p) => {
@@ -934,6 +954,12 @@ function makeNear() {
       if (!place) return null;
       try { return firstRows(place, areaContacts(data, place)); } catch { return null; }
     },
+  });
+  dakun = initDakun({
+    el, store, digits, go, toast: showToast, near,
+    texts: () => LANG[lang].page.dakun,
+    signIn: (button) => auth.tap(button),
+    pickArea,
   });
   near.title = (rest) => { const n = LANG[lang].page.near; return rest[0] && n.cats[rest[0]] ? n.cats[rest[0]] : n.hubTitle; };
 }
@@ -1436,9 +1462,10 @@ const textBtn = (label, fn) => { const b = el('button', null, label); b.type = '
 const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a; };
 
 // The main tabs (R2, #267): a bottom bar on phones, a side menu from 960 px. A tab appears only when its real page
-// exists: সেবা ডাকুন comes with R3. The categories and the numbers are on home; About and FAQ are in the footer.
+// exists. The categories and the numbers are on home; About and FAQ are in the footer.
 const NAV = [
   ['home', 'home', goHome],
+  ['dakun', 'car', () => go('dakun')],
   ['send', 'alert', () => openSos(null)],
   ['account', 'user', (e) => auth.tap(e.currentTarget)],
 ];
@@ -1720,6 +1747,7 @@ $('langBtn').addEventListener('click', () => {
   if (!$('help').hidden) showHelp(readHash()[1]);
   if (!$('prepare').hidden) renderPrepare();
   if (!$('cat').hidden) near.show($('cat'), readHash().slice(1));
+  if (!$('dakun').hidden) dakun.show($('dakun'));
   if ($('main').dataset.page === 'home') renderHome();
   if (!$('sos').hidden) { renderOpened(); renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
   auth.setText();
@@ -1757,7 +1785,7 @@ try {
   [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
   areaIndex = buildAreaIndex(data);
   renderRecent(); renderStats(); renderPlaces(); renderIconRow(); renderGuides(); renderMyArea();
-  if ($('main').dataset.page === 'home') renderHome();   // the pilot numbers need the data
+  if ($('main').dataset.page === 'home') renderHome(); else syncArea();   // the pilot numbers need the data
   autoLoc.resume();                     // only when the person turned it on and the browser allows it
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);

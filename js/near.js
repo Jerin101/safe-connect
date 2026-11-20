@@ -355,6 +355,16 @@ export function initNear(ctx) {
       try { if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); ctx.toast(T().copied); } } catch { /* the person closed the share sheet */ }
     });
     acts.append(share);
+    if (exact(it) && ctx.callTo) {   // সেবা ডাকুন (R3): a ride there, and the service that fits the place
+      const call = (label, ic, mode) => { const b = el('button', 'btn', label); b.type = 'button'; b.prepend(icon(ic, { size: 'sm' }));
+        b.addEventListener('click', () => ctx.callTo({ name: nameOf(p), lat: it.pt.lat, lon: it.pt.lon }, mode)); return b; };
+      const svc = el('div', 'pills');
+      svc.append(call(T().callHere, 'car', 'ride'));
+      if (cat.id === 'hospital') svc.append(call(T().callAmb, 'amb', 'amb'));
+      if (['pharmacy', 'market'].includes(cat.id)) svc.append(call(T().callErrand, 'basket', 'errand'));
+      if (['repair', 'fuel'].includes(cat.id)) svc.append(call(T().callTow, 'car', 'tow'));
+      way.append(svc);
+    }
     if (/^https:\/\//.test(p.source_url || '')) { const s = el('a', 'btn ghost', T().source); s.href = p.source_url; s.target = '_blank'; s.rel = 'noopener noreferrer'; acts.append(s); }
     way.append(acts);
     if (it.pt && it.pt.approx) way.append(el('p', 'small', T().approxNote));
@@ -435,5 +445,24 @@ export function initNear(ctx) {
     const p = box.querySelector('.near-picker'); if (!p) return;
     p.hidden = false; p.scrollIntoView({ block: 'center' }); p.querySelector('select')?.focus({ preventScroll: true });
   }
-  return { show, close: closeMap, home, homeNums, sameUpazila, forget, label, openPicker };
+  // সেবা ডাকুন (R3): the chosen area as a point, and real places near it (own position only) for quick picks
+  async function here() {
+    try { await loadBase(); } catch { return null; }
+    const a = getArea(); if (!a) return null;
+    const p = fromPoint(a);
+    return { district: a.district, label: areaLabel(a), lat: p.lat, lon: p.lon };
+  }
+  async function nearby(catIds, max = 3) {
+    const h = await here(); if (!h) return [];
+    let all; try { all = await placesOf(h.district); } catch { return []; }
+    const out = [];
+    for (const id of catIds) {
+      const c = CATS.find((x) => x.id === id); if (!c) continue;
+      out.push(...all.filter((p) => p.lat != null && c.match(p)).map((p) => ({ name: nameOf(p), lat: p.lat, lon: p.lon, km: km(h, p) }))
+        .sort((x, y) => x.km - y.km).slice(0, max));
+    }
+    return out;
+  }
+  const area = async () => { try { await loadBase(); } catch { return null; } return getArea(); };
+  return { show, close: closeMap, home, homeNums, sameUpazila, forget, label, openPicker, here, nearby, loadLeaflet, area };
 }

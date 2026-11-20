@@ -50,7 +50,7 @@ const CASES = [
   ['', '#/today', 'home', 'home'], ['#/', '#/today', 'home', 'home'], ['#/home', '#/today', 'home', 'home'], ['#/today', '#/today', 'home', 'home'],
   ['#/area', '#/near', 'area', 'home'], ['#/near', '#/near', 'area', 'home'],
   ['#/send', '#/sos', 'send', 'send'], ['#/sos', '#/sos', 'send', 'send'],
-  ['#/numbers', '#/numbers', 'numbers', 'home'], ['#/account', '#/account', 'account', 'account'],
+  ['#/numbers', '#/numbers', 'numbers', 'home'], ['#/account', '#/account', 'account', 'account'], ['#/dakun', '#/dakun', 'dakun', 'dakun'],
   ['#/guide', '#/guide', 'guide', null], ['#/about', '#/about', 'about', null], ['#/faq', '#/faq', 'faq', null], ['#/prepare', '#/prepare', 'prepare', null],
   ['#/area/noakhali/hatiya', '#/area/noakhali/hatiya', 'place', 'home'], ['#/c', '#/c', 'cat', 'home'], ['#/c/pharmacy', '#/c/pharmacy', 'cat', 'home'],
   ['#/help/22.29580,91.10660,1793624400,followed', '#/help/22.29580,91.10660,1793624400,followed', 'help', null],
@@ -63,11 +63,11 @@ for (const [from, to, page, tab] of CASES) {
 const s = await open('#/search');
 check('#/search → #/near with the cursor in the area search', s.hash === '#/near' && s.page === 'area' && s.focus === 'areaInput', JSON.stringify(s));
 
-// The tabs themselves (R2, #267): হোম, জরুরি সাহায্য, সাইন ইন; সেবা ডাকুন comes with R3. The categories and numbers are on home.
+// The tabs themselves (R2/R3, #267): হোম, সেবা ডাকুন, জরুরি সাহায্য, সাইন ইন. The categories and numbers are on home.
 await open('#/today');
 const keys = await ev(`[...document.querySelectorAll('#dock button')].map((b) => b.dataset.key)`);
-check('three main tabs: হোম, জরুরি সাহায্য, সাইন ইন', JSON.stringify(keys) === JSON.stringify(['home', 'send', 'account']), JSON.stringify(keys));
-for (const [key, hash, page] of [['send', '#/sos', 'send'], ['home', '#/today', 'home']]) {
+check('four main tabs: হোম, সেবা ডাকুন, জরুরি সাহায্য, সাইন ইন', JSON.stringify(keys) === JSON.stringify(['home', 'dakun', 'send', 'account']), JSON.stringify(keys));
+for (const [key, hash, page] of [['dakun', '#/dakun', 'dakun'], ['send', '#/sos', 'send'], ['home', '#/today', 'home']]) {
   await ev(`document.querySelector('#dock [data-key="${key}"]').click()`);
   const ok = await waitFor(`location.hash === '${hash}' && document.getElementById('main').dataset.page === '${page}'`);
   check(`tab "${key}" opens ${hash}`, ok, JSON.stringify(await state()));
@@ -80,7 +80,7 @@ check('home: 12 category tiles, the area card and the live-location button', awa
 check('home: the old hero and sidebar are not shown', await ev(`document.querySelector('.hero').hidden && document.getElementById('rail').hidden !== false`));
 
 // Bangla and English on every tab: the tab labels and the page change language.
-const LABELS = { bn: ['হোম', 'জরুরি সাহায্য', 'সাইন ইন'], en: ['Home', 'Emergency help', 'Sign in'] };
+const LABELS = { bn: ['হোম', 'সেবা ডাকুন', 'জরুরি সাহায্য', 'সাইন ইন'], en: ['Home', 'Book a service', 'Emergency help', 'Sign in'] };
 for (const hash of ['#/today', '#/near', '#/numbers', '#/sos']) {
   await open(hash);
   for (const lang of ['en', 'bn']) {
