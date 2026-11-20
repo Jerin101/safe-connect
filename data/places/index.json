@@ -166,14 +166,14 @@
    "division": "Chittagong",
    "district_en": "Comilla",
    "district_bn": "কুমিল্লা",
-   "places": 663,
+   "places": 662,
    "unnamed": 42,
    "without_upazila": 0,
    "files": [
     {
      "file": "comilla.json",
-     "places": 663,
-     "gzip_bytes": 25932
+     "places": 662,
+     "gzip_bytes": 25889
     }
    ]
   },
@@ -321,9 +321,9 @@
    "division": "Dhaka",
    "district_en": "Dhaka",
    "district_bn": "ঢাকা",
-   "places": 10525,
+   "places": 10524,
    "unnamed": 646,
-   "without_upazila": 9392,
+   "without_upazila": 9391,
    "files": [
     {
      "file": "dhaka-1.json",
@@ -332,8 +332,8 @@
     },
     {
      "file": "dhaka-2.json",
-     "places": 2348,
-     "gzip_bytes": 74345
+     "places": 2347,
+     "gzip_bytes": 74313
     },
     {
      "file": "dhaka-3.json",
@@ -836,14 +836,14 @@
    "division": "Rangpur",
    "district_en": "Kurigram",
    "district_bn": "কুড়িগ্রাম",
-   "places": 198,
+   "places": 197,
    "unnamed": 6,
    "without_upazila": 0,
    "files": [
     {
      "file": "kurigram.json",
-     "places": 198,
-     "gzip_bytes": 8471
+     "places": 197,
+     "gzip_bytes": 8387
     }
    ]
   },
@@ -1001,14 +1001,14 @@
    "division": "Mymensingh",
    "district_en": "Jamalpur",
    "district_bn": "জামালপুর",
-   "places": 210,
+   "places": 209,
    "unnamed": 10,
    "without_upazila": 0,
    "files": [
     {
      "file": "jamalpur.json",
-     "places": 210,
-     "gzip_bytes": 8846
+     "places": 209,
+     "gzip_bytes": 8810
     }
    ]
   },
