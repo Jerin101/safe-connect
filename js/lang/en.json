@@ -517,7 +517,7 @@
     ],
     "head": {
       "chipEmpty": "Find area",
-      "chipSub": "Noakhali and Cox's Bazar",
+      "chipSub": "Your area",
       "cta": "Send location",
       "search": "Find area",
       "home": "SafeConnect home",
@@ -610,7 +610,7 @@
     },
     "foot": {
       "tagline": "Official emergency numbers for your area. No login; works without internet too.",
-      "small": "Starting with Noakhali and Cox's Bazar.",
+      "small": "All 64 districts. Official area numbers for Noakhali and Cox's Bazar for now; elsewhere 999 and the nearest police station and hospital.",
       "services": [
         "Services",
         [
