@@ -52,7 +52,7 @@ const CASES = [
   ['#/send', '#/sos', 'send', 'send'], ['#/sos', '#/sos', 'send', 'send'],
   ['#/numbers', '#/numbers', 'numbers', 'numbers'],
   ['#/guide', '#/guide', 'guide', null], ['#/about', '#/about', 'about', null], ['#/faq', '#/faq', 'faq', null], ['#/prepare', '#/prepare', 'prepare', null],
-  ['#/area/noakhali/hatiya', '#/area/noakhali/hatiya', 'place', 'area'],
+  ['#/area/noakhali/hatiya', '#/area/noakhali/hatiya', 'place', 'area'], ['#/c', '#/c', 'cat', 'area'], ['#/c/pharmacy', '#/c/pharmacy', 'cat', 'area'],
   ['#/help/22.29580,91.10660,1793624400,followed', '#/help/22.29580,91.10660,1793624400,followed', 'help', null],
   ['#/no-such-page', '#/today', 'home', 'home'],
 ];
@@ -67,7 +67,8 @@ check('#/search → #/near with the cursor in the area search', s.hash === '#/ne
 await open('#/today');
 const keys = await ev(`[...document.querySelectorAll('#dock button')].map((b) => b.dataset.key)`);
 check('four main tabs: আজ, কাছে, নম্বর, বিপদে', JSON.stringify(keys) === JSON.stringify(['home', 'area', 'numbers', 'send']), JSON.stringify(keys));
-for (const [key, hash, page] of [['area', '#/near', 'area'], ['numbers', '#/numbers', 'numbers'], ['home', '#/today', 'home']]) {
+// since R1 (#267) the কাছে tab opens the categories (#/c); the area search stays at #/near and in the header
+for (const [key, hash, page] of [['area', '#/c', 'cat'], ['numbers', '#/numbers', 'numbers'], ['home', '#/today', 'home']]) {
   await ev(`document.querySelector('#dock [data-key="${key}"]').click()`);
   const ok = await waitFor(`location.hash === '${hash}' && document.getElementById('main').dataset.page === '${page}'`);
   check(`tab "${key}" opens ${hash}`, ok, JSON.stringify(await state()));

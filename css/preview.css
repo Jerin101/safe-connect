@@ -487,3 +487,41 @@
 .help-steps { display: grid; gap: 10px; }
 .help-steps > .btn { justify-self: start; min-height: 44px; }
 .help-bad { font-size: 1.1rem; font-weight: 600; }
+
+/* Categories near the person (R1, #267): hub tiles, area bar, a big simple map, rows, place page */
+#cat { display: grid; gap: 14px; max-width: 900px; padding-block: 16px; }
+#cat .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.cat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 640px) { .cat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.cat-tile { display: grid; justify-items: center; gap: 8px; padding: 14px 6px; min-height: 104px; border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--surface); color: var(--ink); font: 600 0.88rem/1.3 var(--font); text-align: center; cursor: pointer; }
+.cat-tile:hover { border-color: var(--accent); }
+.cat-ic { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--tint); color: var(--accent); flex: none; }
+.cat-ic.sm { width: 40px; height: 40px; border-radius: 12px; }
+.near-area { display: grid; gap: 8px; }
+.near-where { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+.near-picker { display: grid; gap: 8px; }
+.near-selects { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.near-selects select { width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); color: var(--ink); padding: 8px 10px; font: inherit; }
+.near-back { justify-self: start; display: inline-flex; align-items: center; gap: 4px; }
+.near-mapcard { padding: 8px; }
+.near-map { height: 56vh; min-height: 300px; max-height: 560px; width: 100%; border-radius: 12px; overflow: hidden; background: var(--surface-2); isolation: isolate; }
+.near-recenter { justify-self: start; }
+.near-row { grid-template-columns: 40px minmax(0, 1fr); }
+.near-row .acts { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; }
+.near-row.nearest { background: var(--ok-soft); border-radius: 12px; padding-inline: 8px; }
+.badge.b-near { background: var(--ok); color: var(--on-color); }
+.badge.b-ok { background: var(--ok-soft); color: var(--ok); }
+.badge.b-osm { background: var(--tint); color: var(--accent); }
+.mk-wrap { background: none; border: 0; }
+.mk-pin { width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: grid; place-items: center;
+  background: var(--accent); color: var(--accent-ink); border: 2px solid #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3); }
+.mk-pin .sc-ic { transform: rotate(45deg); }
+.mk-pin.near { background: var(--ok); color: var(--on-color); width: 40px; height: 40px; }
+.mk-me { display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--red-1); border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(220, 38, 80, 0.2); }
+.mk-pop { display: grid; gap: 4px; min-width: 150px; }
+.mk-pop .btn { justify-content: center; margin-top: 4px; }
+.leaflet-tooltip.mk-tip { font-weight: 700; background: var(--ok); color: var(--on-color); border: 0; }
+.leaflet-container { font: inherit; }
+#cat .badge { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 600; vertical-align: 1px; }
+#cat .card > .badge { justify-self: start; margin-left: 0; }

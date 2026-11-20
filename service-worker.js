@@ -16,6 +16,7 @@ const FILES = [
   'manifest.json',
   'js/preview.js',
   'js/icons.js',             // line icons (A1)
+  'js/near.js',              // categories near the person (R1)
   'js/bipod.js',
   'js/prepare.js',
   'js/data.js',
