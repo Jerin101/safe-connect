@@ -84,6 +84,24 @@ await click('#cat .near-row .btn.solid');
 const official = await waitFor(`[...document.querySelectorAll('#cat a[href^="tel:"]')].some((a) => a.getAttribute('href') !== 'tel:999')`);
 check('Noakhali: the place page shows the area official numbers', official);
 await shot('r1-noakhali-place-390');
+check('Noakhali: 999 only once on the place page', (await ev(`document.querySelectorAll('#cat a[href="tel:999"]').length`)) === 1);
+
+// 3b. official fuel lists without a position of their own (Dhaka/Savar): never "nearest", no pin, no "~0 m"
+await send('Page.navigate', { url: `${BASE}#/c/fuel` }); await waitFor(`!!document.querySelector('#cat .near-area')`);
+await pickArea('Dhaka', 'Savar');
+await waitFor(`document.querySelectorAll('#cat .near-row').length > 0`);
+const fuel = await ev(`(() => { const r = [...document.querySelectorAll('#cat .near-row')];
+  const near = r.filter((x) => /সবচেয়ে কাছে/.test(x.textContent));
+  return { n: r.length, near: near.length, nearApprox: near.some((x) => /এই উপজেলায়/.test(x.textContent)), zero: r.some((x) => /~\\s*০\\s*মিটার/.test(x.textContent)),
+    inUp: r.filter((x) => /এই উপজেলায়/.test(x.textContent)).length,
+    order: r.map((x) => /এই উপজেলায়/.test(x.textContent)).join('') }; })()`);
+check('Savar fuel: the nearest has its own position, no ~0 m', fuel.near <= 1 && !fuel.nearApprox && !fuel.zero, JSON.stringify(fuel).slice(0, 120));
+check('Savar fuel: "in this upazila" rows come after the exact ones', !/true.*false/.test(fuel.order), `${fuel.inUp} in upazila of ${fuel.n}`);
+await waitFor(`document.querySelectorAll('#cat .mk-pin').length > 0`, 20000);
+const pins = await ev(`document.querySelectorAll('#cat .mk-pin').length`);
+const exactRows = await ev(`document.querySelectorAll('#cat .near-row').length - [...document.querySelectorAll('#cat .near-row')].filter((x) => /এই উপজেলায়/.test(x.textContent)).length`);
+check('Savar fuel: pins only for places with their own position', pins === exactRows, `${pins} pins, ${exactRows} exact rows`);
+await shot('r1-savar-fuel-390');
 
 // 4. English, all 64 districts in the picker, no position stored, no errors
 await send('Page.navigate', { url: `${BASE}#/c` }); await waitFor(`!!document.querySelector('#cat .cat-tile')`);

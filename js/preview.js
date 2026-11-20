@@ -27,7 +27,7 @@ const $ = (id) => document.getElementById(id);
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
 let lang = store.get('sc-lang') || 'bn';
 let data = null, locations = null, current = null, areaIndex = [];
-let near = null;          // categories near the person (js/near.js), created when the texts are loaded
+let near = null;          // categories near the person (js/near.js), created by makeNear() at start-up
 let activeTab = 'home'; // header tab that gets aria-current="page"
 const t = () => LANG[lang].ui;
 const digits = (s) => (lang === 'bn' ? String(s).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[d]) : String(s));
@@ -900,9 +900,7 @@ function makeNear() {
       try { return firstRows(place, areaContacts(data, place)); } catch { return null; }
     },
   });
-  const show = near.show;
   near.title = (rest) => { const n = LANG[lang].page.near; return rest[0] && n.cats[rest[0]] ? n.cats[rest[0]] : n.hubTitle; };
-  near.show = show;
 }
 function showToast(text) {
   const x = $('toast');

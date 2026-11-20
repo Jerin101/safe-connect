@@ -136,6 +136,10 @@ export function initNear(ctx) {
     const c = p.upazila && centreOf(p.district, p.upazila);
     return c ? { lat: c.lat, lon: c.lon, approx: true } : null;      // official lists: the upazila centre, labelled
   };
+  // only a place with its own position can be "nearest" or get a pin; the others are listed after it as "in this upazila"
+  const exact = (it) => !!(it.pt && !it.pt.approx);
+  const rank = (it) => (exact(it) ? 0 : it.pt ? 1 : 2);
+  const distText = (it) => (exact(it) ? dist(it.k) : it.pt ? T().inUpazila : T().noLocation);
   function badge(p) {
     const b = el('span', 'badge', p.source === 'official' ? T().officialList : T().osm);
     b.classList.add(p.source === 'official' ? 'b-ok' : 'b-osm');
@@ -167,11 +171,11 @@ export function initNear(ctx) {
       .addTo(mapObj).bindTooltip(el('span', null, me ? T().you : T().areaCentre));
     const pts = [[from.lat, from.lon]];
     items.forEach((it, i) => {
-      if (!it.pt) return;
+      if (!exact(it)) return;     // no position of its own: no pin (it would sit on the area centre)
       const pin = el('span', i === 0 ? 'mk-pin near' : 'mk-pin'); pin.append(icon(cat.ic, { size: 'sm' }));
       const pop = el('div', 'mk-pop');
       const go = el('button', 'btn solid', T().details); go.type = 'button'; go.addEventListener('click', () => onPick(it));
-      pop.append(el('b', null, nameOf(it.p)), el('span', 'small', `${i === 0 ? T().nearest + ' · ' : ''}${it.pt.approx ? '~' : ''}${dist(it.k)}`), go);
+      pop.append(el('b', null, nameOf(it.p)), el('span', 'small', `${i === 0 ? T().nearest + ' · ' : ''}${dist(it.k)}`), go);
       const m = L.marker([it.pt.lat, it.pt.lon], { icon: L.divIcon({ className: 'mk-wrap', html: pin, iconSize: [34, 40], iconAnchor: [17, 38], popupAnchor: [0, -34] }),
         title: nameOf(it.p), zIndexOffset: i === 0 ? 1000 : 0 }).addTo(mapObj).bindPopup(pop);
       if (i === 0) m.bindTooltip(el('span', null, T().nearest), { permanent: true, direction: 'top', offset: [0, -34], className: 'mk-tip' });
@@ -194,7 +198,7 @@ export function initNear(ctx) {
     try { all = await placesOf(a.district); } catch { view.replaceChildren(el('p', 'note', T().loadFailed)); return; }
     const from = fromPoint(a);
     const items = all.filter(cat.match).map((p) => { const pt = pointOf(p); return { p, pt, k: pt ? km(from, pt) : Infinity }; })
-      .sort((x, y) => x.k - y.k);
+      .sort((x, y) => rank(x) - rank(y) || x.k - y.k);
     if (placeId) {
       const it = items.find((x) => x.p.id === placeId);
       if (it) return placePage(view, cat, a, it);
@@ -250,15 +254,15 @@ export function initNear(ctx) {
       const rows = el('div', 'rows');
       const open = (it) => ctx.go(`c/${cat.id}/${encodeURIComponent(it.p.id)}`);
       shown.forEach((it, i) => {
-        const r = el('div', i === 0 ? 'r near-row nearest' : 'r near-row');
+        const r = el('div', i === 0 && exact(it) ? 'r near-row nearest' : 'r near-row');
         const sq = el('span', 'cat-ic sm'); sq.append(icon(cat.ic, { size: 'sm' }));
         const body = el('div');
         const title = el('div', 't', nameOf(it.p));
-        if (i === 0 && it.pt) title.append(el('span', 'badge b-near', T().nearest));
+        if (i === 0 && exact(it)) title.append(el('span', 'badge b-near', T().nearest));
         title.append(badge(it.p));
-        body.append(title, el('div', 'm', it.pt ? `${it.pt.approx ? T().approx + ' · ~' : ''}${dist(it.k)}` : T().noLocation));
+        body.append(title, el('div', 'm', distText(it)));
         const acts = el('div', 'acts');
-        if (it.pt) {
+        if (exact(it)) {
           const onMap = el('button', 'btn', T().onMap); onMap.type = 'button'; onMap.prepend(icon('pin', { size: 'sm' }));
           onMap.addEventListener('click', () => { const m = markers[i]; if (!m || !mapObj) return; mapCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); mapObj.setView(m.getLatLng(), 16); m.openPopup(); });
           acts.append(onMap);
@@ -280,7 +284,7 @@ export function initNear(ctx) {
     const p = it.p;
     const head = el('section', 'card');
     const h = el('h1', 'page-title', nameOf(p)); h.id = 'catTitle'; h.tabIndex = -1;
-    const meta = el('p', 'muted', `${T().cats[cat.id]} · ${it.pt ? `${it.pt.approx ? '~' : ''}${dist(it.k)}` : T().noLocation}`);
+    const meta = el('p', 'muted', `${T().cats[cat.id]} · ${distText(it)}`);
     head.append(h, meta, badge(p));
     // ফ্রি সহায়তা: the place's own official number (none of our place lists has one yet), the area's official numbers, 999
     const free = el('section', 'card');
@@ -289,7 +293,8 @@ export function initNear(ctx) {
     fh.append(call);
     free.append(fh, el('p', 'note', T().noNumber));
     const rows = ctx.areaRows(a);
-    if (rows && rows.length) { free.append(el('h3', null, T().areaNumbers)); const box = el('div', 'rows'); box.append(...rows); free.append(box); }
+    const own = (rows || []).filter((r) => !r.querySelector('a[href="tel:999"]'));   // 999 is already the red button
+    if (own.length) { free.append(el('h3', null, T().areaNumbers)); const box = el('div', 'rows'); box.append(...own); free.append(box); }
     else {
       const more = el('a', 'btn', T().nationalNumbers); more.href = '#/numbers';
       free.append(el('p', 'small', T().noAreaNumbers), more);
@@ -310,7 +315,7 @@ export function initNear(ctx) {
       try { if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); ctx.toast(T().copied); } } catch { /* the person closed the share sheet */ }
     });
     acts.append(share);
-    if (p.source_url) { const s = el('a', 'btn ghost', T().source); s.href = p.source_url; s.target = '_blank'; s.rel = 'noopener noreferrer'; acts.append(s); }
+    if (/^https:\/\//.test(p.source_url || '')) { const s = el('a', 'btn ghost', T().source); s.href = p.source_url; s.target = '_blank'; s.rel = 'noopener noreferrer'; acts.append(s); }
     way.append(acts);
     if (it.pt && it.pt.approx) way.append(el('p', 'small', T().approxNote));
     view.replaceChildren(backLink(`c/${cat.id}`, T().backToList), head, free, way);
