@@ -1498,7 +1498,7 @@ function renderFooter() {
   help.append(el('h3', null, f.helpTitle), el('p', null, f.helpText), extLink('github.com/Jerin101/safe-connect', SITE.repo));
   $('footGrid').replaceChildren(brand,
     col(sT, [call, textBtn(s[1], () => openSos(null)), textBtn(s[2], locate), textBtn(s[3], () => findArea(''))]),
-    col(aT, [textBtn(a[0], () => findArea('noakhali')), textBtn(a[1], () => findArea('coxsbazar')), textBtn(a[2], () => openQuick('chowmuhani')), textBtn(a[3], () => openQuick('inani'))]),
+    col(aT, ['hospital', 'pharmacy', 'police', 'fuel'].map((c, k) => textBtn(a[k], () => go(`c/${c}`)))),   // all 64 districts (R2)
     col(iT, [textBtn(i[0], () => go('about')), textBtn(i[1], () => go('faq')), textBtn(i[2], () => findArea('')), textBtn(i[3], () => openFaq('source'))]),
     help);
   const nav = el('nav'); nav.setAttribute('aria-label', 'Footer');
@@ -1700,8 +1700,8 @@ $('fReset').addEventListener('click', () => setDistrict(''));
 $('backBtn').addEventListener('click', goHome);
 $('homeBtn').addEventListener('click', goHome);
 $('areaChip').addEventListener('click', pickArea);
-$('hFinder').addEventListener('click', () => findArea(''));
-$('hSearch').addEventListener('click', () => findArea(''));
+$('hFinder').addEventListener('click', pickArea);   // the area picker for all 64 districts (R2)
+$('hSearch').addEventListener('click', pickArea);
 window.addEventListener('resize', markTab);      // keeps the active tab in view and the edge hints right
 const calmScroll = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
 $('ctaSend').addEventListener('click', () => openSos(null));

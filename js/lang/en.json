@@ -25,7 +25,7 @@
     "hello1": "Need help?",
     "hello2": "Stay calm. The official numbers for your area are right here.",
     "h999": "999",
-    "lead": "Police station, chairman, village police and hospital numbers for the unions of Noakhali and Cox's Bazar. All from official government websites; the sources are re-checked every week.",
+    "lead": "For all of Bangladesh: the nearest hospitals, police stations, pharmacies and official emergency numbers. Every piece of information shows its source.",
     "distAll": "All districts",
     "stats": [
       "official numbers",
@@ -111,7 +111,7 @@
     "copied": "Copied",
     "map": "Map",
     "outsideTitle": "Your location",
-    "outside": "You are outside Noakhali and Cox's Bazar. SafeConnect shows local numbers only for these two districts for now. The national numbers below work everywhere.",
+    "outside": "Official numbers for this area are not added yet. In an emergency call 999; see the nearest police station, fire station and hospital on Home. The national numbers below work everywhere.",
     "firstCalm": "Call from top to bottom. If one does not answer, try the next.",
     "first": "Call these first",
     "more": "More help",
@@ -229,7 +229,7 @@
     "msgrHint": "Messenger sends only the map link, not your message. Choose the person in Messenger.",
     "copiedPaste": "Message copied. Paste it in any app and send it.",
     "copyFailed": "Could not copy. Press and hold the text in the message box and copy it yourself.",
-    "coverage": "Area numbers are only for Noakhali and Cox's Bazar for now. 999 and the national numbers work everywhere.",
+    "coverage": "Works across the country. Where an area's official numbers are not added yet, it shows 999 and the nearest police station and hospital.",
     "bipod": {
       "btn": "Send danger message",
       "safeBtn": "Send safe message",
@@ -517,7 +517,7 @@
     ],
     "head": {
       "chipEmpty": "Find area",
-      "chipSub": "Noakhali and Cox's Bazar",
+      "chipSub": "Your area",
       "cta": "Send location",
       "search": "Find area",
       "home": "SafeConnect home",
@@ -553,7 +553,7 @@
     "about": {
       "eyebrow": "About",
       "title": "What is SafeConnect?",
-      "text": "In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. Noakhali and Cox's Bazar now, the whole country later.",
+      "text": "In an emergency, finding the right number takes time you do not have. SafeConnect uses your location to show the official numbers for your police station, union council, village police and hospital, in the order to call them. All over Bangladesh.",
       "points": [
         [
           "check",
@@ -603,14 +603,14 @@
         ],
         [
           "districts",
-          "When will other districts come?",
-          "Noakhali and Cox's Bazar now. More districts come step by step once their data is checked. National numbers like 999, 109 and 333 work everywhere."
+          "Does it work in every district?",
+          "Yes, in all 64 districts. Hospitals, police stations, pharmacies and 9 more kinds of places are shown everywhere. Official area numbers are being added step by step; where they are not added yet, it shows 999 and the nearest police station and hospital. National numbers like 999, 109 and 333 work everywhere."
         ]
       ]
     },
     "foot": {
       "tagline": "Official emergency numbers for your area. No login; works without internet too.",
-      "small": "Starting with Noakhali and Cox's Bazar.",
+      "small": "All 64 districts of Bangladesh.",
       "services": [
         "Services",
         [
@@ -621,12 +621,12 @@
         ]
       ],
       "areas": [
-        "Areas",
+        "What you need",
         [
-          "Noakhali",
-          "Cox's Bazar",
-          "Chowmuhani",
-          "Inani beach"
+          "Hospitals and clinics",
+          "Pharmacies",
+          "Police and fire service",
+          "Filling stations"
         ]
       ],
       "info": [
