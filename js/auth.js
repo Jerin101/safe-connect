@@ -112,6 +112,7 @@ function renderButton() {
   const on = signedIn();
   b.replaceChildren(user ? avatar(user) : icon(ICON.user), ctx.el('span', 'acct-text', on ? A().account : A().signIn));
   b.setAttribute('aria-label', on ? A().accountLabel : A().signIn);
+  ctx.accountChanged?.(on);             // the সাইন ইন / আমার অ্যাকাউন্ট tab (R2)
 }
 // Any "Sign in" button: signed in before -> the account page (a tap, so it may load Firebase); else the modal.
 function tapSignIn(button) {
@@ -374,6 +375,7 @@ export function initAuth(helpers) {
       if (user || (intent && intent.tap && hasFlag())) openAccount();
     },
     // "Report a wrong number" on a contact row (js/preview.js). Opens the form; nothing is loaded or sent yet.
+    tap: (button) => tapSignIn(button),   // the account tab: the account page, or the sign-in modal
     report(record, info, from) { rep.open(record, info, from); },
     askPlace(draft, from, done) { rep.askPlace(draft, from, done); },   // missing place (#159)
     setText() {

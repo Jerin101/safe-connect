@@ -28,6 +28,8 @@ const store = { get(k) { try { return localStorage.getItem(k); } catch { return 
 let lang = store.get('sc-lang') || 'bn';
 let data = null, locations = null, current = null, areaIndex = [];
 let near = null;          // categories near the person (js/near.js), created by makeNear() at start-up
+let homeState = null;     // home (R2): { a: the area, place: its pilot place for the official numbers, or null }
+let acctOn = false;       // signed in (for the account tab's name)
 let activeTab = 'home'; // header tab that gets aria-current="page"
 const t = () => LANG[lang].ui;
 const digits = (s) => (lang === 'bn' ? String(s).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[d]) : String(s));
@@ -447,6 +449,7 @@ function getLast() {
   try { return JSON.parse(store.get('sc-last') || 'null'); } catch { return null; }
 }
 function saveLast(place, src) {
+  near?.forget();                                // the newest area counts on home and in the categories too
   const { pos, ...name } = place;                 // never a position, only the area's names and ids
   memLast = { ...name, src, on: Date.now() };
   if (remembers()) store.set('sc-last', JSON.stringify(memLast));
@@ -485,7 +488,7 @@ function goHome() {
 // #/guide · #/about · #/faq · #/account · #/help/<lat>,<lng>,<time>[,<situation>] (বিপদ বার্তা, #134). Anything else opens home. The home sections carry data-pages="..."
 // in index.html: each page shows the sections that list its name, so no content or id is copied.
 const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare', 'c'];
-const HEADING = { home: 'hello', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
+const HEADING = { home: 'homeTitle', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
 let firstRoute = true;       // the first page after loading does not move focus
 let routeMsg = false;        // the "area not found" line is showing
@@ -542,7 +545,7 @@ function showPage(page) {
   $('main').dataset.page = page;
   document.querySelectorAll('#home [data-pages]').forEach((e) => { e.hidden = !e.dataset.pages.split(' ').includes(page); });
   if (!$('iconSrc').hidden) $('iconSrc').open = page === 'numbers';
-  if (page === 'home') renderRecent();
+  if (page === 'home') { renderRecent(); renderHome(); }
   showView('home');
 }
 function setTitle() { const x = pageTitle(); document.title = x ? `${x} · SafeConnect` : 'SafeConnect'; }
@@ -574,14 +577,14 @@ async function route() {
     if (place) {
       $('main').dataset.page = 'place';
       showArea(place, intent ? intent.pos : same ? current.pos : null);
-      finish('area', () => (current.place.outside ? t().outsideTitle : placeTitle(current.place)), 'placeName', intent);
+      finish('home', () => (current.place.outside ? t().outsideTitle : placeTitle(current.place)), 'placeName', intent);
       return;
     }
     // Not in the data (old link, typo): home with a calm line, never an empty page.
     history.replaceState(null, '', '#/today');
     showPage('home');
     msg(P().notFound); routeMsg = true;
-    finish('home', titleOf('home'), 'hello', null);
+    finish('home', titleOf('home'), 'homeTitle', null);
     return;
   }
   if (name === 'c') {
@@ -589,7 +592,7 @@ async function route() {
     $('main').dataset.page = 'cat';
     showView('cat');
     await near.show($('cat'), rest);
-    finish('area', () => near.title(rest), 'catTitle', intent);
+    finish('home', () => near.title(rest), 'catTitle', intent);
     return;
   }
   if (name === 'send') {
@@ -614,11 +617,11 @@ async function route() {
     $('main').dataset.page = 'account';
     // Never loads Firebase by itself (issue #73): only a tap that brought the person here may.
     auth.open(intent);
-    finish(null, titleOf('account'), $('ws').hidden ? 'acctTitle' : 'wsTitle', intent);
+    finish('account', titleOf('account'), $('ws').hidden ? 'acctTitle' : 'wsTitle', intent);
     return;
   }
   showPage(name);
-  finish(name, titleOf(name), HEADING[name], intent);
+  finish(['numbers', 'area'].includes(name) ? 'home' : name, titleOf(name), HEADING[name], intent);
 }
 // Header area chip: the last opened area (saved on this phone only), or "choose your area".
 const CHIP_ICON = {
@@ -628,9 +631,11 @@ const CHIP_ICON = {
 function renderChip() {
   const last = getLast();
   const h = P().head;
-  const known = !!(last && data && data.docs[last.district]);
+  // R2: an area in any of the 64 districts (js/near.js) unless it is the saved pilot area itself
+  const nearName = homeState?.a && !(last && data?.docs[last.district] && near.sameUpazila(last, homeState.a)) ? near.label(homeState.a) : '';
+  const known = !nearName && !!(last && data && data.docs[last.district]);
   const found = known && justFound(last);
-  const name = known ? placeTitle(last) : h.chipEmpty;
+  const name = nearName || (known ? placeTitle(last) : h.chipEmpty);
   // Phones show a short name: "Ukhia", not "Ukhia (whole upazila)"; "জালিয়াপালং", not "জালিয়াপালং ইউনিয়ন" (#108).
   const short = known ? name.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+(ইউনিয়ন|পৌরসভা|union|municipality|pourashava)$/i, '') : name;
   // Pin = just found here; bookmark + "সেভ করা:" = an area saved earlier or searched (#147).
@@ -641,7 +646,7 @@ function renderChip() {
   $('areaChip').querySelector('svg:not(.chev) path').setAttribute('d', CHIP_ICON[known && !found ? 'saved' : 'pin']);
   $('areaChip').dataset.kind = known ? (found ? 'found' : 'saved') : 'none';
   $('areaChip').title = saved(name);
-  $('areaChipS').textContent = h.chipSub;
+  $('areaChipS').textContent = nearName ? P().near.home.yourArea : h.chipSub;
   // Sidebar "My area" card (#108): the area's name, and what a tap does
   $('hcAreaT').textContent = name;
   $('hcAreaS').textContent = known ? t().auto.allNumbers : '';
@@ -667,7 +672,7 @@ function renderRecent() {
 }
 $('recentClear').addEventListener('click', () => {
   clearLast();
-  renderRecent(); renderMyArea(); renderAutoNote();
+  renderRecent(); refreshHome(); renderAutoNote();
   showToast(t().areaCleared);
   $('areaInput').focus({ preventScroll: true });
 });
@@ -769,7 +774,7 @@ function autoFix(pos) {
     return;
   }
   saveLast(place, 'auto');
-  renderRecent(); renderMyArea(); renderAutoNote();   // header chip, sidebar card, home list, area note; never leaves the page
+  renderRecent(); refreshHome(); renderAutoNote();   // header chip, sidebar card, home list, area note; never leaves the page
   showToast(fill(old ? t().auto.changed : t().auto.found, { n: placeTitle(place) }));   // "changed" only for a real change
 }
 // Area page: auto location is on and the person is looking at another area by hand (#99).
@@ -846,7 +851,8 @@ function renderMyArea() {
   const box = $('myArea');
   if (!data) { box.replaceChildren(); return; }        // empty = not shown (CSS), until the data is here
   const keep = box.contains(document.activeElement) ? document.activeElement.id : '';
-  const a = t().auto, p = lastPlace();
+  const a = t().auto, p = homeState ? homeState.place : lastPlace();
+  if (homeState?.a && !p) { box.replaceChildren(); return; }   // another district: its numbers are in #homeNums
   const kids = [];
   // The question comes only after the first "Find help near me" tap, never together with the welcome (#108).
   if (store.get('sc-near-tapped') === '1' && store.get('sc-autoloc-asked') !== '1' && !autoLoc.isOn() && !autoAsking) {
@@ -871,10 +877,6 @@ function renderMyArea() {
     const all = el('button', 'linkbtn', a.allNumbers); all.type = 'button'; all.id = 'myAreaAll';
     all.addEventListener('click', () => openArea(p, null));
     kids.push(list, all);
-  } else {
-    const pick = el('button', 'btn', P().head.chipEmpty); pick.type = 'button'; pick.id = 'myAreaPick';
-    pick.addEventListener('click', () => findArea(''));
-    kids.push(el('p', 'muted', a.noAreaText), pick);
   }
   const sw = el('div', 'auto-box'); sw.append(...autoSwitch('home', renderMyArea));
   kids.push(sw);
@@ -882,21 +884,54 @@ function renderMyArea() {
   if (keep && $(keep)) $(keep).focus();
 }
 let toastTimer = 0;
+// The pilot place (district key, upazila) of an area from js/near.js, when we have official numbers for it; else null.
+function pilotPlace(a) {
+  const key = String(a.district).toLowerCase().replace(/[^a-z]/g, '');
+  if (!data?.docs[key]) return null;
+  // the centres call a Sadar upazila by the district's name ("Noakhali"); the pilot data says "Noakhali Sadar"
+  const ups = upazilas(data.docs[key]).map((u) => u.en);
+  const upazila = ups.find((u) => u === a.upazila) || ups.find((u) => u.replace(/\s*sadar$/i, '') === a.upazila) || (a.upazila === a.district && ups.find((u) => /sadar/i.test(u)));
+  return upazila ? { district: key, upazila, area: null } : null;
+}
+// Home (R2, #267): area card and the 12 categories (js/near.js), then the area's numbers: the official list in the
+// pilot districts (#myArea, with the saved union when it is in the same upazila), else 999 and the nearest
+// police station, fire station and hospital (#homeNums).
+let homeRun = 0, homePick = false;
+// A newer saved area (auto location, search, clear): home redraws itself; other pages only update the my-area box.
+function refreshHome() { if ($('main').dataset.page === 'home') renderHome(); else { homeState = null; renderMyArea(); } }
+// The header area chip: the area picker on home (all 64 districts).
+function pickArea() { homePick = true; if ($('main').dataset.page === 'home') renderHome(); else go(''); }
+async function renderHome() {
+  if (!near) return;
+  const run = ++homeRun;
+  const a = await near.home({ area: $('homeArea'), cats: $('homeCats') });
+  if (run !== homeRun) return;
+  const last = lastPlace();
+  const place = a ? (last && near.sameUpazila(last, a) ? last : pilotPlace(a)) : null;
+  homeState = { a, place };
+  renderMyArea(); renderChip();
+  if (homePick) { homePick = false; near.openPicker($('homeArea')); }
+  if (a && !place) await near.homeNums($('homeNums'), a); else $('homeNums').replaceChildren();
+}
 // The category pages (js/near.js) get only what they need from this page.
 function makeNear() {
   near = initNear({
     el, $, store, lang: () => lang, digits, go, toast: showToast, lastArea: () => getLast(),
     texts: () => LANG[lang].page.near,
     rerender: () => route(),
+    remembers,
+    // "আমার লোকেশন" in the area card: in the pilot districts the exact union is looked up on the phone, as with
+    // "Find help near me"; the point stays in memory (lastFix) for "Send location"
+    onGps: (p) => {
+      store.set('sc-near-tapped', '1'); store.set('sc-welcomed', '1');
+      lastFix = { pos: p, at: p.at || Date.now() };
+      const place = resolvePlace(p);
+      if (!place.outside) saveLast(place, 'loc');
+    },
     // official numbers of the area, where we have them (the pilot districts); else null
     areaRows: (a) => {
-      const key = String(a.district).toLowerCase().replace(/[^a-z]/g, '');
-      if (!data?.docs[key]) return null;
-      // the centres call a Sadar upazila by the district's name ("Noakhali"); the pilot data says "Noakhali Sadar"
-      const ups = upazilas(data.docs[key]).map((u) => u.en);
-      const upazila = ups.find((u) => u === a.upazila) || ups.find((u) => u.replace(/\s*sadar$/i, '') === a.upazila) || (a.upazila === a.district && ups.find((u) => /sadar/i.test(u)));
-      if (!upazila) return null;
-      const place = { district: key, upazila, area: null };
+      const place = pilotPlace(a);
+      if (!place) return null;
       try { return firstRows(place, areaContacts(data, place)); } catch { return null; }
     },
   });
@@ -1400,20 +1435,19 @@ function openQuick(key) { const q = quickPlaces().find(([k]) => k === key); if (
 const textBtn = (label, fn) => { const b = el('button', null, label); b.type = 'button'; b.addEventListener('click', fn); return b; };
 const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a; };
 
-// The main tabs (A2, #257): a bottom bar on phones, a side menu from 960 px. A tab appears only when its real page
-// exists: সেবা comes with A5, ডাকুন with A12, সমস্যা with A9. About and FAQ are in the footer; "কী হয়েছে?" on home.
+// The main tabs (R2, #267): a bottom bar on phones, a side menu from 960 px. A tab appears only when its real page
+// exists: সেবা ডাকুন comes with R3. The categories and the numbers are on home; About and FAQ are in the footer.
 const NAV = [
   ['home', 'home', goHome],
-  ['area', 'pin', () => go('c')],
-  ['numbers', 'phone', () => go('numbers')],
   ['send', 'alert', () => openSos(null)],
+  ['account', 'user', (e) => auth.tap(e.currentTarget)],
 ];
 function renderNav() {
   const d = P().dock;
   $('dock').replaceChildren(...NAV.map(([key, ic, fn]) => {
     const b = el('button', key === 'send' ? 'dock-btn sos' : 'dock-btn');
     b.type = 'button'; b.dataset.key = key;
-    b.append(lineIcon(ic), el('span', null, d[key]));
+    b.append(lineIcon(ic), el('span', null, key === 'account' ? (acctOn ? d.account : d.signIn) : d[key]));
     b.addEventListener('click', fn);
     return b;
   }));
@@ -1665,7 +1699,7 @@ $('railDist').addEventListener('change', () => setDistrict($('railDist').value))
 $('fReset').addEventListener('click', () => setDistrict(''));
 $('backBtn').addEventListener('click', goHome);
 $('homeBtn').addEventListener('click', goHome);
-$('areaChip').addEventListener('click', () => findArea(''));
+$('areaChip').addEventListener('click', pickArea);
 $('hFinder').addEventListener('click', () => findArea(''));
 $('hSearch').addEventListener('click', () => findArea(''));
 window.addEventListener('resize', markTab);      // keeps the active tab in view and the edge hints right
@@ -1686,6 +1720,7 @@ $('langBtn').addEventListener('click', () => {
   if (!$('help').hidden) showHelp(readHash()[1]);
   if (!$('prepare').hidden) renderPrepare();
   if (!$('cat').hidden) near.show($('cat'), readHash().slice(1));
+  if ($('main').dataset.page === 'home') renderHome();
   if (!$('sos').hidden) { renderOpened(); renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
   auth.setText();
   setTitle();
@@ -1702,6 +1737,7 @@ setText();
 // The workspace (P35, #78) uses the same family list as "Send location" ("sc-family") and the area names.
 const auth = initAuth({
   $, el, store, fill, digits, lang: () => lang, texts: () => LANG[lang], showView, goHome, openSos, locate, go,
+  accountChanged: (on) => { acctOn = on; renderNav(); },
   people: { get: getPeople, set: setPeople, norm: normPhone, changed: () => { renderHomeSos(); if (!$('sos').hidden) { renderPeople(); renderSend(); } } },
   placeName: (p) => (data && data.docs[p.district] ? { title: placeTitle(p), sub: placeSub(p) } : null),
   autoSwitch,                           // Settings shows the same auto-location switch as home (#105)
@@ -1721,6 +1757,7 @@ try {
   [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
   areaIndex = buildAreaIndex(data);
   renderRecent(); renderStats(); renderPlaces(); renderIconRow(); renderGuides(); renderMyArea();
+  if ($('main').dataset.page === 'home') renderHome();   // the pilot numbers need the data
   autoLoc.resume();                     // only when the person turned it on and the browser allows it
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);
