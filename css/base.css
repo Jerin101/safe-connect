@@ -33,7 +33,7 @@
   --font: "Manrope", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
   --r: 16px;
   --ic: 20px; --ic-sm: 16px; --ic-lg: 24px;   /* line icons from js/icons.js (A1) */
-  --dock-h: 62px; --rail-w: 208px;   /* main tabs: bottom bar height on phones, side menu width from 960 px (A2) */
+  --dock-h: 62px; --rail-w: 168px;   /* main tabs: bottom bar height on phones, side menu width from 960 px (A2) */
   --header-h: 150px;   /* height of header.site; js/preview.js replaces it with the measured height (issue #103) */
   --fade: 200ms;   /* page change fade (issue #71) */
   color-scheme: light;

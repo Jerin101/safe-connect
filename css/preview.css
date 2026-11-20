@@ -6,7 +6,7 @@
   .feed { display: grid; gap: 34px; align-content: start; min-width: 0; }
   .rail { display: grid; gap: 20px; align-content: start; min-width: 0; }
   /* The sidebar comes after the feed in the page (999 first for keyboards and screen readers); CSS puts it on the left. */
-  @media (min-width: 1060px) {
+  @media (min-width: 1200px) {   /* A2: from 960 px the main side menu takes room, so the page's own side column waits until 1200 px */
     main[data-page="home"] .shell { grid-template-columns: 280px minmax(0, 1fr); gap: 32px; }
     main[data-page="home"] .feed { grid-column: 2; grid-row: 1; }
     /* Sticks just under the real header (--header-h is measured in js/preview.js) and scrolls inside itself when the screen is short (issue #103). */
@@ -25,7 +25,7 @@
   .hc-btn small { color: var(--muted); font-weight: 400; font-size: 0.8rem; overflow-wrap: anywhere; }
   @media (max-width: 1059px) { .helpcard { display: none; } }
   /* phones: the district menu is inside "Find area"; the sidebar is only for wide screens (#108) */
-  @media (max-width: 1059px) { .rail { display: none; } }
+  @media (max-width: 1199px) { .rail { display: none; } }
   .morelinks { display: flex; flex-wrap: wrap; gap: 10px; }
   /* "Keep it on your phone" card: the short address (no QR image yet); only on wide screens. */
   .appcard { display: grid; justify-items: center; gap: 8px; text-align: center; border-radius: 18px; padding: 20px 18px; background: var(--tint); border: 1px solid var(--line); }
@@ -284,7 +284,7 @@
   .more { display: grid; gap: 10px; }
   .area-main { display: grid; gap: 20px; min-width: 0; align-content: start; }
   #area > .rail .filter { display: none; }   /* the filter only changes home and the search list, so it is not shown here */
-  @media (min-width: 1060px) {
+  @media (min-width: 1200px) {
     main > .wrap.page#area { max-width: 1120px; grid-template-columns: 280px minmax(0, 1fr); gap: 32px; align-items: start; }
     .area-main { grid-column: 2; grid-row: 1; }
     #area > .rail { grid-column: 1; grid-row: 1; position: sticky; top: calc(var(--header-h) + 16px); max-height: calc(100vh - var(--header-h) - 32px); overflow-y: auto; scrollbar-width: thin; padding: 4px; margin: -4px; }
