@@ -25,8 +25,8 @@
     <div class="top-actions">
       <a class="hpill h999" id="h999" href="tel:999"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg><span id="h999Text">৯৯৯</span></a>
       <button class="hpill round hsearch" id="hSearch" type="button" aria-label="Find area"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.8 4.8-1.4 1.4-4.8-4.8A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg></button>
-      <button class="hpill acct" id="acctBtn" type="button" aria-label="Sign in"></button>
-      <button class="hpill cta" id="ctaSend" type="button"></button>
+      <button class="hpill acct" id="acctBtn" type="button" aria-label="Sign in" hidden></button>
+      <button class="hpill cta" id="ctaSend" type="button" hidden></button>
       <button class="hpill lang" id="langBtn" type="button" aria-label="Language: English / বাংলা">EN</button>
       <button class="hpill round" id="themeBtn" type="button" aria-label="Night or day"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg></button>
     </div>
@@ -54,7 +54,7 @@
     <!-- v3 home (issue #72): the feed comes first in the page, so 999 is reached first; on wide screens the sidebar sits on the left. -->
     <div class="wrap shell">
       <div class="feed">
-        <section class="hero" aria-labelledby="hello" data-pages="home">
+        <section class="hero" aria-labelledby="hello" data-pages="">
           <div class="hero-text">
             <p class="greet" id="greet"></p>
             <h1 id="hello" tabindex="-1"><span id="hello1"></span><span class="grad" id="hello2"></span></h1>
@@ -66,11 +66,6 @@
                 <span><strong id="call999Title"></strong><small id="call999Sub"></small></span>
                 <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
               </a>
-              <button class="act glass violet" id="sosBtn" type="button">
-                <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2.5 11.2 20.6 3.4c.8-.34 1.6.46 1.26 1.26L14.1 22.8c-.37.86-1.62.78-1.87-.12l-1.9-6.98-6.98-1.9c-.9-.25-.98-1.5-.12-1.87Zm8.7 3.2 1.3 4.8 5.5-12.8-6.8 8Zm-1.2-1.2 8-6.8-12.8 5.5 4.8 1.3Z"/></svg></span>
-                <span><strong id="sosBtnTitle"></strong><small id="sosBtnSub"></small></span>
-                <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
-              </button>
               <button class="act glass amber" id="locateBtn" type="button">
                 <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg></span>
                 <span><strong id="locateTitle"></strong><small id="locateSub"></small></span>
@@ -79,10 +74,22 @@
             </div>
             <ul class="trust" id="trust"></ul>
             <section class="welcome" id="welcome" hidden aria-labelledby="welcomeTitle"></section>
-            <div class="home-msgs" id="homeMsgs"><p class="msg" id="locMsg" role="status" hidden></p><div class="demo" id="demo" hidden><p id="demoText"></p><div class="chips" id="demoChips"></div></div></div>
           </div>
         </section>
 
+        <!-- Home (R2, #267): the area card, live location, the 12 categories, the area's emergency numbers, then the
+             national helplines. Filled by js/near.js and js/preview.js. -->
+        <section class="row-sec home-area" id="homeArea" aria-labelledby="homeTitle" data-pages="home"></section>
+        <div class="home-msgs" id="homeMsgs" data-pages="home"><p class="msg" id="locMsg" role="status" hidden></p><div class="demo" id="demo" hidden><p id="demoText"></p><div class="chips" id="demoChips"></div></div></div>
+        <section class="row-sec home-live" aria-labelledby="sosBtnTitle" data-pages="home">
+          <button class="act glass violet live-big" id="sosBtn" type="button">
+            <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2.5 11.2 20.6 3.4c.8-.34 1.6.46 1.26 1.26L14.1 22.8c-.37.86-1.62.78-1.87-.12l-1.9-6.98-6.98-1.9c-.9-.25-.98-1.5-.12-1.87Zm8.7 3.2 1.3 4.8 5.5-12.8-6.8 8Zm-1.2-1.2 8-6.8-12.8 5.5 4.8 1.3Z"/></svg></span>
+            <span><strong id="sosBtnTitle"></strong><small id="sosBtnSub"></small></span>
+            <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
+          </button>
+        </section>
+        <section class="row-sec home-cats" id="homeCats" aria-labelledby="homeCatsTitle" data-pages="home"></section>
+        <section class="row-sec home-nums" id="homeNums" aria-labelledby="homeNumsTitle" data-pages="home"></section>
         <!-- My area (issue #105): "Call these first" for the last area, and the opt-in auto location switch; filled by js/preview.js. -->
         <section class="row-sec myarea" id="myArea" aria-labelledby="myAreaTitle" data-pages="home"></section>
 
@@ -98,7 +105,7 @@
           </details>
         </section>
 
-        <section class="row-sec findcard" id="findSec" aria-labelledby="findTitle" data-pages="home area">
+        <section class="row-sec findcard" id="findSec" aria-labelledby="findTitle" data-pages="area">
           <div class="search-band">
             <div>
               <div class="intro"><h1 class="page-title" id="areaPageTitle" tabindex="-1" data-pages="area"></h1><h2 id="findTitle" data-pages="home"></h2><p id="findText"></p></div>
@@ -129,12 +136,12 @@
           </div>
         </section>
 
-        <section class="row-sec" aria-labelledby="quickTitle" data-pages="home area">
+        <section class="row-sec" aria-labelledby="quickTitle" data-pages="area">
           <div class="row-head"><div><p class="eyebrow" id="quickEyebrow" hidden></p><h2 id="quickTitle"></h2><p class="soft" id="quickText"></p></div></div>
           <div class="places" id="places"></div>
         </section>
 
-        <section class="row-sec" aria-labelledby="guideTitle" data-pages="home guide">
+        <section class="row-sec" aria-labelledby="guideTitle" data-pages="guide">
           <div class="row-head"><div><h1 class="page-title" id="guidePageTitle" tabindex="-1" data-pages="guide"></h1><h2 id="guideTitle" data-pages="home"></h2><p class="soft" id="guideText"></p></div><a class="more-link" id="guideMore" href="#/guide" data-pages="home"></a></div>
           <div class="grid-3" id="guideCards"></div>
         </section>
@@ -144,11 +151,11 @@
         </section>
 
         <!-- About and questions have their own pages (#108): home only links to them. -->
-        <nav class="morelinks" id="moreLinks" aria-label="More" data-pages="home"></nav>
+        <nav class="morelinks" id="moreLinks" aria-label="More" data-pages=""></nav>
       </div>
 
       <!-- Sidebar: on wide screens on the left (CSS), on phones under the feed. -->
-      <aside class="rail" id="rail" data-pages="home">
+      <aside class="rail" id="rail" data-pages="">
         <!-- Sidebar (#108): only "My area" and the filter; 999, Send location and Find help near me are in the header and the hero. -->
         <section class="helpcard" aria-labelledby="hcTitle">
           <h2 id="hcTitle"></h2>

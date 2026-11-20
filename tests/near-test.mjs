@@ -52,7 +52,7 @@ await send('Page.navigate', { url: `${BASE}#/c` });
 await waitFor(`document.querySelectorAll('#cat .cat-tile').length > 0`);
 const tiles = await ev(`document.querySelectorAll('#cat .cat-tile').length`);
 check('#/c shows 12 categories', tiles === 12, `${tiles}`);
-check('the কাছে tab is marked', await ev(`document.querySelector('#dock [aria-current="page"]')?.dataset.key === 'area'`));
+check('the হোম tab is marked (the categories belong to home)', await ev(`document.querySelector('#dock [aria-current="page"]')?.dataset.key === 'home'`));
 check('no area yet: the picker is open', await ev(`!document.querySelector('#cat .near-picker').hidden`));
 
 // 2. outside the pilot districts: Sylhet Sadar, pharmacies

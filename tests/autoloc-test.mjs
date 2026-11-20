@@ -129,12 +129,13 @@ await open({ store: { 'sc-welcomed': '0' } });
 await wait(2500);
 let geo = await ev('__geo');
 check('OFF: no geolocation call on open', geo.get === 0 && geo.watch === 0, JSON.stringify(geo));
-check('first visit: welcome shown, no auto-location question yet', await ev(`!document.getElementById('welcome').hidden && !document.getElementById('askAutoYes')`));
-// The first "Find help near me" tap closes the welcome; back on home, the question is there (never both at once).
-await ev(`document.getElementById('locateBtn').click(); true`);
-await waitFor(`location.hash.startsWith('#/area')`);
-await ev(`location.hash = '#/'; true`);
-check('after the first near-me tap: question shown, welcome gone', await waitFor(`!!document.getElementById('askAutoYes') && document.getElementById('welcome').hidden`));
+check('first visit: no auto-location question yet', await ev(`!document.getElementById('askAutoYes')`));
+// R2 (#267): the first "আমার লোকেশন" tap in the home area card finds the area (the exact union in the pilot districts);
+// then the one-time question is there, and the area's official numbers.
+await waitFor(`!!document.querySelector('#homeArea .near-area .pills .btn')`);
+await ev(`document.querySelector('#homeArea .near-area .pills .btn').click(); true`);
+check('after the first আমার লোকেশন tap: union saved, question shown, still on home', await waitFor(`(JSON.parse(localStorage.getItem('sc-last') || 'null') || {}).area?.bn === ${JSON.stringify(A.bn)} && !!document.getElementById('askAutoYes')`) && await ev(`location.hash === '#/today'`));
+check('home shows the area name and its official numbers', await waitFor(`/বেগমগঞ্জ/.test(document.getElementById('homeTitle')?.textContent || '') && document.querySelectorAll('#myArea .first-row').length >= 2`));
 await open({ store: { 'sc-near-tapped': '1' } });
 check('OFF: one-time question on home', await ev(`!!document.getElementById('askAutoYes')`));
 check('OFF: switch shows off', await ev(`document.getElementById('homeAutoSw').checked === false`));

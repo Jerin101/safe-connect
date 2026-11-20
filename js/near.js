@@ -29,6 +29,26 @@ export const km = (a, b) => {
 };
 const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
 
+// Sunrise and sunset for a place, worked out on the phone (the sunrise equation, en.wikipedia.org/wiki/Sunrise_equation).
+// The day is the date in Bangladesh (UTC+6). Accurate to about a minute; no weather and no outside service.
+export function sunTimes(lat, lon, now = new Date()) {
+  const r = Math.PI / 180;
+  const day = new Date(now.getTime() + 6 * 3600000);
+  const noon = Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), 6);   // 12:00 in Bangladesh
+  const n = Math.round(noon / 86400000 + 2440587.5 - 2451545 + 0.0008 - 0.5);
+  const J = n - lon / 360;
+  const M = (357.5291 + 0.98560028 * J) % 360;
+  const C = 1.9148 * Math.sin(M * r) + 0.02 * Math.sin(2 * M * r) + 0.0003 * Math.sin(3 * M * r);
+  const L = (M + C + 180 + 102.9372) % 360;
+  const transit = 2451545 + J + 0.0053 * Math.sin(M * r) - 0.0069 * Math.sin(2 * L * r);
+  const dec = Math.asin(Math.sin(L * r) * Math.sin(23.4397 * r));
+  const cosW = (Math.sin(-0.833 * r) - Math.sin(lat * r) * Math.sin(dec)) / (Math.cos(lat * r) * Math.cos(dec));
+  if (Math.abs(cosW) > 1) return null;
+  const w = Math.acos(cosW) / r / 360;
+  const toDate = (j) => new Date((j - 2440587.5) * 86400000);
+  return { rise: toDate(transit - w), set: toDate(transit + w) };
+}
+
 export function initNear(ctx) {
   const { el, $, store } = ctx;
   const T = () => ctx.texts();
@@ -37,6 +57,7 @@ export function initNear(ctx) {
   let base = null;                         // { centres, districts: [{en, bn, files}], labels }
   const placeCache = new Map();
   let me = null;                           // a GPS point in memory only
+  let memArea = null;                      // the area while "এলাকা মনে রাখবেন না" is on (memory only)
   let mapObj = null, markers = [], leaflet = null;
 
   /* ---------- data ---------- */
@@ -76,7 +97,10 @@ export function initNear(ctx) {
 
   /* ---------- the area (names only) ---------- */
   function getArea() {
-    try { const a = JSON.parse(store.get(AREA_KEY) || 'null'); if (a && centreOf(a.district, a.upazila)) return a; } catch { /* broken: ask again */ }
+    try {
+      const a = ctx.remembers() ? JSON.parse(store.get(AREA_KEY) || 'null') : memArea;
+      if (a && centreOf(a.district, a.upazila)) return a;
+    } catch { /* broken: ask again */ }
     const last = ctx.lastArea();                 // the site's saved area (pilot districts: key + upazila name)
     if (last && !last.outside) {
       const d = base.districts.find((x) => slug(x.en) === last.district);
@@ -84,13 +108,24 @@ export function initNear(ctx) {
     }
     return null;
   }
-  const setArea = (a) => store.set(AREA_KEY, JSON.stringify({ district: a.district, upazila: a.upazila }));
-  const areaLabel = (a) => { const c = centreOf(a.district, a.upazila); return `${bnLang() ? c.upazila_bn : c.upazila_en}, ${bnLang() ? districtBn(a.district) : a.district}`; };
+  const setArea = (a) => {
+    memArea = { district: a.district, upazila: a.upazila };
+    if (ctx.remembers()) store.set(AREA_KEY, JSON.stringify(memArea));
+  };
+  // the site saved a newer area (search, "find help near me", auto location): that one counts from now on
+  const forget = () => { memArea = null; store.set(AREA_KEY, ''); };
+  const areaLabel = (a) => {
+    const c = centreOf(a.district, a.upazila);
+    const d = bnLang() ? districtBn(a.district) : a.district;
+    // the centres call a Sadar upazila by the district's name: "নোয়াখালী সদর, নোয়াখালী", not "নোয়াখালী, নোয়াখালী"
+    const u = c.upazila_en === a.district ? `${d} ${T().sadar}` : (bnLang() ? c.upazila_bn : c.upazila_en);
+    return `${u}, ${d}`;
+  };
   const fromPoint = (a) => me || (() => { const c = centreOf(a.district, a.upazila); return { lat: c.lat, lon: c.lon }; })();
 
-  function areaBar(a, onChange) {
+  function areaBar(a, onChange, { showWhere = true } = {}) {
     const bar = el('div', 'near-area');
-    const where = el('p', 'near-where');
+    const where = el('p', 'near-where'); where.hidden = !showWhere;
     where.append(icon('pin', { size: 'sm' }), el('span', null, a ? areaLabel(a) : T().noArea));
     const change = el('button', 'btn', a ? T().change : T().choose); change.type = 'button';
     const gps = el('button', 'btn', T().myLocation); gps.type = 'button'; gps.prepend(icon('locate', { size: 'sm' }));
@@ -101,11 +136,13 @@ export function initNear(ctx) {
       if (!navigator.geolocation) { msg.textContent = T().noGps; return; }
       msg.textContent = T().finding;
       navigator.geolocation.getCurrentPosition((pos) => {
-        const p = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        const p = { lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy), at: pos.timestamp };
         let best = null, bd = Infinity;
         for (const c of base.centres) { const k = km(p, c); if (k < bd) { bd = k; best = c; } }
         if (!best || bd > 60) { msg.textContent = T().outsideBd; return; }
-        me = p; setArea({ district: best.district, upazila: best.upazila_en }); onChange();
+        me = p; setArea({ district: best.district, upazila: best.upazila_en });
+        ctx.onGps(p);                          // the pilot districts: the exact union for the area numbers
+        onChange();
       }, () => { msg.textContent = T().gpsFailed; }, { timeout: 15000, enableHighAccuracy: true });
     });
     // district and upazila for all 64 districts
@@ -212,6 +249,9 @@ export function initNear(ctx) {
     const head = el('section', 'card');
     const h = el('h1', 'page-title', T().hubTitle); h.id = 'catTitle'; h.tabIndex = -1;
     head.append(h, el('p', 'muted', T().hubText), areaBar(a, () => ctx.rerender()));
+    view.replaceChildren(head, tileGrid());
+  }
+  function tileGrid() {
     const grid = el('div', 'cat-grid');
     for (const c of CATS) {
       const b = el('button', 'cat-tile'); b.type = 'button'; b.dataset.cat = c.id;
@@ -220,7 +260,7 @@ export function initNear(ctx) {
       b.addEventListener('click', () => ctx.go(`c/${c.id}`));
       grid.append(b);
     }
-    view.replaceChildren(head, grid);
+    return grid;
   }
 
   function askArea(view, cat) {
@@ -321,5 +361,79 @@ export function initNear(ctx) {
     view.replaceChildren(backLink(`c/${cat.id}`, T().backToList), head, free, way);
   }
 
-  return { show, close: closeMap };
+  /* ---------- home (R2): the area card, the 12 tiles, the area's emergency numbers ---------- */
+  function sunLine(a) {
+    const c = centreOf(a.district, a.upazila);
+    const s = c && sunTimes(c.lat, c.lon);
+    if (!s) return null;
+    const f = new Intl.DateTimeFormat(bnLang() ? 'bn-BD' : 'en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Dhaka' });
+    // Bangla: "৬:১৬", no AM/PM (the word সূর্যোদয় or সূর্যাস্ত already says it)
+    const hm = (d) => (bnLang() ? f.formatToParts(d).filter((x) => x.type !== 'dayPeriod').map((x) => x.value).join('').trim() : f.format(d));
+    const H = T().home;
+    const line = el('p', 'home-sun');
+    const part = (ic, label, d) => { const x = el('span'); x.append(icon(ic, { size: 'sm' }), el('span', null, `${label} ${hm(d)}`)); return x; };
+    line.append(part('sunrise', H.sunrise, s.rise), part('sunset', H.sunset, s.set));
+    return line;
+  }
+  // Fills the home sections; returns the area (or null) so the page can choose the numbers to show.
+  async function home({ area, cats }) {
+    closeMap();
+    try { await loadBase(); } catch { area.replaceChildren(el('p', 'note', T().loadFailed)); cats.replaceChildren(); return null; }
+    const a = getArea(), H = T().home;
+    const card = el('div', 'home-card');
+    const h = el('h1', 'home-place', a ? areaLabel(a) : H.pickArea); h.id = 'homeTitle'; h.tabIndex = -1;
+    card.append(el('p', 'eyebrow', H.yourArea), h);
+    if (a) { const s = sunLine(a); if (s) card.append(s); } else card.append(el('p', 'muted', T().askArea));
+    card.append(areaBar(a, () => ctx.rerender(), { showWhere: false }));
+    area.replaceChildren(card);
+    const ch = el('h2', null, H.catsTitle); ch.id = 'homeCatsTitle';
+    cats.replaceChildren(ch, tileGrid());
+    return a;
+  }
+  // Outside the pilot districts: 999 first, then the nearest police station, fire station and hospital on the map.
+  // No phone number is shown for them, because none comes from an official source.
+  async function homeNums(box, a) {
+    const H = T().home;
+    const h = el('h2', null, H.numsTitle); h.id = 'homeNumsTitle';
+    const call = el('a', 'btn red home-999', H.call999); call.href = 'tel:999'; call.prepend(icon('phone', { size: 'sm' }));
+    box.replaceChildren(h, call, el('p', 'note', H.noOfficial));
+    let all;
+    try { all = await placesOf(a.district); } catch { box.append(el('p', 'note', T().loadFailed)); return; }
+    if (!box.isConnected) return;
+    const from = fromPoint(a);
+    const kinds = [
+      ['police', 'police', (p) => p.subcategory === 'police'],
+      ['fire', 'police', (p) => p.subcategory === 'fire_station'],
+      ['hospital', 'hospital', (p) => p.category === 'health' && p.subcategory === 'hospital'],
+    ];
+    const rows = el('div', 'rows');
+    for (const [k, catId, match] of kinds) {
+      let best = null, bd = Infinity;
+      for (const p of all) if (p.lat != null && match(p)) { const d = km(from, p); if (d < bd) { bd = d; best = p; } }
+      const r = el('div', 'r near-row');
+      const sq = el('span', 'cat-ic sm'); sq.append(icon(CATS.find((c) => c.id === catId).ic, { size: 'sm' }));
+      const body = el('div');
+      body.append(el('div', 't', H[k]), el('div', 'm', best ? `${nameOf(best)} · ${dist(bd)}` : H.notListed));
+      r.append(sq, body);
+      if (best) {
+        const acts = el('div', 'acts');
+        const b = el('button', 'btn', H.onMap); b.type = 'button'; b.prepend(icon('pin', { size: 'sm' }));
+        b.addEventListener('click', () => ctx.go(`c/${catId}/${encodeURIComponent(best.id)}`));
+        acts.append(b); r.append(acts);
+      }
+      rows.append(r);
+    }
+    box.append(rows, el('p', 'small', me ? T().fromYou : T().fromCentre));
+  }
+  // Is this saved site area (pilot districts) inside the same upazila as the area?
+  const sameUpazila = (last, a) => !!(base && last && a && slug(a.district) === last.district
+    && centreOf(a.district, last.upazila) === centreOf(a.district, a.upazila));
+
+  const label = (a) => (base && a && centreOf(a.district, a.upazila) ? areaLabel(a) : '');
+  // the header chip: open the area picker in the home area card
+  function openPicker(box) {
+    const p = box.querySelector('.near-picker'); if (!p) return;
+    p.hidden = false; p.scrollIntoView({ block: 'center' }); p.querySelector('select')?.focus({ preventScroll: true });
+  }
+  return { show, close: closeMap, home, homeNums, sameUpazila, forget, label, openPicker };
 }

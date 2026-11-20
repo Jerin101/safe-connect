@@ -7,7 +7,7 @@
   .rail { display: grid; gap: 20px; align-content: start; min-width: 0; }
   /* The sidebar comes after the feed in the page (999 first for keyboards and screen readers); CSS puts it on the left. */
   @media (min-width: 1200px) {   /* A2: from 960 px the main side menu takes room, so the page's own side column waits until 1200 px */
-    main[data-page="home"] .shell { grid-template-columns: 280px minmax(0, 1fr); gap: 32px; }
+    main[data-page="home"] .shell:has(> .rail:not([hidden])) { grid-template-columns: 280px minmax(0, 1fr); gap: 32px; }   /* R2: home has no sidebar */
     main[data-page="home"] .feed { grid-column: 2; grid-row: 1; }
     /* Sticks just under the real header (--header-h is measured in js/preview.js) and scrolls inside itself when the screen is short (issue #103). */
     main[data-page="home"] .rail { grid-column: 1; grid-row: 1; align-self: start; position: sticky; top: calc(var(--header-h) + 16px);
@@ -507,7 +507,11 @@
 .near-mapcard { padding: 8px; }
 .near-map { height: 56vh; min-height: 300px; max-height: 560px; width: 100%; border-radius: 12px; overflow: hidden; background: var(--surface-2); isolation: isolate; }
 .near-recenter { justify-self: start; }
-.near-row { grid-template-columns: 40px minmax(0, 1fr); }
+.rows { display: grid; }
+.near-row { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 4px 12px; align-items: start; padding-block: 12px; border-top: 1px solid var(--line); }
+.near-row:first-child { border-top: 0; }
+.near-row .t { font-weight: 700; overflow-wrap: anywhere; }
+.near-row .m { color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
 .near-row .acts { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; }
 .near-row.nearest { background: var(--ok-soft); border-radius: 12px; padding-inline: 8px; }
 .badge.b-near { background: var(--ok); color: var(--on-color); }
@@ -525,3 +529,28 @@
 .leaflet-container { font: inherit; }
 #cat .badge { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 600; vertical-align: 1px; }
 #cat .card > .badge { justify-self: start; margin-left: 0; }
+
+/* Home (R2, #267): area card → live location → 12 categories → the area's numbers → national helplines.
+   One calm column (max 900 px), the same cards as the category pages. */
+main[data-page="home"] .feed { max-width: 900px; width: 100%; margin-inline: auto; gap: 18px; }
+.home-area:empty, .home-nums:empty { display: none; }
+.home-msgs:not(:has(> :not([hidden]))) { display: none; }   /* no empty gap when there is no message */
+.home-card, .home-nums { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.home-card { background: linear-gradient(160deg, var(--tint), var(--surface) 70%); }
+.home-card .eyebrow { margin: 0; color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+.home-place { font-size: 1.5rem; line-height: 1.25; margin: 0; overflow-wrap: anywhere; }
+.home-sun { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; color: var(--ink-2); font-weight: 600; }
+.home-sun > span { display: inline-flex; align-items: center; gap: 6px; }
+.home-sun .sc-ic { color: var(--warn); }
+.home-card .muted { color: var(--muted); margin: 0; }
+.live-big { border: 1.5px solid color-mix(in srgb, var(--violet-1) 40%, transparent); background: var(--surface); min-height: 76px; }
+.live-big strong { font-size: 1.15rem; }
+@media (min-width: 720px) {   /* the old hero rule makes .act a column; the live button stays one wide row */
+  .act.live-big { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 14px 16px; }
+  .act.live-big .arrow { display: grid; }
+}
+.home-cats { display: grid; gap: 10px; }
+.home-cats h2, .home-nums h2 { margin: 0; font-size: 1.15rem; }
+.home-999 { justify-self: start; min-height: 48px; font-size: 1.05rem; }
+.home-nums .note { margin: 0; }
+.home-nums .small { color: var(--muted); margin: 0; font-size: 0.85rem; }

@@ -48,11 +48,11 @@ async function open(hash) {
 // [address typed or linked, address shown afterwards, page, tab marked]
 const CASES = [
   ['', '#/today', 'home', 'home'], ['#/', '#/today', 'home', 'home'], ['#/home', '#/today', 'home', 'home'], ['#/today', '#/today', 'home', 'home'],
-  ['#/area', '#/near', 'area', 'area'], ['#/near', '#/near', 'area', 'area'],
+  ['#/area', '#/near', 'area', 'home'], ['#/near', '#/near', 'area', 'home'],
   ['#/send', '#/sos', 'send', 'send'], ['#/sos', '#/sos', 'send', 'send'],
-  ['#/numbers', '#/numbers', 'numbers', 'numbers'],
+  ['#/numbers', '#/numbers', 'numbers', 'home'], ['#/account', '#/account', 'account', 'account'],
   ['#/guide', '#/guide', 'guide', null], ['#/about', '#/about', 'about', null], ['#/faq', '#/faq', 'faq', null], ['#/prepare', '#/prepare', 'prepare', null],
-  ['#/area/noakhali/hatiya', '#/area/noakhali/hatiya', 'place', 'area'], ['#/c', '#/c', 'cat', 'area'], ['#/c/pharmacy', '#/c/pharmacy', 'cat', 'area'],
+  ['#/area/noakhali/hatiya', '#/area/noakhali/hatiya', 'place', 'home'], ['#/c', '#/c', 'cat', 'home'], ['#/c/pharmacy', '#/c/pharmacy', 'cat', 'home'],
   ['#/help/22.29580,91.10660,1793624400,followed', '#/help/22.29580,91.10660,1793624400,followed', 'help', null],
   ['#/no-such-page', '#/today', 'home', 'home'],
 ];
@@ -63,20 +63,24 @@ for (const [from, to, page, tab] of CASES) {
 const s = await open('#/search');
 check('#/search → #/near with the cursor in the area search', s.hash === '#/near' && s.page === 'area' && s.focus === 'areaInput', JSON.stringify(s));
 
-// The tabs themselves: four, in order, each opens its page; the sign-in button shows its text on a phone.
+// The tabs themselves (R2, #267): হোম, জরুরি সাহায্য, সাইন ইন; সেবা ডাকুন comes with R3. The categories and numbers are on home.
 await open('#/today');
 const keys = await ev(`[...document.querySelectorAll('#dock button')].map((b) => b.dataset.key)`);
-check('four main tabs: আজ, কাছে, নম্বর, বিপদে', JSON.stringify(keys) === JSON.stringify(['home', 'area', 'numbers', 'send']), JSON.stringify(keys));
-// since R1 (#267) the কাছে tab opens the categories (#/c); the area search stays at #/near and in the header
-for (const [key, hash, page] of [['area', '#/c', 'cat'], ['numbers', '#/numbers', 'numbers'], ['home', '#/today', 'home']]) {
+check('three main tabs: হোম, জরুরি সাহায্য, সাইন ইন', JSON.stringify(keys) === JSON.stringify(['home', 'send', 'account']), JSON.stringify(keys));
+for (const [key, hash, page] of [['send', '#/sos', 'send'], ['home', '#/today', 'home']]) {
   await ev(`document.querySelector('#dock [data-key="${key}"]').click()`);
   const ok = await waitFor(`location.hash === '${hash}' && document.getElementById('main').dataset.page === '${page}'`);
   check(`tab "${key}" opens ${hash}`, ok, JSON.stringify(await state()));
 }
-check('"সাইন ইন" is written in the header at 390 px', await ev(`(() => { const t = document.querySelector('#acctBtn .acct-text'); return !!t && t.getClientRects().length > 0 && t.textContent.trim().length > 0; })()`));
+// signed out: the সাইন ইন tab opens the sign-in window (nothing is loaded or sent before the person chooses)
+await ev(`document.querySelector('#dock [data-key="account"]').click()`);
+check('tab "account" (signed out) opens the sign-in window', await waitFor(`document.querySelector('dialog[open]') !== null`));
+await ev(`document.querySelector('dialog[open]')?.close(); true`);
+check('home: 12 category tiles, the area card and the live-location button', await waitFor(`document.querySelectorAll('#homeCats .cat-tile').length === 12 && !!document.getElementById('homeTitle') && document.getElementById('sosBtn').getClientRects().length > 0`));
+check('home: the old hero and sidebar are not shown', await ev(`document.querySelector('.hero').hidden && document.getElementById('rail').hidden !== false`));
 
 // Bangla and English on every tab: the tab labels and the page change language.
-const LABELS = { bn: ['আজ', 'কাছে', 'নম্বর', 'বিপদে'], en: ['Today', 'Nearby', 'Numbers', 'Emergency'] };
+const LABELS = { bn: ['হোম', 'জরুরি সাহায্য', 'সাইন ইন'], en: ['Home', 'Emergency help', 'Sign in'] };
 for (const hash of ['#/today', '#/near', '#/numbers', '#/sos']) {
   await open(hash);
   for (const lang of ['en', 'bn']) {
