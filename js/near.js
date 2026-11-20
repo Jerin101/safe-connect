@@ -1,0 +1,325 @@
+// Categories near the person (R1 of plan v4, #267): 12 categories in all 64 districts, a map inside the page with the
+// nearest place in green, the list, and a place page ("ফ্রি সহায়তা" first). Data: data/places/ (OpenStreetMap, ODbL;
+// official fuel lists) and data/upazila_centres.json. The area is kept on this phone as names only, never as a position;
+// a GPS position stays in memory for distances and is never stored or sent (CLAUDE.md rule 5).
+// Everything is built with createElement + textContent; Leaflet loads only when a map is shown.
+import { icon } from './icons.js';
+
+export const CATS = [
+  { id: 'hospital', ic: 'health', match: (p) => p.category === 'health' && ['hospital', 'clinic', 'doctors'].includes(p.subcategory) },
+  { id: 'pharmacy', ic: 'pill', match: (p) => ['pharmacy', 'chemist'].includes(p.subcategory) },
+  { id: 'police', ic: 'shield', match: (p) => ['police', 'fire_station'].includes(p.subcategory) },
+  { id: 'fuel', ic: 'fuel', match: (p) => p.subcategory === 'fuel' || p.source === 'official' },
+  { id: 'transport', ic: 'bus', match: (p) => ['bus_station', 'ferry_terminal', 'railway_station'].includes(p.subcategory) },
+  { id: 'bank', ic: 'bank', match: (p) => p.category === 'money' },
+  { id: 'market', ic: 'basket', match: (p) => p.category === 'shops' },
+  { id: 'repair', ic: 'wrench', match: (p) => ['car_repair', 'motorcycle_repair', 'motorcycle', 'bicycle'].includes(p.subcategory) },
+  { id: 'food', ic: 'bed', match: (p) => p.category === 'stay_food' },
+  { id: 'post', ic: 'mail', match: (p) => p.subcategory === 'post_office' },
+  { id: 'tourism', ic: 'wave', match: (p) => p.category === 'tourism' },
+  { id: 'shelter', ic: 'shelter', match: (p) => p.category === 'shelter' },
+];
+const AREA_KEY = 'sc-near-area';          // { district, upazila } names only
+const LIST_MAX = 40;
+const R = 6371, rad = Math.PI / 180;
+export const km = (a, b) => {
+  const dLa = (b.lat - a.lat) * rad, dLo = (b.lon - a.lon) * rad;
+  const x = Math.sin(dLa / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+};
+const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
+
+export function initNear(ctx) {
+  const { el, $, store } = ctx;
+  const T = () => ctx.texts();
+  const bnLang = () => ctx.lang() === 'bn';
+  const num = (s) => ctx.digits(s);
+  let base = null;                         // { centres, districts: [{en, bn, files}], labels }
+  const placeCache = new Map();
+  let me = null;                           // a GPS point in memory only
+  let mapObj = null, markers = [], leaflet = null;
+
+  /* ---------- data ---------- */
+  const getJSON = async (u) => { const r = await fetch(u); if (!r.ok) throw new Error(`${u} ${r.status}`); return r.json(); };
+  async function loadBase() {
+    if (base) return base;
+    const [c, idx] = await Promise.all([getJSON('data/upazila_centres.json'), getJSON('data/places/index.json')]);
+    base = { centres: c.centres, labels: idx.unnamed_labels || {},
+      districts: idx.districts.map((d) => ({ en: d.district_en, bn: d.district_bn, files: d.files.map((f) => f.file) })) };
+    return base;
+  }
+  async function placesOf(districtEn) {
+    if (!placeCache.has(districtEn)) {
+      const d = base.districts.find((x) => x.en === districtEn);
+      const files = d ? d.files : [];
+      const officialSlug = files.length ? files[0].replace(/(-\d+)?\.json$/, '') : '';
+      placeCache.set(districtEn, Promise.all([
+        Promise.all(files.map((f) => getJSON(`data/places/${f}`))).then((xs) => xs.flatMap((x) => x.places)),
+        officialSlug ? getJSON(`data/places/official_${officialSlug}.json`).then((o) => o.places.map((p) => ({ ...p, list: o.lists[p.list] }))).catch(() => []) : [],
+      ]).then(([a, b]) => [...a, ...b]).catch((e) => { placeCache.delete(districtEn); throw e; }));
+    }
+    return placeCache.get(districtEn);
+  }
+  // the centres call a Sadar upazila by the district's name ("Noakhali"), other lists say "Noakhali Sadar" or "Sadar"
+  const centreOf = (district, upazila) => {
+    const inD = base.centres.filter((c) => c.district === district);
+    const bare = String(upazila || '').replace(/\s*sadar$/i, '');
+    return inD.find((c) => c.upazila_en === upazila) || inD.find((c) => c.upazila_en === bare)
+      || (/sadar/i.test(upazila || '') && inD.find((c) => c.upazila_en === district || /sadar/i.test(c.upazila_en))) || null;
+  };
+  const districtBn = (en) => (base.districts.find((d) => d.en === en) || {}).bn || en;
+  const nameOf = (p) => {
+    if (p.source === 'official' && p.name_hidden) return bnLang() ? p.list.hidden_name_label_bn : p.list.hidden_name_label_en;
+    const n = bnLang() ? (p.name_bn || p.name_en) : (p.name_en || p.name_bn);
+    return n || (base.labels[p.subcategory] || {})[ctx.lang()] || T().noName;
+  };
+
+  /* ---------- the area (names only) ---------- */
+  function getArea() {
+    try { const a = JSON.parse(store.get(AREA_KEY) || 'null'); if (a && centreOf(a.district, a.upazila)) return a; } catch { /* broken: ask again */ }
+    const last = ctx.lastArea();                 // the site's saved area (pilot districts: key + upazila name)
+    if (last && !last.outside) {
+      const d = base.districts.find((x) => slug(x.en) === last.district);
+      if (d && centreOf(d.en, last.upazila)) return { district: d.en, upazila: last.upazila };
+    }
+    return null;
+  }
+  const setArea = (a) => store.set(AREA_KEY, JSON.stringify({ district: a.district, upazila: a.upazila }));
+  const areaLabel = (a) => { const c = centreOf(a.district, a.upazila); return `${bnLang() ? c.upazila_bn : c.upazila_en}, ${bnLang() ? districtBn(a.district) : a.district}`; };
+  const fromPoint = (a) => me || (() => { const c = centreOf(a.district, a.upazila); return { lat: c.lat, lon: c.lon }; })();
+
+  function areaBar(a, onChange) {
+    const bar = el('div', 'near-area');
+    const where = el('p', 'near-where');
+    where.append(icon('pin', { size: 'sm' }), el('span', null, a ? areaLabel(a) : T().noArea));
+    const change = el('button', 'btn', a ? T().change : T().choose); change.type = 'button';
+    const gps = el('button', 'btn', T().myLocation); gps.type = 'button'; gps.prepend(icon('locate', { size: 'sm' }));
+    const msg = el('p', 'small near-msg'); msg.setAttribute('role', 'status');
+    const picker = el('div', 'near-picker'); picker.hidden = !!a;
+    change.addEventListener('click', () => { picker.hidden = !picker.hidden; });
+    gps.addEventListener('click', () => {
+      if (!navigator.geolocation) { msg.textContent = T().noGps; return; }
+      msg.textContent = T().finding;
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const p = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        let best = null, bd = Infinity;
+        for (const c of base.centres) { const k = km(p, c); if (k < bd) { bd = k; best = c; } }
+        if (!best || bd > 60) { msg.textContent = T().outsideBd; return; }
+        me = p; setArea({ district: best.district, upazila: best.upazila_en }); onChange();
+      }, () => { msg.textContent = T().gpsFailed; }, { timeout: 15000, enableHighAccuracy: true });
+    });
+    // district and upazila for all 64 districts
+    const dSel = el('select'); dSel.setAttribute('aria-label', T().district);
+    const uSel = el('select'); uSel.setAttribute('aria-label', T().upazila);
+    const ds = [...base.districts].sort((x, y) => (bnLang() ? x.bn.localeCompare(y.bn, 'bn') : x.en.localeCompare(y.en)));
+    for (const d of ds) { const o = el('option', null, bnLang() ? d.bn : d.en); o.value = d.en; dSel.append(o); }
+    const fillU = () => {
+      uSel.replaceChildren(...base.centres.filter((c) => c.district === dSel.value)
+        .sort((x, y) => (bnLang() ? x.upazila_bn.localeCompare(y.upazila_bn, 'bn') : x.upazila_en.localeCompare(y.upazila_en)))
+        .map((c) => { const o = el('option', null, bnLang() ? c.upazila_bn : c.upazila_en); o.value = c.upazila_en; return o; }));
+    };
+    dSel.value = a ? a.district : 'Dhaka'; fillU(); if (a) uSel.value = a.upazila;
+    dSel.addEventListener('change', fillU);
+    const ok = el('button', 'btn solid', T().useArea); ok.type = 'button';
+    ok.addEventListener('click', () => { me = null; setArea({ district: dSel.value, upazila: uSel.value }); onChange(); });
+    const row = el('div', 'near-selects'); row.append(dSel, uSel);
+    picker.append(row, ok);
+    const acts = el('div', 'pills'); acts.append(gps, change);
+    bar.append(where, acts, msg, picker);
+    return bar;
+  }
+
+  /* ---------- formats and rows ---------- */
+  const dist = (k) => (k < 1 ? `${num(Math.round(k * 100) * 10)} ${T().metres}` : `${num(k.toFixed(1))} ${T().km}`);
+  const pointOf = (p) => {
+    if (p.lat != null) return { lat: p.lat, lon: p.lon, approx: false };
+    const c = p.upazila && centreOf(p.district, p.upazila);
+    return c ? { lat: c.lat, lon: c.lon, approx: true } : null;      // official lists: the upazila centre, labelled
+  };
+  // only a place with its own position can be "nearest" or get a pin; the others are listed after it as "in this upazila"
+  const exact = (it) => !!(it.pt && !it.pt.approx);
+  const rank = (it) => (exact(it) ? 0 : it.pt ? 1 : 2);
+  const distText = (it) => (exact(it) ? dist(it.k) : it.pt ? T().inUpazila : T().noLocation);
+  function badge(p) {
+    const b = el('span', 'badge', p.source === 'official' ? T().officialList : T().osm);
+    b.classList.add(p.source === 'official' ? 'b-ok' : 'b-osm');
+    return b;
+  }
+
+  /* ---------- the map (Leaflet only when shown; tiles from OpenStreetMap) ---------- */
+  function loadLeaflet() {
+    if (window.L) return Promise.resolve(window.L);
+    if (leaflet) return leaflet;
+    leaflet = new Promise((ok, fail) => {
+      const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'vendor/leaflet/leaflet.css'; document.head.append(css);
+      const s = document.createElement('script'); s.src = 'vendor/leaflet/leaflet.js'; s.onload = () => ok(window.L); s.onerror = () => { leaflet = null; fail(new Error('leaflet')); };
+      document.head.append(s);
+    });
+    return leaflet;
+  }
+  function closeMap() { if (mapObj) { mapObj.stop(); mapObj.remove(); mapObj = null; } markers = []; }
+  async function drawMap(box, from, items, cat, onPick) {
+    closeMap();
+    if (!navigator.onLine) { box.replaceChildren(el('p', 'note', T().mapOffline)); return; }
+    let L;
+    try { L = await loadLeaflet(); } catch { box.replaceChildren(el('p', 'note', T().mapFailed)); return; }
+    if (!box.isConnected) return;
+    mapObj = L.map(box, { zoomControl: true, tap: true }).setView([from.lat, from.lon], 14);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(mapObj);
+    const meIcon = el('span', 'mk-me');
+    L.marker([from.lat, from.lon], { icon: L.divIcon({ className: 'mk-wrap', html: meIcon, iconSize: [22, 22], iconAnchor: [11, 11] }), keyboard: false, zIndexOffset: 500 })
+      .addTo(mapObj).bindTooltip(el('span', null, me ? T().you : T().areaCentre));
+    const pts = [[from.lat, from.lon]];
+    items.forEach((it, i) => {
+      if (!exact(it)) return;     // no position of its own: no pin (it would sit on the area centre)
+      const pin = el('span', i === 0 ? 'mk-pin near' : 'mk-pin'); pin.append(icon(cat.ic, { size: 'sm' }));
+      const pop = el('div', 'mk-pop');
+      const go = el('button', 'btn solid', T().details); go.type = 'button'; go.addEventListener('click', () => onPick(it));
+      pop.append(el('b', null, nameOf(it.p)), el('span', 'small', `${i === 0 ? T().nearest + ' · ' : ''}${dist(it.k)}`), go);
+      const m = L.marker([it.pt.lat, it.pt.lon], { icon: L.divIcon({ className: 'mk-wrap', html: pin, iconSize: [34, 40], iconAnchor: [17, 38], popupAnchor: [0, -34] }),
+        title: nameOf(it.p), zIndexOffset: i === 0 ? 1000 : 0 }).addTo(mapObj).bindPopup(pop);
+      if (i === 0) m.bindTooltip(el('span', null, T().nearest), { permanent: true, direction: 'top', offset: [0, -34], className: 'mk-tip' });
+      markers[i] = m;
+      if (i < 8) pts.push([it.pt.lat, it.pt.lon]);
+    });
+    if (pts.length > 1) mapObj.fitBounds(pts, { padding: [36, 36], maxZoom: 16, animate: false });
+  }
+
+  /* ---------- pages ---------- */
+  async function show(view, rest) {
+    view.replaceChildren(el('div', 'skeleton'));
+    try { await loadBase(); } catch { view.replaceChildren(el('p', 'note', T().loadFailed)); return; }
+    const [catId, placeId] = rest;
+    const cat = CATS.find((c) => c.id === catId);
+    if (!cat) return hub(view);
+    const a = getArea();
+    if (!a) return askArea(view, cat);
+    let all;
+    try { all = await placesOf(a.district); } catch { view.replaceChildren(el('p', 'note', T().loadFailed)); return; }
+    const from = fromPoint(a);
+    const items = all.filter(cat.match).map((p) => { const pt = pointOf(p); return { p, pt, k: pt ? km(from, pt) : Infinity }; })
+      .sort((x, y) => rank(x) - rank(y) || x.k - y.k);
+    if (placeId) {
+      const it = items.find((x) => x.p.id === placeId);
+      if (it) return placePage(view, cat, a, it);
+    }
+    return catPage(view, cat, a, items, from);
+  }
+
+  function hub(view) {
+    closeMap();
+    const a = getArea();
+    const head = el('section', 'card');
+    const h = el('h1', 'page-title', T().hubTitle); h.id = 'catTitle'; h.tabIndex = -1;
+    head.append(h, el('p', 'muted', T().hubText), areaBar(a, () => ctx.rerender()));
+    const grid = el('div', 'cat-grid');
+    for (const c of CATS) {
+      const b = el('button', 'cat-tile'); b.type = 'button'; b.dataset.cat = c.id;
+      const sq = el('span', 'cat-ic'); sq.append(icon(c.ic));
+      b.append(sq, el('span', null, T().cats[c.id]));
+      b.addEventListener('click', () => ctx.go(`c/${c.id}`));
+      grid.append(b);
+    }
+    view.replaceChildren(head, grid);
+  }
+
+  function askArea(view, cat) {
+    closeMap();
+    const card = el('section', 'card');
+    const h = el('h1', 'page-title', T().cats[cat.id]); h.id = 'catTitle'; h.tabIndex = -1;
+    card.append(h, el('p', 'muted', T().askArea), areaBar(null, () => ctx.rerender()));
+    view.replaceChildren(backLink(), card);
+  }
+
+  function backLink(to = 'c', label = T().allCats) {
+    const b = el('button', 'linkbtn near-back', label); b.type = 'button'; b.prepend(icon('back', { size: 'sm' }));
+    b.addEventListener('click', () => ctx.go(to));
+    return b;
+  }
+
+  function catPage(view, cat, a, items, from) {
+    const head = el('section', 'card');
+    const h = el('h1', 'page-title', T().cats[cat.id]); h.id = 'catTitle'; h.tabIndex = -1;
+    head.append(h, areaBar(a, () => ctx.rerender()));
+    const shown = items.slice(0, LIST_MAX);
+    const mapCard = el('section', 'card near-mapcard');
+    const mapBox = el('div', 'near-map'); mapBox.setAttribute('role', 'region'); mapBox.setAttribute('aria-label', T().mapLabel);
+    const recenter = el('button', 'btn near-recenter', T().nearMe); recenter.type = 'button'; recenter.prepend(icon('locate', { size: 'sm' }));
+    recenter.addEventListener('click', () => { if (mapObj) mapObj.setView([from.lat, from.lon], 15); });
+    mapCard.append(mapBox, recenter, el('p', 'small', T().mapNote));
+    const list = el('section', 'card');
+    if (!shown.length) list.append(el('p', 'note', T().empty));
+    else {
+      list.append(el('p', 'small', me ? T().fromYou : T().fromCentre));
+      const rows = el('div', 'rows');
+      const open = (it) => ctx.go(`c/${cat.id}/${encodeURIComponent(it.p.id)}`);
+      shown.forEach((it, i) => {
+        const r = el('div', i === 0 && exact(it) ? 'r near-row nearest' : 'r near-row');
+        const sq = el('span', 'cat-ic sm'); sq.append(icon(cat.ic, { size: 'sm' }));
+        const body = el('div');
+        const title = el('div', 't', nameOf(it.p));
+        if (i === 0 && exact(it)) title.append(el('span', 'badge b-near', T().nearest));
+        title.append(badge(it.p));
+        body.append(title, el('div', 'm', distText(it)));
+        const acts = el('div', 'acts');
+        if (exact(it)) {
+          const onMap = el('button', 'btn', T().onMap); onMap.type = 'button'; onMap.prepend(icon('pin', { size: 'sm' }));
+          onMap.addEventListener('click', () => { const m = markers[i]; if (!m || !mapObj) return; mapCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); mapObj.setView(m.getLatLng(), 16); m.openPopup(); });
+          acts.append(onMap);
+        }
+        const det = el('button', 'btn solid', T().details); det.type = 'button'; det.addEventListener('click', () => open(it));
+        acts.append(det);
+        r.append(sq, body, acts);
+        rows.append(r);
+      });
+      list.append(rows);
+    }
+    list.append(el('p', 'small', T().credit));
+    view.replaceChildren(backLink(), head, mapCard, list);
+    drawMap(mapBox, from, shown, cat, (it) => ctx.go(`c/${cat.id}/${encodeURIComponent(it.p.id)}`));
+  }
+
+  function placePage(view, cat, a, it) {
+    closeMap();
+    const p = it.p;
+    const head = el('section', 'card');
+    const h = el('h1', 'page-title', nameOf(p)); h.id = 'catTitle'; h.tabIndex = -1;
+    const meta = el('p', 'muted', `${T().cats[cat.id]} · ${distText(it)}`);
+    head.append(h, meta, badge(p));
+    // ফ্রি সহায়তা: the place's own official number (none of our place lists has one yet), the area's official numbers, 999
+    const free = el('section', 'card');
+    const fh = el('div', 'sec-head'); fh.append(el('h2', null, T().freeHelp));
+    const call = el('a', 'btn red', T().call999); call.href = 'tel:999'; call.prepend(icon('phone', { size: 'sm' }));
+    fh.append(call);
+    free.append(fh, el('p', 'note', T().noNumber));
+    const rows = ctx.areaRows(a);
+    const own = (rows || []).filter((r) => !r.querySelector('a[href="tel:999"]'));   // 999 is already the red button
+    if (own.length) { free.append(el('h3', null, T().areaNumbers)); const box = el('div', 'rows'); box.append(...own); free.append(box); }
+    else {
+      const more = el('a', 'btn', T().nationalNumbers); more.href = '#/numbers';
+      free.append(el('p', 'small', T().noAreaNumbers), more);
+    }
+    // the way there: our map first, Google Maps for turn-by-turn
+    const way = el('section', 'card');
+    way.append(el('h2', null, T().wayThere));
+    const acts = el('div', 'pills');
+    if (it.pt) {
+      const g = el('a', 'btn', T().googleMaps); g.target = '_blank'; g.rel = 'noopener noreferrer'; g.prepend(icon('nav', { size: 'sm' }));
+      g.href = it.pt.approx ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.name_en || ''} ${a.upazila} ${a.district}`.trim())}`
+        : `https://www.google.com/maps/dir/?api=1&destination=${it.pt.lat},${it.pt.lon}`;
+      acts.append(g);
+    }
+    const share = el('button', 'btn', T().share); share.type = 'button'; share.prepend(icon('share', { size: 'sm' }));
+    share.addEventListener('click', async () => {
+      const text = `${nameOf(p)} (${T().cats[cat.id]}), ${areaLabel(a)}`;
+      try { if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); ctx.toast(T().copied); } } catch { /* the person closed the share sheet */ }
+    });
+    acts.append(share);
+    if (/^https:\/\//.test(p.source_url || '')) { const s = el('a', 'btn ghost', T().source); s.href = p.source_url; s.target = '_blank'; s.rel = 'noopener noreferrer'; acts.append(s); }
+    way.append(acts);
+    if (it.pt && it.pt.approx) way.append(el('p', 'small', T().approxNote));
+    view.replaceChildren(backLink(`c/${cat.id}`, T().backToList), head, free, way);
+  }
+
+  return { show, close: closeMap };
+}

@@ -16,6 +16,7 @@ const FILES = [
   'manifest.json',
   'js/preview.js',
   'js/icons.js',             // line icons (A1)
+  'js/near.js',              // categories near the person (R1)
   'js/bipod.js',
   'js/prepare.js',
   'js/data.js',
@@ -32,6 +33,8 @@ const FILES = [
   'js/lang/bn.json',
   'js/lang/en.json',
   'data/national_hotlines.json',
+  'data/upazila_centres.json',   // the area picker and "my location" (R1)
+  'data/places/index.json',      // which places file each district uses (R1)
   'data/manual_additions.json',
   'data/villages.json',
   'data/villages_bbs.json',

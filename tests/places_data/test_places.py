@@ -193,7 +193,8 @@ class OsmPlaceRules(unittest.TestCase):
         self.assertTrue(self.osm(unnamed=True, category="shops", subcategory="marketplace"))
         self.assertTrue(self.osm())                                   # no name and not marked unnamed
         self.assertEqual(set(R.UNNAMED_LABELS), {"hospital", "clinic", "pharmacy", "fuel", "atm", "bank", "police",
-                                                 "fire_station", "bus_station", "ferry_terminal"})
+                                                 "fire_station", "bus_station", "ferry_terminal",
+                                                 "post_office", "railway_station"})   # R0 (#268)
         for sub, lab in R.UNNAMED_LABELS.items():
             self.assertTrue(lab["bn"].endswith("(নাম জানা নেই)") and lab["en"].endswith("(name not known)"), sub)
 
