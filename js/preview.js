@@ -494,7 +494,7 @@ const PUBLIC = { '': 'today', home: 'today', area: 'near', send: 'sos' };
 const INTERNAL = { today: 'home', near: 'area', sos: 'send', search: 'area' };
 function go(path, intent = null) {
   pending = intent;
-  const hash = `#/${path in PUBLIC ? PUBLIC[path] : path}`;
+  const hash = `#/${Object.hasOwn(PUBLIC, path) ? PUBLIC[path] : path}`;
   if (location.hash === hash) route(); else location.hash = hash;
 }
 // Address of a place, built from the ids already in the data: district key, upazila and union names, place id.
@@ -555,12 +555,12 @@ async function route() {
   if (routeMsg) { msg(''); routeMsg = false; }
   let [name = 'today', ...rest] = readHash();
   // an old address or a bare one shows its page under the new address, so a shared or bookmarked link never breaks
-  if (!rest.length && (['', '#', '#/'].includes(location.hash) || name in PUBLIC)) {
+  if (!rest.length && (['', '#', '#/'].includes(location.hash) || Object.hasOwn(PUBLIC, name))) {
     name = PUBLIC[name] || name; history.replaceState(null, '', `#/${name}`);
   }
   let search = false;
   if (name === 'search') { search = true; history.replaceState(null, '', '#/near'); }
-  name = INTERNAL[name] || name;
+  name = Object.hasOwn(INTERNAL, name) ? INTERNAL[name] : name;
   if (!PAGES.includes(name)) { history.replaceState(null, '', '#/today'); name = 'home'; rest = []; }
   if (search && !intent?.after) intent = { ...intent, after: () => $('areaInput').focus({ preventScroll: true }) };
   const titleOf = (key) => () => P().titles[key];
