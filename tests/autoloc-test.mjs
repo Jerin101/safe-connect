@@ -155,7 +155,7 @@ check('ON: switch shows on', await ev(`document.getElementById('homeAutoSw').che
 await open({ store: { 'sc-autoloc': '1', 'sc-autoloc-asked': '1' } });
 check('ON + granted: area set on page open', await waitFor(`(JSON.parse(localStorage.getItem('sc-last') || 'null') || {}).area?.bn === ${JSON.stringify(A.bn)}`));
 const shown = await ev(`[document.getElementById('areaChipT').textContent, document.getElementById('hcAreaT').textContent, document.getElementById('myAreaTitle').textContent, document.querySelectorAll('#myArea .first-row').length, location.hash]`);
-check('chip, sidebar card and home list show the area', shown[0] && shown[0] === shown[1] && shown[2].includes(shown[0]) && shown[3] >= 2 && shown[4] === '', JSON.stringify(shown));
+check('chip, sidebar card and home list show the area', shown[0] && shown[0] === shown[1] && shown[2].includes(shown[0]) && shown[3] >= 2 && shown[4] === '#/today', JSON.stringify(shown));   // home's address is #/today since A2
 check('first-call list starts with 999', await ev(`document.querySelector('#myArea .first-row a[href^="tel:"]')?.getAttribute('href') === 'tel:999'`));
 geo = await ev('__geo');
 check('page open: one position read + one watch', geo.get >= 1 && geo.active === 1, JSON.stringify(geo));
@@ -202,7 +202,7 @@ await waitFor(`!window.__old && !document.getElementById('area').hidden`);
 await wait(2500);
 check('reloading that area link: same auto area, no "changed" note', (await last()).area?.bn === A.bn && await ev(`document.getElementById('toast').hidden && location.hash === '#/area/coxsbazar/ukhia'`));
 await ev(`document.getElementById('autoNoteBtn').click(); true`);
-check('"Go to the switch" opens home with focus on the switch', await waitFor(`location.hash === '' || location.hash === '#/'`) && await waitFor(`document.activeElement?.id === 'homeAutoSw'`));
+check('"Go to the switch" opens home with focus on the switch', await waitFor(`location.hash === '#/today'`) && await waitFor(`document.activeElement?.id === 'homeAutoSw'`));
 await ev(`document.getElementById('myAreaAll').click(); true`);
 check('own area page: no auto-location note', await waitFor(`!document.getElementById('area').hidden && location.hash.startsWith('#/area/noakhali')`) && await ev(`document.getElementById('autoNote').hidden`));
 
@@ -235,7 +235,7 @@ await ev(`document.getElementById('homeAutoYes').click(); true`);
 check('denied: calm message shown', await waitFor(`document.querySelector('#myArea [role=status]')?.textContent.length > 10`));
 check('denied: switch shows off and setting is off', await ev(`!document.getElementById('homeAutoSw').checked && localStorage.getItem('sc-autoloc') === '0'`));
 await ev(`[...document.querySelectorAll('#myArea .auto-box .btn')].pop().click(); true`);
-check('denied: "Choose your area" opens the area finder', await waitFor(`location.hash === '#/area' && document.activeElement.id === 'areaInput'`));
+check('denied: "Choose your area" opens the area finder', await waitFor(`location.hash === '#/near' && document.activeElement.id === 'areaInput'`));
 // Setting left on but permission taken away later: no prompt, setting turned off, message shown.
 await open({ store: { 'sc-autoloc': '1', 'sc-autoloc-asked': '1' } });
 geo = await ev('__geo');

@@ -33,6 +33,7 @@
   --font: "Manrope", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
   --r: 16px;
   --ic: 20px; --ic-sm: 16px; --ic-lg: 24px;   /* line icons from js/icons.js (A1) */
+  --dock-h: 62px; --rail-w: 208px;   /* main tabs: bottom bar height on phones, side menu width from 960 px (A2) */
   --header-h: 150px;   /* height of header.site; js/preview.js replaces it with the measured height (issue #103) */
   --fade: 200ms;   /* page change fade (issue #71) */
   color-scheme: light;
@@ -158,7 +159,7 @@ header.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 8; 
 .chip-short { display: none; }
 /* Small phones: the logo keeps only its mark, and on the smallest the account button keeps only its icon, so 999 always keeps its place. */
 @media (max-width: 430px) { .hpill.round#themeBtn { display: none; } .hpill { padding: 6px 8px; } .hpill.lang { padding: 6px 4px; } .bar1 { gap: 8px; padding-block: 10px; } .top-actions { gap: 5px; }
-  .acct { width: 44px; padding: 0; justify-content: center; } .acct .acct-text { display: none; } }
+  .acct { padding: 6px 10px; } .acct > svg, .acct > .av { display: none; } }
 @media (max-width: 400px) { .logo .logo-text { display: none; } }
 @media (max-width: 340px) { .areachip > svg { display: none; } }   /* smallest phones: the name gets the room */
 /* Phones: the area name needs the room more than the logo; "Home" is the first tab, so the logo button steps aside (#108). */
@@ -432,3 +433,29 @@ textarea { resize: vertical; line-height: 1.45; }
 .sc-ic { width: var(--ic); height: var(--ic); flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .sc-ic.sm { width: var(--ic-sm); height: var(--ic-sm); }
 .sc-ic.lg { width: var(--ic-lg); height: var(--ic-lg); }
+
+/* Main tabs (A2, #257): a bar at the bottom on phones, a side menu from 960 px. The old scrolling tab row is gone;
+   the search pill stays in the second header row on wide screens, a round search button takes its place on phones. */
+.dock { position: fixed; z-index: 7; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+  padding: 0 max(8px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(8px, env(safe-area-inset-left, 0px)); }
+.dock-btn { position: relative; display: grid; justify-items: center; align-content: center; gap: 3px; min-height: var(--dock-h); padding: 6px 2px;
+  border: 0; background: none; color: var(--muted); font: 600 0.8rem/1.25 var(--font); cursor: pointer; text-align: center; }
+.dock-btn:hover { color: var(--ink); }
+.dock-btn[aria-current="page"] { color: var(--accent); }
+.dock-btn[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 50%; translate: -50% 0; width: 28px; height: 3px; border-radius: 0 0 3px 3px; background: currentColor; }
+.dock-btn.sos, .dock-btn.sos[aria-current="page"] { color: var(--red-ink); }
+body { padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom, 0px)); }
+.toast { bottom: calc(var(--dock-h) + 12px + env(safe-area-inset-bottom, 0px)); }
+.hpill.hsearch { display: none; }
+@media (max-width: 760px) { .hpill.hsearch { display: grid; place-items: center; } .bar2 { display: none; } }
+@media (min-width: 960px) {
+  .dock { top: var(--header-h); right: auto; width: var(--rail-w); grid-template-columns: none; grid-auto-rows: min-content; align-content: start; gap: 4px;
+    padding: 16px 12px; border-top: 0; border-right: 1px solid var(--line); box-shadow: none; }
+  .dock-btn { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 10px 12px; border-radius: 10px; font-size: 0.95rem; text-align: left; }
+  .dock-btn[aria-current="page"] { background: var(--tint); }
+  .dock-btn[aria-current="page"]::before { display: none; }
+  body { padding-bottom: 0; }
+  main, footer { margin-left: var(--rail-w); }
+  .toast { bottom: 16px; }
+}

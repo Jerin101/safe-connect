@@ -16,7 +16,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const BASE = process.env.BASE || 'http://127.0.0.1:8000/';
-const PAGES = (process.env.PAGES || '#/,#/area/noakhali/hatiya,#/area,#/send,#/numbers,#/help/22.29580,91.10660,1793624400,followed').split(/,(?=#)/);
+const PAGES = (process.env.PAGES || '#/today,#/area/noakhali/hatiya,#/near,#/sos,#/numbers,#/help/22.29580,91.10660,1793624400,followed').split(/,(?=#)/);
 const GRID = Array.from({ length: 71 }, (_, i) => 320 + i * 10).concat(1024);
 const PHONES = [360, 375, 390, 393, 412, 430, 440, 480, 768, 820, 1024, 1366];
 const WIDTHS = process.env.WIDTHS ? process.env.WIDTHS.split(',').map(Number) : [...new Set([...GRID, ...PHONES])].sort((a, b) => a - b);

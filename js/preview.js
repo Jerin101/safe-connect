@@ -7,6 +7,7 @@ import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS, hasPhone } from './reports.js';
 import { helpLink, parseHelp, buildSms, smsParts, minutesAgo, pickPolice } from './bipod.js';
 import { BRANDS, LIVE, CHECKED } from './prepare.js';
+import { icon as lineIcon } from './icons.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -487,10 +488,14 @@ let firstRoute = true;       // the first page after loading does not move focus
 let routeMsg = false;        // the "area not found" line is showing
 let pageTitle = () => '';
 const slug = (s) => norm(s).toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+// The new addresses (A2, #257): #/today, #/near, #/sos and #/search are what people see; inside, the pages keep their
+// old names (home, area, send). Old addresses (#/, #/home, #/area, #/send) still open the same page.
+const PUBLIC = { '': 'today', home: 'today', area: 'near', send: 'sos' };
+const INTERNAL = { today: 'home', near: 'area', sos: 'send', search: 'area' };
 function go(path, intent = null) {
   pending = intent;
-  const hash = `#/${path}`;
-  if (location.hash === hash || (!path && !location.hash)) route(); else location.hash = hash;
+  const hash = `#/${path in PUBLIC ? PUBLIC[path] : path}`;
+  if (location.hash === hash) route(); else location.hash = hash;
 }
 // Address of a place, built from the ids already in the data: district key, upazila and union names, place id.
 function areaPath(p) {
@@ -546,10 +551,18 @@ function finish(tab, title, headingId, intent) {
   intent?.after?.();
 }
 async function route() {
-  const intent = pending; pending = null;
+  let intent = pending; pending = null;
   if (routeMsg) { msg(''); routeMsg = false; }
-  let [name = 'home', ...rest] = readHash();
-  if (!PAGES.includes(name)) { history.replaceState(null, '', '#/'); name = 'home'; rest = []; }
+  let [name = 'today', ...rest] = readHash();
+  // an old address or a bare one shows its page under the new address, so a shared or bookmarked link never breaks
+  if (!rest.length && (['', '#', '#/'].includes(location.hash) || name in PUBLIC)) {
+    name = PUBLIC[name] || name; history.replaceState(null, '', `#/${name}`);
+  }
+  let search = false;
+  if (name === 'search') { search = true; history.replaceState(null, '', '#/near'); }
+  name = INTERNAL[name] || name;
+  if (!PAGES.includes(name)) { history.replaceState(null, '', '#/today'); name = 'home'; rest = []; }
+  if (search && !intent?.after) intent = { ...intent, after: () => $('areaInput').focus({ preventScroll: true }) };
   const titleOf = (key) => () => P().titles[key];
   if (name === 'area' && rest.length) {
     const path = ['area', ...rest].join('/');
@@ -562,7 +575,7 @@ async function route() {
       return;
     }
     // Not in the data (old link, typo): home with a calm line, never an empty page.
-    history.replaceState(null, '', '#/');
+    history.replaceState(null, '', '#/today');
     showPage('home');
     msg(P().notFound); routeMsg = true;
     finish('home', titleOf('home'), 'hello', null);
@@ -1356,47 +1369,36 @@ function openQuick(key) { const q = quickPlaces().find(([k]) => k === key); if (
 const textBtn = (label, fn) => { const b = el('button', null, label); b.type = 'button'; b.addEventListener('click', fn); return b; };
 const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a; };
 
-// Second header row: one button per page (DESIGN.md §3). Each tab changes the address; the router shows the page.
+// The main tabs (A2, #257): a bottom bar on phones, a side menu from 960 px. A tab appears only when its real page
+// exists: সেবা comes with A5, ডাকুন with A12, সমস্যা with A9. About and FAQ are in the footer; "কী হয়েছে?" on home.
 const NAV = [
-  ['home', goHome],
-  ['numbers', () => go('numbers')],
-  ['area', () => findArea('', false)],
-  ['send', () => openSos(null)],
-  ['guide', () => go('guide')],
-  ['about', () => go('about')],
-  ['faq', () => go('faq')],
+  ['home', 'home', goHome],
+  ['area', 'pin', () => findArea('', false)],
+  ['numbers', 'phone', () => go('numbers')],
+  ['send', 'alert', () => openSos(null)],
 ];
 function renderNav() {
-  $('nav').replaceChildren(...NAV.map(([key, fn]) => {
-    const b = textBtn(P().nav[key], fn);
-    b.dataset.key = key;
+  const d = P().dock;
+  $('dock').replaceChildren(...NAV.map(([key, ic, fn]) => {
+    const b = el('button', key === 'send' ? 'dock-btn sos' : 'dock-btn');
+    b.type = 'button'; b.dataset.key = key;
+    b.append(lineIcon(ic), el('span', null, d[key]));
+    b.addEventListener('click', fn);
     return b;
   }));
   markTab();
 }
 function markTab() {
-  $('nav').querySelectorAll('button').forEach((b) => {
+  $('dock').querySelectorAll('button').forEach((b) => {
     if (b.dataset.key === activeTab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   });
-  const cur = $('nav').querySelector('[aria-current]');
-  if (cur) {                                          // bring the active tab into view (phones show only a few, #108)
-    const nav = $('nav'), left = cur.offsetLeft - (nav.clientWidth - cur.offsetWidth) / 2;
-    nav.scrollTo({ left: Math.max(0, left), behavior: 'auto' });
-  }
-  tabsMore();
-}
-// Which sides of the tab row have more tabs hidden: CSS fades that edge and shows an arrow.
-function tabsMore() {
-  const n = $('nav'), more = [];
-  if (n.scrollLeft > 4) more.push('start');
-  if (n.scrollLeft + n.clientWidth < n.scrollWidth - 4) more.push('end');
-  n.dataset.more = more.join(' ');
 }
 // Header texts and labels (row 1 and the search pill in row 2).
 function renderHead() {
   const h = P().head;
   $('homeBtn').setAttribute('aria-label', h.home);
-  $('nav').setAttribute('aria-label', h.navLabel);
+  $('dock').setAttribute('aria-label', h.navLabel);
+  $('hSearch').setAttribute('aria-label', h.search);
   $('langBtn').setAttribute('aria-label', h.langLabel);
   $('themeBtn').setAttribute('aria-label', h.themeLabel);
   $('h999').setAttribute('aria-label', t().call999);
@@ -1634,11 +1636,9 @@ $('backBtn').addEventListener('click', goHome);
 $('homeBtn').addEventListener('click', goHome);
 $('areaChip').addEventListener('click', () => findArea(''));
 $('hFinder').addEventListener('click', () => findArea(''));
-$('nav').addEventListener('scroll', tabsMore, { passive: true });
+$('hSearch').addEventListener('click', () => findArea(''));
 window.addEventListener('resize', markTab);      // keeps the active tab in view and the edge hints right
 const calmScroll = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
-$('tabsMore').addEventListener('click', () => $('nav').scrollBy({ left: 160, behavior: calmScroll() }));
-$('tabsBack').addEventListener('click', () => $('nav').scrollBy({ left: -160, behavior: calmScroll() }));
 $('ctaSend').addEventListener('click', () => openSos(null));
 $('hcArea').addEventListener('click', openMyArea);
 $('autoNoteBtn').addEventListener('click', goToSwitch);
