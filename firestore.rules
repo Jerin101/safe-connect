@@ -167,7 +167,6 @@ service cloud.firestore {
         && incoming().actorUid == request.auth.uid
         && ((incoming().action == 'REPORT_STATUS_CHANGED' && incoming().entity == 'reports')
           || (incoming().action == 'ROLE_CHANGED' && incoming().entity == 'users')
-          || (incoming().action == 'ISSUE_STATUS_CHANGED' && incoming().entity == 'issues')
           || (incoming().action == 'PROVIDER_APPROVED' && incoming().entity == 'providers')
           || (incoming().action == 'RATES_CHANGED' && incoming().entity == 'rates'))
         && incoming().entityId is string
@@ -181,84 +180,8 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // ---------- community problems: "সমস্যা জানান, সমাধান দেখুন" (impact plan, feature 1) ----------
-    // Anyone, even signed out, can read a problem and its status: it names no person. Who reported it is kept in
-    // issueOwners/{issueId} (that person and admins only). Limits as for reports: a verified email, at most 10 a day,
-    // 60 s apart (issueLimits/{uid}). The problem, its owner entry and the limits are one batch and each checks the
-    // others (getAfter). Never a phone number in any text. Only an admin moves the status, with an audit entry
-    // (volunteers get this for their own union in P38).
-    function issuePath(id) { return /databases/$(database)/documents/issues/$(id); }
-    function ownerPath(id) { return /databases/$(database)/documents/issueOwners/$(id); }
-    function issueLimitsAfter() { return getAfter(/databases/$(database)/documents/issueLimits/$(request.auth.uid)).data; }
+    // Text written by people: a length range and never a phone number (place status, ride labels and lists).
     function placeText(v, min, max) { return v is string && v.size() >= min && v.size() <= max && noPhone(v); }
-
-    match /issues/{issueId} {
-      allow read: if true;
-      allow create: if signedIn() && verified()
-        && issueLimitsAfter().lastIssue == issueId && issueLimitsAfter().lastAt == request.time
-        && existsAfter(ownerPath(issueId)) && getAfter(ownerPath(issueId)).data.uid == request.auth.uid
-        && incoming().keys().hasOnly(['category', 'district', 'upazila', 'union', 'landmark', 'text', 'status', 'metoo', 'createdAt', 'updatedAt'])
-        && incoming().category in ['road', 'water', 'drain', 'light', 'garbage', 'power', 'health', 'safety', 'place', 'other']
-        && incoming().district is string && incoming().district.matches('^[a-z]{3,30}$')
-        && placeText(incoming().upazila, 2, 60)
-        && placeText(incoming().get('union', ''), 0, 80)
-        && placeText(incoming().landmark, 2, 80)
-        && placeText(incoming().text, 5, 300)
-        && incoming().status == 'open' && incoming().metoo == 0
-        && incoming().createdAt == request.time && incoming().updatedAt == request.time;
-      allow update: if
-        // "আমিও": one more, only together with this person's first "আমিও" for this problem (same batch).
-        (signedIn() && verified()
-          && changed().hasOnly(['metoo'])
-          && incoming().metoo == resource.data.metoo + 1
-          && !exists(/databases/$(database)/documents/issues/$(issueId)/metoo/$(request.auth.uid))
-          && existsAfter(/databases/$(database)/documents/issues/$(issueId)/metoo/$(request.auth.uid)))
-        // The status: an admin, with an audit entry that names the old and the new status.
-        || (isAdmin()
-          && changed().hasOnly(['status', 'statusNote', 'updatedAt', 'lastAuditId'])
-          && incoming().status in ['open', 'verified', 'sent', 'working', 'solved', 'closed']
-          && incoming().status != resource.data.status
-          && placeText(incoming().get('statusNote', ''), 0, 200)
-          && incoming().updatedAt == request.time
-          && audited('issues', issueId, 'ISSUE_STATUS_CHANGED')
-          && getAfter(/databases/$(database)/documents/audit/$(incoming().lastAuditId)).data.meta.from == resource.data.status
-          && getAfter(/databases/$(database)/documents/audit/$(incoming().lastAuditId)).data.meta.to == incoming().status);
-      allow delete: if false;
-
-      match /metoo/{uid} {
-        allow read: if isMe(uid);
-        allow create: if isMe(uid) && verified()
-          && incoming().keys().hasOnly(['at']) && incoming().at == request.time
-          && getAfter(issuePath(issueId)).data.metoo == get(issuePath(issueId)).data.metoo + 1;
-        allow update, delete: if false;
-      }
-    }
-
-    match /issueOwners/{issueId} {
-      allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
-      allow create: if signedIn() && verified()
-        && incoming().keys().hasOnly(['uid', 'at'])
-        && incoming().uid == request.auth.uid && incoming().at == request.time
-        && !exists(issuePath(issueId)) && existsAfter(issuePath(issueId));
-      allow update, delete: if false;
-    }
-
-    match /issueLimits/{uid} {
-      allow read: if isMe(uid);
-      allow create, update: if isMe(uid) && verified()
-        && incoming().keys().hasOnly(['day', 'count', 'lastAt', 'lastIssue'])
-        && incoming().day == today()
-        && incoming().lastAt == request.time
-        && incoming().count is int && incoming().count <= 10
-        && incoming().lastIssue is string
-        && !exists(issuePath(incoming().lastIssue)) && existsAfter(issuePath(incoming().lastIssue))
-        && getAfter(ownerPath(incoming().lastIssue)).data.uid == uid
-        && (resource == null
-          ? incoming().count == 1
-          : (request.time >= resource.data.lastAt + duration.value(60, 's')
-            && incoming().count == (resource.data.day == today() ? resource.data.count + 1 : 1)));
-      allow delete: if false;
-    }
 
     // ---------- place status: "এখন খোলা? তেল আছে?" (impact plan, feature 5) ----------
     // placeStatus/{placeId} is public and names nobody: the latest answer, how many people gave it, and when.
@@ -302,7 +225,7 @@ service cloud.firestore {
     function provPath(uid) { return /databases/$(database)/documents/providers/$(uid); }
     function rateOf(t) { return get(/databases/$(database)/documents/rates/$(t)).data; }
     function myProv() { return get(provPath(request.auth.uid)).data; }
-    function rideTypes() { return ['ambulance', 'cng', 'bike', 'technician', 'help', 'errand']; }
+    function rideTypes() { return ['ambulance', 'cng', 'bike', 'technician', 'help', 'errand', 'towing', 'pickup']; }
     function inBd(lat, lon) { return lat is number && lon is number && lat >= 20.5 && lat <= 26.7 && lon >= 88.0 && lon <= 92.7; }
     // Stored points are rounded to 3 decimals (about 100 m, CLAUDE.md rule 5): the exact spot is only in the live
     // documents, which exist during the ride and are deleted at its end.
@@ -394,7 +317,10 @@ service cloud.firestore {
         && (incoming().type == 'errand'
           ? ('drop' in incoming() && placeText(incoming().get('items', ''), 2, 300)
             && incoming().get('maxItems', 0) is int && incoming().get('maxItems', 0) >= 1 && incoming().get('maxItems', 0) <= 20000)
-          : (!('items' in incoming()) && !('maxItems' in incoming())))
+          // "তৈরি অর্ডার তুলে আনুন": already paid at the shop, so a list to collect but no money limit
+          : incoming().type == 'pickup'
+            ? ('drop' in incoming() && placeText(incoming().get('items', ''), 2, 300) && !('maxItems' in incoming()))
+            : (!('items' in incoming()) && !('maxItems' in incoming())))
         && incoming().riderUid == request.auth.uid
         && incoming().type in rideTypes() && exists(/databases/$(database)/documents/rates/$(incoming().type))
         && incoming().district is string && incoming().district.matches('^[a-z]{3,30}$')

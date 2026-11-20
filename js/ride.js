@@ -10,7 +10,11 @@ export const RIDE_TYPES = [
   { id: 'technician', bn: 'কারিগর (ইলেকট্রিশিয়ান, প্লাম্বার, মেকানিক)', who: 'কারিগর', kmh: 20, dest: false },
   { id: 'help', bn: 'বিপদে কাছের সাহায্যকারী', who: 'স্বেচ্ছাসেবক', kmh: 15, dest: false },
   // pickup = the shop, drop = the person; the bill = the shop's receipt (up to the person's limit) + the delivery fare
-  { id: 'errand', bn: 'আনিয়ে দিন (ওষুধ, বাজার, দোকানের জিনিস)', who: 'ডেলিভারি রাইডার', kmh: 25, dest: true, errand: true },
+  { id: 'errand', bn: 'আনিয়ে দিন (ওষুধ, বাজার, দোকানের জিনিস)', who: 'ডেলিভারি রাইডার', kmh: 25, dest: true, errand: true, shop: true },
+  // pickup point: the order is already paid at the shop; the rider collects it and brings it (bill = delivery only)
+  { id: 'pickup', bn: 'তৈরি অর্ডার তুলে আনুন (দোকানে আগেই পরিশোধিত)', who: 'ডেলিভারি রাইডার', kmh: 25, dest: true, shop: true },
+  // a tow truck from the person (pickup) to a workshop or filling station (destination)
+  { id: 'towing', bn: 'টোয়িং (নষ্ট গাড়ি টেনে নেওয়া)', who: 'টোয়িং চালক', kmh: 20, dest: true },
 ];
 export const typeOf = (id) => RIDE_TYPES.find((t) => t.id === id);
 // Example rates (admin sets the real ones in rates/{type}); "help" is never billed.
@@ -21,6 +25,8 @@ export const DEFAULT_RATES = {
   technician: { base: 150, perKm: 0, perMin: 3, minFare: 200 },
   help: { base: 0, perKm: 0, perMin: 0, minFare: 0 },
   errand: { base: 30, perKm: 15, perMin: 1, minFare: 50 },
+  pickup: { base: 30, perKm: 15, perMin: 1, minFare: 50 },
+  towing: { base: 500, perKm: 60, perMin: 5, minFare: 800 },
 };
 export const ITEMS_MAX = 20000;   // the most a rider may allow for the things bought (the rules check it)
 // What the rider pays in cash: the delivery fare, plus the shop's receipt for an errand.
@@ -83,6 +89,7 @@ export function receiptText(r, bn = (x) => String(x)) {
     `${t.who}: ${r.providerName || ''}${r.vehicle ? ' (' + r.vehicle + ')' : ''}`,
     `দূরত্ব: ${bn(((r.distM || 0) / 1000).toFixed(1))} কিমি · অপেক্ষা: ${bn(r.waitMin || 0)} মিনিট`,
     ...(r.type === 'errand' ? [`জিনিস: ${r.items || ''}`, `দোকানের রসিদ: ${bn(r.itemsCost || 0)} টাকা · ডেলিভারি: ${bn(r.fare || 0)} টাকা`] : []),
+    ...(r.type === 'pickup' ? [`তুলে আনা: ${r.items || ''}`, 'জিনিসের দাম: দোকানে আগেই পরিশোধিত'] : []),
     `${r.type === 'errand' ? 'মোট' : 'ভাড়া'}: ${bn(billTotal(r))} টাকা (নগদ) · ${r.payStatus === 'paid' ? 'পরিশোধিত' : 'বাকি'}`];
   return lines.join('\n');
 }
