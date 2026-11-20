@@ -168,19 +168,15 @@ select { width: 100%; border: 1px solid var(--line); background: var(--surface-2
 /* v4: problems, trip, GD */
 textarea { width: 100%; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 12px; padding: 12px 14px; font: 1rem var(--body); resize: vertical; }
 input[type=date], input[type=time] { width: 100%; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 12px; padding: 10px 12px; font: 1rem var(--body); min-height: 44px; }
-.issue-text { margin: 6px 0; line-height: 1.5; }
 .stepper { list-style: none; display: flex; flex-wrap: wrap; gap: 4px; padding: 0; margin: 6px 0 0; }
 .stepper li { font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
 .stepper li.done { background: var(--ok-soft); color: var(--ok); }
 .stepper li.now { background: var(--brand); color: var(--brand-ink); }
-.checks { display: grid; gap: 6px; }
-.check { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; font-size: .95rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; min-height: 44px; }
-.check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--brand); flex: none; }
 .trip-late { background: var(--sos); color: var(--sos-ink); border: 0; }
 .trip-late .small { color: var(--sos-ink); }
 .big-count { font: 800 2rem var(--display); margin: 4px 0; }
 .gd-text { font: .95rem/1.7 var(--body); white-space: pre-wrap; }
-nav.dock .in { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+nav.dock .in { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 /* v5: ডাকুন (service engine) */
 .hsearch { border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 999px; width: 40px; height: 40px; display: grid; place-items: center; cursor: pointer; flex: none; }
 .hsearch[aria-current="true"] { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
@@ -227,7 +223,6 @@ nav.dock .in { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .htile .btn { min-height: 36px; padding: 6px 10px; font-size: .8rem; }
 .hhead { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: .85rem; color: var(--muted); }
 .hhead .sq { width: 32px; height: 32px; border-radius: 10px; }
-.adm-issue { display: grid; gap: 6px; margin: 8px 0; padding: 10px; border: 1px dashed var(--line); border-radius: 12px; background: var(--surface-2); }
 @media print { header.top, nav.dock, .rail, .demo-bar, .btn, .link, label, input, select, .note { display: none !important; } .card { border: 0; } }
 
 /* premium map (19 Nov 2026): pins, vehicle, "you" dot, distance chip, labels */

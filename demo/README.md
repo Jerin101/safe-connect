@@ -116,3 +116,16 @@ the tiles with a CSS filter.
   reason), with an audit entry; nobody else sees the form.
 - Tested: rules 155/155; four-browser test (map, nearest help, errand with its bill, GD, problem status, stored points)
   and the three-browser CNG ride; 320/1280 px, no console errors.
+
+## v8 (20 Nov 2026): focused scope, free help first, pickup point, towing
+- **Removed** (nobody on the team can follow them up): local problems ("সমস্যা জানান", "আমিও", status), the government
+  service guides and the GD draft. Their Firestore collections (`issues`, `issueOwners`, `issueLimits`) are closed by the
+  rules. Tabs are now আজ, কাছে, ডাকুন, বিপদে (search in the header). The v4 notes above describe what was there before.
+- **The 19 national helplines** moved to বিপদে, grouped by need, each with its source.
+- **Place page:** first **ফ্রি সহায়তা** (the place's official number, or "নম্বর পাওয়া যায়নি"; the area's police, UNO and
+  fire numbers; 999), then **সার্ভিস** (এখানে যেতে ডাকুন and the category's services). Emergency numbers always come first and are free.
+- **তৈরি অর্ডার তুলে আনুন (pickup point):** the order is already paid at the shop; a rider collects and delivers it; the
+  bill is the delivery fare only. Rules: a list (2–300 characters, no phone) and a destination, no money limit, no receipt amount.
+- **Towing:** a tow driver from the person to a vehicle workshop (car or motorcycle repair) or a filling station; own rates.
+- Tested: rules 136/136; browsers: Dhaka map and popup actions, errand (receipt + delivery), pickup (delivery only),
+  place page free help, towing to a vehicle workshop only, helplines in বিপদে, 4 tabs; 320/1280 px; no console errors.

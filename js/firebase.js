@@ -8,7 +8,7 @@ import {
   createUserWithEmailAndPassword, sendEmailVerification, reload, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, collection, getDocs, writeBatch, query, where, orderBy, limit, increment,
+  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, collection, getDocs, writeBatch, query, where, orderBy, limit,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 
@@ -193,53 +193,7 @@ export async function listAudit({ action, actorUid, from, to } = {}) {
   return snap.docs.map((d) => { const x = d.data(); return { id: d.id, ...x, at: millis(x.at) }; });
 }
 
-// Community features (impact plan): problems with "আমিও", and place status. js/community.js builds the fields in
-// exactly the shape firestore.rules allow; here only the server times are added. Reads are public (no person in them).
-export const ISSUE_LIMIT = { perDay: 10, gapMs: 60000 };
-const asIssue = (d) => { const x = d.data(); return { id: d.id, ...x, createdAt: millis(x.createdAt), updatedAt: millis(x.updatedAt) }; };
-// A new problem, its owner entry and issueLimits/{uid} in one batch (the rules check all three).
-export async function sendIssue(fields) {
-  const user = auth.currentUser;
-  if (!user) throw Object.assign(new Error('signed-out'), { code: 'signed-out' });
-  const ref = doc(collection(db, 'issues'));
-  const limRef = doc(db, 'issueLimits', user.uid);
-  const snap = await getDoc(limRef);
-  const old = snap.exists() ? snap.data() : null, now = Date.now(), today = dayNumber(now);
-  if (old && millis(old.lastAt) && now < millis(old.lastAt) + ISSUE_LIMIT.gapMs) throw Object.assign(new Error('limit-wait'), { code: 'limit-wait' });
-  if (old && old.day === today && old.count >= ISSUE_LIMIT.perDay) throw Object.assign(new Error('limit-day'), { code: 'limit-day' });
-  const batch = writeBatch(db);
-  batch.set(ref, { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-  batch.set(doc(db, 'issueOwners', ref.id), { uid: user.uid, at: serverTimestamp() });
-  batch.set(limRef, { day: today, count: old && old.day === today ? old.count + 1 : 1, lastAt: serverTimestamp(), lastIssue: ref.id });
-  await batch.commit();
-  return ref.id;
-}
-// Problems in one upazila (an equality filter only: no index needed), newest first, at most 30 reads.
-export async function listIssues(district, upazila) {
-  const snap = await getDocs(query(collection(db, 'issues'), where('district', '==', district), where('upazila', '==', upazila), limit(30)));
-  return snap.docs.map(asIssue).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-}
-// "আমিও": this person's own marker and +1 on the problem, in one batch; a second "আমিও" is refused by the rules.
-export async function meToo(issueId) {
-  const user = auth.currentUser;
-  if (!user) throw Object.assign(new Error('signed-out'), { code: 'signed-out' });
-  const mark = doc(db, 'issues', issueId, 'metoo', user.uid);
-  if ((await getDoc(mark)).exists()) throw Object.assign(new Error('already'), { code: 'already' });
-  const batch = writeBatch(db);
-  batch.set(mark, { at: serverTimestamp() });
-  batch.update(doc(db, 'issues', issueId), { metoo: increment(1) });
-  await batch.commit();
-}
-// Admins only: the new status and its audit entry in one batch.
-export async function setIssueStatus(issueId, audit, status, statusNote = '') {
-  const batch = writeBatch(db);
-  const auditRef = doc(collection(db, 'audit'));
-  batch.set(auditRef, { ...audit, at: serverTimestamp() });
-  // the note always belongs to this status: an empty note clears the old one
-  const upd = { status, statusNote, updatedAt: serverTimestamp(), lastAuditId: auditRef.id };
-  batch.update(doc(db, 'issues', issueId), upd);
-  await batch.commit();
-}
+// Place status ("এখন কেমন?"): js/community.js builds the next value; here only the server time is added. Public reads.
 // Place status: the public summary and this person's own answer, in one batch.
 export async function readPlaceStatus(placeId) {
   const snap = await getDoc(doc(db, 'placeStatus', placeId));

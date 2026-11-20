@@ -8,7 +8,7 @@ import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebas
 import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, where } from 'firebase/firestore';
 import { DEFAULT_RATES, fare, cancelFee, estimateMetres, trackAdd, billLooksRight } from '../../js/ride.js';
 
-const ADMIN = 'admin-uid', RINA = 'rina-uid', KARIM = 'karim-uid', DRIVER = 'driver-uid', DRIVER2 = 'driver2-uid', PENDING = 'pending-uid', BIKER = 'biker-uid', FENI = 'feni-uid', HELPER = 'helper-uid', RUNNER = 'runner-uid';
+const ADMIN = 'admin-uid', RINA = 'rina-uid', KARIM = 'karim-uid', DRIVER = 'driver-uid', DRIVER2 = 'driver2-uid', PENDING = 'pending-uid', BIKER = 'biker-uid', FENI = 'feni-uid', HELPER = 'helper-uid', RUNNER = 'runner-uid', COURIER = 'courier-uid', TOWER = 'tower-uid';
 let env;
 const db = (uid) => (uid ? env.authenticatedContext(uid, { email: `${uid}@example.com`, email_verified: true }) : env.unauthenticatedContext()).firestore();
 const dbUnverified = (uid) => env.authenticatedContext(uid, { email: `${uid}@example.com`, email_verified: false }).firestore();
@@ -32,6 +32,8 @@ beforeEach(async () => {
     await setDoc(doc(f, 'providers', PENDING), prov('cng', 'noakhali', false));
     await setDoc(doc(f, 'providers', BIKER), prov('bike', 'noakhali', true));
     await setDoc(doc(f, 'providers', RUNNER), prov('errand', 'noakhali', true, 'বাবু', 'বাইক, ডেলিভারি'));
+    await setDoc(doc(f, 'providers', COURIER), prov('pickup', 'noakhali', true, 'সুমন', 'বাইক, পিকআপ'));
+    await setDoc(doc(f, 'providers', TOWER), prov('towing', 'noakhali', true, 'জামাল', 'নোয়াখালী-ট-৫৫'));
     await setDoc(doc(f, 'providers', FENI), prov('cng', 'feni', true));
     await setDoc(doc(f, 'providers', HELPER), prov('help', 'noakhali', true, 'স্বেচ্ছাসেবক রুমা', 'প্রাথমিক চিকিৎসা'));
     await setDoc(doc(f, 'providers', KARIM), prov('cng', 'noakhali', true, 'কারিম', 'নোয়াখালী-থ-৯৯৯৯'));
@@ -389,5 +391,39 @@ describe('stored points and stuck rides (privacy and safety)', () => {
   test('a paid or already cancelled ride cannot be closed this way', async () => {
     const id = await rideTo('paid');
     await ago(id, 20); await assertFails(stale(db(RINA), id));
+  });
+});
+
+describe('তৈরি অর্ডার তুলে আনুন (pickup point) and towing', () => {
+  const PICK = { items: 'রহিম স্টোর: চাল ৫ কেজি, রসিদ ১২৩', };
+  const pickupFields = (extra = {}) => rideFields(RINA, { type: 'pickup', estFare: fare(DEFAULT_RATES.pickup, 1200), ...PICK, ...extra });
+  test('a pickup needs what to collect and a destination, and has no money limit (already paid at the shop)', async () => {
+    await assertFails(request(db(RINA), RINA, pickupFields({ items: 'x' })));
+    await aMinuteLater(RINA); await assertFails(request(db(RINA), RINA, pickupFields({ maxItems: 500 })));
+    await aMinuteLater(RINA); await assertFails(request(db(RINA), RINA, pickupFields({ items: 'দোকানে ফোন দিন 01711223344' })));
+    await aMinuteLater(RINA); const { drop, ...noDrop } = pickupFields(); await assertFails(request(db(RINA), RINA, noDrop));
+    await aMinuteLater(RINA); await assertSucceeds(request(db(RINA), RINA, pickupFields()));
+  });
+  test('only a pickup rider takes it; the bill is the delivery fare only (no receipt amount)', async () => {
+    await aMinuteLater(RINA);
+    const id = await request(db(RINA), RINA, pickupFields());
+    await assertFails(accept(db(RUNNER), id, 'বাবু', 'বাইক, ডেলিভারি', RUNNER));
+    await assertSucceeds(accept(db(COURIER), id, 'সুমন', 'বাইক, পিকআপ', COURIER));
+    await step(db(COURIER), id, { status: 'arrived', arrivedAt: serverTimestamp() });
+    await step(db(COURIER), id, { status: 'on_trip', startedAt: serverTimestamp() });
+    const done = (x) => step(db(COURIER), id, { status: 'completed', endedAt: serverTimestamp(), distM: 1500, waitMin: 0, fare: fare(DEFAULT_RATES.pickup, 1500, 0), payStatus: 'pending', ...x });
+    await assertFails(done({ itemsCost: 200 }));
+    await assertSucceeds(done({}));
+  });
+  test('towing: an approved tow driver takes it, the fare follows the towing rates', async () => {
+    await aMinuteLater(RINA);
+    const id = await request(db(RINA), RINA, rideFields(RINA, { type: 'towing', estFare: fare(DEFAULT_RATES.towing, 1200) }));
+    await assertFails(getDoc(doc(db(DRIVER), 'rides', id)));
+    await assertSucceeds(accept(db(TOWER), id, 'জামাল', 'নোয়াখালী-ট-৫৫', TOWER));
+    await step(db(TOWER), id, { status: 'arrived', arrivedAt: serverTimestamp() });
+    await step(db(TOWER), id, { status: 'on_trip', startedAt: serverTimestamp() });
+    const done = (f) => step(db(TOWER), id, { status: 'completed', endedAt: serverTimestamp(), distM: 4000, waitMin: 0, fare: f, payStatus: 'pending' });
+    await assertFails(done(fare(DEFAULT_RATES.cng, 4000, 0)));
+    await assertSucceeds(done(fare(DEFAULT_RATES.towing, 4000, 0)));
   });
 });
