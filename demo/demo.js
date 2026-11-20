@@ -1225,7 +1225,7 @@ function riderPanel() {
       <div><button class="btn solid" type="button" data-ride-new>নতুন ডাক</button></div>`;
   // no change for 3 hours (12 once the trip started): the rider may close it, so the page is never stuck on it
   const quiet = ['accepted', 'arrived', 'on_trip', 'completed'].includes(r.status) && r.updatedAt && Date.now() - r.updatedAt > (['accepted', 'arrived'].includes(r.status) ? 3 : 12) * 3600000;
-  const stuck = quiet ? `<div class="note">${icon('info')}<p>অনেকক্ষণ কোনো সাড়া নেই। যাত্রা বা কাজ আসলে শেষ হয়ে থাকলে ডাকটা বন্ধ করে দিন (বন্ধ করতে কোনো ফি লাগবে না; বিলের টাকা দেওয়া বাকি থাকলে সেটা দিয়ে দিন)।</p></div><div><button class="btn" type="button" data-ride-stale>ডাকটা বন্ধ করুন</button></div>` : '';
+  const stuck = quiet ? `<div class="note">${icon('info')}<p>অনেকক্ষণ কোনো সাড়া নেই। যাত্রা বা কাজ আসলে শেষ হয়ে থাকলে ডাকটা বন্ধ করে দিন (বন্ধ করতে কোনো চার্জ লাগবে না; বিলের টাকা দেওয়া বাকি থাকলে সেটা দিয়ে দিন)।</p></div><div><button class="btn" type="button" data-ride-stale>ডাকটা বন্ধ করুন</button></div>` : '';
   return `${rideStepper(r.status)}${body}${stuck}<div id="rideMsg" class="small" role="status"></div>`;
 }
 
