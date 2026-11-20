@@ -3,6 +3,8 @@
 const getJSON = async (u) => { const r = await fetch(u); if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); };
 const [D, CEN, PIDX, ALI] = await Promise.all([getJSON('data.json'), getJSON('../data/upazila_centres.json'), getJSON('../data/places/index.json'),
   getJSON('../data/aliases.json').catch(() => ({ aliases: [] }))]);
+// Police stations with their upazila, from the district police websites (data/thanas.json): for the GD draft.
+const THN = await getJSON('../data/thanas.json').catch(() => ({ thanas: [] }));
 const PILOT = new Set(['Noakhali', "Cox's Bazar"]);
 const DISTBN = Object.fromEntries(PIDX.districts.map((d) => [d.district_en, d.district_bn]));
 const UPBN_ALL = Object.fromEntries(CEN.centres.map((c) => [`${c.district}|${c.upazila_en}`, c.upazila_bn]));
@@ -131,7 +133,7 @@ async function loadPlaces(h) {
       getJSON(`../data/places/official_${slug}.json`).then((o) => o.places.map((x) => ({ ...x, list: o.lists[x.list] }))).catch(() => []),
     ]).then(([a, b]) => [...a, ...b]));
     const list = await placeCache.get(h.d);
-    if (here === h) { h.places = list; if (tab === 'near') render(); }
+    if (here === h) { h.places = list; if (tab === 'near' || tab === 'today') render(); }
   } catch { if (here === h) { h.places = []; h.placesErr = true; if (tab === 'near') render(); } }
 }
 const OSMCAT = {
@@ -273,14 +275,41 @@ const srcLink = (s) => s ? `<a class="btn ghost" href="${esc(s)}" ${ext}>উৎ�
 const srcTag = (p) => p.official ? `<span class="badge off">সরকারি তালিকা</span>${p.badge ? `<span class="badge sample">${esc(p.badge)}</span>` : ''}` : p.osm ? '<span class="badge osm">OpenStreetMap, যাচাই করা হয়নি</span>' : p.off ? '<span class="badge off">সরকারি উৎস</span>' : '';
 
 let lastItems = [];
-function placeRow(p, i) {
-  return `<div class="r">${sq(p.cat)}
-    <div><div class="t">${esc(p.name)}${srcTag(p)}</div><div class="m">${esc(p.sub || '')}</div></div>
+const ERRAND_CATS = ['pharmacy', 'shop', 'bazar', 'stay'];   // places a rider can buy from ("আনিয়ে দিন": medicine, groceries, food)
+// The extra action that fits the category (every place with a point also has "এখানে যেতে ডাকুন" and "বিস্তারিত").
+const CAT_ACT = { health: ['amb', 'অ্যাম্বুলেন্সে যান', 'amb'], workshop: ['tech', 'মেকানিক কাছে ডাকুন', 'wrench'], other: ['tech', 'কারিগর কাছে ডাকুন', 'wrench'],
+  shelter: ['help', 'সাহায্যকারী ডাকুন', 'hands'] };
+const catAct = (p) => (ERRAND_CATS.includes(p.cat) ? (p.approx ? null : ['errand', p.cat === 'stay' ? 'খাবার আনিয়ে দিন' : 'আনিয়ে দিন', 'basket']) : CAT_ACT[p.cat] || null);
+// The first place with its own point (not an upazila centre) is the closest one: green on the map and in the list.
+const nearestIdx = (items) => items.findIndex((p) => !p.noLoc && !p.approx);
+function placeRow(p, i, near) {
+  const real = !p.noLoc && i !== undefined;
+  return `<div class="r${near ? ' nearest' : ''}">${sq(p.cat)}
+    <div><div class="t">${esc(p.name)}${near ? '<span class="badge near">সবচেয়ে কাছে</span>' : ''}${srcTag(p)}</div><div class="m">${esc(p.sub || '')}</div></div>
     <div class="dist">${p.noLoc ? '<small>অবস্থান জানা নেই</small>' : p.approx ? `${p.km < 1.5 ? 'এই উপজেলায়' : '~' + distTxt(p.km)}<small>আনুমানিক অবস্থান</small>` : `${distTxt(p.km)}<small>${walkTxt(p.km)}</small>`}</div>
-    <div class="acts">${callBtn(p.phone)}${p.noLoc || i === undefined
-      ? `<a class="btn" href="${esc(dirLink(p))}" ${ext}>${icon('nav', 'sm')}${p.noLoc ? 'Google Maps-এ খুঁজুন' : 'পথ দেখান'}</a>`
-      : `<button class="btn solid" type="button" data-dest="${i}">${icon('nav', 'sm')}পথ দেখান</button>`}
-      <button class="btn" type="button" data-share="${esc(p.name + (p.phone ? ' ' + p.phone : ''))}">${icon('share', 'sm')}শেয়ার</button>${srcLink(p.src)}</div></div>`;
+    <div class="acts">${callBtn(p.phone)}${real ? `<button class="btn" type="button" data-focus="${i}">${icon('pin', 'sm')}ম্যাপে</button>
+      <button class="btn" type="button" data-goto="${i}">${icon('car', 'sm')}এখানে যেতে ডাকুন</button>${catAct(p) ? `<button class="btn" type="button" data-act="${i}">${icon(catAct(p)[2], 'sm')}${catAct(p)[1]}</button>` : ''}`
+      : `<a class="btn" href="${esc(dirLink(p))}" ${ext}>${icon('nav', 'sm')}Google Maps-এ খুঁজুন</a>`}${srcLink(p.src)}
+      ${real ? `<button class="btn ghost" type="button" data-dest="${i}">${icon('nav', 'sm')}পথ ও বিস্তারিত</button>` : ''}<button class="btn ghost" type="button" data-share="${esc(p.name + (p.phone ? ' ' + p.phone : ''))}">${icon('share', 'sm')}শেয়ার</button></div></div>`;
+}
+// "সবচেয়ে কাছের সাহায্য": the closest hospital, pharmacy, police/fire and filling station from where the person is,
+// anywhere in the 64 districts (the old site's "আমার কাছের সাহায্য", now from the places lists too).
+const HELPCATS = [['health', 'হাসপাতাল'], ['pharmacy', 'ফার্মেসি'], ['police', 'থানা ও ফায়ার'], ['fuel', 'ফিলিং স্টেশন']];
+let helpPicks = [];
+function nearHelpHtml() {
+  if (!here) return '';
+  const head = `<div class="sec-head"><h2>সবচেয়ে কাছের সাহায্য</h2><a class="btn danger" href="tel:999">${icon('phone', 'sm')}৯৯৯</a></div>`;
+  if (!here.places) return `<section class="card">${head}<div class="skeleton"></div></section>`;
+  helpPicks = HELPCATS.map(([c, n]) => {
+    let l = nearby(c);
+    if (c === 'health') { const h = l.filter((p) => p.off || String(p.sub || '').startsWith('হাসপাতাল')); if (h.length) l = h; }
+    const k = nearestIdx(l); return { c, n, p: k >= 0 ? { ...l[k], cat: c } : l[0] ? { ...l[0], cat: c } : null };
+  });
+  return `<section class="card">${head}<p class="muted">${esc(here.label)} থেকে। দূরত্ব ফোনেই হিসাব হয়।</p><div class="helpgrid">${helpPicks.map(({ c, n, p }, j) => `<div class="htile">
+      <div class="hhead">${sq(c, 'sm')}<span>${esc(n)}</span></div>
+      ${p ? `<b>${esc(p.name)}</b><span class="small">${p.noLoc ? 'অবস্থান জানা নেই' : (p.approx ? '~' : '') + distTxt(p.km)}</span>
+      <div class="pills">${p.phone ? `<a class="btn solid" href="tel:${esc(p.phone)}">${icon('phone', 'sm')}কল</a>` : ''}<button class="btn" type="button" data-hfocus="${c}">${icon('pin', 'sm')}ম্যাপে</button>${p.noLoc ? '' : `<button class="btn" type="button" data-hgoto="${j}">${icon('car', 'sm')}ডাকুন</button>`}</div>`
+      : '<span class="small">এই এলাকায় তালিকায় নেই</span>'}</div>`).join('')}</div></section>`;
 }
 function contactRows(list) {
   const rows = list.filter((x) => x && x.c && x.c.p);
@@ -315,6 +344,7 @@ function viewToday() {
         <div class="cell"><span>${icon('flag', 'sm')}ঘূর্ণিঝড় সংকেত</span><b>—</b><span>শীঘ্রই আসছে</span></div>
       </div>
       <p class="small">সূর্যোদয়-সূর্যাস্ত ফোনেই হিসাব হয়, ইন্টারনেট লাগে না। আবহাওয়া আর সংকেত আসবে আবহাওয়া অধিদপ্তর থেকে (পর্ব ৩)।</p></section>
+    ${nearHelpHtml()}
     <section class="card"><div class="sec-head"><h2>${esc(here.dBn)} জেলা</h2><button class="link" type="button" data-open-area>জেলা বদলান${icon('chev', 'sm')}</button></div>
       <p class="muted">৬৪ জেলার যেকোনোটা বেছে নিন: সেখানকার দরকারি জায়গা, দর্শনীয় স্থান আর সাহায্যের নম্বর দেখাবে।</p>
       <div class="pills"><button class="pill" type="button" data-cat="spot">${icon('wave', 'sm')}এই জেলার দর্শনীয় স্থান</button><button class="pill" type="button" data-tab-go="help">${icon('hands', 'sm')}সাহায্য ও হেল্পলাইন</button></div></section>
@@ -331,23 +361,26 @@ function viewToday() {
       ${contactRows([{ label: `${here.upBn} থানা`, c: c.police, ic: 'shield' }, { label: 'উপজেলা স্বাস্থ্য কমপ্লেক্স', c: c.health, ic: 'health' }])}</section>`;
 }
 
-let mapOn = false;
+let mapOn = true;    // the map opens inside the site with the list (OSM tiles); "ম্যাপ লুকান" hides it
+let nearMk = [];      // markers of the list on the map, by row number ("ম্যাপে" on a row opens its popup)
 function viewNear() {
   if (!here) return needHere();
   const k = CATS.find((x) => x.id === cat), osmCat = !!OSMCAT[cat], loading = osmCat && !here.places;
   const items = loading ? [] : nearby(cat).map((p) => ({ ...p, cat }));
+  lastItems = items;   // the map draws exactly this list, also when it is empty
   const pilotOnly = cat === 'union' && !here.union;
   const gq = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${GQ[cat] || k.n} ${here.upBn} ${here.dBn}`)}`;
   const empty = `<div class="note">${icon('info')}<p>${pilotOnly ? 'এই তথ্য এখন শুধু নোয়াখালী আর কক্সবাজারের জন্য আছে; বাকি জেলায় আসছে।'
     : cat === 'shelter' && !items.length ? 'এই এলাকার আশ্রয়কেন্দ্রের তালিকা এখনো নেই; সরকারি তালিকা (দুর্যোগ ব্যবস্থাপনা অধিদপ্তর) আসছে। দুর্যোগের আগাম বার্তা: ১০৯০।'
     : `${esc(here.upBn)}-এর কাছে এখনো কোনো ${esc(k.n)} আমাদের তালিকায় নেই। OpenStreetMap-এ এই এলাকার তথ্য কম; সরকারি তালিকা আর স্বেচ্ছাসেবকদের তথ্য যোগ হচ্ছে।`}</p></div>`;
-  return `<section class="card"><p class="eyebrow">আমার কাছে · ${esc(here.dBn)}</p><h1>${esc(k.n)}</h1><p class="muted">${esc(here.label)} থেকে দূরত্ব, কাছেরটা আগে। দূরত্ব ফোনেই হিসাব হয়, লোকেশন কোথাও যায় না।</p>
+  const ni = nearestIdx(items);
+  return `${nearHelpHtml()}<section class="card"><p class="eyebrow">আমার কাছে · ${esc(here.dBn)}</p><h1>${esc(k.n)}</h1><p class="muted">${esc(here.label)} থেকে দূরত্ব, কাছেরটা আগে (সবুজ)। দূরত্ব ফোনেই হিসাব হয়, লোকেশন কোথাও যায় না।</p>
       <div class="scroller" role="group" aria-label="বিভাগ">${CATS.map((x) => `<button class="pill" type="button" data-cat="${x.id}" aria-pressed="${x.id === cat}">${icon(CI[x.id][0], 'sm')}${x.n}</button>`).join('')}</div>
       <div class="pills"><button class="btn ${mapOn ? 'solid' : ''}" type="button" data-map>${icon('pin', 'sm')}${mapOn ? 'ম্যাপ লুকান' : 'ম্যাপে দেখুন'}</button>
       <a class="btn ghost" href="${esc(gq)}" ${ext}>Google Maps-এ আরও দেখুন ${icon('ext', 'sm')}</a></div></section>
-    ${mapOn ? `<section class="card"><div class="mapwrap"><div id="map" role="region" aria-label="ম্যাপ"></div></div><p class="small">ম্যাপ দেখতে ইন্টারনেট লাগে; ম্যাপ © OpenStreetMap। নিচের তালিকা নেট ছাড়াও চলে।</p></section>` : ''}
+    ${mapOn ? `<section class="card" id="mapCard"><div class="mapwrap"><div id="map" role="region" aria-label="ম্যাপ"></div></div><p class="small"><span class="dot-near"></span> সবচেয়ে কাছে · <span class="dot-me"></span> আপনি। কোনো চিহ্নে চাপ দিলে: এখানে যেতে ডাকুন${ERRAND_CATS.includes(cat) ? (cat === 'stay' ? ', খাবার আনিয়ে দিন' : ', আনিয়ে দিন') : CAT_ACT[cat] ? ', ' + CAT_ACT[cat][1] : ''}, বিস্তারিত। ম্যাপের ছবি OpenStreetMap থেকে; নিচের তালিকা নেট ছাড়াও চলে।</p></section>` : ''}
     <section class="card">${loading ? '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'
-      : items.length ? `<div class="rows">${(lastItems = items).map((p, i) => placeRow(p, i)).join('')}</div>` : empty}
+      : items.length ? `<div class="rows">${items.map((p, i) => placeRow(p, i, i === ni)).join('')}</div>` : empty}
       ${['bazar', 'edu', 'spot'].includes(cat) && items.some((p) => p.approx) ? '<p class="small">"আনুমানিক": জায়গাটার নিজের অবস্থান এখনো নেই, তাই তার ইউনিয়ন বা উপজেলার কেন্দ্র থেকে দূরত্ব দেখানো হচ্ছে।</p>' : ''}
       ${items.some((p) => p.official) ? '<p class="small">ফিলিং স্টেশন: পদ্মা অয়েল (২০১৯) আর মেঘনা পেট্রোলিয়ামের (২০২৫) সরকারি ডিলার তালিকা। তালিকায় অবস্থান নেই, তাই উপজেলার কেন্দ্র থেকে আনুমানিক দূরত্ব; উপজেলা জানা না থাকলে "অবস্থান জানা নেই"। যমুনা অয়েলের তালিকা এখনো যোগ হয়নি।</p>' : ''}
       ${items.some((p) => p.osm) ? '<p class="small">জায়গা © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> (ODbL), ১৩ নভেম্বর ২০২৬-এর তথ্য। ফোন নম্বর রাখা হয়নি, কারণ সেগুলো সরকারি উৎসের না।</p>' : ''}</section>`;
@@ -520,8 +553,9 @@ const VIEWS = { today: viewToday, near: viewNear, services: viewServices, sos: v
 const navHtml = () => TABS.map((t) => `<button class="navbtn ${t.id === 'sos' ? 'sos' : ''}" type="button" data-tab="${t.id}" aria-current="${t.id === tab || (t.id === 'near' && tab === 'dest') || (t.id === 'services' && (tab === 'help' || tab === 'gd')) || (t.id === 'today' && (tab === 'tripset' || tab === 'trip')) || (t.id === 'call' && tab === 'drive') ? 'page' : 'false'}">${icon(t.ic)}<span>${t.n}</span></button>`).join('');
 let mapObj = null;
 function render() {
-  if (mapObj) { mapObj.remove(); mapObj = null; }
-  if (rideMap) { rideMap.remove(); rideMap = null; lines = null; }
+  // stop() first: removing a map in the middle of a pan animation throws from Leaflet's next frame
+  if (mapObj) { mapObj.stop(); mapObj.remove(); mapObj = null; }
+  if (rideMap) { rideMap.stop(); rideMap.remove(); rideMap = null; lines = null; }
   $('#view').innerHTML = VIEWS[tab]();
   if (tab === 'near' && mapOn) drawMap();
   if (tab === 'dest') { drawDestMap(); loadPlaceStatus(); }
@@ -546,21 +580,38 @@ function smsBlock(text) {
 function drawMap() {
   const el = $('#map'); if (!el || !window.L || !here) return;
   if (!navigator.onLine) { el.textContent = 'ইন্টারনেট নেই, তাই ম্যাপ দেখানো যাচ্ছে না। নিচের তালিকা ব্যবহার করুন।'; return; }
-  mapObj = L.map(el).setView([here.lat, here.lon], 13);
+  mapObj = L.map(el).setView([here.lat, here.lon], 14);
   baseTiles(mapObj);
-  const brand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#0b4a4e';
-  const pts = [[here.lat, here.lon]];
-  lastItems.forEach((p, i) => {
+  const items = lastItems, ni = nearestIdx(items), pts = [[here.lat, here.lon]];
+  nearMk = [];
+  items.forEach((p, i) => {
     if (p.noLoc) return;
-    const box = document.createElement('div'), b = document.createElement('b'), s = document.createElement('div'), a = document.createElement('button');
-    b.textContent = p.name; s.textContent = `${p.sub || ''} · ${distTxt(p.km)}`; a.textContent = 'পথ দেখান'; a.type = 'button'; a.className = 'btn solid'; a.dataset.dest = String(i);
-    box.className = 'mpop'; box.append(b, s, a);
-    L.circleMarker([p.lat, p.lon], { radius: 7, color: brand, weight: 2, fillColor: brand, fillOpacity: 0.35 }).addTo(mapObj).bindPopup(box);
-    pts.push([p.lat, p.lon]);
+    const near = i === ni;
+    // the icon is our own SVG (no data in it); the name and buttons are DOM nodes with textContent
+    const mk = L.marker([p.lat, p.lon], { icon: L.divIcon({ className: `mpin place${near ? ' near' : ''}${p.approx ? ' approx' : ''}`, html: `<span class="mpin-in">${icon(CI[p.cat] ? CI[p.cat][0] : 'pin', 'sm')}</span>`,
+      iconSize: [34, 42], iconAnchor: [17, 41], tooltipAnchor: [0, -38], popupAnchor: [0, -38] }), zIndexOffset: near ? 1000 : 0, keyboard: true, title: p.name });
+    const box = document.createElement('div'); box.className = 'mpop pop';
+    const b = document.createElement('b'), sub = document.createElement('div');
+    b.textContent = p.name; sub.textContent = `${near ? 'সবচেয়ে কাছে · ' : ''}${p.approx ? 'আনুমানিক · ~' : ''}${distTxt(p.km)}`;
+    const acts = document.createElement('div'); acts.className = 'pop-acts';
+    const btn = (txt, key, cls = 'btn') => { const x = document.createElement('button'); x.type = 'button'; x.className = cls; x.textContent = txt; x.dataset[key] = String(i); acts.append(x); };
+    btn('এখানে যেতে ডাকুন', 'goto', 'btn solid');
+    if (catAct(p)) btn(catAct(p)[1], 'act');
+    btn('পথ ও বিস্তারিত', 'dest', 'btn ghost');
+    box.append(b, sub, acts);
+    mk.addTo(mapObj).bindPopup(box);
+    if (near) mk.bindTooltip(tipNode('সবচেয়ে কাছে'), { permanent: true, direction: 'top', className: 'mtip tip-near' });
+    nearMk[i] = mk; pts.push([p.lat, p.lon]);
   });
-  // The chosen area on top; zoom to it and the 8 nearest places (far ones stay on the map, outside the first view).
-  L.marker([here.lat, here.lon], { icon: meIcon(), keyboard: false, zIndexOffset: 500 }).addTo(mapObj).bindTooltip(tipNode('বাছাই করা এলাকা'), { className: 'mtip' });
-  if (pts.length > 1) mapObj.fitBounds(pts.slice(0, 9), { padding: [28, 28], maxZoom: 15 });
+  L.marker([here.lat, here.lon], { icon: meIcon(), keyboard: false, zIndexOffset: 500 }).addTo(mapObj).bindTooltip(tipNode('আপনি'), { className: 'mtip' });
+  if (pts.length > 1) mapObj.fitBounds(pts.slice(0, 9), { padding: [32, 32], maxZoom: 16, animate: false });
+}
+// Open one row's place on the map inside the site (no Google Maps).
+function focusPlace(i) {
+  if (!mapOn) { mapOn = true; render(); }
+  const mk = nearMk[i]; if (!mk || !mapObj) return;
+  $('#mapCard')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  mapObj.setView(mk.getLatLng(), Math.max(mapObj.getZoom(), 16)); mk.openPopup();
 }
 document.addEventListener('click', (ev) => {
   const t = ev.target.closest('button, a'); if (!t) return;
@@ -575,6 +626,11 @@ document.addEventListener('click', (ev) => {
   if (t.dataset.copy) return copy(t.dataset.copy);
   if ('map' in t.dataset) { mapOn = !mapOn; render(); return; }
   if (t.dataset.dest) { dest = lastItems[Number(t.dataset.dest)]; if (dest) { tab = 'dest'; render(); window.scrollTo(0, 0); } return; }
+  if (t.dataset.focus) { focusPlace(Number(t.dataset.focus)); return; }
+  if (t.dataset.goto) { const p = lastItems[Number(t.dataset.goto)]; if (p) callTo(p, 'ride'); return; }
+  if (t.dataset.act) { const p = lastItems[Number(t.dataset.act)]; if (p) callTo(p, catAct(p)[0]); return; }
+  if (t.dataset.hfocus) { cat = t.dataset.hfocus; mapOn = true; tab = 'near'; render(); const k = nearestIdx(lastItems); setTimeout(() => focusPlace(k >= 0 ? k : 0), 50); return; }
+  if (t.dataset.hgoto) { const h = helpPicks[Number(t.dataset.hgoto)]; if (h && h.p) callTo(h.p, h.c === 'health' ? 'amb' : 'ride'); return; }
   if (t.dataset.around) { const p = aroundList[Number(t.dataset.around)]; if (p) { dest = { ...p, km: hav(here, p) }; tab = 'dest'; render(); window.scrollTo(0, 0); } return; }
   if (t.dataset.tripDest) { situ = null; tab = 'sos'; render(); $('#sosOut').innerHTML = smsBlock(t.dataset.tripDest); return; }
   if (t.id === 'goUp') { const c = CEN.centres[Number($('#upSel').value)]; if (c) { $('#areaDlg').close(); locate(c.lat, c.lon, `${c.upazila_bn}, ${DISTBN[c.district]}`); } return; }
@@ -646,7 +702,7 @@ function drawDestMap() {
   L.marker([dest.lat, dest.lon], { icon: pinIcon('drop', 'flag'), keyboard: false, zIndexOffset: 800 }).addTo(mapObj).bindTooltip(tipNode(dest.name), { permanent: true, direction: 'auto', className: 'mtip' });
   mapChip(el, `${dest.approx ? '~' : ''}${distTxt(dest.km)} সোজা দূরত্ব · ${walkTxt(dest.km)}`);
   pts.push([here.lat, here.lon]);
-  mapObj.fitBounds(pts.length > 2 ? pts : [[here.lat, here.lon], [dest.lat, dest.lon]], { paddingTopLeft: [40, 50], paddingBottomRight: [40, 70], maxZoom: 16 });
+  mapObj.fitBounds(pts.length > 2 ? pts : [[here.lat, here.lon], [dest.lat, dest.lon]], { paddingTopLeft: [40, 50], paddingBottomRight: [40, 70], maxZoom: 16, animate: false });
 }
 
 /* ===================== v4: features that help people act (impact plan) ===================== */
@@ -753,6 +809,10 @@ function viewIssues() {
     : `<div class="rows">${st.list.map((x) => `<div class="r issue"><span class="sq ${x.status === 'solved' ? 't-ok' : 't-sun'}">${icon('flag')}</span>
         <div><div class="t">${esc(ISSUE_BN[x.category] || x.category)} · ${esc(x.landmark)}</div><div class="m">${esc(x.union ? x.union + ' · ' : '')}${x.createdAt ? agoBn(x.createdAt) : ''}</div>
         <p class="issue-text">${esc(x.text)}</p>${stepper(x.status)}${x.statusNote ? `<p class="small">${icon('info', 'sm')} ${esc(x.statusNote)}</p>` : ''}</div><span></span>
+        ${st.admin ? `<div class="adm-issue"><label class="small" for="ist-${esc(x.id)}">অ্যাডমিন: অবস্থা বদলান</label>
+          <div class="row2"><select id="ist-${esc(x.id)}">${ISSUE_ST.map(([k, n]) => `<option value="${k}"${k === x.status ? ' selected' : ''}>${n}</option>`).join('')}</select>
+          <input type="search" id="isn-${esc(x.id)}" maxlength="200" placeholder="নোট (যেমন: ইউনিয়ন পরিষদকে জানানো হয়েছে)"></div>
+          <div><button class="btn" type="button" data-issue-status="${esc(x.id)}">অবস্থা সংরক্ষণ</button></div></div>` : ''}
         <div class="acts"><button class="btn" type="button" data-metoo="${esc(x.id)}">${icon('hands', 'sm')}আমিও (${bn(x.metoo || 0)})</button>
         <button class="btn ghost" type="button" data-share="${esc(`${ISSUE_BN[x.category] || ''}: ${x.landmark}, ${here.upBn} — SafeConnect-এ "আমিও" দিন`)}">${icon('share', 'sm')}শেয়ার</button></div></div>`).join('')}</div>`;
   return `<section class="card"><p class="eyebrow">সমস্যা জানান, সমাধান দেখুন</p><h1>${esc(here.upBn)}-এর সমস্যা</h1>
@@ -763,13 +823,30 @@ function viewIssues() {
 const ISSUE_CATS = [['road', 'রাস্তা ভাঙা'], ['water', 'খাবার পানি'], ['drain', 'জলাবদ্ধতা বা ড্রেন'], ['light', 'সড়কবাতি নষ্ট'], ['garbage', 'ময়লা'],
   ['power', 'বিদ্যুৎ'], ['health', 'স্বাস্থ্যসেবা'], ['safety', 'নিরাপত্তা'], ['place', 'জায়গার তথ্য ভুল বা বন্ধ'], ['other', 'অন্য সমস্যা']];
 const ISSUE_BN = Object.fromEntries(ISSUE_CATS);
+const ISSUE_ST = [['open', 'জানানো হয়েছে'], ['verified', 'যাচাই হয়েছে'], ['sent', 'অফিসকে জানানো হয়েছে'], ['working', 'কাজ চলছে'], ['solved', 'সমাধান হয়েছে'], ['closed', 'বন্ধ (কারণ লিখুন)']];
+async function setIssueNow(id) {
+  const msg = $('#issueRowMsg'), x = (issuesState.list || []).find((i) => i.id === id);
+  const to = $(`#ist-${id}`).value, note = ($(`#isn-${id}`).value || '').trim();
+  if (!x || to === x.status) { msg.textContent = 'নতুন একটা অবস্থা বাছুন।'; return; }
+  if (to === 'closed' && note.length < 3) { msg.textContent = 'বন্ধ করলে কারণটা নোটে লিখুন।'; return; }
+  msg.textContent = 'সংরক্ষণ হচ্ছে…';
+  try {
+    const [fb, cm] = await FB(); const u = await fb.currentUser(); if (!u) { msg.textContent = 'আগে সাইন ইন করুন।'; return; }
+    await fb.setIssueStatus(id, cm.issueAuditFields(u.uid, id, x.status, to), to, note);
+    toast('অবস্থা বদলানো হয়েছে (অডিট লগে আছে)'); await loadIssues(true);
+  } catch (e) { msg.textContent = e && e.code === 'permission-denied' ? 'সংরক্ষণ হয়নি: নোটে ফোন নম্বর থাকলে বাদ দিন; শুধু অ্যাডমিন অবস্থা বদলাতে পারেন।' : errText(e); }
+}
 const issueKey = () => `${here.d}|${here.up}`;
 async function loadIssues(force) {
   if (!here) return;
   if (!force && issuesState.key === issueKey() && (issuesState.list || issuesState.err || issuesState.loading)) return;
   issuesState = { ...issuesState, key: issueKey(), list: null, err: '', loading: true };
   if (!navigator.onLine) { issuesState.err = 'ইন্টারনেট নেই। জানানো সমস্যার তালিকা দেখতে নেট লাগে।'; if (tab === 'issues') render(); return; }
-  try { const [fb, cm] = await FB(); issuesState.list = await fb.listIssues(cm.districtKey(here.d), here.up); }
+  try {
+    const [fb, cm] = await FB(); issuesState.list = await fb.listIssues(cm.districtKey(here.d), here.up);
+    // an admin sees a status form on each problem (the rules refuse it for anyone else, with an audit entry)
+    try { const u = await fb.currentUser(); issuesState.admin = !!u && (await fb.roleOf(u, 'bn')) === 'admin'; } catch { issuesState.admin = false; }
+  }
   catch (e) { issuesState.err = 'তালিকা আনা যায়নি: ' + errText(e); }
   issuesState.loading = false;
   if (tab === 'issues') render();
@@ -830,7 +907,9 @@ function tickTrip() { clearInterval(tripTimer); tripTimer = setInterval(() => { 
 /* ---- জিডির খসড়া (stays on the phone; nothing is stored or sent) ---- */
 const LOST = ['মোবাইল ফোন', 'জাতীয় পরিচয়পত্র (NID)', 'পাসপোর্ট', 'ব্যাংক বা এটিএম কার্ড', 'শিক্ষাগত সার্টিফিকেট', 'ড্রাইভিং লাইসেন্স', 'অন্য কিছু'];
 function viewGd() {
-  const thana = here ? `${here.upBn} থানা` : '';
+  // the station that serves this upazila, from the official list; where the list has none, the person types it
+  const th = here && THN.thanas.find((x) => x.district === here.d && x.upazila_en === here.up);
+  const thana = th ? th.name_bn : '';
   return `<button class="link" type="button" data-tab-go="services">${icon('back', 'sm')}সব সেবা</button>
     <section class="card"><p class="eyebrow">কাগজ সহায়ক</p><h1>জিডির খসড়া</h1>
       <p class="muted">তথ্যগুলো শুধু এই ফোনে থাকে, কোথাও পাঠানো বা রাখা হয় না। খসড়া কপি বা প্রিন্ট করে থানায় নিয়ে যান।</p>
@@ -838,7 +917,8 @@ function viewGd() {
       <label for="gdDetail">বিবরণ (চাইলে: রং, মডেল, কার্ড বা NID নম্বরের শেষ ৪ সংখ্যা)</label><input type="search" id="gdDetail" maxlength="120">
       <label for="gdWhere">কোথায় হারিয়েছে</label><input type="search" id="gdWhere" maxlength="80" placeholder="যেমন: চৌমুহনী বাসস্ট্যান্ড">
       <div class="row2"><div><label for="gdDate">কবে</label><input type="date" id="gdDate"></div><div><label for="gdTime">আনুমানিক সময়</label><input type="time" id="gdTime"></div></div>
-      <label for="gdThana">কোন থানায় জমা দেবেন</label><input type="search" id="gdThana" value="${esc(thana)}" maxlength="60">
+      <label for="gdThana">কোন থানায় জমা দেবেন</label><input type="search" id="gdThana" value="${esc(thana)}" maxlength="60" placeholder="থানার নাম লিখুন">
+      <p class="small">${th ? `থানার নাম জেলা পুলিশের ওয়েবসাইট থেকে: <a href="${esc(th.source_url)}" ${ext}>উৎস</a>` : 'এই এলাকার থানার নাম আমাদের তালিকায় এখনো নেই; নিজে লিখুন।'}</p>
       <label for="gdName">আপনার নাম</label><input type="search" id="gdName" maxlength="60">
       <label for="gdFather">পিতা বা স্বামীর নাম</label><input type="search" id="gdFather" maxlength="60">
       <label for="gdAddr">আপনার ঠিকানা</label><input type="search" id="gdAddr" maxlength="120">
@@ -879,6 +959,7 @@ document.addEventListener('click', async (ev) => {
   if ('issueReload' in t.dataset) { loadIssues(true); return; }
   if ('issueSend' in t.dataset) { sendIssueNow(); return; }
   if (t.dataset.metoo) { meTooNow(t.dataset.metoo); return; }
+  if (t.dataset.issueStatus) { setIssueNow(t.dataset.issueStatus); return; }
   if (t.dataset.pst) { sendPlace(t.dataset.pst); return; }
   if ('signin' in t.dataset) { try { const [fb] = await FB(); await fb.signInGoogle(); // ডাকুন pages rebuild themselves (their fields live in callF); elsewhere a half-typed form must stay as it is
       if (tab === 'call' || tab === 'drive') { toast('সাইন ইন হয়েছে।'); render(); } else toast('সাইন ইন হয়েছে। এবার আবার চাপুন।'); } catch (e) { signinFailed(t, e); } return; }
@@ -908,16 +989,18 @@ document.addEventListener('click', async (ev) => {
 // Live positions exist only during accepted → arrived → on_trip, only for those two people, and are deleted at the end.
 const RIDE = () => Promise.all([FB(), import('../js/ride.js'), import('../js/reports.js')]);
 P.car = '<path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18v2H3z"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/><path d="M5 11h14"/>';
-const TYPE_IC = { ambulance: 'amb', cng: 'car', bike: 'bike', technician: 'wrench', help: 'hands' };
-const TYPE_TINT = { ambulance: 't-sos', cng: '', bike: 't-sun', technician: 't-sun', help: 't-ok' };
+const TYPE_IC = { ambulance: 'amb', cng: 'car', bike: 'bike', technician: 'wrench', help: 'hands', errand: 'basket' };
+const TYPE_TINT = { ambulance: 't-sos', cng: '', bike: 't-sun', technician: 't-sun', help: 't-ok', errand: 't-ok' };
 const SIM = new URLSearchParams(location.search).has('sim');   // presentation only: positions move along a line, labelled on the page
 Object.assign(FBERR, { 'signed-out': 'আগে সাইন ইন করুন।', taken: 'অন্য কেউ আগেই নিয়েছেন।', 'limit-wait': '১ মিনিট পর আবার চেষ্টা করুন।',
   'limit-day': 'আজ ১০ বার ডাকা হয়ে গেছে, কাল আবার।', norates: 'এই সেবার ভাড়া এখনো অ্যাডমিন ঠিক করেননি, তাই এখন ডাকা যাচ্ছে না।' });
 const r5 = (x) => Math.round(x * 1e5) / 1e5;
+const r3 = (x) => Math.round(x * 1e3) / 1e3;   // stored ride points: about 100 m (the rules refuse more exact ones)
 const noRates = () => !rates || !Object.keys(rates).length;   // not read yet, or read before an admin set them
 let RM = null, HP = null;        // js/ride.js, hasPhone
 let rates = null;                // { type: {base, perKm, perMin, minFare} } from Firestore
-let callF = { type: 'cng', pick: null, drop: null, pickLabel: '', dropLabel: '', picking: 'drop', online: null };
+let callF = { type: 'cng', pick: null, drop: null, pickLabel: '', dropLabel: '', picking: 'drop', online: null, area: '', items: '', maxItems: '' };
+let itemsDraft = '';   // the provider's receipt amount while typing (the job panel is redrawn on every live point)
 let ride = null, rideRole = null, rideUnsub = null, liveUnsub = null, other = null, mine = null;
 let rideMap = null, mk = {};
 let geoId = null, lastSent = null, track = null, simTimer = null, simPos = null;
@@ -938,23 +1021,27 @@ function viewCall() {
     return `<section class="card"><p class="eyebrow">ডাকুন · ${esc(tName(ride.type))}</p><div id="ridePanel">${riderPanel()}</div></section>
       <div class="mapwrap"><div id="rmap" class="rmap"></div></div>${SIM ? simNote() : ''}`;
   }
-  const t = RM ? RM.typeOf(callF.type) : { dest: true, who: 'চালক' };
+  const t = RM ? RM.typeOf(callF.type) : { dest: true, who: 'চালক' }, er = !!t.errand;
   const types = (RM ? RM.RIDE_TYPES : []).map((x) => `<button class="tcard" type="button" data-rtype="${x.id}" aria-pressed="${x.id === callF.type}">${`<span class="sq ${TYPE_TINT[x.id]}">${icon(TYPE_IC[x.id])}</span>`}<span>${esc(x.bn.split(' (')[0])}</span></button>`).join('');
   const quick = quickDrops();
   return `<section class="card hero"><p class="small">ডাকুন · ${esc(here.label)}</p><h1>যা দরকার, কাছের মানুষকে ডাকুন</h1>
-      <p class="muted">গাড়ি, অ্যাম্বুলেন্স, কারিগর বা বিপদে সাহায্যকারী। কে আসছেন, কোথায় আছেন, কত ভাড়া: সব ম্যাপে আর বিলে দেখবেন। ভাড়া অ্যাডমিনের ঠিক করা হারে, আগেই আন্দাজ দেখাবে।</p></section>
+      <p class="muted">গাড়ি, অ্যাম্বুলেন্স, কারিগর, বিপদে সাহায্যকারী, বা দোকান থেকে জিনিস আনিয়ে নিন। কে আসছেন, কোথায় আছেন, কত ভাড়া: সব ম্যাপে আর বিলে দেখবেন। ভাড়া অ্যাডমিনের ঠিক করা হারে, আগেই আন্দাজ দেখাবে।</p></section>
     <section class="card"><h2>কী দরকার?</h2><div class="tgrid">${types || '<div class="skeleton"></div>'}</div>
       ${callF.type === 'ambulance' || callF.type === 'help' ? `<div class="note">${icon('alert')}<p>জীবন ঝুঁকিতে থাকলে আগে <a href="tel:999">৯৯৯</a>-এ কল করুন। এখানে ডাকা তার বদলে নয়, পাশাপাশি।</p></div>` : ''}</section>
     <section class="card"><h2>কোথায়?</h2>
-      <label for="pickLabel">কোথা থেকে (চেনা জায়গা)</label><input type="search" id="pickLabel" maxlength="80" value="${esc(callF.pickLabel)}" placeholder="যেমন: মাইজদী বাজার, জামে মসজিদের সামনে">
-      <div class="pills"><button class="btn" type="button" data-call-gps>${icon('locate', 'sm')}আমার লোকেশন</button>${t.dest ? `<button class="pill" type="button" data-pickmode="pick" aria-pressed="${callF.picking === 'pick'}">ম্যাপে: ডাকার জায়গা</button><button class="pill" type="button" data-pickmode="drop" aria-pressed="${callF.picking === 'drop'}">ম্যাপে: গন্তব্য</button>` : ''}</div>
-      ${t.dest ? `<label for="dropLabel">কোথায় যাবেন</label><input type="search" id="dropLabel" maxlength="80" value="${esc(callF.dropLabel)}" placeholder="ম্যাপে চাপ দিন, বা নিচের একটা বাছুন">
-      ${quick.length ? `<div class="pills">${quick.map((p, i) => `<button class="pill" type="button" data-qdrop="${i}">${esc(p.name)}</button>`).join('')}</div>` : ''}` : `<p class="small">${esc(t.who)} আপনার কাছে আসবেন; গন্তব্য লাগবে না।</p>`}
+      <label for="pickLabel">${er ? 'কোন দোকান থেকে আনবেন' : 'কোথা থেকে (চেনা জায়গা)'}</label><input type="search" id="pickLabel" maxlength="80" value="${esc(callF.pickLabel)}" placeholder="${er ? 'নিচ থেকে বাছুন, বা ম্যাপে দোকানে চাপ দিন' : 'যেমন: মাইজদী বাজার, জামে মসজিদের সামনে'}">
+      ${er && quick.length ? `<div class="pills">${quick.map((p, i) => `<button class="pill" type="button" data-qpick="${i}">${esc(p.name)} · ${distTxt(p.km)}</button>`).join('')}</div>` : ''}
+      <div class="pills"><button class="btn" type="button" data-call-gps>${icon('locate', 'sm')}${er ? 'আমার লোকেশনে দিন' : 'আমার লোকেশন'}</button>${t.dest ? `<button class="pill" type="button" data-pickmode="pick" aria-pressed="${callF.picking === 'pick'}">${er ? 'ম্যাপে: দোকান' : 'ম্যাপে: ডাকার জায়গা'}</button><button class="pill" type="button" data-pickmode="drop" aria-pressed="${callF.picking === 'drop'}">${er ? 'ম্যাপে: আমার জায়গা' : 'ম্যাপে: গন্তব্য'}</button>` : ''}</div>
+      ${t.dest ? `<label for="dropLabel">${er ? 'কোথায় পৌঁছে দেবেন (আপনার কাছের চেনা জায়গা)' : 'কোথায় যাবেন'}</label><input type="search" id="dropLabel" maxlength="80" value="${esc(callF.dropLabel)}" placeholder="${er ? 'যেমন: হাসপাতাল রোড, ৩ নম্বর গলির মুখ' : 'ম্যাপে চাপ দিন, বা নিচের একটা বাছুন'}">
+      ${!er && quick.length ? `<div class="pills">${quick.map((p, i) => `<button class="pill" type="button" data-qdrop="${i}">${esc(p.name)}</button>`).join('')}</div>` : ''}` : `<p class="small">${esc(t.who)} আপনার কাছে আসবেন; গন্তব্য লাগবে না।</p>`}
+      ${er ? `<label for="items">কী কী আনতে হবে</label><textarea id="items" rows="3" maxlength="300" placeholder="যেমন: নাপা এক্সট্রা ২ পাতা, ওরস্যালাইন ৫টা, ডেটল ১টা">${esc(callF.items)}</textarea>
+      <label for="maxItems">জিনিসের দাম সর্বোচ্চ কত টাকা (এর বেশি হলে রাইডার কিনবেন না)</label><input type="tel" id="maxItems" inputmode="numeric" maxlength="5" value="${esc(callF.maxItems)}" placeholder="যেমন: ৫০০">
+      <div class="note">${icon('info')}<p>রাইডার নিজের টাকায় কিনে আনবেন; আপনি দেবেন দোকানের রসিদের টাকা + ডেলিভারি ভাড়া, নগদে। প্রেসক্রিপশন লাগে এমন ওষুধ এভাবে আনানো যাবে না।</p></div>` : ''}
       <div class="mapwrap"><div id="rmap" class="rmap"></div></div>
       <div id="est">${estHtml()}</div>
-      <button class="btn solid big" type="button" data-call-go>${icon(TYPE_IC[callF.type], 'sm')}${esc(t.who)} ডাকুন</button>
+      <button class="btn solid big" type="button" data-call-go>${icon(TYPE_IC[callF.type], 'sm')}${er ? 'আনিয়ে দিতে বলুন' : `${esc(t.who)} ডাকুন`}</button>
       <div id="callMsg" class="small" role="status"></div>
-      <p class="small">ডাকার জায়গা আর গন্তব্য এই যাত্রার রেকর্ডে থাকে (রসিদের জন্য); দেখেন আপনি, যিনি নিলেন আর অ্যাডমিন; ডাক খোলা থাকা পর্যন্ত এই জেলার অনুমোদিত সেবাদাতারাও দেখেন। লাইভ লোকেশন শুধু যাত্রার সময় দুজনে দেখেন, শেষ হলে মুছে যায়।</p></section>
+      <p class="small">ডাকার জায়গা আর গন্তব্য প্রায় ১০০ মিটার পর্যন্ত গোল করে এই যাত্রার রেকর্ডে থাকে (রসিদের জন্য); দেখেন আপনি, যিনি নিলেন আর অ্যাডমিন; ডাক খোলা থাকা পর্যন্ত এই জেলার অনুমোদিত সেবাদাতারাও দেখেন। লাইভ লোকেশন শুধু যাত্রার সময় দুজনে দেখেন, শেষ হলে মুছে যায়।</p></section>
     <section class="card"><div class="sec-head"><h2>আমার আগের ডাক</h2><button class="link" type="button" data-call-hist>দেখুন${icon('chev', 'sm')}</button></div><div id="hist"></div></section>
     <section class="card"><h2>সেবা দিতে চান?</h2><p class="muted">সিএনজি, বাইক বা অ্যাম্বুলেন্স চালান, ইলেকট্রিশিয়ান-প্লাম্বার-মেকানিক, বা বিপদে মানুষের পাশে দাঁড়াতে চান? আবেদন করুন; অনুমোদনের পর কাছের ডাক পাবেন।</p>
       <div><button class="btn" type="button" data-tab-go="drive">${icon('wrench', 'sm')}আমি সেবা দিই</button></div></section>${SIM ? simNote() : ''}`;
@@ -963,8 +1050,8 @@ const simNote = () => `<div class="note">${icon('info')}<p>প্রেজেন
 // Destination shortcuts from the places list (ambulance: hospitals; others: bazars and bus stands).
 function quickDrops() {
   try {
-    const cats = callF.type === 'ambulance' ? ['health'] : ['bazar', 'ghat'];
-    return cats.flatMap((c) => nearby(c).filter((p) => p.lat && !p.noLoc).slice(0, 3)).slice(0, 4);
+    const er = callF.type === 'errand', cats = er ? ['pharmacy', 'shop', 'bazar'] : callF.type === 'ambulance' ? ['health'] : ['bazar', 'ghat'];
+    return cats.flatMap((c) => nearby(c).filter((p) => p.lat && !p.noLoc && !(er && p.approx)).slice(0, er ? 2 : 3)).slice(0, er ? 6 : 4);
   } catch { return []; }
 }
 function estHtml() {
@@ -972,16 +1059,34 @@ function estHtml() {
   const t = RM.typeOf(callF.type), rt = rates && rates[callF.type];
   if (!rates) return '<div class="skeleton"></div>';
   if (!rt) return `<div class="note">${icon('info')}<p>${FBERR.norates}</p></div>`;
+  if (t.errand && !callF.pick) return `<p class="small">দোকান বাছলে ডেলিভারি ভাড়ার আন্দাজ দেখাবে। হার: শুরু ${tk(rt.base)} + প্রতি কিমি ${tk(rt.perKm)} · সর্বনিম্ন ${tk(rt.minFare)}</p>`;
   if (t.dest && !callF.drop) return `<p class="small">গন্তব্য বাছলে ভাড়ার আন্দাজ দেখাবে। হার: শুরু ${tk(rt.base)} + প্রতি কিমি ${tk(rt.perKm)} · সর্বনিম্ন ${tk(rt.minFare)}</p>`;
   const m = t.dest ? RM.estimateMetres(callF.pick, callF.drop) : 0, f = RM.fare(rt, m, 0);
   const on = callF.online == null ? '' : callF.online.length ? `${bn(callF.online.length)} জন ${esc(t.who)} এই জেলায় এখন কাজে আছেন` : `এই মুহূর্তে এই জেলায় কোনো ${esc(t.who)} অনলাইনে নেই; ডাকলে যিনি অনলাইনে আসবেন তিনি দেখবেন`;
+  if (t.errand) return `<div class="bill"><div><span>জিনিসের দাম</span><b>দোকানের রসিদ অনুযায়ী</b></div><div><span>আনুমানিক ডেলিভারি ভাড়া (${kmTxt(m)})</span><b>${tk(f)}</b></div></div>
+    <p class="small">${on ? on + ' · ' : ''}মোট = দোকানের রসিদ (আপনার দেওয়া সীমার মধ্যে) + ডেলিভারি ভাড়া। রসিদের টাকা আপনি বিলে দেখে "ঠিক আছে" বলবেন, তারপর নগদে দেবেন।</p>`;
   return `<div class="bill"><div><span>আনুমানিক ভাড়া</span><b>${callF.type === 'help' ? 'বিনামূল্যে' : tk(f)}</b></div>
     ${t.dest ? `<div><span>দূরত্ব (রাস্তায় আন্দাজ)</span><b>${kmTxt(m)}</b></div><div><span>সময়</span><b>${bn(RM.etaMinutes(m, callF.type))} মিনিট</b></div>` : ''}</div>
     <p class="small">${on ? on + ' · ' : ''}শেষ ভাড়া হবে আসল দূরত্ব আর অপেক্ষা (প্রথম ৩ মিনিট ফ্রি) দিয়ে। নগদে দেবেন।</p>`;
 }
+// From a place (কাছে, its map, or the nearest-help card): "এখানে যেতে ডাকুন" (pickup = here, destination = the place) or
+// "আনিয়ে দিন" (the place is the shop, the drop is here). The person can still change everything on the form.
+function callTo(p, mode = 'ride') {
+  const me = { lat: r5(here.lat), lon: r5(here.lon) }, at = { lat: r5(p.lat), lon: r5(p.lon) }, name = String(p.name || '').slice(0, 80), area = here.label.slice(0, 80);
+  // errand: the place is the shop, the drop is here · amb: an ambulance from here to the hospital · tech / help: someone
+  // comes to the person (no destination) · ride: CNG (or the bike/ambulance already chosen) from here to the place
+  const set = mode === 'errand' ? { type: 'errand', pick: at, pickLabel: name, drop: me, dropLabel: area }
+    : mode === 'tech' || mode === 'help' ? { type: mode === 'tech' ? 'technician' : 'help', pick: me, pickLabel: area, drop: null, dropLabel: '' }
+    : { type: mode === 'amb' ? 'ambulance' : ['bike', 'ambulance'].includes(callF.type) ? callF.type : 'cng', pick: me, pickLabel: area, drop: at, dropLabel: name };
+  Object.assign(callF, { area: here.label, online: null, picking: 'drop' }, set);
+  if (ride && rideRole === 'rider') toast('আগের ডাকটা এখনো চলছে; সেটা শেষ হলে নতুন ডাক দিন।');
+  setTab('call');
+}
 async function callMount() {
   try { if (!RM) { const [, rm, rp] = await RIDE(); RM = rm; HP = rp.hasPhone; if (tab === 'call') { render(); return; } } } catch (e) { $('#callMsg') && ($('#callMsg').textContent = errText(e)); return; }
-  if (!callF.pick || callF.pick.area !== here.label) callF = { ...callF, pick: { lat: here.lat, lon: here.lon, area: here.label }, drop: null, dropLabel: '' };
+  if (callF.area !== here.label) Object.assign(callF, { area: here.label, pick: null, drop: null, pickLabel: '', dropLabel: '' });
+  if (RM.typeOf(callF.type).errand) { if (!callF.drop) callF.drop = { lat: r5(here.lat), lon: r5(here.lon) }; }
+  else if (!callF.pick) callF.pick = { lat: r5(here.lat), lon: r5(here.lon) };
   drawRideMap();
   if (noRates()) { try { const [[fb]] = await RIDE(); rates = await fb.readRates(); } catch { rates = {}; } if (tab === 'call' && !ride) paintEst(); }
   // a ride left open on this phone (another tab, a reload)
@@ -1002,7 +1107,7 @@ const paintEst = () => { const el = $('#est'); if (el) el.innerHTML = estHtml();
 // The live map: pickup, destination, and the two people. Markers are moved in place (no re-render).
 function drawRideMap() {
   const el = $('#rmap'); if (!el || !window.L) return;
-  if (rideMap) { rideMap.remove(); rideMap = null; } mk = {}; lines = null; lastFitStatus = null;
+  if (rideMap) { rideMap.stop(); rideMap.remove(); rideMap = null; } mk = {}; lines = null; lastFitStatus = null;
   if (!navigator.onLine) { el.textContent = 'ইন্টারনেট নেই, তাই ম্যাপ দেখানো যাচ্ছে না।'; return; }
   const r = ride || { pickup: callF.pick, drop: callF.drop };
   rideMap = L.map(el).setView([r.pickup ? r.pickup.lat : here.lat, r.pickup ? r.pickup.lon : here.lon], 14);
@@ -1010,7 +1115,7 @@ function drawRideMap() {
   if (!ride) rideMap.on('click', (e) => {
     const p = { lat: r5(e.latlng.lat), lon: r5(e.latlng.lng) };
     if (!RM || !RM.inBangladesh(p.lat, p.lon)) return;
-    if (callF.picking === 'pick' || !RM.typeOf(callF.type).dest) { callF.pick = { ...p, area: here.label }; } else { callF.drop = p; if (!$('#dropLabel').value.trim()) $('#dropLabel').value = 'ম্যাপে বাছাই করা জায়গা'; }
+    if (callF.picking === 'pick' || !RM.typeOf(callF.type).dest) { callF.pick = p; if (RM.typeOf(callF.type).errand && !$('#pickLabel').value.trim()) $('#pickLabel').value = 'ম্যাপে বাছাই করা দোকান'; } else { callF.drop = p; if (!$('#dropLabel').value.trim()) $('#dropLabel').value = 'ম্যাপে বাছাই করা জায়গা'; }
     paintMarkers(); paintEst();
   });
   paintMarkers(true);
@@ -1050,15 +1155,16 @@ function paintMarkers(fit) {
   const r = ride || { pickup: callF.pick, drop: callF.drop, type: callF.type };
   const live = ride && RM && RM.LIVE.includes(ride.status);
   const provPos = rideRole === 'provider' ? mine : other, riderPos = rideRole === 'rider' ? mine : other;
-  setMk('pick', r.pickup, () => pinIcon('pick', 'pin'), 'ডাকার জায়গা');
-  setMk('drop', r.drop, () => pinIcon('drop', 'flag'), 'গন্তব্য');
+  const er = r.type === 'errand';
+  setMk('pick', r.pickup, () => pinIcon('pick', er ? 'basket' : 'pin'), er ? 'দোকান' : 'ডাকার জায়গা');
+  setMk('drop', r.drop, () => pinIcon('drop', 'flag'), er ? 'পৌঁছে দেওয়ার জায়গা' : 'গন্তব্য');
   setMk('prov', live || ride?.status === 'on_trip' ? provPos : null, () => vehIcon(r.type), rideRole === 'provider' ? 'আপনি' : `${tWho(r.type)}${ride && ride.providerName ? ': ' + ride.providerName : ''}`);
   setMk('me', live && ride.status !== 'on_trip' ? riderPos : null, meIcon, rideRole === 'rider' ? 'আপনি' : 'যাত্রী');
   paintLines(r, live || ride?.status === 'on_trip' ? provPos : null);
   const pts = Object.values(mk).map((m) => m.getLatLng());
   const st = ride ? ride.status : 'new', inner = rideMap.getBounds().pad(-0.12);
   if (pts.length > 1 && (fit || st !== lastFitStatus || pts.some((p) => !inner.contains(p)))) {
-    rideMap.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [40, 40], paddingBottomRight: [40, 70], maxZoom: 16 });
+    rideMap.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [40, 40], paddingBottomRight: [40, 70], maxZoom: 16, animate: false });
     lastFitStatus = st;
   }
 }
@@ -1075,15 +1181,27 @@ function billHtml(r) {
   const rt = rates && rates[r.type]; if (!rt) return `<div class="okbox">মোট ভাড়া: ${tk(r.fare || 0)}</div>`;
   const p = RM.fareParts(rt, r.distM || 0, r.waitMin || 0);
   const odd = !RM.billLooksRight(rt, r.distM || 0, r.waitMin || 0, r.fare || 0) || RM.distanceSuspicious(r.estM || 0, r.distM || 0);
-  return `<div class="bill rows-bill"><div><span>শুরু</span><b>${tk(p.base)}</b></div><div><span>দূরত্ব ${bn(p.km.toFixed(1))} কিমি × ${tk(rt.perKm)}</span><b>${tk(p.distance)}</b></div>
-    <div><span>অপেক্ষা ${bn(r.waitMin || 0)} মিনিট (৩ ফ্রি)</span><b>${tk(p.waiting)}</b></div><div class="total"><span>মোট (৫ টাকায় রাউন্ড, সর্বনিম্ন ${tk(rt.minFare)})</span><b>${tk(r.fare || 0)}</b></div></div>
+  const er = r.type === 'errand';
+  return `<div class="bill rows-bill">${er ? `<div><span>জিনিস: দোকানের রসিদ (সীমা ${tk(r.maxItems || 0)})</span><b>${tk(r.itemsCost || 0)}</b></div>` : ''}<div><span>${er ? 'ডেলিভারি: ' : ''}শুরু</span><b>${tk(p.base)}</b></div><div><span>দূরত্ব ${bn(p.km.toFixed(1))} কিমি × ${tk(rt.perKm)}</span><b>${tk(p.distance)}</b></div>
+    <div><span>অপেক্ষা ${bn(r.waitMin || 0)} মিনিট (৩ ফ্রি)</span><b>${tk(p.waiting)}</b></div>${er ? `<div><span>ডেলিভারি ভাড়া (৫ টাকায় রাউন্ড, সর্বনিম্ন ${tk(rt.minFare)})</span><b>${tk(r.fare || 0)}</b></div><div class="total"><span>মোট</span><b>${tk(RM.billTotal(r))}</b></div>` : `<div class="total"><span>মোট (৫ টাকায় রাউন্ড, সর্বনিম্ন ${tk(rt.minFare)})</span><b>${tk(r.fare || 0)}</b></div>`}</div>
     ${odd ? `<div class="note">${icon('alert')}<p>দূরত্ব আন্দাজের চেয়ে অনেক বেশি। ঠিক মনে না হলে "বিল ভুল" চাপুন; অ্যাডমিন দেখবেন।</p></div>` : ''}`;
+}
+const itemsBox = (r) => `<div class="okbox">${icon('basket', 'sm')} ${esc(r.items || '')}<br><span class="small">জিনিসের দাম সর্বোচ্চ ${tk(r.maxItems || 0)} · ${esc(r.pickup.label)} থেকে</span></div>`;
+function errandRiderBody(r, rt) {
+  const cancel = (fee) => `<div class="pills"><button class="btn ghost" type="button" data-ride-cancel>বাতিল${fee ? ` (চার্জ ${tk(fee)})` : ' (কোনো চার্জ নেই)'}</button></div>`;
+  if (r.status === 'requested') return `<h2>কাছের ডেলিভারি রাইডার খোঁজা হচ্ছে…</h2>${itemsBox(r)}<p class="muted">আনুমানিক ডেলিভারি ভাড়া ${tk(r.estFare)} + জিনিসের দাম</p>${cancel(0)}`;
+  const goal = r.status === 'on_trip' ? r.drop : r.pickup, far = other ? RM.metres(other, goal) : null;
+  const eta = far == null ? 'অবস্থান আসছে…' : `${kmTxt(far)} দূরে · প্রায় ${bn(RM.etaMinutes(far * RM.ROAD_FACTOR, r.type))} মিনিট`;
+  if (r.status === 'accepted') return `<h2>দোকানে যাচ্ছেন</h2>${provLine(r)}<p class="muted">${esc(r.pickup.label)}: ${eta}</p>${itemsBox(r)}${cancel(0)}`;
+  if (r.status === 'arrived') return `<h2>দোকানে কিনছেন</h2>${provLine(r)}${itemsBox(r)}<p class="small">রাইডার রসিদের টাকা বিলে লিখবেন; ${tk(r.maxItems || 0)}-এর বেশি হতে পারবে না।</p>${cancel(rt ? RM.cancelFee(rt, 'arrived') : 0)}`;
+  return `<h2>আপনার কাছে আনছেন</h2>${provLine(r)}<p class="muted">${eta}</p>${itemsBox(r)}`;
 }
 function riderPanel() {
   const r = ride; if (!r || !RM) return '<div class="skeleton"></div>';
   const t = RM.typeOf(r.type), rt = rates && rates[r.type];
   let body = '';
-  if (r.status === 'requested') body = `<h2>কাছের ${esc(t.who)} খোঁজা হচ্ছে…</h2><p class="muted">${esc(r.pickup.label)}${r.drop ? ' → ' + esc(r.drop.label) : ''} · আনুমানিক ${r.type === 'help' ? 'বিনামূল্যে' : tk(r.estFare)}</p>
+  if (t.errand && ['requested', 'accepted', 'arrived', 'on_trip'].includes(r.status)) body = errandRiderBody(r, rt);
+  else if (r.status === 'requested') body = `<h2>কাছের ${esc(t.who)} খোঁজা হচ্ছে…</h2><p class="muted">${esc(r.pickup.label)}${r.drop ? ' → ' + esc(r.drop.label) : ''} · আনুমানিক ${r.type === 'help' ? 'বিনামূল্যে' : tk(r.estFare)}</p>
     <p class="small">যিনি নেবেন তাঁর নাম আর ${r.type === 'technician' || r.type === 'help' ? 'পরিচয়' : 'গাড়ির নম্বর'} এখানে দেখাবে, আর ম্যাপে তাঁকে আসতে দেখবেন।</p>
     <div class="pills"><button class="btn ghost" type="button" data-ride-cancel>বাতিল (কোনো চার্জ নেই)</button></div>`;
   else if (r.status === 'accepted' || r.status === 'arrived') {
@@ -1094,7 +1212,7 @@ function riderPanel() {
   } else if (r.status === 'on_trip') body = `<h2>${r.type === 'technician' ? 'কাজ চলছে' : r.type === 'help' ? 'সাহায্য চলছে' : 'যাত্রা চলছে'}</h2>${provLine(r)}
       ${r.drop ? `<p class="muted">${esc(r.drop.label)}-এর দিকে</p>` : ''}
       <div class="pills"><button class="btn" type="button" data-ride-family>${icon('msg', 'sm')}পরিবারকে জানান</button></div><div id="sosOut"></div>`;
-  else if (r.status === 'completed') body = `<h2>বিল</h2>${provLine(r)}${billHtml(r)}<p class="muted">${esc(t.who)}কে নগদ ${tk(r.fare || 0)} দিন। তিনি "টাকা পেয়েছি" চাপলে রসিদ আসবে।</p>
+  else if (r.status === 'completed') body = `<h2>বিল</h2>${provLine(r)}${billHtml(r)}<p class="muted">${esc(t.who)}কে নগদ ${tk(RM.billTotal(r))} দিন। তিনি "টাকা পেয়েছি" চাপলে রসিদ আসবে।</p>
       ${'billOk' in r ? `<p class="small">আপনি বলেছেন: ${r.billOk ? 'বিল ঠিক আছে' : 'বিল ভুল মনে হচ্ছে'}</p>` : `<div class="pills"><button class="btn" type="button" data-bill-ok="1">${icon('check', 'sm')}বিল ঠিক আছে</button><button class="btn ghost" type="button" data-bill-ok="0">বিল ভুল মনে হচ্ছে</button></div>`}`;
   else if (r.status === 'paid') {
     const txt = RM.receiptText(r, bn);
@@ -1103,9 +1221,12 @@ function riderPanel() {
       ${'rating' in r ? `<p class="small">আপনার রেটিং: ${'★'.repeat(r.rating)}</p>` : `<p class="muted">${esc(t.who)} কেমন ছিলেন?</p><div class="stars">${[1, 2, 3, 4, 5].map((n) => `<button class="star" type="button" data-rate="${n}" aria-label="${bn(n)} তারা">★</button>`).join('')}</div>`}
       ${'billOk' in r ? '' : `<div class="pills"><button class="btn ghost" type="button" data-bill-ok="0">বিল ভুল মনে হচ্ছে</button></div>`}
       <div><button class="btn solid" type="button" data-ride-new>নতুন ডাক</button></div>`;
-  } else body = `<h2>বাতিল হয়েছে</h2><p class="muted">${r.cancelledBy === 'provider' ? `${esc(t.who)} বাতিল করেছেন। আবার ডাকুন, অন্য কেউ নেবেন।` : 'আপনি বাতিল করেছেন।'}${r.cancelFee ? ` চার্জ: ${tk(r.cancelFee)} (নগদ)।` : ''}</p>
+  } else body = `<h2>বাতিল হয়েছে</h2><p class="muted">${r.cancelledBy === 'provider' ? `${esc(t.who)} বাতিল করেছেন। আবার ডাকুন, অন্য কেউ নেবেন।` : r.cancelledBy === 'stale' ? 'সাড়া না পাওয়ায় আপনি ডাকটা বন্ধ করেছেন।' : 'আপনি বাতিল করেছেন।'}${r.cancelFee ? ` চার্জ: ${tk(r.cancelFee)} (নগদ)।` : ''}</p>
       <div><button class="btn solid" type="button" data-ride-new>নতুন ডাক</button></div>`;
-  return `${rideStepper(r.status)}${body}<div id="rideMsg" class="small" role="status"></div>`;
+  // no change for 3 hours (12 once the trip started): the rider may close it, so the page is never stuck on it
+  const quiet = ['accepted', 'arrived', 'on_trip', 'completed'].includes(r.status) && r.updatedAt && Date.now() - r.updatedAt > (['accepted', 'arrived'].includes(r.status) ? 3 : 12) * 3600000;
+  const stuck = quiet ? `<div class="note">${icon('info')}<p>অনেকক্ষণ কোনো সাড়া নেই। যাত্রা বা কাজ আসলে শেষ হয়ে থাকলে ডাকটা বন্ধ করে দিন (কোনো চার্জ নেই)।</p></div><div><button class="btn" type="button" data-ride-stale>ডাকটা বন্ধ করুন</button></div>` : '';
+  return `${rideStepper(r.status)}${body}${stuck}<div id="rideMsg" class="small" role="status"></div>`;
 }
 
 // Follow one ride (rider or provider): the ride document, the other person's live position, and our own GPS.
@@ -1125,6 +1246,7 @@ async function onRide(r) {
   if (['completed', 'paid', 'cancelled'].includes(r.status) && was && RM.LIVE.includes(was)) fb.clearLive(r.id);
   if (rideRole === 'rider' && was && was !== r.status) toast(RM.STATUS_BN[r.status]);
   if (rideRole === 'provider' && ['cancelled', 'paid'].includes(r.status)) {
+    if (r.status === 'cancelled' && r.cancelledBy === 'stale') toast('যাত্রী সাড়া না পেয়ে ডাকটা বন্ধ করেছেন।');
     if (r.status === 'cancelled' && r.cancelledBy === 'rider') toast(`যাত্রী বাতিল করেছেন${r.cancelFee ? `: চার্জ ${r.cancelFee} টাকা নিন` : ''}`);
     stopRide(); ride = null; rideRole = null; try { myJobs = await fb.myRides('provider'); } catch { /* keep the old list */ } paintDrive(); return;
   }
@@ -1184,17 +1306,28 @@ async function callGo() {
   if (noRates() || !rates[callF.type]) { try { const [[fb]] = await RIDE(); rates = await fb.readRates(); paintEst(); } catch { /* the check below says it */ } }
   const rt = rates && rates[callF.type];
   if (!rt) { msg.textContent = FBERR.norates; return; }
-  if (callF.pickLabel.length < 2) { msg.textContent = 'কোথা থেকে ডাকছেন, একটা চেনা জায়গার নাম লিখুন।'; $('#pickLabel').focus(); return; }
+  if (callF.pickLabel.length < 2) { msg.textContent = t.errand ? 'দোকানের নাম লিখুন।' : 'কোথা থেকে ডাকছেন, একটা চেনা জায়গার নাম লিখুন।'; $('#pickLabel').focus(); return; }
   if (t.dest && !callF.drop) { msg.textContent = 'গন্তব্য বাছুন: ম্যাপে চাপ দিন বা একটা জায়গা বাছুন।'; return; }
   if (t.dest && callF.dropLabel.length < 2) { msg.textContent = 'গন্তব্যের নাম লিখুন।'; return; }
   if ([callF.pickLabel, callF.dropLabel].some(HP)) { msg.textContent = 'ফোন নম্বর লিখবেন না। যিনি নেবেন তিনি অ্যাপেই আপনাকে দেখবেন।'; return; }
+  let maxItems = 0;
+  if (t.errand) {
+    if (!callF.pick) { msg.textContent = 'কোন দোকান থেকে আনবেন, উপর থেকে বাছুন বা ম্যাপে দোকানে চাপ দিন।'; return; }
+    callF.items = ($('#items').value || '').trim(); callF.maxItems = ($('#maxItems').value || '').trim();
+    maxItems = Number(callF.maxItems.replace(/[০-৯]/g, (x) => '০১২৩৪৫৬৭৮৯'.indexOf(x)));
+    if (callF.items.length < 2) { msg.textContent = 'কী কী আনতে হবে লিখুন।'; $('#items').focus(); return; }
+    if (HP(callF.items)) { msg.textContent = 'জিনিসের তালিকায় ফোন নম্বর লিখবেন না।'; return; }
+    if (!Number.isInteger(maxItems) || maxItems < 1 || maxItems > RM.ITEMS_MAX) { msg.textContent = `জিনিসের দাম সর্বোচ্চ কত, ১ থেকে ${bn(RM.ITEMS_MAX)} টাকার মধ্যে লিখুন।`; $('#maxItems').focus(); return; }
+  }
   msg.textContent = 'পাঠানো হচ্ছে…';
   try {
     const [[fb, cm]] = await RIDE();
-    const estM = t.dest ? RM.estimateMetres(callF.pick, callF.drop) : 0;
-    const f = { type: callF.type, district: cm.districtKey(here.d), pickup: { lat: r5(callF.pick.lat), lon: r5(callF.pick.lon), label: callF.pickLabel.slice(0, 80) },
+    const pk = { lat: r3(callF.pick.lat), lon: r3(callF.pick.lon) }, dp = t.dest ? { lat: r3(callF.drop.lat), lon: r3(callF.drop.lon) } : null;
+    const estM = t.dest ? RM.estimateMetres(pk, dp) : 0;
+    const f = { type: callF.type, district: cm.districtKey(here.d), pickup: { ...pk, label: callF.pickLabel.slice(0, 80) },
       estM, estFare: RM.fare(rt, estM, 0) };
-    if (t.dest) f.drop = { lat: r5(callF.drop.lat), lon: r5(callF.drop.lon), label: callF.dropLabel.slice(0, 80) };
+    if (t.dest) f.drop = { ...dp, label: callF.dropLabel.slice(0, 80) };
+    if (t.errand) { f.items = callF.items.slice(0, 300); f.maxItems = maxItems; }
     const id = await fb.requestRide(f);
     store.set('sc-ride', id); ride = { id, ...f, status: 'requested' }; rideRole = 'rider'; render();
     await followRide(id, 'rider');
@@ -1239,6 +1372,13 @@ async function driveMount() {
     paintDrive();
   } catch (e) { box.innerHTML = `<section class="card"><p class="muted">${esc(errText(e))}</p></section>`; }
 }
+// While online: say so again every 10 minutes (riders count only the last 30); closing the page takes the provider offline.
+let onlineTimer = null;
+function keepOnline() {
+  clearInterval(onlineTimer); onlineTimer = null;
+  if (pvOnline && prov) onlineTimer = setInterval(() => { RIDE().then(([[fb]]) => fb.goOnline(prov)).catch(() => {}); }, 10 * 60000);
+}
+addEventListener('pagehide', () => { if (pvOnline) RIDE().then(([[fb]]) => fb.goOffline()).catch(() => {}); });
 function paintDrive() {
   const box = $('#drivePanel'); if (!box || tab !== 'drive') return;
   const typeOpts = RM.RIDE_TYPES.map((x) => `<option value="${x.id}">${esc(x.bn)}</option>`).join('');
@@ -1254,7 +1394,7 @@ function paintDrive() {
     const job = ride && rideRole === 'provider' && ['accepted', 'arrived', 'on_trip', 'completed'].includes(ride.status);
     html = `<section class="card"><div class="sec-head"><h2>${esc(prov.name)}</h2><span class="badge off">অনুমোদিত</span></div><p class="muted">${esc(tName(prov.type))} · ${esc(prov.vehicle)}</p>
         <div class="pills"><button class="btn ${pvOnline ? '' : 'solid'}" type="button" data-pv-online>${pvOnline ? 'কাজ বন্ধ করুন' : 'কাজ শুরু (অনলাইন)'}</button></div>
-        <p class="small">${pvOnline ? 'অনলাইনে আছেন: যাত্রীরা দেখবেন এই জেলায় কতজন কাজে আছেন (আপনার জায়গা প্রায় ১০০ মিটার ঘুরিয়ে)।' : 'অনলাইনে না থাকলেও নতুন ডাক দেখবেন; অনলাইনে থাকলে যাত্রীরা জানবেন কেউ আছেন।'}</p></section>
+        <p class="small">${pvOnline ? 'অনলাইনে আছেন: যাত্রীরা দেখবেন এই জেলায় কতজন কাজে আছেন (আপনার জায়গা কাউকে দেখানো বা রাখা হয় না)।' : 'অনলাইনে না থাকলেও নতুন ডাক দেখবেন; অনলাইনে থাকলে যাত্রীরা জানবেন কেউ আছেন।'}</p></section>
       ${job ? `<section class="card"><p class="eyebrow">এখনকার কাজ</p><div id="jobPanel">${jobPanel()}</div></section><div class="mapwrap"><div id="rmap" class="rmap"></div></div>`
         : `<section class="card"><h2>নতুন ডাক</h2><div id="reqList">${reqHtml()}</div><div id="jobMsg" class="small" role="status"></div></section>`}
       <section class="card"><h2>আয়</h2>${earnHtml()}</section>`;
@@ -1268,7 +1408,8 @@ function reqHtml() {
   if (!reqs.length) return `<p class="muted">এই মুহূর্তে ${esc(here.dBn)} জেলায় নতুন কোনো ডাক নেই। এই পাতা খোলা রাখুন: ডাক এলে নিজে থেকে দেখাবে।</p>`;
   const from = mine || (here ? { lat: here.lat, lon: here.lon } : null);
   return `<div class="rows">${reqs.map((r) => `<div class="r req"><span class="sq ${TYPE_TINT[r.type]}">${icon(TYPE_IC[r.type])}</span>
-    <div><div class="t">${esc(r.pickup.label)}${r.drop ? ' → ' + esc(r.drop.label) : ''}</div><div class="m">${from ? kmTxt(RM.metres(from, r.pickup)) + ' দূরে · ' : ''}${r.drop ? kmTxt(r.estM) + ' যাত্রা · ' : ''}${r.type === 'help' ? 'বিনামূল্যে' : 'আনুমানিক ' + tk(r.estFare)} · ${r.createdAt ? agoBn(r.createdAt) : 'এইমাত্র'}</div></div>
+    <div><div class="t">${esc(r.pickup.label)}${r.drop ? ' → ' + esc(r.drop.label) : ''}</div><div class="m">${from ? kmTxt(RM.metres(from, r.pickup)) + ' দূরে · ' : ''}${r.drop ? kmTxt(r.estM) + (r.type === 'errand' ? ' ডেলিভারি · ' : ' যাত্রা · ') : ''}${r.type === 'help' ? 'বিনামূল্যে' : (r.type === 'errand' ? 'ডেলিভারি আনুমানিক ' : 'আনুমানিক ') + tk(r.estFare)} · ${r.createdAt ? agoBn(r.createdAt) : 'এইমাত্র'}</div>
+    ${r.type === 'errand' ? `<div class="m">${icon('basket', 'sm')} ${esc(r.items || '')} · সর্বোচ্চ ${tk(r.maxItems || 0)}</div>` : ''}</div>
     <button class="btn solid" type="button" data-pv-accept="${esc(r.id)}">নিন</button></div>`).join('')}</div>`;
 }
 const jobDist = () => (ride && ride.status === 'on_trip' && track ? `এ পর্যন্ত ${kmTxt(track.m)} চলেছে (GPS)` : ride && ride.status === 'accepted' && mine ? `যাত্রী ${kmTxt(RM.metres(mine, other || ride.pickup))} দূরে` : '');
@@ -1277,10 +1418,17 @@ function jobPanel() {
   const where = `<p class="muted">${icon('pin', 'sm')} ${esc(r.pickup.label)}${r.drop ? ` → ${esc(r.drop.label)} (${kmTxt(r.estM)})` : ''}</p>`;
   const nav = `<a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=${r.status === 'on_trip' && r.drop ? `${r.drop.lat},${r.drop.lon}` : `${r.pickup.lat},${r.pickup.lon}`}" ${ext}>${icon('nav', 'sm')}পথ দেখান</a>`;
   let body = '';
-  if (r.status === 'accepted') body = `<h2>যাত্রীর কাছে যান</h2>${where}<p class="small" id="jobDist">${jobDist()}</p><div class="pills"><button class="btn solid" type="button" data-pv-step="arrived">পৌঁছেছি</button>${nav}<button class="btn ghost" type="button" data-pv-cancel>বাতিল</button></div>`;
+  if (t.errand && ['accepted', 'arrived', 'on_trip'].includes(r.status)) {
+    const list = `<div class="okbox">${icon('basket', 'sm')} ${esc(r.items || '')}<br><span class="small">সর্বোচ্চ ${tk(r.maxItems || 0)}: এর বেশি হলে কিনবেন না, অ্যাপে জানিয়ে বাতিল করুন</span></div>`;
+    if (r.status === 'accepted') body = `<h2>দোকানে যান</h2>${where}${list}<p class="small" id="jobDist">${jobDist()}</p><div class="pills"><button class="btn solid" type="button" data-pv-step="arrived">দোকানে পৌঁছেছি</button>${nav}<button class="btn ghost" type="button" data-pv-cancel>বাতিল</button></div>`;
+    else if (r.status === 'arrived') body = `<h2>দোকানে কিনুন</h2>${list}<p class="small">দোকান থেকে রসিদ নিন: বিলে রসিদের টাকা লিখবেন।</p><div class="pills"><button class="btn solid" type="button" data-pv-step="on_trip">কেনা শেষ: রওনা দিন</button><button class="btn ghost" type="button" data-pv-cancel>বাতিল</button></div>`;
+    else body = `<h2>জিনিস পৌঁছে দিন</h2>${where}${list}<p class="small" id="jobDist">${jobDist()}</p>
+      <label for="itemsCost">দোকানের রসিদে কত টাকা</label><input type="tel" id="itemsCost" inputmode="numeric" maxlength="5" value="${esc(itemsDraft)}" placeholder="যেমন: ২৪০">
+      <div class="pills"><button class="btn solid" type="button" data-pv-end>পৌঁছে দিয়েছি: বিল করুন</button>${nav}</div>`;
+  } else if (r.status === 'accepted') body = `<h2>যাত্রীর কাছে যান</h2>${where}<p class="small" id="jobDist">${jobDist()}</p><div class="pills"><button class="btn solid" type="button" data-pv-step="arrived">পৌঁছেছি</button>${nav}<button class="btn ghost" type="button" data-pv-cancel>বাতিল</button></div>`;
   else if (r.status === 'arrived') body = `<h2>যাত্রীর অপেক্ষা</h2>${where}<p class="small">প্রথম ৩ মিনিট অপেক্ষা ফ্রি, তারপর প্রতি মিনিট ${tk(rates[r.type]?.perMin || 0)}।</p><div class="pills"><button class="btn solid" type="button" data-pv-step="on_trip">${t.dest ? 'যাত্রা শুরু' : 'কাজ শুরু'}</button><button class="btn ghost" type="button" data-pv-cancel>বাতিল</button></div>`;
   else if (r.status === 'on_trip') body = `<h2>${t.dest ? 'যাত্রা চলছে' : 'কাজ চলছে'}</h2>${where}<p class="small" id="jobDist">${jobDist()}</p><div class="pills"><button class="btn solid" type="button" data-pv-end>${t.dest ? 'গন্তব্যে পৌঁছেছি: বিল করুন' : 'কাজ শেষ: বিল করুন'}</button>${t.dest ? nav : ''}</div>`;
-  else if (r.status === 'completed') body = `<h2>নগদ ${tk(r.fare || 0)} নিন</h2>${billHtml(r)}${'billOk' in r ? `<p class="small">যাত্রী বলেছেন: ${r.billOk ? 'বিল ঠিক আছে' : 'বিল ভুল মনে হচ্ছে'}</p>` : ''}<div><button class="btn solid" type="button" data-pv-paid>টাকা পেয়েছি</button></div>`;
+  else if (r.status === 'completed') body = `<h2>নগদ ${tk(RM.billTotal(r))} নিন</h2>${billHtml(r)}${'billOk' in r ? `<p class="small">যাত্রী বলেছেন: ${r.billOk ? 'বিল ঠিক আছে' : 'বিল ভুল মনে হচ্ছে'}</p>` : ''}<div><button class="btn solid" type="button" data-pv-paid>টাকা পেয়েছি</button></div>`;
   return `${rideStepper(r.status)}${body}<div id="jobMsg" class="small" role="status"></div>`;
 }
 function earnHtml() {
@@ -1324,12 +1472,13 @@ async function pvAction(t) {
     }
     if ('pvWithdraw' in t.dataset) { await fb.withdrawProvider(); prov = null; return paintDrive(); }
     if ('pvOnline' in t.dataset) {
-      if (pvOnline) { await fb.goOffline(); pvOnline = false; return paintDrive(); }
+      if (pvOnline) { await fb.goOffline(); pvOnline = false; keepOnline(); return paintDrive(); }
       const at = await new Promise((ok) => {
         if (SIM || !navigator.geolocation) return ok({ lat: here.lat, lon: here.lon });
         navigator.geolocation.getCurrentPosition((p) => ok({ lat: p.coords.latitude, lon: p.coords.longitude }), () => ok({ lat: here.lat, lon: here.lon }), { timeout: 10000 });
       });
-      await fb.goOnline(prov, RM.coarse(at.lat), RM.coarse(at.lon)); pvOnline = true; mine = mine || { ...at, at: Date.now() }; toast('আপনি অনলাইনে আছেন'); return paintDrive();
+      // the position stays on this phone (for "কত দূরে" in the list); Firestore only learns "one more is working"
+      await fb.goOnline(prov); pvOnline = true; mine = mine || { ...at, at: Date.now() }; toast('আপনি অনলাইনে আছেন'); keepOnline(); return paintDrive();
     }
     if (t.dataset.pvAccept) {
       try { await fb.acceptRide(t.dataset.pvAccept, prov); } catch (e) { if (e.code === 'permission-denied') throw { code: 'taken' }; throw e; }
@@ -1344,7 +1493,13 @@ async function pvAction(t) {
       const max = (r.estM || 0) * 3 + 5000;
       const distM = tp.dest ? Math.min(max, Math.round(track && track.m > 50 ? track.m : r.estM || 0)) : 0;
       const waitMin = r.arrivedAt && r.startedAt ? Math.max(0, Math.floor((r.startedAt - r.arrivedAt) / 60000)) : 0;
-      await fb.completeRide(r.id, { distM, waitMin, fare: RM.fare(rt, distM, waitMin) }); return;
+      let itemsCost;
+      if (tp.errand) {
+        itemsCost = Number(String($('#itemsCost')?.value || itemsDraft).trim().replace(/[০-৯]/g, (x) => '০১২৩৪৫৬৭৮৯'.indexOf(x)));
+        if (!String($('#itemsCost')?.value || itemsDraft).trim() || !Number.isInteger(itemsCost) || itemsCost < 0) return say('#jobMsg', 'দোকানের রসিদের টাকা লিখুন (পূর্ণ সংখ্যা)।');
+        if (itemsCost > r.maxItems) return say('#jobMsg', `যাত্রীর দেওয়া সীমা ${bn(r.maxItems)} টাকা। এর বেশি হলে যাত্রীর সাথে কথা বলে বাতিল করুন।`);
+      }
+      await fb.completeRide(r.id, { distM, waitMin, fare: RM.fare(rt, distM, waitMin), itemsCost }); itemsDraft = ''; return;
     }
     if ('pvPaid' in t.dataset) {
       await fb.markPaid(ride.id); toast('টাকা পেয়েছেন। রসিদ যাত্রীর কাছে গেছে।');
@@ -1379,6 +1534,7 @@ async function riderAction(t) {
     }
     if (t.dataset.billOk) { await fb.billOk(ride.id, t.dataset.billOk === '1'); toast('ধন্যবাদ, জানানো হয়েছে'); return; }
     if (t.dataset.rate) { await fb.rateRide(ride.id, Number(t.dataset.rate)); toast('ধন্যবাদ!'); return; }
+    if ('rideStale' in t.dataset) { await fb.closeStale(ride.id); await fb.clearLive(ride.id); return; }
     if ('rideNew' in t.dataset) { stopRide(); ride = null; rideRole = null; store.set('sc-ride', ''); callF.drop = null; callF.dropLabel = ''; render(); return; }
     if ('rideFamily' in t.dataset) {
       const msg = `${tName(ride.type).split(' (')[0]}-এ যাচ্ছি: ${ride.pickup.label}${ride.drop ? ' থেকে ' + ride.drop.label : ''}। ${tWho(ride.type)}: ${ride.providerName} (${ride.vehicle})। পৌঁছে জানাব।`;
@@ -1391,7 +1547,16 @@ Object.assign(VIEWS, { call: viewCall, drive: viewDrive });
 document.addEventListener('click', async (ev) => {
   const t = ev.target.closest('button, a'); if (!t) return;
   const d = t.dataset;
-  if (d.rtype) { callF.type = d.rtype; callF.online = null; if (!RM.typeOf(d.rtype).dest) callF.drop = null; callF.pickLabel = $('#pickLabel')?.value || callF.pickLabel; render(); refreshOnline(); return; }
+  if (d.rtype) {
+    const was = !!RM.typeOf(callF.type).errand, now = !!RM.typeOf(d.rtype).errand;
+    callF.pickLabel = $('#pickLabel')?.value || callF.pickLabel; callF.dropLabel = $('#dropLabel')?.value || callF.dropLabel;
+    callF.type = d.rtype; callF.online = null;
+    // an errand turns the two points round (pickup = the shop, drop = the person), so start them again
+    if (was !== now) Object.assign(callF, { pick: null, drop: null, pickLabel: now ? '' : here.label.slice(0, 80), dropLabel: now ? here.label.slice(0, 80) : '', picking: now ? 'pick' : 'drop' });
+    if (!RM.typeOf(d.rtype).dest) callF.drop = null;
+    render(); refreshOnline(); return;
+  }
+  if (d.qpick) { const p = quickDrops()[Number(d.qpick)]; if (p) { callF.pick = { lat: r5(p.lat), lon: r5(p.lon) }; callF.pickLabel = p.name.slice(0, 80); $('#pickLabel').value = callF.pickLabel; paintMarkers(true); paintEst(); } return; }
   if (d.pickmode) { callF.picking = d.pickmode; callF.pickLabel = $('#pickLabel').value; callF.dropLabel = $('#dropLabel')?.value || ''; document.querySelectorAll('[data-pickmode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pickmode === d.pickmode))); return; }
   if (d.qdrop) { const p = quickDrops()[Number(d.qdrop)]; if (p) { callF.drop = { lat: p.lat, lon: p.lon }; $('#dropLabel').value = p.name.slice(0, 80); paintMarkers(true); paintEst(); } return; }
   if ('callGps' in d) {
@@ -1400,16 +1565,23 @@ document.addEventListener('click', async (ev) => {
     navigator.geolocation.getCurrentPosition((p) => {
       const la = r5(p.coords.latitude), lo = r5(p.coords.longitude);
       if (!RM.inBangladesh(la, lo)) { m.textContent = 'আপনি বাংলাদেশের বাইরে আছেন বলে মনে হচ্ছে।'; return; }
-      callF.pick = { lat: la, lon: lo, area: here.label }; m.textContent = 'ডাকার জায়গা: আপনার এখনকার লোকেশন।'; paintMarkers(true); paintEst();
+      if (RM.typeOf(callF.type).errand) { callF.drop = { lat: la, lon: lo }; m.textContent = 'পৌঁছে দেওয়ার জায়গা: আপনার এখনকার লোকেশন।'; }
+      else { callF.pick = { lat: la, lon: lo }; m.textContent = 'ডাকার জায়গা: আপনার এখনকার লোকেশন।'; }
+      paintMarkers(true); paintEst();
     }, () => { m.textContent = 'লোকেশন পাওয়া যায়নি। ম্যাপে চাপ দিয়ে ডাকার জায়গা বাছুন।'; }, { timeout: 15000, enableHighAccuracy: true });
     return;
   }
   if ('callGo' in d) { callGo(); return; }
   if ('callHist' in d) { showHistory(); return; }
-  if (['rideCancel', 'billOk', 'rate', 'rideNew', 'rideFamily'].some((k) => k in d)) { riderAction(t); return; }
+  if (['rideCancel', 'billOk', 'rate', 'rideNew', 'rideFamily', 'rideStale'].some((k) => k in d)) { riderAction(t); return; }
   if (Object.keys(d).some((k) => /^(pv|rt)[A-Z]/.test(k))) { pvAction(t); return; }
 });
 document.addEventListener('change', (ev) => { if (ev.target.id === 'rtType') fillRateForm(); });
+document.addEventListener('input', (ev) => {
+  const id = ev.target.id;
+  if (id === 'items') callF.items = ev.target.value; else if (id === 'maxItems') callF.maxItems = ev.target.value;
+  else if (id === 'itemsCost') itemsDraft = ev.target.value; else if (id === 'pickLabel') callF.pickLabel = ev.target.value; else if (id === 'dropLabel') callF.dropLabel = ev.target.value;
+});
 
 // Start (last, so every page above exists): a family trip link opens its page; otherwise the saved area.
 tripFromHash();

@@ -8,13 +8,13 @@ import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebas
 import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, where } from 'firebase/firestore';
 import { DEFAULT_RATES, fare, cancelFee, estimateMetres, trackAdd, billLooksRight } from '../../js/ride.js';
 
-const ADMIN = 'admin-uid', RINA = 'rina-uid', KARIM = 'karim-uid', DRIVER = 'driver-uid', DRIVER2 = 'driver2-uid', PENDING = 'pending-uid', BIKER = 'biker-uid', FENI = 'feni-uid', HELPER = 'helper-uid';
+const ADMIN = 'admin-uid', RINA = 'rina-uid', KARIM = 'karim-uid', DRIVER = 'driver-uid', DRIVER2 = 'driver2-uid', PENDING = 'pending-uid', BIKER = 'biker-uid', FENI = 'feni-uid', HELPER = 'helper-uid', RUNNER = 'runner-uid';
 let env;
 const db = (uid) => (uid ? env.authenticatedContext(uid, { email: `${uid}@example.com`, email_verified: true }) : env.unauthenticatedContext()).firestore();
 const dbUnverified = (uid) => env.authenticatedContext(uid, { email: `${uid}@example.com`, email_verified: false }).firestore();
 const today = () => Math.floor(Date.now() / 86400000);
-const MAIJDEE = { lat: 22.8696, lon: 91.0994, label: 'মাইজদী বাজার' };
-const HOSPITAL = { lat: 22.8601, lon: 91.0952, label: 'জেনারেল হাসপাতাল' };
+const MAIJDEE = { lat: 22.87, lon: 91.099, label: 'মাইজদী বাজার' };
+const HOSPITAL = { lat: 22.86, lon: 91.095, label: 'জেনারেল হাসপাতাল' };
 const prov = (type, district, approved, name = 'রহিম', vehicle = 'নোয়াখালী-থ-১২৩৪') => ({ name, type, vehicle, district, approved, createdAt: new Date(), updatedAt: new Date() });
 
 before(async () => {
@@ -31,12 +31,14 @@ beforeEach(async () => {
     await setDoc(doc(f, 'providers', DRIVER2), prov('cng', 'noakhali', true, 'করিম', 'নোয়াখালী-থ-৫৫৫৫'));
     await setDoc(doc(f, 'providers', PENDING), prov('cng', 'noakhali', false));
     await setDoc(doc(f, 'providers', BIKER), prov('bike', 'noakhali', true));
+    await setDoc(doc(f, 'providers', RUNNER), prov('errand', 'noakhali', true, 'বাবু', 'বাইক, ডেলিভারি'));
     await setDoc(doc(f, 'providers', FENI), prov('cng', 'feni', true));
     await setDoc(doc(f, 'providers', HELPER), prov('help', 'noakhali', true, 'স্বেচ্ছাসেবক রুমা', 'প্রাথমিক চিকিৎসা'));
     await setDoc(doc(f, 'providers', KARIM), prov('cng', 'noakhali', true, 'কারিম', 'নোয়াখালী-থ-৯৯৯৯'));
   });
 });
 
+const ERRAND = { items: 'নাপা এক্সট্রা ২ পাতা, ওরস্যালাইন ৫টা', maxItems: 500 };
 async function readAs(...path) { let d = null; await env.withSecurityRulesDisabled(async (ctx) => { const x = await getDoc(doc(ctx.firestore(), ...path)); d = x.exists() ? x.data() : null; }); return d; }
 async function patchAs(path, data) { await env.withSecurityRulesDisabled(async (ctx) => { await updateDoc(doc(ctx.firestore(), ...path), data); }); }
 const rideFields = (uid, extra = {}) => ({ riderUid: uid, type: 'cng', district: 'noakhali', pickup: MAIJDEE, drop: HOSPITAL,
@@ -62,14 +64,14 @@ async function aMinuteLater(uid) {
 }
 async function rideTo(status, type = 'cng') {
   await aMinuteLater(RINA);
-  const id = await request(db(RINA), RINA, rideFields(RINA, { type, estFare: fare(DEFAULT_RATES[type], 1200) }));
-  const who = type === 'help' ? HELPER : type === 'bike' ? BIKER : DRIVER, name = type === 'help' ? 'স্বেচ্ছাসেবক রুমা' : 'রহিম', veh = type === 'help' ? 'প্রাথমিক চিকিৎসা' : 'নোয়াখালী-থ-১২৩৪';
+  const id = await request(db(RINA), RINA, rideFields(RINA, { type, estFare: fare(DEFAULT_RATES[type], 1200), ...(type === 'errand' ? ERRAND : {}) }));
+  const who = type === 'help' ? HELPER : type === 'bike' ? BIKER : type === 'errand' ? RUNNER : DRIVER, name = type === 'help' ? 'স্বেচ্ছাসেবক রুমা' : type === 'errand' ? 'বাবু' : 'রহিম', veh = type === 'help' ? 'প্রাথমিক চিকিৎসা' : type === 'errand' ? 'বাইক, ডেলিভারি' : 'নোয়াখালী-থ-১২৩৪';
   if (status === 'requested') return id;
   await accept(db(who), id, name, veh, who); if (status === 'accepted') return id;
   await step(db(who), id, { status: 'arrived', arrivedAt: serverTimestamp() }); if (status === 'arrived') return id;
   await step(db(who), id, { status: 'on_trip', startedAt: serverTimestamp() }); if (status === 'on_trip') return id;
   const r = await readAs('rides', id);
-  await step(db(who), id, { status: 'completed', endedAt: serverTimestamp(), distM: 1500, waitMin: 0, fare: fare(DEFAULT_RATES[type], 1500, 0), payStatus: 'pending' });
+  await step(db(who), id, { status: 'completed', endedAt: serverTimestamp(), distM: 1500, waitMin: 0, fare: fare(DEFAULT_RATES[type], 1500, 0), ...(type === 'errand' ? { itemsCost: 240 } : {}), payStatus: 'pending' });
   if (status === 'completed') return id;
   await step(db(who), id, { status: 'paid', payStatus: 'paid', paidAt: serverTimestamp() }); return id;
 }
@@ -141,12 +143,12 @@ describe('providers', () => {
 
 describe('online', () => {
   test('an approved provider goes online with their own type and district; others cannot', async () => {
-    const pos = { type: 'cng', district: 'noakhali', lat: 22.87, lon: 91.1, at: serverTimestamp() };
+    const pos = { type: 'cng', district: 'noakhali', at: serverTimestamp() };
+    await assertFails(setDoc(doc(db(DRIVER), 'online', DRIVER), { ...pos, lat: 22.87, lon: 91.1 }));   // no position, not even a rough one
     await assertSucceeds(setDoc(doc(db(DRIVER), 'online', DRIVER), pos));
     await assertFails(setDoc(doc(db(PENDING), 'online', PENDING), pos));
     await assertFails(setDoc(doc(db(DRIVER), 'online', DRIVER), { ...pos, type: 'ambulance' }));
     await assertFails(setDoc(doc(db(RINA), 'online', DRIVER), pos));
-    await assertFails(setDoc(doc(db(DRIVER), 'online', DRIVER), { ...pos, lat: 40 }));
     await assertSucceeds(getDocs(collection(db(RINA), 'online')));
     await assertFails(getDocs(collection(db(null), 'online')));
     await assertSucceeds(deleteDoc(doc(db(DRIVER), 'online', DRIVER)));
@@ -317,5 +319,75 @@ describe('live positions', () => {
     await step(db(DRIVER), id, { status: 'completed', endedAt: serverTimestamp(), distM: 1500, waitMin: 0, fare: fare(DEFAULT_RATES.cng, 1500, 0), payStatus: 'pending' });
     await assertFails(setDoc(doc(db(DRIVER), 'rides', id, 'live', 'provider'), pos()));
     await assertSucceeds(deleteDoc(doc(db(DRIVER), 'rides', id, 'live', 'provider')));
+  });
+});
+
+describe('আনিয়ে দিন (errand): the list, the limit and the receipt', () => {
+  const errandFields = (extra = {}) => rideFields(RINA, { type: 'errand', estFare: fare(DEFAULT_RATES.errand, 1200), ...ERRAND, ...extra });
+  test('a request needs the list of things, a limit from 1 to 20,000 taka and a destination; other types carry neither', async () => {
+    await assertFails(request(db(RINA), RINA, errandFields({ items: 'x' })));
+    await aMinuteLater(RINA); await assertFails(request(db(RINA), RINA, errandFields({ maxItems: 0 })));
+    await aMinuteLater(RINA); await assertFails(request(db(RINA), RINA, errandFields({ maxItems: 25000 })));
+    await aMinuteLater(RINA); await assertFails(request(db(RINA), RINA, errandFields({ items: 'ওষুধ, ফোন 01711223344' })));
+    await aMinuteLater(RINA); const { drop, ...noDrop } = errandFields(); await assertFails(request(db(RINA), RINA, noDrop));
+    await aMinuteLater(RINA); await assertFails(request(db(RINA), RINA, rideFields(RINA, ERRAND)));
+    await aMinuteLater(RINA); await assertSucceeds(request(db(RINA), RINA, errandFields()));
+  });
+  test('only an approved errand rider of the district takes it; a CNG driver does not see it', async () => {
+    const id = await rideTo('requested', 'errand');
+    await assertFails(getDoc(doc(db(DRIVER), 'rides', id)));
+    await assertFails(accept(db(DRIVER), id));
+    await assertSucceeds(accept(db(RUNNER), id, 'বাবু', 'বাইক, ডেলিভারি', RUNNER));
+  });
+  test('the receipt amount is required, whole taka, and never above the limit; the delivery fare still matches the rates', async () => {
+    const id = await rideTo('on_trip', 'errand');
+    const done = (x) => step(db(RUNNER), id, { status: 'completed', endedAt: serverTimestamp(), distM: 1500, waitMin: 0, fare: fare(DEFAULT_RATES.errand, 1500, 0), payStatus: 'pending', ...x });
+    await assertFails(done({}));
+    await assertFails(done({ itemsCost: 501 }));
+    await assertFails(done({ itemsCost: 240.5 }));
+    await assertFails(done({ itemsCost: 240, fare: 5 }));
+    await assertSucceeds(done({ itemsCost: 500 }));
+  });
+  test('a ride that is not an errand cannot add a receipt amount', async () => {
+    const id = await rideTo('on_trip', 'cng');
+    await assertFails(step(db(DRIVER), id, { status: 'completed', endedAt: serverTimestamp(), distM: 1500, waitMin: 0, fare: fare(DEFAULT_RATES.cng, 1500, 0), itemsCost: 100, payStatus: 'pending' }));
+  });
+  test('the whole errand to paid, with the receipt text the rider gets', async () => {
+    const id = await rideTo('paid', 'errand');
+    const r = await readAs('rides', id);
+    assert.equal(r.itemsCost, 240); assert.equal(r.status, 'paid');
+  });
+});
+
+describe('stored points and stuck rides (privacy and safety)', () => {
+  test('pickup and destination are stored rounded to about 100 m; an exact point is refused', async () => {
+    await assertFails(request(db(RINA), RINA, rideFields(RINA, { pickup: { lat: 22.8696, lon: 91.0994, label: 'মাইজদী বাজার' } })));
+    await aMinuteLater(RINA);
+    await assertFails(request(db(RINA), RINA, rideFields(RINA, { drop: { lat: 22.86, lon: 91.09512, label: 'হাসপাতাল' } })));
+    await aMinuteLater(RINA);
+    await assertSucceeds(request(db(RINA), RINA, rideFields(RINA)));
+  });
+  const ago = (id, h) => patchAs(['rides', id], { updatedAt: new Date(Date.now() - h * 3600000) });
+  const stale = (f, id, by = 'stale') => step(f, id, { status: 'cancelled', cancelledBy: by, cancelFee: 0 });
+  test('before the trip: the rider may close a ride with no change for 3 hours, not earlier', async () => {
+    const id = await rideTo('arrived');
+    await assertFails(stale(db(RINA), id));
+    await ago(id, 2); await assertFails(stale(db(RINA), id));
+    await ago(id, 4);
+    await assertFails(stale(db(RINA), id, 'rider'));
+    await assertFails(step(db(RINA), id, { status: 'cancelled', cancelledBy: 'stale', cancelFee: 20 }));
+    await assertFails(stale(db(DRIVER), id));
+    await assertSucceeds(stale(db(RINA), id));
+  });
+  test('on the trip or waiting for "paid": only after 12 hours', async () => {
+    for (const st of ['on_trip', 'completed']) {
+      const id = await rideTo(st);
+      await ago(id, 5); await assertFails(stale(db(RINA), id));
+      await ago(id, 13); await assertSucceeds(stale(db(RINA), id));
+    }
+  });
+  test('a paid or already cancelled ride cannot be closed this way', async () => {
+    const id = await rideTo('paid');
+    await ago(id, 20); await assertFails(stale(db(RINA), id));
   });
 });

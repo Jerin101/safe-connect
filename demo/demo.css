@@ -206,6 +206,28 @@ nav.dock .in { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .bento.earn { grid-template-columns: 1fr 1fr; }
 .bento.earn .cell { background: var(--surface-2); }
 .leaflet-tooltip { font: 600 .78rem var(--body); }
+/* v6: map inside the site, the closest place, nearest help, আনিয়ে দিন */
+.mpin.place .mpin-in { background: var(--surface); color: var(--brand); border-color: var(--brand); }
+.mpin.place.approx .mpin-in { border-style: dashed; opacity: .85; }
+.mpin.place.near .mpin-in { background: var(--ok); color: #ffffff; border-color: #ffffff; width: 40px; height: 40px; }
+.leaflet-tooltip.mtip.tip-near { background: var(--ok); color: #ffffff; font-weight: 700; }
+.pop { display: grid; gap: 4px; min-width: 180px; }
+.pop b { font: 700 .95rem var(--display); }
+.pop-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.pop-acts .btn { min-height: 36px; padding: 6px 10px; font-size: .82rem; }
+.badge.near { background: var(--ok); color: #ffffff; margin-left: 6px; }
+.r.nearest { background: var(--ok-soft); border-radius: 12px; padding-left: 8px; padding-right: 8px; }
+.dot-near, .dot-me { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; }
+.dot-near { background: var(--ok); } .dot-me { background: var(--sos); }
+.helpgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 700px) { .helpgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.htile { border: 1px solid var(--line); border-radius: 14px; padding: 10px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.htile b { font-size: .92rem; line-height: 1.3; overflow-wrap: anywhere; }
+.htile .pills { gap: 4px; margin-top: 4px; }
+.htile .btn { min-height: 36px; padding: 6px 10px; font-size: .8rem; }
+.hhead { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: .85rem; color: var(--muted); }
+.hhead .sq { width: 32px; height: 32px; border-radius: 10px; }
+.adm-issue { display: grid; gap: 6px; margin: 8px 0; padding: 10px; border: 1px dashed var(--line); border-radius: 12px; background: var(--surface-2); }
 @media print { header.top, nav.dock, .rail, .demo-bar, .btn, .link, label, input, select, .note { display: none !important; } .card { border: 0; } }
 
 /* premium map (19 Nov 2026): pins, vehicle, "you" dot, distance chip, labels */
