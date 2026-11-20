@@ -302,9 +302,12 @@ service cloud.firestore {
     function provPath(uid) { return /databases/$(database)/documents/providers/$(uid); }
     function rateOf(t) { return get(/databases/$(database)/documents/rates/$(t)).data; }
     function myProv() { return get(provPath(request.auth.uid)).data; }
-    function rideTypes() { return ['ambulance', 'cng', 'bike', 'technician', 'help']; }
+    function rideTypes() { return ['ambulance', 'cng', 'bike', 'technician', 'help', 'errand']; }
     function inBd(lat, lon) { return lat is number && lon is number && lat >= 20.5 && lat <= 26.7 && lon >= 88.0 && lon <= 92.7; }
-    function placeMap(m) { return m is map && m.keys().hasOnly(['lat', 'lon', 'label']) && inBd(m.lat, m.lon) && placeText(m.label, 2, 80); }
+    // Stored points are rounded to 3 decimals (about 100 m, CLAUDE.md rule 5): the exact spot is only in the live
+    // documents, which exist during the ride and are deleted at its end.
+    function round3(v) { return math.abs(v * 1000 - math.round(v * 1000)) < 0.001; }
+    function placeMap(m) { return m is map && m.keys().hasOnly(['lat', 'lon', 'label']) && inBd(m.lat, m.lon) && round3(m.lat) && round3(m.lon) && placeText(m.label, 2, 80); }
     function isProviderFor(r) {
       return signedIn() && exists(provPath(request.auth.uid)) && myProv().approved == true
         && myProv().type == r.type && myProv().district == r.district;
@@ -356,9 +359,10 @@ service cloud.firestore {
     match /online/{uid} {
       allow read: if signedIn() && verified();
       allow create, update: if isMe(uid) && exists(provPath(uid)) && myProv().approved == true
-        && incoming().keys().hasOnly(['type', 'district', 'lat', 'lon', 'at'])
+        // no position at all: riders only see how many providers of a type work in the district
+        && incoming().keys().hasOnly(['type', 'district', 'at'])
         && incoming().type == myProv().type && incoming().district == myProv().district
-        && inBd(incoming().lat, incoming().lon) && incoming().at == request.time;
+        && incoming().at == request.time;
       allow delete: if isMe(uid);
     }
 
@@ -385,7 +389,12 @@ service cloud.firestore {
         || (resource.data.status == 'requested' && isProviderFor(resource.data)));
       allow create: if signedIn() && verified()
         && rideLimitsAfter().lastRide == rideId && rideLimitsAfter().lastAt == request.time
-        && incoming().keys().hasOnly(['riderUid', 'type', 'district', 'pickup', 'drop', 'estM', 'estFare', 'status', 'createdAt', 'updatedAt'])
+        && incoming().keys().hasOnly(['riderUid', 'type', 'district', 'pickup', 'drop', 'estM', 'estFare', 'items', 'maxItems', 'status', 'createdAt', 'updatedAt'])
+        // "আনিয়ে দিন": pickup = the shop, drop = the rider; the list of things and the most the rider will pay for them
+        && (incoming().type == 'errand'
+          ? ('drop' in incoming() && placeText(incoming().get('items', ''), 2, 300)
+            && incoming().get('maxItems', 0) is int && incoming().get('maxItems', 0) >= 1 && incoming().get('maxItems', 0) <= 20000)
+          : (!('items' in incoming()) && !('maxItems' in incoming())))
         && incoming().riderUid == request.auth.uid
         && incoming().type in rideTypes() && exists(/databases/$(database)/documents/rates/$(incoming().type))
         && incoming().district is string && incoming().district.matches('^[a-z]{3,30}$')
@@ -406,7 +415,11 @@ service cloud.firestore {
           (moved('accepted', 'arrived') && changed().hasOnly(['status', 'arrivedAt', 'updatedAt']) && now('arrivedAt'))
           || (moved('arrived', 'on_trip') && changed().hasOnly(['status', 'startedAt', 'updatedAt']) && now('startedAt'))
           || (moved('on_trip', 'completed')
-            && changed().hasOnly(['status', 'endedAt', 'distM', 'waitMin', 'fare', 'payStatus', 'updatedAt']) && now('endedAt')
+            && changed().hasOnly(['status', 'endedAt', 'distM', 'waitMin', 'fare', 'itemsCost', 'payStatus', 'updatedAt']) && now('endedAt')
+            // errand: the shop's receipt amount, never more than the rider allowed; other types have none
+            && (resource.data.type == 'errand'
+              ? (incoming().get('itemsCost', -1) is int && incoming().get('itemsCost', -1) >= 0 && incoming().get('itemsCost', -1) <= resource.data.maxItems)
+              : !('itemsCost' in incoming()))
             && incoming().distM is int && incoming().distM >= 0 && incoming().distM <= resource.data.estM * 3 + 5000
             && incoming().waitMin is int && incoming().waitMin >= 0
             && incoming().waitMin <= (resource.data.startedAt.toMillis() - resource.data.arrivedAt.toMillis()) / 60000 + 1
@@ -424,6 +437,12 @@ service cloud.firestore {
             && incoming().cancelFee == (resource.data.status == 'arrived' ? math.ceil(rateOf(resource.data.type).base / 10.0) * 5 : 0))
           || (resource.data.status in ['completed', 'paid'] && !('billOk' in resource.data)
             && changed().hasOnly(['billOk', 'updatedAt']) && incoming().billOk is bool)
+          // a ride with no answer: the rider may close it after 3 hours (before the trip) or 12 hours (on the trip or
+          // waiting for "paid"), so nobody stays stuck on it; no fee
+          || (resource.data.status in ['accepted', 'arrived', 'on_trip', 'completed']
+            && request.time > resource.data.updatedAt + duration.value(resource.data.status in ['accepted', 'arrived'] ? 3 : 12, 'h')
+            && incoming().status == 'cancelled' && changed().hasOnly(['status', 'cancelledBy', 'cancelFee', 'updatedAt'])
+            && incoming().cancelledBy == 'stale' && incoming().cancelFee == 0)
           || (resource.data.status == 'paid' && !('rating' in resource.data)
             && changed().hasOnly(['rating', 'updatedAt']) && incoming().rating is int && incoming().rating >= 1 && incoming().rating <= 5)))
       );

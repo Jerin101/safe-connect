@@ -9,6 +9,8 @@ export const RIDE_TYPES = [
   { id: 'bike', bn: 'বাইক', who: 'চালক', kmh: 25, dest: true },
   { id: 'technician', bn: 'কারিগর (ইলেকট্রিশিয়ান, প্লাম্বার, মেকানিক)', who: 'কারিগর', kmh: 20, dest: false },
   { id: 'help', bn: 'বিপদে কাছের সাহায্যকারী', who: 'স্বেচ্ছাসেবক', kmh: 15, dest: false },
+  // pickup = the shop, drop = the person; the bill = the shop's receipt (up to the person's limit) + the delivery fare
+  { id: 'errand', bn: 'আনিয়ে দিন (ওষুধ, বাজার, দোকানের জিনিস)', who: 'ডেলিভারি রাইডার', kmh: 25, dest: true, errand: true },
 ];
 export const typeOf = (id) => RIDE_TYPES.find((t) => t.id === id);
 // Example rates (admin sets the real ones in rates/{type}); "help" is never billed.
@@ -18,7 +20,11 @@ export const DEFAULT_RATES = {
   bike: { base: 25, perKm: 15, perMin: 1, minFare: 40 },
   technician: { base: 150, perKm: 0, perMin: 3, minFare: 200 },
   help: { base: 0, perKm: 0, perMin: 0, minFare: 0 },
+  errand: { base: 30, perKm: 15, perMin: 1, minFare: 50 },
 };
+export const ITEMS_MAX = 20000;   // the most a rider may allow for the things bought (the rules check it)
+// What the rider pays in cash: the delivery fare, plus the shop's receipt for an errand.
+export const billTotal = (r) => (r.fare || 0) + (r.itemsCost || 0);
 export const FREE_WAIT_MIN = 3;
 export const ROAD_FACTOR = 1.3;
 export const STATUSES = ['requested', 'accepted', 'arrived', 'on_trip', 'completed', 'paid', 'cancelled'];
@@ -76,6 +82,7 @@ export function receiptText(r, bn = (x) => String(x)) {
   const lines = [`SafeConnect রসিদ #${String(r.id || '').slice(0, 8).toUpperCase()}`, `সেবা: ${t.bn}`,
     `${t.who}: ${r.providerName || ''}${r.vehicle ? ' (' + r.vehicle + ')' : ''}`,
     `দূরত্ব: ${bn(((r.distM || 0) / 1000).toFixed(1))} কিমি · অপেক্ষা: ${bn(r.waitMin || 0)} মিনিট`,
-    `ভাড়া: ${bn(r.fare || 0)} টাকা (নগদ) · ${r.payStatus === 'paid' ? 'পরিশোধিত' : 'বাকি'}`];
+    ...(r.type === 'errand' ? [`জিনিস: ${r.items || ''}`, `দোকানের রসিদ: ${bn(r.itemsCost || 0)} টাকা · ডেলিভারি: ${bn(r.fare || 0)} টাকা`] : []),
+    `${r.type === 'errand' ? 'মোট' : 'ভাড়া'}: ${bn(billTotal(r))} টাকা (নগদ) · ${r.payStatus === 'paid' ? 'পরিশোধিত' : 'বাকি'}`];
   return lines.join('\n');
 }

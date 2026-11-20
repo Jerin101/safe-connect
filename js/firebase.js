@@ -296,13 +296,14 @@ export async function setRates(type, r) {
 }
 
 // "আমি এখন কাজে আছি": an approved provider with a rough position (about 100 m); deleted when they stop.
-export const goOnline = (p, lat, lon) => setDoc(doc(db, 'online', me().uid), { type: p.type, district: p.district, lat, lon, at: serverTimestamp() });
+// No position is stored (not even a rough one): riders only see how many are working in the district.
+export const goOnline = (p) => setDoc(doc(db, 'online', me().uid), { type: p.type, district: p.district, at: serverTimestamp() });
 export const goOffline = () => deleteDoc(doc(db, 'online', me().uid));
 // How many providers of a type are working in a district in the last 30 minutes (equality filters only: no index).
 export async function onlineCount(type, district) {
   const snap = await getDocs(query(collection(db, 'online'), where('type', '==', type), where('district', '==', district), limit(50)));
   const fresh = Date.now() - 30 * 60000;
-  return snap.docs.filter((d) => (millis(d.data().at) || 0) > fresh).map((d) => ({ lat: d.data().lat, lon: d.data().lon }));
+  return snap.docs.filter((d) => (millis(d.data().at) || 0) > fresh).map((d) => d.id);
 }
 
 // A request and rideLimits/{uid} in one batch (at most 10 a day, 60 s apart; the rules check both).
@@ -335,10 +336,14 @@ const step = (id, f) => updateDoc(doc(db, 'rides', id), { ...f, updatedAt: serve
 export const acceptRide = (id, p) => step(id, { status: 'accepted', providerUid: me().uid, providerName: p.name, vehicle: p.vehicle, acceptedAt: serverTimestamp() });
 export const arrived = (id) => step(id, { status: 'arrived', arrivedAt: serverTimestamp() });
 export const startTrip = (id) => step(id, { status: 'on_trip', startedAt: serverTimestamp() });
-export const completeRide = (id, { distM, waitMin, fare }) => step(id, { status: 'completed', endedAt: serverTimestamp(), distM, waitMin, fare, payStatus: 'pending' });
+// itemsCost only for an errand (the shop's receipt; the rules refuse it on other types and above the rider's limit).
+export const completeRide = (id, { distM, waitMin, fare, itemsCost }) => step(id, { status: 'completed', endedAt: serverTimestamp(), distM, waitMin, fare,
+  ...(itemsCost === undefined ? {} : { itemsCost }), payStatus: 'pending' });
 export const markPaid = (id) => step(id, { status: 'paid', payStatus: 'paid', paidAt: serverTimestamp() });
 export const cancelRide = (id, by, fee) => step(id, { status: 'cancelled', cancelledBy: by, cancelFee: fee });
 export const billOk = (id, ok) => step(id, { billOk: ok });
+// The rider closes a ride that got no answer (3 h before the trip, 12 h after it started); the rules check the time.
+export const closeStale = (id) => step(id, { status: 'cancelled', cancelledBy: 'stale', cancelFee: 0 });
 export const rateRide = (id, rating) => step(id, { rating });
 
 // Live position: rides/{id}/live/{rider|provider}, only during accepted → arrived → on_trip, only the two people.

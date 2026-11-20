@@ -80,3 +80,39 @@ the provider as a vehicle that glides and turns toward where it goes, the person
 (no road-routing service) and a chip with distance and minutes. "পথ দেখান" on a place opens our own place page first
 (straight line from the chosen area and the distance); "Google Maps-এ খুলুন" is the second button. Dark mode darkens
 the tiles with a CSS filter.
+
+## v6 (19 Nov 2026): the map inside the site, the closest place, and "আনিয়ে দিন"
+- **কাছে opens with a map inside the site** (Leaflet + OpenStreetMap, no Google Maps): every place of the category is
+  an icon; **the closest one is green** with the label "সবচেয়ে কাছে", and the same row is green in the list. Tapping a
+  pin (or "ম্যাপে" on a row) opens: **এখানে যেতে ডাকুন**, **আনিয়ে দিন** (pharmacies, shops, bazars), বিস্তারিত.
+- **Every category works the same way** (all 17): map, closest in green, "এখানে যেতে ডাকুন", plus the action that fits:
+  হাসপাতাল → অ্যাম্বুলেন্সে যান · ফার্মেসি, দোকান, বাজার → আনিয়ে দিন · হোটেল ও খাবার → খাবার আনিয়ে দিন · ওয়ার্কশপ → মেকানিক কাছে ডাকুন ·
+  অন্যান্য সেবা → কারিগর কাছে ডাকুন · আশ্রয়কেন্দ্র → সাহায্যকারী ডাকুন. A category with no places shows an empty map (only "আপনি").
+  Places at an "approximate" point (upazila or union centre) get no green and no আনিয়ে দিন.
+- **সবচেয়ে কাছের সাহায্য** on আজ and কাছে: the closest hospital (a hospital or the official health complex before
+  clinics), pharmacy, police/fire and filling station from where the person is, in any of the 64 districts (e.g.
+  Mohammadpur, Dhaka by GPS), with call (official numbers), map and ডাকুন.
+- **এখানে যেতে ডাকুন** fills the ডাকুন form: pickup = the person's area, destination = that place; then the same live map.
+- **আনিয়ে দিন (errand) — the new billing:** the person picks a shop, writes what to buy and the most they will pay for
+  the things. An approved delivery rider takes it: দোকানে যাচ্ছেন → দোকানে কিনছেন → আপনার কাছে আনছেন, live on the map.
+  The rider pays at the shop and types the receipt amount. **Bill = the shop's receipt + the delivery fare** (start +
+  per km + waiting, the same formula); the person sees both parts, says "বিল ঠিক আছে", pays cash; the receipt lists the
+  things. Firestore rules: the list (2–300 characters, no phone number) and the limit (1–20,000 taka) are required for an
+  errand and refused on other types; the receipt amount must be whole taka and never above the limit; the delivery fare
+  is checked like any ride. Medicines that need a prescription are excluded (said on the form).
+- Tested: rules 151/151 (5 new for errands); a four-browser test (visitor in Mohammadpur; admin, delivery rider and
+  rider in Noakhali) from the map to the receipt; 320/390/1280 px, no console errors.
+
+## v7 (20 Nov 2026): safety fixes, police station in the GD draft, problem status by an admin
+- **Stored ride points are rounded to about 100 m** (CLAUDE.md rule 5); the rules refuse a more exact pickup or
+  destination. The exact spot exists only in the live documents during the ride and is deleted at its end.
+- **"Online" providers store no position at all** (only type, district, time); riders see only how many work in the
+  district. Online is renewed every 10 minutes while the page is open, and the page goes offline when it is closed.
+- **A stuck ride can be closed by the rider** (no fee): after 3 hours with no change before the trip, 12 hours after it
+  started or while waiting for "টাকা পেয়েছি". The rules check the time; the provider sees why it closed.
+- **GD draft:** the police station comes from `data/thanas.json` (district police websites, with the source link);
+  where the list has none, the field is empty for the person to fill, never a guess.
+- **Problems:** an admin changes the status in the app (জানানো → যাচাই → অফিসে → কাজ চলছে → সমাধান, or বন্ধ with a
+  reason), with an audit entry; nobody else sees the form.
+- Tested: rules 155/155; four-browser test (map, nearest help, errand with its bill, GD, problem status, stored points)
+  and the three-browser CNG ride; 320/1280 px, no console errors.
