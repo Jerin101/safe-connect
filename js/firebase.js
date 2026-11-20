@@ -235,8 +235,8 @@ export async function setIssueStatus(issueId, audit, status, statusNote = '') {
   const batch = writeBatch(db);
   const auditRef = doc(collection(db, 'audit'));
   batch.set(auditRef, { ...audit, at: serverTimestamp() });
-  const upd = { status, updatedAt: serverTimestamp(), lastAuditId: auditRef.id };
-  if (statusNote) upd.statusNote = statusNote;
+  // the note always belongs to this status: an empty note clears the old one
+  const upd = { status, statusNote, updatedAt: serverTimestamp(), lastAuditId: auditRef.id };
   batch.update(doc(db, 'issues', issueId), upd);
   await batch.commit();
 }

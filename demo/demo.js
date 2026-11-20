@@ -1041,7 +1041,7 @@ function viewCall() {
       <div id="est">${estHtml()}</div>
       <button class="btn solid big" type="button" data-call-go>${icon(TYPE_IC[callF.type], 'sm')}${er ? 'আনিয়ে দিতে বলুন' : `${esc(t.who)} ডাকুন`}</button>
       <div id="callMsg" class="small" role="status"></div>
-      <p class="small">ডাকার জায়গা আর গন্তব্য প্রায় ১০০ মিটার পর্যন্ত গোল করে এই যাত্রার রেকর্ডে থাকে (রসিদের জন্য); দেখেন আপনি, যিনি নিলেন আর অ্যাডমিন; ডাক খোলা থাকা পর্যন্ত এই জেলার অনুমোদিত সেবাদাতারাও দেখেন। লাইভ লোকেশন শুধু যাত্রার সময় দুজনে দেখেন, শেষ হলে মুছে যায়।</p></section>
+      <p class="small">ডাকার জায়গা আর গন্তব্য প্রায় ১০০ মিটার পর্যন্ত গোল করে এই যাত্রার রেকর্ডে থাকে (রসিদের জন্য); দেখেন আপনি, যিনি নিলেন আর অ্যাডমিন; ডাক খোলা থাকা পর্যন্ত এই জেলার অনুমোদিত সেবাদাতারাও দেখেন। লাইভ লোকেশন ডাক নেওয়ার পর থেকে যাত্রা শেষ পর্যন্ত শুধু আপনারা দুজন দেখেন, তারপর মুছে যায়।</p></section>
     <section class="card"><div class="sec-head"><h2>আমার আগের ডাক</h2><button class="link" type="button" data-call-hist>দেখুন${icon('chev', 'sm')}</button></div><div id="hist"></div></section>
     <section class="card"><h2>সেবা দিতে চান?</h2><p class="muted">সিএনজি, বাইক বা অ্যাম্বুলেন্স চালান, ইলেকট্রিশিয়ান-প্লাম্বার-মেকানিক, বা বিপদে মানুষের পাশে দাঁড়াতে চান? আবেদন করুন; অনুমোদনের পর কাছের ডাক পাবেন।</p>
       <div><button class="btn" type="button" data-tab-go="drive">${icon('wrench', 'sm')}আমি সেবা দিই</button></div></section>${SIM ? simNote() : ''}`;
@@ -1225,7 +1225,7 @@ function riderPanel() {
       <div><button class="btn solid" type="button" data-ride-new>নতুন ডাক</button></div>`;
   // no change for 3 hours (12 once the trip started): the rider may close it, so the page is never stuck on it
   const quiet = ['accepted', 'arrived', 'on_trip', 'completed'].includes(r.status) && r.updatedAt && Date.now() - r.updatedAt > (['accepted', 'arrived'].includes(r.status) ? 3 : 12) * 3600000;
-  const stuck = quiet ? `<div class="note">${icon('info')}<p>অনেকক্ষণ কোনো সাড়া নেই। যাত্রা বা কাজ আসলে শেষ হয়ে থাকলে ডাকটা বন্ধ করে দিন (কোনো চার্জ নেই)।</p></div><div><button class="btn" type="button" data-ride-stale>ডাকটা বন্ধ করুন</button></div>` : '';
+  const stuck = quiet ? `<div class="note">${icon('info')}<p>অনেকক্ষণ কোনো সাড়া নেই। যাত্রা বা কাজ আসলে শেষ হয়ে থাকলে ডাকটা বন্ধ করে দিন (বন্ধ করতে কোনো চার্জ লাগবে না; বিলের টাকা দেওয়া বাকি থাকলে সেটা দিয়ে দিন)।</p></div><div><button class="btn" type="button" data-ride-stale>ডাকটা বন্ধ করুন</button></div>` : '';
   return `${rideStepper(r.status)}${body}${stuck}<div id="rideMsg" class="small" role="status"></div>`;
 }
 
@@ -1394,7 +1394,7 @@ function paintDrive() {
     const job = ride && rideRole === 'provider' && ['accepted', 'arrived', 'on_trip', 'completed'].includes(ride.status);
     html = `<section class="card"><div class="sec-head"><h2>${esc(prov.name)}</h2><span class="badge off">অনুমোদিত</span></div><p class="muted">${esc(tName(prov.type))} · ${esc(prov.vehicle)}</p>
         <div class="pills"><button class="btn ${pvOnline ? '' : 'solid'}" type="button" data-pv-online>${pvOnline ? 'কাজ বন্ধ করুন' : 'কাজ শুরু (অনলাইন)'}</button></div>
-        <p class="small">${pvOnline ? 'অনলাইনে আছেন: যাত্রীরা দেখবেন এই জেলায় কতজন কাজে আছেন (আপনার জায়গা কাউকে দেখানো বা রাখা হয় না)।' : 'অনলাইনে না থাকলেও নতুন ডাক দেখবেন; অনলাইনে থাকলে যাত্রীরা জানবেন কেউ আছেন।'}</p></section>
+        <p class="small">${pvOnline ? 'অনলাইনে আছেন: যাত্রীরা দেখবেন এই জেলায় কতজন কাজে আছেন (আপনার জায়গা কাউকে দেখানো বা রাখা হয় না; ডাক নিলে শুধু সেই যাত্রী যাত্রা শেষ পর্যন্ত আপনার লাইভ লোকেশন দেখবেন)।' : 'অনলাইনে না থাকলেও নতুন ডাক দেখবেন; অনলাইনে থাকলে যাত্রীরা জানবেন কেউ আছেন।'}</p></section>
       ${job ? `<section class="card"><p class="eyebrow">এখনকার কাজ</p><div id="jobPanel">${jobPanel()}</div></section><div class="mapwrap"><div id="rmap" class="rmap"></div></div>`
         : `<section class="card"><h2>নতুন ডাক</h2><div id="reqList">${reqHtml()}</div><div id="jobMsg" class="small" role="status"></div></section>`}
       <section class="card"><h2>আয়</h2>${earnHtml()}</section>`;
