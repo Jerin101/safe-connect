@@ -534,6 +534,7 @@
       "about": "About",
       "faq": "Questions"
     },
+    "dock": {"home": "Today", "area": "Nearby", "numbers": "Numbers", "send": "Emergency"},
     "titles": {
       "home": "Emergency help",
       "numbers": "Emergency numbers",
