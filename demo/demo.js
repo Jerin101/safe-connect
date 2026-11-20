@@ -1021,7 +1021,7 @@ function billHtml(r) {
   const p = RM.fareParts(rt, r.distM || 0, r.waitMin || 0);
   const odd = !RM.billLooksRight(rt, r.distM || 0, r.waitMin || 0, r.fare || 0) || RM.distanceSuspicious(r.estM || 0, r.distM || 0);
   const er = r.type === 'errand';
-  return `<div class="bill rows-bill">${r.type === 'pickup' ? '<div><span>জিনিসের দাম</span><b>দোকানে পরিশোধিত</b></div>' : ''}${er ? `<div><span>জিনিস: দোকানের রসিদ (সীমা ${tk(r.maxItems || 0)})</span><b>${tk(r.itemsCost || 0)}</b></div>` : ''}<div><span>${er ? 'ডেলিভারি: ' : ''}শুরু</span><b>${tk(p.base)}</b></div><div><span>দূরত্ব ${bn(p.km.toFixed(1))} কিমি × ${tk(rt.perKm)}</span><b>${tk(p.distance)}</b></div>
+  return `<div class="bill rows-bill">${r.type === 'pickup' ? '<div><span>জিনিসের দাম</span><b>দোকানে পরিশোধিত</b></div>' : ''}${r.type === 'errand' ? `<div><span>জিনিস: দোকানের রসিদ (সীমা ${tk(r.maxItems || 0)})</span><b>${tk(r.itemsCost || 0)}</b></div>` : ''}<div><span>${er ? 'ডেলিভারি: ' : ''}শুরু</span><b>${tk(p.base)}</b></div><div><span>দূরত্ব ${bn(p.km.toFixed(1))} কিমি × ${tk(rt.perKm)}</span><b>${tk(p.distance)}</b></div>
     <div><span>অপেক্ষা ${bn(r.waitMin || 0)} মিনিট (৩ ফ্রি)</span><b>${tk(p.waiting)}</b></div>${er ? `<div><span>ডেলিভারি ভাড়া (৫ টাকায় রাউন্ড, সর্বনিম্ন ${tk(rt.minFare)})</span><b>${tk(r.fare || 0)}</b></div><div class="total"><span>মোট</span><b>${tk(RM.billTotal(r))}</b></div>` : `<div class="total"><span>মোট (৫ টাকায় রাউন্ড, সর্বনিম্ন ${tk(rt.minFare)})</span><b>${tk(r.fare || 0)}</b></div>`}</div>
     ${odd ? `<div class="note">${icon('alert')}<p>দূরত্ব আন্দাজের চেয়ে অনেক বেশি। ঠিক মনে না হলে "বিল ভুল" চাপুন; অ্যাডমিন দেখবেন।</p></div>` : ''}`;
 }
