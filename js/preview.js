@@ -8,6 +8,7 @@ import { REPORT_DISTRICTS, hasPhone } from './reports.js';
 import { helpLink, parseHelp, buildSms, smsParts, minutesAgo, pickPolice } from './bipod.js';
 import { BRANDS, LIVE, CHECKED } from './prepare.js';
 import { icon as lineIcon } from './icons.js';
+import { initNear } from './near.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -26,6 +27,7 @@ const $ = (id) => document.getElementById(id);
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
 let lang = store.get('sc-lang') || 'bn';
 let data = null, locations = null, current = null, areaIndex = [];
+let near = null;          // categories near the person (js/near.js), created when the texts are loaded
 let activeTab = 'home'; // header tab that gets aria-current="page"
 const t = () => LANG[lang].ui;
 const digits = (s) => (lang === 'bn' ? String(s).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[d]) : String(s));
@@ -420,7 +422,8 @@ function renderArea() {
 /* ---------- views ---------- */
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see index.html).
 function showView(name) {
-  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws']) $(view).hidden = name !== view;
+  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat']) $(view).hidden = name !== view;
+  if (name !== 'cat') near?.close();   // the category map is closed when another page opens
   // One sidebar for home and the area page (#108): it moves with the view; CSS shows it only on wide screens.
   const rail = $('rail');
   // After the content (999 first for keyboards and screen readers); CSS puts it on the left.
@@ -481,7 +484,7 @@ function goHome() {
 // #/ home · #/numbers · #/area (search) · #/area/<district>/<upazila>[/<union or town>[/<place id>]] · #/send
 // #/guide · #/about · #/faq · #/account · #/help/<lat>,<lng>,<time>[,<situation>] (বিপদ বার্তা, #134). Anything else opens home. The home sections carry data-pages="..."
 // in index.html: each page shows the sections that list its name, so no content or id is copied.
-const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare'];
+const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare', 'c'];
 const HEADING = { home: 'hello', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
 let firstRoute = true;       // the first page after loading does not move focus
@@ -579,6 +582,14 @@ async function route() {
     showPage('home');
     msg(P().notFound); routeMsg = true;
     finish('home', titleOf('home'), 'hello', null);
+    return;
+  }
+  if (name === 'c') {
+    // categories near the person, all 64 districts (R1, #267): #/c, #/c/<category>, #/c/<category>/<place id>
+    $('main').dataset.page = 'cat';
+    showView('cat');
+    await near.show($('cat'), rest);
+    finish('area', () => near.title(rest), 'catTitle', intent);
     return;
   }
   if (name === 'send') {
@@ -871,6 +882,28 @@ function renderMyArea() {
   if (keep && $(keep)) $(keep).focus();
 }
 let toastTimer = 0;
+// The category pages (js/near.js) get only what they need from this page.
+function makeNear() {
+  near = initNear({
+    el, $, store, lang: () => lang, digits, go, toast: showToast, lastArea: () => getLast(),
+    texts: () => LANG[lang].page.near,
+    rerender: () => route(),
+    // official numbers of the area, where we have them (the pilot districts); else null
+    areaRows: (a) => {
+      const key = String(a.district).toLowerCase().replace(/[^a-z]/g, '');
+      if (!data?.docs[key]) return null;
+      // the centres call a Sadar upazila by the district's name ("Noakhali"); the pilot data says "Noakhali Sadar"
+      const ups = upazilas(data.docs[key]).map((u) => u.en);
+      const upazila = ups.find((u) => u === a.upazila) || ups.find((u) => u.replace(/\s*sadar$/i, '') === a.upazila) || (a.upazila === a.district && ups.find((u) => /sadar/i.test(u)));
+      if (!upazila) return null;
+      const place = { district: key, upazila, area: null };
+      try { return firstRows(place, areaContacts(data, place)); } catch { return null; }
+    },
+  });
+  const show = near.show;
+  near.title = (rest) => { const n = LANG[lang].page.near; return rest[0] && n.cats[rest[0]] ? n.cats[rest[0]] : n.hubTitle; };
+  near.show = show;
+}
 function showToast(text) {
   const x = $('toast');
   x.textContent = text; x.hidden = false;
@@ -1373,7 +1406,7 @@ const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.hr
 // exists: সেবা comes with A5, ডাকুন with A12, সমস্যা with A9. About and FAQ are in the footer; "কী হয়েছে?" on home.
 const NAV = [
   ['home', 'home', goHome],
-  ['area', 'pin', () => findArea('', false)],
+  ['area', 'pin', () => go('c')],
   ['numbers', 'phone', () => go('numbers')],
   ['send', 'alert', () => openSos(null)],
 ];
@@ -1654,6 +1687,7 @@ $('langBtn').addEventListener('click', () => {
   if (data) { renderRecent(); renderSuggest(); renderStats(); renderPlaces(); if (current) renderArea(); }
   if (!$('help').hidden) showHelp(readHash()[1]);
   if (!$('prepare').hidden) renderPrepare();
+  if (!$('cat').hidden) near.show($('cat'), readHash().slice(1));
   if (!$('sos').hidden) { renderOpened(); renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
   auth.setText();
   setTitle();
@@ -1681,6 +1715,7 @@ const auth = initAuth({
 });
 // Pages: show the page in the address now; an area address waits for the data it needs.
 history.scrollRestoration = 'manual';
+makeNear();
 window.addEventListener('hashchange', () => route());
 const isPlace = () => ['area', 'help'].includes(readHash()[0]) && readHash().length > 1;   // these wait for the data
 if (!isPlace()) route();
