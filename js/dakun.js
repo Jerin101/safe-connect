@@ -229,7 +229,10 @@ export function initDakun(ctx) {
     // earlier calls
     const hist = el('div', 'dk-hist');
     const histHead = el('div', 'sec-head'); histHead.append(el('h2', null, T().history), btn('linkbtn', T().showHistory, null, () => showHistory(hist)));
-    view.replaceChildren(top, what, where, card(histHead, hist));
+    // সেবা দিতে চান? → the provider page (R4)
+    const P = ctx.provideTexts();
+    const give = card(el('h2', null, P.wantToProvide), el('p', 'muted', P.wantText), pills(btn('btn', P.iProvide, 'wrench', () => ctx.go('provide'))));
+    view.replaceChildren(top, what, where, card(histHead, hist), give);
     paintEst();
     drawMap();
   }

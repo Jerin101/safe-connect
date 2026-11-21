@@ -169,7 +169,8 @@ function renderSide() {
   const out = withIcon(button(null, 'navitem', ctx.askSignOut), ICON.out, a.signOut);
   $('wsSide').setAttribute('aria-label', w.side);
   $('wsSide').replaceChildren(me,
-    group(w.groupWork, sections().filter((k) => k !== 'settings').map(navButton)),
+    group(w.groupWork, [...sections().filter((k) => k !== 'settings').map(navButton),
+      withIcon(button(null, 'navitem', () => ctx.go('provide')), ICON.send, ctx.texts().page.provide.title)]),   // সেবা দিন (R4)
     group(w.groupAccount, [navButton('settings'), out]),
     group(w.groupHelp, helpItems('navitem')));
   $('wsMob').setAttribute('aria-label', w.sections);
