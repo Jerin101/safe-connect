@@ -1,0 +1,23 @@
+﻿{
+  "project_name": "SafeConnect Capstone Project",
+  "submission_deadline": "2026-12-09",
+  "start_date": "",
+  "end_date": "",
+  "ignore_bots": [
+    "dependabot[bot]"
+  ],
+  "members": {
+    "Israt Jerin Nafisa": {
+      "role": "Team Member 1",
+      "emails": ["nafijerin455@gmail.com"],
+      "aliases": ["Israt Jerin", "Israt Jerin Nafisa", "Jerin101"],
+      "tag": "[Jerin]"
+    },
+    "Tasmin Toshi": {
+      "role": "Team Member 2",
+      "emails": ["toshi2305341342@diu.edu.bd"],
+      "aliases": ["Tasmin Toshi", "tasmintoshi"],
+      "tag": "[Toshi]"
+    }
+  }
+}
