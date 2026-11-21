@@ -18,6 +18,7 @@ const FILES = [
   'js/icons.js',             // line icons (A1)
   'js/near.js',              // categories near the person (R1)
   'js/dakun.js',             // সেবা ডাকুন (R3)
+  'js/provide.js',           // সেবা দিন (R4)
   'js/ride.js',
   'js/bipod.js',
   'js/prepare.js',

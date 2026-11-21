@@ -10,6 +10,7 @@ import { BRANDS, LIVE, CHECKED } from './prepare.js';
 import { icon as lineIcon } from './icons.js';
 import { initNear } from './near.js';
 import { initDakun } from './dakun.js';
+import { initProvide } from './provide.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -30,6 +31,7 @@ let lang = store.get('sc-lang') || 'bn';
 let data = null, locations = null, current = null, areaIndex = [];
 let near = null;          // categories near the person (js/near.js), created by makeNear() at start-up
 let dakun = null;         // সেবা ডাকুন (js/dakun.js, R3), created by makeNear() too
+let provide = null;       // সেবা দিন (js/provide.js, R4): providers, and approvals and rates for an admin
 let homeState = null;     // home (R2): { a: the area, place: its pilot place for the official numbers, or null }
 let acctOn = false;       // signed in (for the account tab's name)
 let activeTab = 'home'; // header tab that gets aria-current="page"
@@ -426,7 +428,7 @@ function renderArea() {
 /* ---------- views ---------- */
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see index.html).
 function showView(name) {
-  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat', 'dakun']) $(view).hidden = name !== view;
+  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat', 'dakun', 'provide']) $(view).hidden = name !== view;
   if (name !== 'cat') near?.close();   // the category map is closed when another page opens
   if (name !== 'dakun') dakun?.close();
   // One sidebar for home and the area page (#108): it moves with the view; CSS shows it only on wide screens.
@@ -490,7 +492,7 @@ function goHome() {
 // #/ home · #/numbers · #/area (search) · #/area/<district>/<upazila>[/<union or town>[/<place id>]] · #/send
 // #/guide · #/about · #/faq · #/account · #/help/<lat>,<lng>,<time>[,<situation>] (বিপদ বার্তা, #134). Anything else opens home. The home sections carry data-pages="..."
 // in index.html: each page shows the sections that list its name, so no content or id is copied.
-const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare', 'c', 'dakun'];
+const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare', 'c', 'dakun', 'provide'];
 const HEADING = { home: 'homeTitle', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
 let firstRoute = true;       // the first page after loading does not move focus
@@ -596,14 +598,31 @@ async function route() {
     showView('cat');
     await near.show($('cat'), rest);
     finish('home', () => near.title(rest), 'catTitle', intent);
+    syncArea();
     return;
   }
   if (name === 'dakun') {
     // সেবা ডাকুন (R3, #267): the eight services, the live map, the bill; Firebase loads only when it is needed
     $('main').dataset.page = 'dakun';
     showView('dakun');
+    activeTab = 'dakun'; markTab();
+    const at = location.hash;
     await dakun.show($('dakun'));
+    if (location.hash !== at) return;
     finish('dakun', () => dakun.title(), 'dakunTitle', intent);
+    syncArea();
+    return;
+  }
+  if (name === 'provide') {
+    // সেবা দিন (R4, #267): apply, go online, take calls, the bill; approvals and rates for an admin
+    $('main').dataset.page = 'provide';
+    showView('provide');
+    activeTab = 'account'; markTab();          // the tab now; the page may wait for Firebase
+    const at = location.hash;
+    await provide.show($('provide'));
+    if (location.hash !== at) return;          // the person went on meanwhile: that page finishes itself
+    finish('account', () => provide.title(), 'provideTitle', intent);
+    syncArea();
     return;
   }
   if (name === 'send') {
@@ -958,8 +977,15 @@ function makeNear() {
   dakun = initDakun({
     el, store, digits, go, toast: showToast, near,
     texts: () => LANG[lang].page.dakun,
+    provideTexts: () => LANG[lang].page.provide,
     signIn: (button) => auth.tap(button),
     pickArea,
+  });
+  provide = initProvide({
+    el, store, digits, toast: showToast, near, lang: () => lang,
+    texts: () => LANG[lang].page.provide,
+    dakunTexts: () => LANG[lang].page.dakun,
+    signIn: (button) => auth.tap(button),
   });
   near.title = (rest) => { const n = LANG[lang].page.near; return rest[0] && n.cats[rest[0]] ? n.cats[rest[0]] : n.hubTitle; };
 }
@@ -1748,6 +1774,7 @@ $('langBtn').addEventListener('click', () => {
   if (!$('prepare').hidden) renderPrepare();
   if (!$('cat').hidden) near.show($('cat'), readHash().slice(1));
   if (!$('dakun').hidden) dakun.show($('dakun'));
+  if (!$('provide').hidden) provide.show($('provide'));
   if ($('main').dataset.page === 'home') renderHome();
   if (!$('sos').hidden) { renderOpened(); renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
   auth.setText();

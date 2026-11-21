@@ -50,7 +50,7 @@ const CASES = [
   ['', '#/today', 'home', 'home'], ['#/', '#/today', 'home', 'home'], ['#/home', '#/today', 'home', 'home'], ['#/today', '#/today', 'home', 'home'],
   ['#/area', '#/near', 'area', 'home'], ['#/near', '#/near', 'area', 'home'],
   ['#/send', '#/sos', 'send', 'send'], ['#/sos', '#/sos', 'send', 'send'],
-  ['#/numbers', '#/numbers', 'numbers', 'home'], ['#/account', '#/account', 'account', 'account'], ['#/dakun', '#/dakun', 'dakun', 'dakun'],
+  ['#/numbers', '#/numbers', 'numbers', 'home'], ['#/account', '#/account', 'account', 'account'], ['#/dakun', '#/dakun', 'dakun', 'dakun'], ['#/provide', '#/provide', 'provide', 'account'],
   ['#/guide', '#/guide', 'guide', null], ['#/about', '#/about', 'about', null], ['#/faq', '#/faq', 'faq', null], ['#/prepare', '#/prepare', 'prepare', null],
   ['#/area/noakhali/hatiya', '#/area/noakhali/hatiya', 'place', 'home'], ['#/c', '#/c', 'cat', 'home'], ['#/c/pharmacy', '#/c/pharmacy', 'cat', 'home'],
   ['#/help/22.29580,91.10660,1793624400,followed', '#/help/22.29580,91.10660,1793624400,followed', 'help', null],

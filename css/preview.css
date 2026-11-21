@@ -556,7 +556,14 @@ main[data-page="home"] .feed { max-width: 900px; width: 100%; margin-inline: aut
 .home-nums .small { color: var(--muted); margin: 0; font-size: 0.85rem; }
 
 /* সেবা ডাকুন (R3, #267): the eight services, the form, the live map, the bill. Colours only from css/base.css. */
-#dakun { display: grid; gap: 14px; max-width: 900px; padding-block: 16px; }
+#dakun, #provide { display: grid; gap: 14px; max-width: 900px; padding-block: 16px; }
+#provide .card, #provide input, #provide select { min-width: 0; }
+#provide .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 10px; }
+#provide h2 { margin: 0; font-size: 1.15rem; }
+#provide label { font-weight: 600; font-size: 0.92rem; }
+#provide input, #provide select { width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); color: var(--ink); padding: 10px 12px; font: inherit; }
+.pv-rates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pv-rates > div { display: grid; gap: 4px; }
 #dakun .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 10px; min-width: 0; }
 #dakun h2 { margin: 0; font-size: 1.15rem; }
 #dakun label { font-weight: 600; font-size: 0.92rem; }

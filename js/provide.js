@@ -1,0 +1,341 @@
+// সেবা দিন (R4 of plan v4, #267): the provider's page on the real site, and, for an admin, approvals and rates.
+// An approved provider (driver, repair person, volunteer, delivery rider) sees open calls of their service in their
+// district, accepts one, sends a live position only while the job is live (the rider sees it on the map), and ends it
+// with a bill worked out from the admin's rates (firestore.rules check the same arithmetic). Being "online" stores no
+// position at all: riders only see how many providers work in the district. Built with createElement + textContent.
+import { icon } from './icons.js';
+
+const TYPE_IC = { ambulance: 'amb', cng: 'car', bike: 'bike', technician: 'wrench', help: 'hands', errand: 'basket', pickup: 'bag', towing: 'car' };
+const r5 = (x) => Math.round(x * 1e5) / 1e5;
+const toInt = (s) => Number(String(s).trim().replace(/[০-৯]/g, (x) => '০১২৩৪৫৬৭৮৯'.indexOf(x)));
+
+export function initProvide(ctx) {
+  const { el, store } = ctx;
+  const T = () => ctx.texts();
+  const D = () => ctx.dakunTexts();
+  const num = (s) => ctx.digits(s);
+  const fill = (s, v) => String(s).replace(/\{(\w+)\}/g, (all, k) => (k in v ? v[k] : all));
+  let RM = null, HP = null, FBM = null;
+  let view = null, here = null, user = null, prov, isAdm = false, pend = null, rates = null;
+  let reqs = [], reqUnsub = null, myJobs = null, online = false, onlineTimer = null;
+  let job = null, jobUnsub = null, liveUnsub = null, other = null, mine = null, geoId = null, lastSent = null, track = null, itemsDraft = '';
+
+  const tk = (n) => fill(D().taka, { n: num(n) });
+  const dist = (m) => (m < 1000 ? `${num(Math.round(m / 10) * 10)} ${D().metres}` : `${num((m / 1000).toFixed(1))} ${D().km}`);
+  const name = (t) => D().names[t] || t;
+  const btn = (cls, text, ic, onClick) => {
+    const b = el('button', cls, text); b.type = 'button';
+    if (ic) b.prepend(icon(ic, { size: 'sm' }));
+    if (onClick) b.addEventListener('click', onClick);
+    return b;
+  };
+  const card = (...kids) => { const c = el('section', 'card'); c.append(...kids.filter(Boolean)); return c; };
+  const pills = (...kids) => { const p = el('div', 'pills'); p.append(...kids.filter(Boolean)); return p; };
+  const note = (text, ic = 'info') => { const n = el('div', 'note dk-note'); n.append(icon(ic, { size: 'sm' }), el('p', null, text)); return n; };
+  const msgBox = () => { const m = el('div', 'small dk-msg'); m.setAttribute('role', 'status'); return m; };
+  const errText = (e) => (e && D().err[e.code]) || (navigator.onLine ? D().err.generic : D().err.unavailable);
+  const say = (text) => { const m = view?.querySelector('.dk-msg'); if (m) m.textContent = text; else ctx.toast(text); };
+  async function load() {
+    if (!FBM) FBM = await Promise.all([import('./firebase.js'), import('./community.js')]);
+    if (!RM) { RM = await import('./ride.js'); HP = (await import('./reports.js')).hasPhone; }
+    return FBM;
+  }
+  function field(id, label, value, { ph = '', max = 60, tel = false } = {}) {
+    const l = el('label', null, label); l.htmlFor = id;
+    const i = el('input'); i.id = id; i.maxLength = max; i.value = value || ''; i.placeholder = ph; i.type = tel ? 'tel' : 'text'; if (tel) i.inputMode = 'numeric';
+    return [l, i];
+  }
+  const val = (id) => view.querySelector(`#${id}`)?.value || '';
+
+  /* ---------- the page ---------- */
+  async function show(v) {
+    view = v;
+    v.replaceChildren(el('div', 'skeleton'));
+    try {
+      const [fb] = await load();
+      user = await fb.currentUser();
+      here = await ctx.near.here();
+      if (!view.isConnected) return;
+      const h = el('h1', 'page-title', T().title); h.id = 'provideTitle'; h.tabIndex = -1;
+      const head = card(el('p', 'eyebrow', T().eyebrow), h, el('p', 'muted', T().intro));
+      if (!user) {
+        const b = btn('btn solid', D().signIn, 'user', (e) => ctx.signIn(e.currentTarget));
+        v.replaceChildren(head, card(note(T().whySignIn), b));
+        return;
+      }
+      if (!(await fb.isVerified())) { v.replaceChildren(head, card(note(D().err.unverified))); return; }
+      if (!rates) { try { rates = await fb.readRates(); } catch { rates = {}; } }
+      prov = await fb.myProvider();
+      isAdm = (await fb.roleOf(user, ctx.lang())) === 'admin';
+      if (isAdm) { try { pend = await fb.pendingProviders(); } catch { pend = []; } }
+      if (prov?.approved) {
+        if (!reqUnsub) reqUnsub = fb.watchRequests(prov, (list) => { reqs = list; paintReqs(); }, (e) => { const b = view?.querySelector('.pv-reqs'); if (b) b.replaceChildren(el('p', 'note', errText(e))); });
+        myJobs = await fb.myRides('provider');
+        const act = myJobs.find((r) => ['accepted', 'arrived', 'on_trip', 'completed'].includes(r.status));
+        if (act && (!job || job.id !== act.id)) { job = act; follow(act.id); }
+      }
+      paint(head);
+    } catch (e) { v.replaceChildren(card(el('p', 'note', errText(e)))); }
+  }
+  function paint(head) {
+    if (!view?.isConnected) return;
+    head = head || view.querySelector('section.card');
+    const parts = [head];
+    if (prov === null) parts.push(applyCard());
+    else if (prov && !prov.approved) parts.push(card(el('h2', null, T().pendingTitle), el('p', 'muted', `${prov.name} · ${name(prov.type)} · ${prov.vehicle}`),
+      el('p', 'muted', T().pendingText), pills(btn('btn ghost', T().withdraw, null, () => act('withdraw'))), msgBox()));
+    else if (prov) {
+      const status = card();
+      const sh = el('div', 'sec-head'); sh.append(el('h2', null, prov.name), el('span', 'badge b-ok', T().approved));
+      status.append(sh, el('p', 'muted', `${name(prov.type)} · ${prov.vehicle} · ${prov.district}`),
+        pills(btn(online ? 'btn' : 'btn solid', online ? T().goOffline : T().goOnline, null, () => act('online'))),
+        el('p', 'small', online ? T().onlineNote : T().offlineNote));
+      parts.push(status);
+      if (job && ['accepted', 'arrived', 'on_trip', 'completed'].includes(job.status)) {
+        const jp = el('div', 'pv-job'); jp.append(...jobPanel());
+        parts.push(card(el('p', 'eyebrow', T().nowJob), jp));
+      } else {
+        const rb = el('div', 'pv-reqs');
+        parts.push(card(el('h2', null, T().newCalls), rb, msgBox()));
+      }
+      parts.push(card(el('h2', null, T().earnings), earnBox()));
+    }
+    if (isAdm) parts.push(...adminCards());
+    view.replaceChildren(...parts);
+    paintReqs();
+  }
+
+  /* ---------- apply ---------- */
+  function applyCard() {
+    const sel = el('select'); sel.id = 'pvType';
+    for (const x of RM.RIDE_TYPES) { const o = el('option', null, name(x.id)); o.value = x.id; sel.append(o); }
+    const l = el('label', null, T().serviceType); l.htmlFor = 'pvType';
+    const district = here ? here.label : T().noArea;
+    return card(el('h2', null, T().applyTitle), el('p', 'muted', fill(T().applyText, { area: district })), l, sel,
+      ...field('pvName', T().yourName, '', { ph: T().namePh }), ...field('pvVeh', T().vehicle, '', { ph: T().vehiclePh, max: 40 }),
+      pills(btn('btn solid', T().apply, null, () => act('apply'))), msgBox());
+  }
+
+  /* ---------- open calls ---------- */
+  function paintReqs() {
+    const box = view?.querySelector('.pv-reqs'); if (!box) return;
+    if (!reqs.length) { box.replaceChildren(el('p', 'muted', T().noCalls)); return; }
+    const from = mine || (here ? { lat: here.lat, lon: here.lon } : null);
+    const rows = el('div', 'rows');
+    for (const r of reqs) {
+      const row = el('div', 'r near-row'); const sq = el('span', 'cat-ic sm'); sq.append(icon(TYPE_IC[r.type] || 'car'));
+      const b = el('div');
+      b.append(el('div', 't', `${r.pickup.label}${r.drop ? ' → ' + r.drop.label : ''}`),
+        el('div', 'm', [from ? fill(T().away, { d: dist(RM.metres(from, r.pickup)) }) : '', r.drop ? dist(r.estM) : '', r.type === 'help' ? D().free : `${D().estShort} ${tk(r.estFare)}`].filter(Boolean).join(' · ')));
+      if (r.items) b.append(el('div', 'm', `${r.items} · ${r.type === 'errand' ? fill(D().maxLine, { t: tk(r.maxItems || 0) }) : D().itemsPaid}`));
+      const acts = el('div', 'acts'); acts.append(btn('btn solid', T().accept, null, () => act('accept', r)));
+      row.append(sq, b, acts); rows.append(row);
+    }
+    box.replaceChildren(rows);
+  }
+
+  /* ---------- the job ---------- */
+  function navLink(r) {
+    const goal = r.status === 'on_trip' && r.drop ? r.drop : r.pickup;
+    const a = el('a', 'btn', T().directions); a.target = '_blank'; a.rel = 'noopener noreferrer'; a.prepend(icon('nav', { size: 'sm' }));
+    a.href = `https://www.google.com/maps/dir/?api=1&destination=${Number(goal.lat)},${Number(goal.lon)}`;
+    return a;
+  }
+  function jobPanel() {
+    const r = job, t = RM.typeOf(r.type);
+    const where = el('p', 'muted', `${r.pickup.label}${r.drop ? ` → ${r.drop.label} (${dist(r.estM)})` : ''}`);
+    const far = el('p', 'small pv-dist', jobDist());
+    const cancel = btn('btn ghost', D().cancel, null, () => act('cancel'));
+    const out = [stepper(r.status)];
+    const list = r.items ? (() => { const b = el('div', 'okbox'); b.append(icon(TYPE_IC[r.type], { size: 'sm' }), ` ${r.items}`, el('br'),
+      el('span', 'small', t.errand ? fill(T().errandLimit, { t: tk(r.maxItems || 0) }) : T().pickupPaid)); return b; })() : null;
+    if (t.shop && ['accepted', 'arrived', 'on_trip'].includes(r.status)) {
+      if (r.status === 'accepted') out.push(el('h2', null, T().toShop), where, list, far, pills(btn('btn solid', T().atShop, null, () => act('arrived')), navLink(r), cancel));
+      else if (r.status === 'arrived') out.push(el('h2', null, t.errand ? T().buy : T().collect), list, t.errand ? el('p', 'small', T().takeReceipt) : null,
+        pills(btn('btn solid', t.errand ? T().boughtGo : T().collectedGo, null, () => act('start')), cancel));
+      else {
+        const cost = t.errand ? field('pvCost', T().receiptAmount, itemsDraft, { ph: T().receiptPh, max: 5, tel: true }) : [];
+        cost[1]?.addEventListener('input', (e) => { itemsDraft = e.target.value; });
+        out.push(el('h2', null, T().deliver), where, list, far, ...cost, pills(btn('btn solid', T().deliveredBill, null, () => act('end')), navLink(r)));
+      }
+    } else if (r.status === 'accepted') out.push(el('h2', null, T().toRider), where, far, pills(btn('btn solid', T().arrived, null, () => act('arrived')), navLink(r), cancel));
+    else if (r.status === 'arrived') out.push(el('h2', null, T().waitRider), where, el('p', 'small', fill(T().waitNote, { t: tk(rates?.[r.type]?.perMin || 0) })),
+      pills(btn('btn solid', t.dest ? T().startTrip : T().startWork, null, () => act('start')), cancel));
+    else if (r.status === 'on_trip') out.push(el('h2', null, t.dest ? D().onTrip : D().working), where, far,
+      pills(btn('btn solid', t.dest ? T().endTrip : T().endWork, null, () => act('end')), t.dest ? navLink(r) : null));
+    else if (r.status === 'completed') out.push(el('h2', null, fill(T().takeCash, { t: tk(RM.billTotal(r)) })), ...billBox(r),
+      'billOk' in r ? el('p', 'small', `${T().riderSaid}: ${r.billOk ? D().billOk : D().billWrong}`) : null,
+      pills(btn('btn solid', T().gotMoney, 'check', () => act('paid'))));
+    out.push(msgBox());
+    return out.filter(Boolean);
+  }
+  function jobDist() {
+    if (!job) return '';
+    if (job.status === 'on_trip' && track) return fill(T().sofar, { d: dist(track.m) });
+    if (job.status === 'accepted' && mine) return fill(T().riderAway, { d: dist(RM.metres(mine, other || job.pickup)) });
+    return '';
+  }
+  function stepper(st) {
+    const steps = ['requested', 'accepted', 'arrived', 'on_trip', 'completed', 'paid'], k = steps.indexOf(st);
+    const ol = el('ol', 'dk-steps'); ol.setAttribute('aria-label', D().stepsLabel);
+    steps.forEach((x, i) => ol.append(el('li', i < k ? 'done' : i === k ? 'now' : '', D().steps[x])));
+    return ol;
+  }
+  function billBox(r) {
+    const rt = rates?.[r.type]; if (!rt) return [];
+    const p = RM.fareParts(rt, r.distM || 0, r.waitMin || 0);
+    const bill = el('div', 'bill');
+    const row = (a, b, cls) => { const d = el('div', cls); d.append(el('span', null, a), el('b', null, b)); bill.append(d); };
+    if (r.type === 'errand') row(fill(D().itemsRow, { t: tk(r.maxItems || 0) }), tk(r.itemsCost || 0));
+    row(D().start, tk(p.base));
+    row(fill(D().distRow, { km: num(p.km.toFixed(1)), per: tk(rt.perKm) }), tk(p.distance));
+    row(fill(D().waitRow, { n: num(r.waitMin || 0) }), tk(p.waiting));
+    row(D().total, tk(RM.billTotal(r)), 'total');
+    return [bill];
+  }
+  function earnBox() {
+    if (!myJobs) return el('div', 'skeleton');
+    const paid = myJobs.filter((r) => r.status === 'paid'), day = new Date(); day.setHours(0, 0, 0, 0);
+    const today = paid.filter((r) => (r.paidAt || 0) >= day.getTime());
+    const sum = (l) => l.reduce((s, r) => s + (r.fare || 0), 0);
+    const b = el('div', 'bill');
+    const row = (a, x) => { const d = el('div'); d.append(el('span', null, a), el('b', null, x)); b.append(d); };
+    row(fill(T().today, { n: num(today.length) }), tk(sum(today)));
+    row(fill(T().allTime, { n: num(paid.length) }), tk(sum(paid)));
+    return b;
+  }
+
+  /* ---------- following the job: the ride, the rider's live point, our own GPS ---------- */
+  async function follow(id) {
+    const [fb] = await load();
+    stopJob(false);
+    jobUnsub = fb.watchRide(id, async (r) => {
+      const was = job ? job.status : null; job = r;
+      if (!r) { stopJob(); paint(); return; }
+      const live = RM.LIVE.includes(r.status);
+      if (live && !liveUnsub) liveUnsub = fb.watchLive(r.id, 'rider', (p) => { other = p; const d = view?.querySelector('.pv-dist'); if (d) d.textContent = jobDist(); }, () => {});
+      if (live) startGeo(); else stopGeo();
+      if (['completed', 'paid', 'cancelled'].includes(r.status) && was && RM.LIVE.includes(was)) fb.clearLive(r.id).catch(() => {});
+      if (r.status === 'cancelled') {
+        ctx.toast(r.cancelledBy === 'rider' ? fill(T().riderCancelled, { f: r.cancelFee ? tk(r.cancelFee) : '' }) : r.cancelledBy === 'stale' ? T().staleClosed : D().cancelled);
+        stopJob(); try { myJobs = await fb.myRides('provider'); } catch { /* keep the old list */ }
+      }
+      if (r.status === 'paid') { stopJob(); try { myJobs = await fb.myRides('provider'); } catch { /* keep */ } }
+      if (!was || was !== r.status) paint();
+    }, (e) => say(errText(e)));
+  }
+  function stopGeo() { if (geoId != null) navigator.geolocation.clearWatch(geoId); geoId = null; }
+  function stopJob(clear = true) {
+    stopGeo(); if (jobUnsub) jobUnsub(); if (liveUnsub) liveUnsub(); jobUnsub = liveUnsub = null; other = null; lastSent = null;
+    if (clear) { job = null; track = null; }
+  }
+  function startGeo() {
+    if (geoId != null || !navigator.geolocation) return;
+    geoId = navigator.geolocation.watchPosition((p) => gotPos(r5(p.coords.latitude), r5(p.coords.longitude)),
+      () => say(T().gpsLost), { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+  }
+  async function gotPos(lat, lon) {
+    if (!job || !RM.inBangladesh(lat, lon)) return;
+    const p = { lat, lon, at: Date.now() }; mine = p;
+    if (job.status === 'on_trip') track = RM.trackAdd(track, p);
+    const due = !lastSent || (p.at - lastSent.at >= 8000 && RM.metres(lastSent, p) >= 25) || p.at - lastSent.at >= 60000;
+    if (due) { lastSent = p; try { const [fb] = await load(); await fb.sendLive(job.id, 'provider', lat, lon); } catch { /* the next point tries again */ } }
+    const d = view?.querySelector('.pv-dist'); if (d) d.textContent = jobDist();
+  }
+  function keepOnline() {
+    clearInterval(onlineTimer); onlineTimer = null;
+    if (online && prov) onlineTimer = setInterval(() => { load().then(([fb]) => fb.goOnline(prov)).catch(() => {}); }, 10 * 60000);
+  }
+  addEventListener('pagehide', () => { if (online) load().then(([fb]) => fb.goOffline()).catch(() => {}); });
+
+  /* ---------- actions ---------- */
+  async function act(what, arg) {
+    try {
+      const [fb, cm] = await load();
+      if (what === 'apply') {
+        const nm = val('pvName').trim(), veh = val('pvVeh').trim(), type = val('pvType');
+        if (!here) return say(T().noArea);
+        if (nm.length < 2 || veh.length < 2) return say(T().needNameVehicle);
+        if (HP(nm) || HP(veh)) return say(D().check.noPhone);
+        await fb.applyProvider({ name: nm, type, vehicle: veh, district: cm.districtKey(here.district) });
+        ctx.toast(T().applied); return show(view);
+      }
+      if (what === 'withdraw') { await fb.withdrawProvider(); prov = null; return paint(); }
+      if (what === 'online') {
+        if (online) { await fb.goOffline(); online = false; keepOnline(); return paint(); }
+        await fb.goOnline(prov); online = true; ctx.toast(T().nowOnline); keepOnline(); return paint();
+      }
+      if (what === 'accept') {
+        try { await fb.acceptRide(arg.id, prov); } catch (e) { if (e.code === 'permission-denied') throw { code: 'taken' }; throw e; }
+        ctx.toast(T().accepted);
+        job = { ...arg, status: 'accepted' }; follow(arg.id); return paint();
+      }
+      if (what === 'arrived') { await fb.arrived(job.id); return; }
+      if (what === 'start') { track = null; await fb.startTrip(job.id); return; }
+      if (what === 'end') {
+        const r = job, tp = RM.typeOf(r.type), rt = rates[r.type];
+        const max = (r.estM || 0) * 3 + 5000;
+        const distM = tp.dest ? Math.min(max, Math.round(track && track.m > 50 ? track.m : r.estM || 0)) : 0;
+        const waitMin = r.arrivedAt && r.startedAt ? Math.max(0, Math.floor((r.startedAt - r.arrivedAt) / 60000)) : 0;
+        let itemsCost;
+        if (tp.errand) {
+          const raw = val('pvCost') || itemsDraft; itemsCost = toInt(raw);
+          if (!String(raw).trim() || !Number.isInteger(itemsCost) || itemsCost < 0) return say(T().needReceipt);
+          if (itemsCost > r.maxItems) return say(fill(T().overLimit, { t: tk(r.maxItems) }));
+        }
+        await fb.completeRide(r.id, { distM, waitMin, fare: RM.fare(rt, distM, waitMin), itemsCost }); itemsDraft = ''; return;
+      }
+      if (what === 'paid') { await fb.markPaid(job.id); ctx.toast(T().paidDone); return; }
+      if (what === 'cancel') { await fb.cancelRide(job.id, 'provider', 0); await fb.clearLive(job.id); stopJob(); ctx.toast(D().cancelled); return paint(); }
+      if (what === 'approve') { await fb.approveProvider(arg, true); pend = await fb.pendingProviders(); ctx.toast(T().approvedDone); return paint(); }
+      if (what === 'rates' || what === 'defaults') {
+        const list = what === 'defaults' ? Object.entries(RM.DEFAULT_RATES)
+          : [[val('rtType'), { base: toInt(val('rtBase')), perKm: toInt(val('rtKm')), perMin: toInt(val('rtMin')), minFare: toInt(val('rtMinF')) }]];
+        for (const [k, r] of list) {
+          if (![r.base, r.perKm, r.perMin, r.minFare].every((x) => Number.isInteger(x) && x >= 0)) return say(T().wholeNumbers);
+          await fb.setRates(k, k === 'help' ? { base: 0, perKm: 0, perMin: 0, minFare: 0 } : r);
+        }
+        rates = await fb.readRates(); ctx.toast(T().ratesSaved); return paint();
+      }
+    } catch (e) { say(errText(e)); }
+  }
+
+  /* ---------- admin: approvals and rates ---------- */
+  function adminCards() {
+    const ap = card(el('p', 'eyebrow', T().admin), el('h2', null, T().waitingApproval));
+    if (!pend) ap.append(el('div', 'skeleton'));
+    else if (!pend.length) ap.append(el('p', 'muted', T().nobodyWaiting));
+    else {
+      const rows = el('div', 'rows');
+      for (const p of pend) {
+        const row = el('div', 'r near-row'); const sq = el('span', 'cat-ic sm'); sq.append(icon(TYPE_IC[p.type] || 'car'));
+        const b = el('div'); b.append(el('div', 't', `${p.name} · ${name(p.type)}`), el('div', 'm', `${p.vehicle} · ${p.district}`));
+        const acts = el('div', 'acts'); acts.append(btn('btn solid', T().approve, 'check', () => act('approve', p.id)));
+        row.append(sq, b, acts); rows.append(row);
+      }
+      ap.append(rows);
+    }
+    const sel = el('select'); sel.id = 'rtType';
+    for (const x of RM.RIDE_TYPES.filter((y) => y.id !== 'help')) { const o = el('option', null, name(x.id)); o.value = x.id; sel.append(o); }
+    const l = el('label', null, T().service); l.htmlFor = 'rtType';
+    const missing = RM.RIDE_TYPES.filter((x) => !rates?.[x.id]).map((x) => name(x.id));
+    const grid = el('div', 'pv-rates');
+    const fields = [['rtBase', T().rBase], ['rtKm', T().rKm], ['rtMin', T().rMin], ['rtMinF', T().rMinFare]].map(([id, label]) => { const d = el('div'); d.append(...field(id, label, '', { max: 5, tel: true })); return d; });
+    grid.append(...fields);
+    const fillForm = () => { const r = rates?.[sel.value] || RM.DEFAULT_RATES[sel.value]; const set = (id, x) => { const i = grid.querySelector(`#${id}`); if (i) i.value = num(x); };
+      set('rtBase', r.base); set('rtKm', r.perKm); set('rtMin', r.perMin); set('rtMinF', r.minFare); };
+    sel.addEventListener('change', fillForm);
+    const rc = card(el('p', 'eyebrow', T().admin), el('h2', null, T().ratesTitle),
+      missing.length ? note(fill(T().missingRates, { list: missing.join(', ') })) : null,
+      l, sel, grid, pills(btn('btn solid', T().saveRates, null, () => act('rates')), btn('btn ghost', T().sampleRates, null, () => act('defaults'))),
+      el('p', 'small', T().ratesNote), msgBox());
+    queueMicrotask(fillForm);
+    return [ap, rc];
+  }
+
+  return {
+    show,
+    close() { /* the job keeps running in the background; the page is redrawn when opened again */ },
+    title: () => T().title,
+  };
+}
