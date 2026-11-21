@@ -1,0 +1,1270 @@
+# SafeConnect Capstone - Combined Team Development Journal
+
+*Auto-compiled from individual member logs. Total Logged Entries: 22*
+
+---
+
+## 2026-10-23 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Add design guide and reference page
+- **Completed Tasks:**
+  - Add design guide and reference page
+  - Make the design guide a project rule
+  - Use portal colours and two-row header
+  - Add portal banner with greeting, trust ticks and first-visit welcome
+  - Add round icon row with national numbers and their sources
+  - Move area search into the portal search band
+  - Restore message, chip and page layout styles
+  - Add "What happened?" situation cards
+  - Add side cards, help icons and weak-network band
+  - Use the portal column footer
+  - Area and send-location pages in portal style
+  - Keep component colours in variables
+  - Make page texts short, calm and true (bangla-reviewer)
+  - Merge pull request #43 from Jerin101/feature/42-portal-design
+  - Keep the 3 actions visible on short phones
+  - DESIGN.md: say 'বিনা খরচে ব্যবহার' in the trust badges
+  - Don't ask for location when saving family numbers
+  - Show warning badges on call-first rows
+  - Use a fake example phone number
+  - Add web app manifest and icons
+  - Save fonts inside the project
+  - Merge pull request #51 from Jerin101/fix/48-release-check-fixes
+  - Merge pull request #47 from Jerin101/docs/46-free-to-use
+  - Merge pull request #45 from Jerin101/fix/44-short-phones
+  - Add service worker so the site opens with no internet
+  - Show a calm notice when there is no internet
+  - Say "works without internet" where it is now true
+  - Move P34 from tasmintoshi to Jerin101 in the plan
+  - Add the service-worker VERSION rule for data PRs
+  - Tester: block data PRs that don't raise the service-worker VERSION
+  - Merge remote-tracking branch 'origin/main' into feature/53-offline-app
+  - Add Bangla and English text files
+  - Read page texts from js/lang files
+  - Save the text files for offline use (VERSION v2)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `2363f4c` — Add design guide and reference page
+  - `ccf4aea` — Make the design guide a project rule
+  - `4214710` — Use portal colours and two-row header
+  - `fea70b5` — Add portal banner with greeting, trust ticks and first-visit welcome
+  - `b1c7038` — Add round icon row with national numbers and their sources
+  - `9c71503` — Move area search into the portal search band
+  - `005d23e` — Restore message, chip and page layout styles
+  - `b6e76ff` — Add "What happened?" situation cards
+  - `8f1dd00` — Add side cards, help icons and weak-network band
+  - `751f026` — Use the portal column footer
+  - `d1150ed` — Area and send-location pages in portal style
+  - `228e520` — Keep component colours in variables
+  - `4c71eb7` — Make page texts short, calm and true (bangla-reviewer)
+  - `bc9bb09` — Merge pull request #43 from Jerin101/feature/42-portal-design *(PR Merge)*
+  - `de52fa6` — Keep the 3 actions visible on short phones
+  - `750c077` — DESIGN.md: say 'বিনা খরচে ব্যবহার' in the trust badges
+  - `60b008e` — Don't ask for location when saving family numbers
+  - `8366953` — Show warning badges on call-first rows
+  - `b13c4e8` — Use a fake example phone number
+  - `f1d13ca` — Add web app manifest and icons
+  - `9ab88bb` — Save fonts inside the project
+  - `d77f2ba` — Merge pull request #51 from Jerin101/fix/48-release-check-fixes *(PR Merge)*
+  - `a470bb7` — Merge pull request #47 from Jerin101/docs/46-free-to-use *(PR Merge)*
+  - `07ee286` — Merge pull request #45 from Jerin101/fix/44-short-phones *(PR Merge)*
+  - `9797e67` — Add service worker so the site opens with no internet
+  - `1214de4` — Show a calm notice when there is no internet
+  - `f887a73` — Say "works without internet" where it is now true
+  - `83d2a56` — Move P34 from tasmintoshi to Jerin101 in the plan
+  - `12449bb` — Add the service-worker VERSION rule for data PRs
+  - `fb2ac07` — Tester: block data PRs that don't raise the service-worker VERSION
+  - `3958f3c` — Merge remote-tracking branch 'origin/main' into feature/53-offline-app *(PR Merge)*
+  - `f5df005` — Add Bangla and English text files
+  - `acd8352` — Read page texts from js/lang files
+  - `c563296` — Save the text files for offline use (VERSION v2)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-10-24 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Add Firestore security rules and emulator tests (P17)
+- **Completed Tasks:**
+  - Add Firestore security rules and emulator tests (P17)
+  - Add rules test workflow and Firebase setup guide
+  - Merge pull request #61 from Jerin101/feature/60-firebase-rules
+  - Merge pull request #54 from Jerin101/feature/53-offline-app
+  - Merge pull request #58 from Jerin101/feature/57-lang-files
+  - Merge pull request #56 from Jerin101/docs/55-p34-owner-version-rule
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `4c7035c` — Add Firestore security rules and emulator tests (P17)
+  - `f70ddde` — Add rules test workflow and Firebase setup guide
+  - `2ef6fae` — Merge pull request #61 from Jerin101/feature/60-firebase-rules *(PR Merge)*
+  - `f343fd5` — Merge pull request #54 from Jerin101/feature/53-offline-app *(PR Merge)*
+  - `5555a1c` — Merge pull request #58 from Jerin101/feature/57-lang-files *(PR Merge)*
+  - `9724836` — Merge pull request #56 from Jerin101/docs/55-p34-owner-version-rule *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-10-27 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Merge pull request #63 from Jerin101/feature/57-lang-files
+- **Completed Tasks:**
+  - Merge pull request #63 from Jerin101/feature/57-lang-files
+  - Mark P16 and P17 done, fix old plan rows
+  - Merge pull request #64 from Jerin101/docs/59-system-design-v2
+  - Add Firebase config and auth/firestore module (#66)
+  - Add sign-in and sign-out texts in Bangla and English (#66)
+  - Add sign-in page, account button and sign-out (#66)
+  - Allow official sign-in provider logos in the design guide (#66)
+  - Add the Firebase web API key (#66)
+  - Add Google logo to sign-in button and profile photo to account button (#66)
+  - Add accounts and honest limits to README (#66)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `0156a8e` — Merge pull request #63 from Jerin101/feature/57-lang-files *(PR Merge)*
+  - `e391375` — Mark P16 and P17 done, fix old plan rows
+  - `5ebd63e` — Merge pull request #64 from Jerin101/docs/59-system-design-v2 *(PR Merge)*
+  - `e2a606f` — Add Firebase config and auth/firestore module (#66)
+  - `ed959a3` — Add sign-in and sign-out texts in Bangla and English (#66)
+  - `2a1a3ff` — Add sign-in page, account button and sign-out (#66)
+  - `d1fe352` — Allow official sign-in provider logos in the design guide (#66)
+  - `d2a4212` — Add the Firebase web API key (#66)
+  - `579f416` — Add Google logo to sign-in button and profile photo to account button (#66)
+  - `d5f89bf` — Add accounts and honest limits to README (#66)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-10-28 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Merge pull request #67 from Jerin101/feature/66-signin
+- **Completed Tasks:**
+  - Merge pull request #67 from Jerin101/feature/66-signin
+  - Add design v3 reference page (#68)
+  - Add v3 layout section to the design guide (#68)
+  - Merge pull request #76 from Jerin101/docs/68-design-v3
+  - Move shared styles into css/base.css (#69)
+  - Use v3 colours (#69)
+  - Add secret scan with gitleaks and the secrets rule (#77)
+  - Fix secret-scan allowlist for the Firebase key (#77)
+  - Merge pull request #83 from Jerin101/feature/77-secret-scan
+  - Merge branch 'main' into feature/69-base-css
+  - Update autopilot log (#69)
+  - Merge pull request #84 from Jerin101/feature/69-base-css
+  - Add v3 header layout and styles (#70)
+  - Add area chip, tab state and send button to header (#70)
+  - Add header texts in Bangla and English (#70)
+  - Raise service worker version to v6 (#70)
+  - Shorten header texts after Bangla review (#70)
+  - Narrow header search so all tabs fit (#70)
+  - Merge pull request #85 from Jerin101/feature/70-new-header
+  - Add page markers, headings and see-more links (#71)
+  - Add page titles and see-more texts (#71)
+  - Add hash routes for pages and areas (#71)
+  - Raise service worker version to v7 (#71)
+  - Update autopilot log (#71)
+  - Match area title to the tab and hide the see-more arrow from screen readers (#71)
+  - Merge pull request #86 from Jerin101/feature/71-routes
+  - Raise red contrast for white text on 999 and call buttons (#72)
+  - Add texts for the home sidebar, numbers row and three roles (#72)
+  - Export role icons for the home roles section (#72)
+  - Build v3 home layout with sidebar, card rows and three roles (#72)
+  - Raise service worker version to v8 (#72)
+  - Update autopilot log (#72)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `8c7607e` — Merge pull request #67 from Jerin101/feature/66-signin *(PR Merge)*
+  - `30fcacf` — Add design v3 reference page (#68)
+  - `7c5931f` — Add v3 layout section to the design guide (#68)
+  - `deb496c` — Merge pull request #76 from Jerin101/docs/68-design-v3 *(PR Merge)*
+  - `0aaaf9d` — Move shared styles into css/base.css (#69)
+  - `4002077` — Use v3 colours (#69)
+  - `1cf5050` — Add secret scan with gitleaks and the secrets rule (#77)
+  - `e996009` — Fix secret-scan allowlist for the Firebase key (#77)
+  - `2d4690b` — Merge pull request #83 from Jerin101/feature/77-secret-scan *(PR Merge)*
+  - `1efed42` — Merge branch 'main' into feature/69-base-css *(PR Merge)*
+  - `d465062` — Update autopilot log (#69)
+  - `4a0fc42` — Merge pull request #84 from Jerin101/feature/69-base-css *(PR Merge)*
+  - `9c0ca83` — Add v3 header layout and styles (#70)
+  - `66bef62` — Add area chip, tab state and send button to header (#70)
+  - `1fbaec0` — Add header texts in Bangla and English (#70)
+  - `0f84249` — Raise service worker version to v6 (#70)
+  - `affaf5b` — Shorten header texts after Bangla review (#70)
+  - `86ad698` — Narrow header search so all tabs fit (#70)
+  - `5b8fa22` — Merge pull request #85 from Jerin101/feature/70-new-header *(PR Merge)*
+  - `a995c71` — Add page markers, headings and see-more links (#71)
+  - `b30b35f` — Add page titles and see-more texts (#71)
+  - `5a01e13` — Add hash routes for pages and areas (#71)
+  - `a30c6cc` — Raise service worker version to v7 (#71)
+  - `3417665` — Update autopilot log (#71)
+  - `fe86f35` — Match area title to the tab and hide the see-more arrow from screen readers (#71)
+  - `9599801` — Merge pull request #86 from Jerin101/feature/71-routes *(PR Merge)*
+  - `3dbfd4d` — Raise red contrast for white text on 999 and call buttons (#72)
+  - `b811a3a` — Add texts for the home sidebar, numbers row and three roles (#72)
+  - `68a6e8b` — Export role icons for the home roles section (#72)
+  - `86163b4` — Build v3 home layout with sidebar, card rows and three roles (#72)
+  - `54505ac` — Raise service worker version to v8 (#72)
+  - `277fa09` — Update autopilot log (#72)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-10-29 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Make home texts clearer and more honest after Bangla review (#72)
+- **Completed Tasks:**
+  - Make home texts clearer and more honest after Bangla review (#72)
+  - Merge pull request #87 from Jerin101/feature/72-home-layout
+  - Add sign-in modal and Google error texts (#73)
+  - Turn sign-in into a two-panel modal with 999 on top (#73)
+  - Load Firebase only after a tap and map auth errors (#73)
+  - Raise service worker version to v9 (#73)
+  - Update autopilot log (#73)
+  - Clearer sign-in and error texts after Bangla review (#73)
+  - Fix Firebase load comment and name internal-error (#73)
+  - Merge pull request #88 from Jerin101/feature/73-signin-modal
+  - Add reset-code helpers to firebase.js (#74)
+  - Add password-reset texts in Bangla and English (#74)
+  - Add reset page styles (#74)
+  - Add password-reset page (#74)
+  - Cache reset page and raise service worker version to v10 (#74)
+  - Update autopilot log (#74)
+  - Polish reset texts after Bangla review (#74)
+  - Never store the reset code in the cache or the address bar (#74)
+  - Merge pull request #89 from Jerin101/feature/74-reset-page
+  - Add share texts for WhatsApp, Messenger and copy (#75)
+  - Add share note area and wrapping share row (#75)
+  - Add WhatsApp, Messenger and other-app share buttons per person (#75)
+  - Raise service worker version to v11 (#75)
+  - Update autopilot log (#75)
+  - Offer SMS first in share messages after Bangla review (#75)
+  - Use cleaned saved numbers in send links (#75)
+  - Merge pull request #90 from Jerin101/feature/75-share
+  - Add family copy functions to the Firebase module (#78)
+  - Add rules tests for the family copy (#78)
+  - Add workspace texts in Bangla and English (#78)
+  - Add workspace styles (#78)
+  - Add user workspace module (#78)
+  - Open the workspace from the account page (#78)
+  - Raise service worker version to v12 (#78)
+  - Update autopilot log (#78)
+  - Say exactly what the sync copies, clearer sign-out texts (#78)
+  - Never upload this phone's numbers unless the copy is on for this phone (#78)
+  - Merge pull request #91 from Jerin101/feature/78-user-workspace
+  - Add report fields and Firestore calls for wrong-number reports (#79)
+  - Test that the site's report documents pass the rules (#79)
+  - Add report form and status texts in Bangla and English (#79)
+  - Add the 3-step wrong-number form on area cards (#79)
+  - Show my reports and the admin report list in the workspace (#79)
+  - Raise service worker version to v13 and cache reports.js (#79)
+  - Update autopilot log (#79)
+  - Clearer report texts after Bangla review (#79)
+  - Save a report status only once per tap (#79)
+  - Merge pull request #92 from Jerin101/feature/79-reports
+  - Add admin module and rules tests for roles and audit log (#65)
+  - Require a true audit entry for role changes (#65)
+  - Add audit log indexes (#65)
+  - Add admin reads and role change to firebase.js (#65)
+  - Add admin texts (#65)
+  - Add admin workspace sections (#65)
+  - Raise service worker version to v14 and cache admin.js (#65)
+  - Update autopilot log (#65)
+  - Accurate admin texts after Bangla review (#65)
+  - An admin cannot change another admin's role (#65)
+  - Merge pull request #93 from Jerin101/feature/65-admin-workspace
+  - Update GitHub Action versions and pin Ubuntu 24.04 (#52)
+  - Merge pull request #94 from Jerin101/fix/52-action-versions
+  - Add the 40-contact spot-check sheet and its tool (#80)
+  - Update autopilot log (#80)
+  - Keep hand-check answers and correct the Amanullapur note (#80)
+  - Merge pull request #95 from Jerin101/data/80-spot-check
+  - Final autopilot report (#80)
+  - Clearer NEEDS JERIN steps (#80)
+  - Merge pull request #96 from Jerin101/docs/80-autopilot-report
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `9ea9491` — Make home texts clearer and more honest after Bangla review (#72)
+  - `8a4739a` — Merge pull request #87 from Jerin101/feature/72-home-layout *(PR Merge)*
+  - `a0655b8` — Add sign-in modal and Google error texts (#73)
+  - `b82bcf2` — Turn sign-in into a two-panel modal with 999 on top (#73)
+  - `40d266c` — Load Firebase only after a tap and map auth errors (#73)
+  - `cb1ef02` — Raise service worker version to v9 (#73)
+  - `e31c6d1` — Update autopilot log (#73)
+  - `810397d` — Clearer sign-in and error texts after Bangla review (#73)
+  - `4b76e7f` — Fix Firebase load comment and name internal-error (#73)
+  - `a4072db` — Merge pull request #88 from Jerin101/feature/73-signin-modal *(PR Merge)*
+  - `9799d3a` — Add reset-code helpers to firebase.js (#74)
+  - `6d7996d` — Add password-reset texts in Bangla and English (#74)
+  - `d357ab5` — Add reset page styles (#74)
+  - `c2176ba` — Add password-reset page (#74)
+  - `46e8e0b` — Cache reset page and raise service worker version to v10 (#74)
+  - `e37a001` — Update autopilot log (#74)
+  - `c8059f7` — Polish reset texts after Bangla review (#74)
+  - `1dad4da` — Never store the reset code in the cache or the address bar (#74)
+  - `40a1483` — Merge pull request #89 from Jerin101/feature/74-reset-page *(PR Merge)*
+  - `d19d982` — Add share texts for WhatsApp, Messenger and copy (#75)
+  - `6dae5be` — Add share note area and wrapping share row (#75)
+  - `63beaf4` — Add WhatsApp, Messenger and other-app share buttons per person (#75)
+  - `2465ab2` — Raise service worker version to v11 (#75)
+  - `8a4f020` — Update autopilot log (#75)
+  - `efa8589` — Offer SMS first in share messages after Bangla review (#75)
+  - `0a681fd` — Use cleaned saved numbers in send links (#75)
+  - `fcd5716` — Merge pull request #90 from Jerin101/feature/75-share *(PR Merge)*
+  - `764f92e` — Add family copy functions to the Firebase module (#78)
+  - `8d9b011` — Add rules tests for the family copy (#78)
+  - `d33b5b7` — Add workspace texts in Bangla and English (#78)
+  - `2b596f1` — Add workspace styles (#78)
+  - `af7a376` — Add user workspace module (#78)
+  - `e83d9c6` — Open the workspace from the account page (#78)
+  - `c4b49fd` — Raise service worker version to v12 (#78)
+  - `057668f` — Update autopilot log (#78)
+  - `de6ee94` — Say exactly what the sync copies, clearer sign-out texts (#78)
+  - `7b74fb7` — Never upload this phone's numbers unless the copy is on for this phone (#78)
+  - `5283ef1` — Merge pull request #91 from Jerin101/feature/78-user-workspace *(PR Merge)*
+  - `ab7a442` — Add report fields and Firestore calls for wrong-number reports (#79)
+  - `6a870f6` — Test that the site's report documents pass the rules (#79)
+  - `2121403` — Add report form and status texts in Bangla and English (#79)
+  - `6a688c7` — Add the 3-step wrong-number form on area cards (#79)
+  - `7f44a8b` — Show my reports and the admin report list in the workspace (#79)
+  - `6a01819` — Raise service worker version to v13 and cache reports.js (#79)
+  - `17fbed6` — Update autopilot log (#79)
+  - `55c58c0` — Clearer report texts after Bangla review (#79)
+  - `9ff9788` — Save a report status only once per tap (#79)
+  - `a8b3a11` — Merge pull request #92 from Jerin101/feature/79-reports *(PR Merge)*
+  - `f70851a` — Add admin module and rules tests for roles and audit log (#65)
+  - `a4cb2e7` — Require a true audit entry for role changes (#65)
+  - `46e27bd` — Add audit log indexes (#65)
+  - `ebfa27f` — Add admin reads and role change to firebase.js (#65)
+  - `d6b9c91` — Add admin texts (#65)
+  - `8d955ee` — Add admin workspace sections (#65)
+  - `7468a9a` — Raise service worker version to v14 and cache admin.js (#65)
+  - `85f565d` — Update autopilot log (#65)
+  - `9125b34` — Accurate admin texts after Bangla review (#65)
+  - `1bc1c8c` — An admin cannot change another admin's role (#65)
+  - `b53b65e` — Merge pull request #93 from Jerin101/feature/65-admin-workspace *(PR Merge)*
+  - `384a643` — Update GitHub Action versions and pin Ubuntu 24.04 (#52)
+  - `71da1ea` — Merge pull request #94 from Jerin101/fix/52-action-versions *(PR Merge)*
+  - `e74fb6f` — Add the 40-contact spot-check sheet and its tool (#80)
+  - `8450046` — Update autopilot log (#80)
+  - `6b8c54c` — Keep hand-check answers and correct the Amanullapur note (#80)
+  - `486f9d5` — Merge pull request #95 from Jerin101/data/80-spot-check *(PR Merge)*
+  - `46d7e4c` — Final autopilot report (#80)
+  - `4c17788` — Clearer NEEDS JERIN steps (#80)
+  - `abe33d2` — Merge pull request #96 from Jerin101/docs/80-autopilot-report *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-10-30 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Explain tool output paths and officer page dates (#19)
+- **Completed Tasks:**
+  - Explain tool output paths and officer page dates (#19)
+  - Merge pull request #97 from Jerin101/docs/19-tools-readme
+  - Add new Ukhia/Teknaf fire officers and Tourist Police SP; remove officers who left (#62)
+  - Merge pull request #102 from Jerin101/data/62-new-officers
+  - Desktop sidebar: sticks under the real header, emergency help card on top (#103)
+  - Merge pull request #104 from Jerin101/fix/103-desktop-rail
+  - Opt-in auto location: the area updates by itself (#105)
+  - Merge pull request #106 from Jerin101/feature/105-auto-location
+  - Auto location notes: other-area note and first-position toast (#99)
+  - Merge pull request #107 from Jerin101/fix/99-autoloc-notes
+  - One name per feature, honest coverage, in-site report links (#108)
+  - Merge pull request #109 from Jerin101/fix/108-one-name-texts
+  - Phone home order: all national numbers as a grid, About/FAQ as links (#108)
+  - Merge pull request #110 from Jerin101/fix/108-home-order
+  - Move roles to Account, stats to About, trim the sidebar, ask about auto location after the first near-me tap (#108)
+  - Merge pull request #111 from Jerin101/fix/108-moves
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `e23d8e1` — Explain tool output paths and officer page dates (#19)
+  - `ae894fd` — Merge pull request #97 from Jerin101/docs/19-tools-readme *(PR Merge)*
+  - `5d506a8` — Add new Ukhia/Teknaf fire officers and Tourist Police SP; remove officers who left (#62)
+  - `a0cd43a` — Merge pull request #102 from Jerin101/data/62-new-officers *(PR Merge)*
+  - `3c69ed6` — Desktop sidebar: sticks under the real header, emergency help card on top (#103)
+  - `3c3ce43` — Merge pull request #104 from Jerin101/fix/103-desktop-rail *(PR Merge)*
+  - `67c2c40` — Opt-in auto location: the area updates by itself (#105)
+  - `7f09dc9` — Merge pull request #106 from Jerin101/feature/105-auto-location *(PR Merge)*
+  - `36f5efe` — Auto location notes: other-area note and first-position toast (#99)
+  - `94fe567` — Merge pull request #107 from Jerin101/fix/99-autoloc-notes *(PR Merge)*
+  - `06d8a47` — One name per feature, honest coverage, in-site report links (#108)
+  - `ea57180` — Merge pull request #109 from Jerin101/fix/108-one-name-texts *(PR Merge)*
+  - `8c308ef` — Phone home order: all national numbers as a grid, About/FAQ as links (#108)
+  - `c36af88` — Merge pull request #110 from Jerin101/fix/108-home-order *(PR Merge)*
+  - `9af7144` — Move roles to Account, stats to About, trim the sidebar, ask about auto location after the first near-me tap (#108)
+  - `6d44d41` — Merge pull request #111 from Jerin101/fix/108-moves *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-10-31 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Header and navigation: area in the phone header, tabs in view, one h1, 44 px targets (#108)
+- **Completed Tasks:**
+  - Header and navigation: area in the phone header, tabs in view, one h1, 44 px targets (#108)
+  - Merge pull request #112 from Jerin101/fix/108-header-nav
+  - Area page uses the home layout; 'Situation' on the send page; English post names (#108)
+  - Merge pull request #114 from Jerin101/fix/108-area-layout
+  - Add the UI/UX test reports (before v19, after v23) and link them from the README (#115)
+  - Merge pull request #116 from Jerin101/docs/115-uiux-reports
+  - WIP: report limits (rules, client, texts) (#117)
+  - Secret alert #1: explain the public Firebase web key, ignore it in secret scanning (#118)
+  - WIP: report limits to the v2 spec: limits/{uid}, day, lastAt, admins exempt (#117)
+  - SECURITY.md: reporting works whether or not private reporting is on (#118)
+  - Merge pull request #119 from Jerin101/docs/118-secret-alert
+  - Rules tests for report limits; old report tests use the batch the site sends (#117)
+  - Service worker v24 (report limits change cached files) (#117)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `2d45bc0` — Header and navigation: area in the phone header, tabs in view, one h1, 44 px targets (#108)
+  - `d3336ab` — Merge pull request #112 from Jerin101/fix/108-header-nav *(PR Merge)*
+  - `87797cd` — Area page uses the home layout; 'Situation' on the send page; English post names (#108)
+  - `85af7cf` — Merge pull request #114 from Jerin101/fix/108-area-layout *(PR Merge)*
+  - `0fe7c8b` — Add the UI/UX test reports (before v19, after v23) and link them from the README (#115)
+  - `fa46afa` — Merge pull request #116 from Jerin101/docs/115-uiux-reports *(PR Merge)*
+  - `fc2b65f` — WIP: report limits (rules, client, texts) (#117)
+  - `70dfd83` — Secret alert #1: explain the public Firebase web key, ignore it in secret scanning (#118)
+  - `9aacd9b` — WIP: report limits to the v2 spec: limits/{uid}, day, lastAt, admins exempt (#117)
+  - `0147345` — SECURITY.md: reporting works whether or not private reporting is on (#118)
+  - `7ea3824` — Merge pull request #119 from Jerin101/docs/118-secret-alert *(PR Merge)*
+  - `8b07c6b` — Rules tests for report limits; old report tests use the batch the site sends (#117)
+  - `7896b76` — Service worker v24 (report limits change cached files) (#117)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-01 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Report limits: check the token's email_verified, announce 'email sent', test the day check (#117)
+- **Completed Tasks:**
+  - Report limits: check the token's email_verified, announce 'email sent', test the day check (#117)
+  - Report limits: 'spam folder' wording (#117)
+  - Report limits: keep reports working until the new rules are deployed (#117)
+  - Merge pull request #120 from Jerin101/fix/117-report-limits
+  - Content-Security-Policy for preview.html and reset.html; inline styles moved to css/preview.css (#121)
+  - Css/preview.css: no blank line at the end (#121)
+  - Merge pull request #122 from Jerin101/fix/121-csp
+  - Report notes: refuse mobile numbers in rules and in the report window (#123)
+  - Report notes: kinder message for a phone number (#123)
+  - Report notes: check at the right step, fewer false alarms, more separators (#123)
+  - Report notes: rules also catch a plus sign straight before the number (#123)
+  - Merge pull request #124 from Jerin101/fix/123-note-phone
+  - GitHub Actions: pin to commit SHAs, Dependabot for actions, safe issue text in the weekly check (#125)
+  - Weekly check: one 'all checked' checkbox, comment on the zero-width space (#125)
+  - Merge pull request #126 from Jerin101/fix/125-actions-pins
+  - Dev tools: firebase-tools 15.34.2, rules-unit-testing 6, firebase 13 (tests only); grpc forced to 1.14 (#127)
+  - Rules test CI on Node 24 (the new test packages need Node >= 24.12) (#127)
+  - Merge pull request #128 from Jerin101/fix/127-dev-tools
+  - Security audit report 2026-10-31; FAQ entry for shared phones (#129)
+  - Audit report: source links include acc.org.bd (#129)
+  - Merge pull request #130 from Jerin101/docs/129-security-audit
+  - Header and pages with large text, 44 px district menu, Hatiya post in English (#113)
+  - Post(): use only the list's own entries (#113)
+  - #113 tester fixes: number tiles grow with large text, centred chip, 44 px Sign in, post() keeps untranslated text (#113)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `1b6858d` — Report limits: check the token's email_verified, announce 'email sent', test the day check (#117)
+  - `2724317` — Report limits: 'spam folder' wording (#117)
+  - `48cae7c` — Report limits: keep reports working until the new rules are deployed (#117)
+  - `b89e820` — Merge pull request #120 from Jerin101/fix/117-report-limits *(PR Merge)*
+  - `ee1629b` — Content-Security-Policy for preview.html and reset.html; inline styles moved to css/preview.css (#121)
+  - `4245245` — css/preview.css: no blank line at the end (#121)
+  - `2b52deb` — Merge pull request #122 from Jerin101/fix/121-csp *(PR Merge)*
+  - `12b8292` — Report notes: refuse mobile numbers in rules and in the report window (#123)
+  - `96dd6b4` — Report notes: kinder message for a phone number (#123)
+  - `6574a31` — Report notes: check at the right step, fewer false alarms, more separators (#123)
+  - `332ad4c` — Report notes: rules also catch a plus sign straight before the number (#123)
+  - `72314f2` — Merge pull request #124 from Jerin101/fix/123-note-phone *(PR Merge)*
+  - `ae0c44a` — GitHub Actions: pin to commit SHAs, Dependabot for actions, safe issue text in the weekly check (#125)
+  - `f4d2a95` — Weekly check: one 'all checked' checkbox, comment on the zero-width space (#125)
+  - `dab2345` — Merge pull request #126 from Jerin101/fix/125-actions-pins *(PR Merge)*
+  - `b53b5cc` — Dev tools: firebase-tools 15.34.2, rules-unit-testing 6, firebase 13 (tests only); grpc forced to 1.14 (#127)
+  - `08874b5` — Rules test CI on Node 24 (the new test packages need Node >= 24.12) (#127)
+  - `11b2889` — Merge pull request #128 from Jerin101/fix/127-dev-tools *(PR Merge)*
+  - `8110851` — Security audit report 2026-10-31; FAQ entry for shared phones (#129)
+  - `cf5d575` — Audit report: source links include acc.org.bd (#129)
+  - `1274fd9` — Merge pull request #130 from Jerin101/docs/129-security-audit *(PR Merge)*
+  - `bd72134` — Header and pages with large text, 44 px district menu, Hatiya post in English (#113)
+  - `a67a208` — post(): use only the list's own entries (#113)
+  - `538567d` — #113 tester fixes: number tiles grow with large text, centred chip, 44 px Sign in, post() keeps untranslated text (#113)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-02 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Run the rules tests on every PR so they can be required (#132)
+- **Completed Tasks:**
+  - Run the rules tests on every PR so they can be required (#132)
+  - Merge pull request #135 from Jerin101/fix/113-header-large-text
+  - বিপদ বার্তা step 1: danger SMS with area, police number and help link; family help page (#134)
+  - বিপদ বার্তা plan with exact SMS texts and part counts; test README (#134)
+  - বিপদ বার্তা: bangla-reviewer fixes, 999 in normal digits in the SMS, remove unused old message texts (#134)
+  - Autoloc test: remove the Chrome profile on every exit, stop below 5 GB free (#137)
+  - Rewrite the autopilot log: summary, queue results A–G, #98/#100/#101, fresh NEEDS JERIN (#139)
+  - Merge pull request #140 from Jerin101/docs/139-autopilot-log
+  - Merge pull request #138 from Jerin101/fix/137-autoloc-cleanup
+  - Merge pull request #136 from Jerin101/feature/134-bipod-barta
+  - Merge pull request #133 from Jerin101/fix/132-rules-test-every-pr
+  - বিপদ বার্তা: 'send new location' takes a fresh fix; links carry the fix time (#134)
+  - Remove the P19 placeholder start page (#141)
+  - Move the site from preview.html to index.html (#141)
+  - The site becomes index.html; preview.html keeps old links working (#141)
+  - বিপদ বার্তা review fixes: short link, thana OC number, safer no-location text, 'followed' warning (#143)
+  - বিপদ বার্তা: bangla-reviewer fixes (noLocYet matches the new no-location text; ৯৯৯ on the page) (#143)
+  - Service worker checks files with the server; loop guard for the old address (#141)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `12eb207` — Run the rules tests on every PR so they can be required (#132)
+  - `3114067` — Merge pull request #135 from Jerin101/fix/113-header-large-text *(PR Merge)*
+  - `13b6240` — বিপদ বার্তা step 1: danger SMS with area, police number and help link; family help page (#134)
+  - `24f32a5` — বিপদ বার্তা plan with exact SMS texts and part counts; test README (#134)
+  - `0335562` — বিপদ বার্তা: bangla-reviewer fixes, 999 in normal digits in the SMS, remove unused old message texts (#134)
+  - `20a7ffe` — autoloc test: remove the Chrome profile on every exit, stop below 5 GB free (#137)
+  - `1631476` — Rewrite the autopilot log: summary, queue results A–G, #98/#100/#101, fresh NEEDS JERIN (#139)
+  - `bd29859` — Merge pull request #140 from Jerin101/docs/139-autopilot-log *(PR Merge)*
+  - `eb66288` — Merge pull request #138 from Jerin101/fix/137-autoloc-cleanup *(PR Merge)*
+  - `7d88856` — Merge pull request #136 from Jerin101/feature/134-bipod-barta *(PR Merge)*
+  - `76e6979` — Merge pull request #133 from Jerin101/fix/132-rules-test-every-pr *(PR Merge)*
+  - `4708361` — বিপদ বার্তা: 'send new location' takes a fresh fix; links carry the fix time (#134)
+  - `07831af` — Remove the P19 placeholder start page (#141)
+  - `54c7d47` — Move the site from preview.html to index.html (#141)
+  - `132df7d` — The site becomes index.html; preview.html keeps old links working (#141)
+  - `1d29e13` — বিপদ বার্তা review fixes: short link, thana OC number, safer no-location text, 'followed' warning (#143)
+  - `5b6d45e` — বিপদ বার্তা: bangla-reviewer fixes (noLocYet matches the new no-location text; ৯৯৯ on the page) (#143)
+  - `64e0d36` — Service worker checks files with the server; loop guard for the old address (#141)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-06 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** বিপদ বার্তা: 'send new location' takes a fresh fix; links carry the fix time (#134, #143)
+- **Completed Tasks:**
+  - বিপদ বার্তা: 'send new location' takes a fresh fix; links carry the fix time (#134, #143)
+  - Service worker: page loads keep their own redirect mode (#141)
+  - Phone layout: search field full width, no 'bazar'-only suggestions, width sweep test (#145)
+  - বিপদ বার্তা: every Bangla SMS fits in 3 parts in every upazila (#143)
+  - Area chip: the name is never cut with … (#145)
+  - বিপদ বার্তা: English 'followed' text matches the shorter Bangla (#143)
+  - Saved area, made clear: pin only when just found, 'সেভ করা', days ago, remove, don't remember (#147)
+  - Saved area: bangla-reviewer fixes; no 'সেভ করা' when the area is not kept (#147)
+  - Smart search plan; part 1: Kashem Bazar as a local name in Newajpur union (#149)
+  - Merge branch 'fix/145-phone-layout' into feature/147-saved-area
+  - Merge pull request #142 from Jerin101/fix/141-site-index
+  - Merge pull request #148 from Jerin101/feature/147-saved-area
+  - Kashem Bazar: no Bangla village name in the English address; plan wording (#149)
+  - Merge remote-tracking branch 'origin/fix/145-phone-layout' into feature/151-query-understanding
+  - Saved area: the pin stays on reload; auto location marks the area it is in (#147)
+  - Width sweep: reload between rounds so each case has its own language and sign-in; service worker v35 (#145)
+  - Merge branch 'fix/145-phone-layout' into feature/147-saved-area
+  - Smart search part 2: query understanding (context, filler and common words) (#151)
+  - Smart search part 3: thana names lead to their upazila (data/thanas.json) (#153)
+  - Smart search part 4: full address in every result (#155)
+  - Width sweep: 15 s limit per browser request, so a stuck page cannot hang the run (#145)
+  - Merge branch 'fix/145-phone-layout' into feature/147-saved-area
+  - Smart search part 2: keep every same-named place; one area word = the normal search (#151)
+  - Merge branch 'feature/151-query-understanding' into feature/153-thana-names
+  - Merge branch 'feature/153-thana-names' into feature/155-full-address
+  - Smart search part 5: landmarks from the official union pages (#157)
+  - Smart search part 6: when nothing matches - location, step picker, ask to add a place (#159)
+  - Merge remote-tracking branch 'origin/main' into feature/149-kashem-bazar
+  - Merge branch 'feature/149-kashem-bazar' into feature/151-query-understanding
+  - Smart search part 2: names are matched whole first; never a place outside the area without saying so (#151)
+  - Merge branch 'feature/151-query-understanding' into feature/153-thana-names
+  - Merge branch 'feature/153-thana-names' into feature/155-full-address
+  - Merge branch 'feature/155-full-address' into feature/157-landmarks
+  - Landmarks: drop copied template lists and prose; validator catches duplicates (#157)
+  - Merge branch 'feature/157-landmarks' into feature/159-missing-place
+  - Merge remote-tracking branch 'origin/main' into feature/143-bipod-fixes
+  - বিপদ বার্তা step 2: prepare page (phone SOS) and live location (#161)
+  - Merge remote-tracking branch 'origin/main' into feature/147-saved-area
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `a879667` — বিপদ বার্তা: 'send new location' takes a fresh fix; links carry the fix time (#134, #143)
+  - `d209a9d` — Service worker: page loads keep their own redirect mode (#141)
+  - `d213690` — Phone layout: search field full width, no 'bazar'-only suggestions, width sweep test (#145)
+  - `85170b2` — বিপদ বার্তা: every Bangla SMS fits in 3 parts in every upazila (#143)
+  - `541e16a` — Area chip: the name is never cut with … (#145)
+  - `520030c` — বিপদ বার্তা: English 'followed' text matches the shorter Bangla (#143)
+  - `7a5703a` — Saved area, made clear: pin only when just found, 'সেভ করা', days ago, remove, don't remember (#147)
+  - `5675b00` — Saved area: bangla-reviewer fixes; no 'সেভ করা' when the area is not kept (#147)
+  - `86502f4` — Smart search plan; part 1: Kashem Bazar as a local name in Newajpur union (#149)
+  - `bc61cd4` — Merge branch 'fix/145-phone-layout' into feature/147-saved-area *(PR Merge)*
+  - `59ebd41` — Merge pull request #142 from Jerin101/fix/141-site-index *(PR Merge)*
+  - `3c60dbd` — Merge pull request #148 from Jerin101/feature/147-saved-area *(PR Merge)*
+  - `4e56801` — Kashem Bazar: no Bangla village name in the English address; plan wording (#149)
+  - `7a8d049` — Merge remote-tracking branch 'origin/fix/145-phone-layout' into feature/151-query-understanding *(PR Merge)*
+  - `8447de9` — Saved area: the pin stays on reload; auto location marks the area it is in (#147)
+  - `9e7898b` — Width sweep: reload between rounds so each case has its own language and sign-in; service worker v35 (#145)
+  - `eb36db6` — Merge branch 'fix/145-phone-layout' into feature/147-saved-area *(PR Merge)*
+  - `813aec2` — Smart search part 2: query understanding (context, filler and common words) (#151)
+  - `6cd123d` — Smart search part 3: thana names lead to their upazila (data/thanas.json) (#153)
+  - `aee19cb` — Smart search part 4: full address in every result (#155)
+  - `80cb805` — Width sweep: 15 s limit per browser request, so a stuck page cannot hang the run (#145)
+  - `3e94127` — Merge branch 'fix/145-phone-layout' into feature/147-saved-area *(PR Merge)*
+  - `7bcf2b4` — Smart search part 2: keep every same-named place; one area word = the normal search (#151)
+  - `1f3aa91` — Merge branch 'feature/151-query-understanding' into feature/153-thana-names *(PR Merge)*
+  - `f6b740c` — Merge branch 'feature/153-thana-names' into feature/155-full-address *(PR Merge)*
+  - `5b6da58` — Smart search part 5: landmarks from the official union pages (#157)
+  - `92f1c2d` — Smart search part 6: when nothing matches - location, step picker, ask to add a place (#159)
+  - `dafa6d1` — Merge remote-tracking branch 'origin/main' into feature/149-kashem-bazar *(PR Merge)*
+  - `555af49` — Merge branch 'feature/149-kashem-bazar' into feature/151-query-understanding *(PR Merge)*
+  - `9756af3` — Smart search part 2: names are matched whole first; never a place outside the area without saying so (#151)
+  - `2b13406` — Merge branch 'feature/151-query-understanding' into feature/153-thana-names *(PR Merge)*
+  - `3674c51` — Merge branch 'feature/153-thana-names' into feature/155-full-address *(PR Merge)*
+  - `ebd4cb1` — Merge branch 'feature/155-full-address' into feature/157-landmarks *(PR Merge)*
+  - `bbe8d5d` — Landmarks: drop copied template lists and prose; validator catches duplicates (#157)
+  - `37cad11` — Merge branch 'feature/157-landmarks' into feature/159-missing-place *(PR Merge)*
+  - `443faab` — Merge remote-tracking branch 'origin/main' into feature/143-bipod-fixes *(PR Merge)*
+  - `a43be26` — বিপদ বার্তা step 2: prepare page (phone SOS) and live location (#161)
+  - `f17fa42` — Merge remote-tracking branch 'origin/main' into feature/147-saved-area *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-07 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Autopilot log: queue v3 status, PRs #142-#163, fresh NEEDS JERIN
+- **Completed Tasks:**
+  - Autopilot log: queue v3 status, PRs #142-#163, fresh NEEDS JERIN
+  - Merge pull request #163 from Jerin101/feature/147-saved-area
+  - Merge pull request #164 from Jerin101/docs/164-log-v3
+  - Merge remote-tracking branch 'origin/main' into feature/143-bipod-fixes
+  - Merge pull request #144 from Jerin101/feature/143-bipod-fixes
+  - Merge remote-tracking branch 'origin/main' into feature/149-kashem-bazar
+  - Merge branch 'feature/149-kashem-bazar' into feature/151-query-understanding
+  - Merge branch 'feature/151-query-understanding' into feature/153-thana-names
+  - Merge branch 'feature/153-thana-names' into feature/155-full-address
+  - Merge branch 'feature/155-full-address' into feature/157-landmarks
+  - Merge branch 'feature/157-landmarks' into feature/159-missing-place
+  - Merge remote-tracking branch 'origin/main' into feature/161-prepare
+  - Smart search part 2: a village with its upazila stays whole; short Bangla union names count as area words (#151 review 3)
+  - Merge branch 'feature/151-query-understanding' into feature/153-thana-names
+  - Merge branch 'feature/153-thana-names' into feature/155-full-address
+  - Merge branch 'feature/155-full-address' into feature/157-landmarks
+  - Merge branch 'feature/157-landmarks' into feature/159-missing-place
+  - Smart search part 2: a village with the wrong district shows the village elsewhere, never a wrong place (#151 review 4)
+  - Merge branch 'feature/151-query-understanding' into feature/153-thana-names
+  - Merge branch 'feature/153-thana-names' into feature/155-full-address
+  - Merge branch 'feature/155-full-address' into feature/157-landmarks
+  - Merge branch 'feature/157-landmarks' into feature/159-missing-place
+  - Merge pull request #162 from Jerin101/feature/161-prepare
+  - Merge remote-tracking branch 'origin/main' into feature/149-kashem-bazar
+  - Merge branch 'feature/149-kashem-bazar' into feature/151-query-understanding
+  - Merge branch 'feature/151-query-understanding' into feature/153-thana-names
+  - Merge branch 'feature/153-thana-names' into feature/155-full-address
+  - Merge branch 'feature/155-full-address' into feature/157-landmarks
+  - Merge branch 'feature/157-landmarks' into feature/159-missing-place
+  - Thana names: "মডেল" and a lone "থানা" are no place; Teknaf's name and Charjabbar's proof as on the pages (#153 review)
+  - Merge branch 'feature/153-thana-names' into feature/155-full-address
+  - Merge branch 'feature/155-full-address' into feature/157-landmarks
+  - Merge branch 'feature/157-landmarks' into feature/159-missing-place
+  - Prepare page review fixes (#162): clearer texts, language switch redraws, WhatsApp note in the live box, timer keeps focus
+  - Prepare page: own note for the live box, cleared on a new tap; reviewer's wording polish (#165 review)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `b95a3e9` — Autopilot log: queue v3 status, PRs #142-#163, fresh NEEDS JERIN
+  - `8f53b13` — Merge pull request #163 from Jerin101/feature/147-saved-area *(PR Merge)*
+  - `2d0b11b` — Merge pull request #164 from Jerin101/docs/164-log-v3 *(PR Merge)*
+  - `d2f424b` — Merge remote-tracking branch 'origin/main' into feature/143-bipod-fixes *(PR Merge)*
+  - `eb64a89` — Merge pull request #144 from Jerin101/feature/143-bipod-fixes *(PR Merge)*
+  - `93ddf3e` — Merge remote-tracking branch 'origin/main' into feature/149-kashem-bazar *(PR Merge)*
+  - `b55036e` — Merge branch 'feature/149-kashem-bazar' into feature/151-query-understanding *(PR Merge)*
+  - `06fb9f6` — Merge branch 'feature/151-query-understanding' into feature/153-thana-names *(PR Merge)*
+  - `348722f` — Merge branch 'feature/153-thana-names' into feature/155-full-address *(PR Merge)*
+  - `1589d54` — Merge branch 'feature/155-full-address' into feature/157-landmarks *(PR Merge)*
+  - `3076c8b` — Merge branch 'feature/157-landmarks' into feature/159-missing-place *(PR Merge)*
+  - `b9737fa` — Merge remote-tracking branch 'origin/main' into feature/161-prepare *(PR Merge)*
+  - `b3f0ba1` — Smart search part 2: a village with its upazila stays whole; short Bangla union names count as area words (#151 review 3)
+  - `d7fd08f` — Merge branch 'feature/151-query-understanding' into feature/153-thana-names *(PR Merge)*
+  - `4e68b26` — Merge branch 'feature/153-thana-names' into feature/155-full-address *(PR Merge)*
+  - `7be68b3` — Merge branch 'feature/155-full-address' into feature/157-landmarks *(PR Merge)*
+  - `6cefb09` — Merge branch 'feature/157-landmarks' into feature/159-missing-place *(PR Merge)*
+  - `ae120af` — Smart search part 2: a village with the wrong district shows the village elsewhere, never a wrong place (#151 review 4)
+  - `d9b905c` — Merge branch 'feature/151-query-understanding' into feature/153-thana-names *(PR Merge)*
+  - `bb31e18` — Merge branch 'feature/153-thana-names' into feature/155-full-address *(PR Merge)*
+  - `0ee1e98` — Merge branch 'feature/155-full-address' into feature/157-landmarks *(PR Merge)*
+  - `d938b37` — Merge branch 'feature/157-landmarks' into feature/159-missing-place *(PR Merge)*
+  - `cd063be` — Merge pull request #162 from Jerin101/feature/161-prepare *(PR Merge)*
+  - `efa1f1b` — Merge remote-tracking branch 'origin/main' into feature/149-kashem-bazar *(PR Merge)*
+  - `13212c0` — Merge branch 'feature/149-kashem-bazar' into feature/151-query-understanding *(PR Merge)*
+  - `74380ce` — Merge branch 'feature/151-query-understanding' into feature/153-thana-names *(PR Merge)*
+  - `1b94742` — Merge branch 'feature/153-thana-names' into feature/155-full-address *(PR Merge)*
+  - `07f8159` — Merge branch 'feature/155-full-address' into feature/157-landmarks *(PR Merge)*
+  - `429a8ce` — Merge branch 'feature/157-landmarks' into feature/159-missing-place *(PR Merge)*
+  - `7f5908d` — Thana names: "মডেল" and a lone "থানা" are no place; Teknaf's name and Charjabbar's proof as on the pages (#153 review)
+  - `98cc018` — Merge branch 'feature/153-thana-names' into feature/155-full-address *(PR Merge)*
+  - `9d0f1e0` — Merge branch 'feature/155-full-address' into feature/157-landmarks *(PR Merge)*
+  - `78e89cc` — Merge branch 'feature/157-landmarks' into feature/159-missing-place *(PR Merge)*
+  - `86adb9a` — Prepare page review fixes (#162): clearer texts, language switch redraws, WhatsApp note in the live box, timer keeps focus
+  - `7dcc10a` — Prepare page: own note for the live box, cleared on a new tap; reviewer's wording polish (#165 review)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-08 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Merge pull request #150 from Jerin101/feature/149-kashem-bazar
+- **Completed Tasks:**
+  - Merge pull request #150 from Jerin101/feature/149-kashem-bazar
+  - Merge pull request #152 from Jerin101/feature/151-query-understanding
+  - Merge pull request #154 from Jerin101/feature/153-thana-names
+  - Merge pull request #165 from Jerin101/fix/162-prepare-review
+  - Merge remote-tracking branch 'origin/main' into feature/155-full-address
+  - Merge branch 'feature/155-full-address' into feature/157-landmarks
+  - Merge branch 'feature/157-landmarks' into feature/159-missing-place
+  - Merge pull request #156 from Jerin101/feature/155-full-address
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `14fa307` — Merge pull request #150 from Jerin101/feature/149-kashem-bazar *(PR Merge)*
+  - `144551b` — Merge pull request #152 from Jerin101/feature/151-query-understanding *(PR Merge)*
+  - `337f319` — Merge pull request #154 from Jerin101/feature/153-thana-names *(PR Merge)*
+  - `412edfd` — Merge pull request #165 from Jerin101/fix/162-prepare-review *(PR Merge)*
+  - `0021f0b` — Merge remote-tracking branch 'origin/main' into feature/155-full-address *(PR Merge)*
+  - `7ba6ec7` — Merge branch 'feature/155-full-address' into feature/157-landmarks *(PR Merge)*
+  - `d677ad9` — Merge branch 'feature/157-landmarks' into feature/159-missing-place *(PR Merge)*
+  - `f4be1df` — Merge pull request #156 from Jerin101/feature/155-full-address *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-09 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Landmarks: never outrank an exact place; drop upazila lists and prose (#157 review 2)
+- **Completed Tasks:**
+  - Landmarks: never outrank an exact place; drop upazila lists and prose (#157 review 2)
+  - Landmarks: skip pages copied onto several union sites (#157 review 3)
+  - Merge pull request #158 from Jerin101/feature/157-landmarks
+  - Merge remote-tracking branch 'origin/main' into feature/159-missing-place
+  - Missing place: no phone number in the upazila; review texts (#159 review)
+  - Merge pull request #160 from Jerin101/feature/159-missing-place
+  - Raise VERSION to v49-2026-11-09 after the search PRs (#150-#160)
+  - Merge pull request #168 from Jerin101/chore/version-v49
+  - Log: merge queue done, rules deployed from 4167be2, live check on v49 (9 Nov)
+  - Merge pull request #169 from Jerin101/docs/log-2026-11-09
+  - Search: a calm note when the village or landmark list fails to load (#170)
+  - PartialNote: true whichever list failed; mention towns (Bangla review)
+  - Search: one sound key for Bangla, English and Banglish (js/phonetic.js)
+  - Merge pull request #171 from Jerin101/fix/villages-load-note
+  - Merge remote-tracking branch 'origin/main' into feature/phonetic-search
+  - Tests/README: the phonetic test
+  - Merge pull request #173 from Jerin101/feature/phonetic-search
+  - Coverage fix: must-find test per district, plan and data gaps (#174)
+  - Coverage fix: tourist spots from the official portals in the search (#176)
+  - Tourist spots: review fixes (#176)
+  - Tourist spots: one entry per spot; notes (data-checker, #176)
+  - Must-find: review fixes (#174)
+  - Tourist spots: keep the address form the portal serves; two more merges (data-checker, #176)
+  - Tourist spots: no union from the end of a list of unions (#176)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `9596654` — Landmarks: never outrank an exact place; drop upazila lists and prose (#157 review 2)
+  - `ddd3b08` — Landmarks: skip pages copied onto several union sites (#157 review 3)
+  - `9ebe882` — Merge pull request #158 from Jerin101/feature/157-landmarks *(PR Merge)*
+  - `a409317` — Merge remote-tracking branch 'origin/main' into feature/159-missing-place *(PR Merge)*
+  - `e24ff03` — Missing place: no phone number in the upazila; review texts (#159 review)
+  - `4167be2` — Merge pull request #160 from Jerin101/feature/159-missing-place *(PR Merge)*
+  - `7395ee1` — Raise VERSION to v49-2026-11-09 after the search PRs (#150-#160)
+  - `9b57973` — Merge pull request #168 from Jerin101/chore/version-v49 *(PR Merge)*
+  - `4595124` — Log: merge queue done, rules deployed from 4167be2, live check on v49 (9 Nov)
+  - `270bb4c` — Merge pull request #169 from Jerin101/docs/log-2026-11-09 *(PR Merge)*
+  - `90f392f` — Search: a calm note when the village or landmark list fails to load (#170)
+  - `2246835` — partialNote: true whichever list failed; mention towns (Bangla review)
+  - `694f644` — Search: one sound key for Bangla, English and Banglish (js/phonetic.js)
+  - `cd8b0f9` — Merge pull request #171 from Jerin101/fix/villages-load-note *(PR Merge)*
+  - `c616a78` — Merge remote-tracking branch 'origin/main' into feature/phonetic-search *(PR Merge)*
+  - `20d60ab` — tests/README: the phonetic test
+  - `ca5f864` — Merge pull request #173 from Jerin101/feature/phonetic-search *(PR Merge)*
+  - `9456560` — Coverage fix: must-find test per district, plan and data gaps (#174)
+  - `73ae58d` — Coverage fix: tourist spots from the official portals in the search (#176)
+  - `aa48abb` — Tourist spots: review fixes (#176)
+  - `d3774a1` — Tourist spots: one entry per spot; notes (data-checker, #176)
+  - `0d09212` — Must-find: review fixes (#174)
+  - `bcadaf2` — Tourist spots: keep the address form the portal serves; two more merges (data-checker, #176)
+  - `88fe998` — Tourist spots: no union from the end of a list of unions (#176)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-11 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Must-find: portal link forms, Patuartek's union, one duplicate (#174)
+- **Completed Tasks:**
+  - Must-find: portal link forms, Patuartek's union, one duplicate (#174)
+  - Merge pull request #175 from Jerin101/test/must-find
+  - Merge pull request #177 from Jerin101/data/tourist-spots
+  - Coverage fix 3: villages from BBS for the 78 unions without a village page (#179)
+  - BBS villages: review fixes (two Bangla names to English only, validator ties each district to its PDF) (#179)
+  - Merge pull request #181 from Jerin101/data/bbs-villages
+  - Raise VERSION to v50-2026-11-11 after #175, #177 and #181
+  - Merge pull request #183 from Jerin101/chore/version-v50
+  - Pages workflow fills in VERSION; the repo keeps 'dev' (step 4)
+  - Pages workflow: no stored token on checkout; deploy only from main (tester note, #184)
+  - Phase 2: the nationwide plan docs (#186)
+  - Repo cleanup: .gitattributes, LF line endings everywhere
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `4dbdd9a` — Must-find: portal link forms, Patuartek's union, one duplicate (#174)
+  - `fc088ce` — Merge pull request #175 from Jerin101/test/must-find *(PR Merge)*
+  - `9dc7b5a` — Merge pull request #177 from Jerin101/data/tourist-spots *(PR Merge)*
+  - `7f0520b` — Coverage fix 3: villages from BBS for the 78 unions without a village page (#179)
+  - `25adfea` — BBS villages: review fixes (two Bangla names to English only, validator ties each district to its PDF) (#179)
+  - `62fe7c3` — Merge pull request #181 from Jerin101/data/bbs-villages *(PR Merge)*
+  - `5d483a5` — Raise VERSION to v50-2026-11-11 after #175, #177 and #181
+  - `fb168c2` — Merge pull request #183 from Jerin101/chore/version-v50 *(PR Merge)*
+  - `cdf95bd` — Pages workflow fills in VERSION; the repo keeps 'dev' (step 4)
+  - `9b8e435` — Pages workflow: no stored token on checkout; deploy only from main (tester note, #184)
+  - `711e5f6` — Phase 2: the nationwide plan docs (#186)
+  - `756da1e` — Repo cleanup: .gitattributes, LF line endings everywhere
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-15 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Places data for 64 districts: OSM places, upazila centres, manual places import + validator
+- **Completed Tasks:**
+  - Places data for 64 districts: OSM places, upazila centres, manual places import + validator
+  - Places data: review fixes (tester + data-checker NO-GO on a1c7c4d)
+  - Places data: drop names with text copied from Google Maps (rating, Google category labels), split mixed-script name fields, drop cut-off and 1-2 letter names, strip ', Unnamed Road…' (data-checker follow-up on 00d4290)
+  - DATA_GAPS §14: place counts after the rebuild
+  - Places data: drop a cut Bangla bank name (osm-w531198283) and ', Unnamed Rd…' (data-checker leftovers on 0b55b74)
+  - Places rules: review fixes on 0b55b74 (tester)
+  - Places data: Jerin's changes before push (keep unnamed key places, craft split, coverage, validator)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `a1c7c4d` — Places data for 64 districts: OSM places, upazila centres, manual places import + validator
+  - `00d4290` — Places data: review fixes (tester + data-checker NO-GO on a1c7c4d)
+  - `bbe404b` — Places data: drop names with text copied from Google Maps (rating, Google category labels), split mixed-script name fields, drop cut-off and 1-2 letter names, strip ', Unnamed Road…' (data-checker follow-up on 00d4290)
+  - `0b55b74` — DATA_GAPS §14: place counts after the rebuild
+  - `dc8fa84` — Places data: drop a cut Bangla bank name (osm-w531198283) and ', Unnamed Rd…' (data-checker leftovers on 0b55b74)
+  - `698f03a` — Places rules: review fixes on 0b55b74 (tester)
+  - `dac9363` — Places data: Jerin's changes before push (keep unnamed key places, craft split, coverage, validator)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-17 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Places: Bangla labels after bangla-reviewer (থানা বা ফাঁড়ি, পেট্রোল/সিএনজি পাম্প, ফায়ার সার্ভিস, Bus stand; 'OpenStreetMap থেকে, যাচাই করা হয়নি'); data rebuilt
+- **Completed Tasks:**
+  - Places: Bangla labels after bangla-reviewer (থানা বা ফাঁড়ি, পেট্রোল/সিএনজি পাম্প, ফায়ার সার্ভিস, Bus stand; 'OpenStreetMap থেকে, যাচাই করা হয়নি'); data rebuilt
+  - Merge pull request #214 from Jerin101/chore/gitattributes
+  - Places docs: README craft wording (subcategory), DATA_GAPS note on unnamed places next to named ones (for Jerin's decision)
+  - Merge pull request #217 from Jerin101/data/216-osm-places
+  - OSM coverage and gaps reports for the places plan (#218)
+  - Docs reports: remove the last Padma account numbers and dealers' personal names; status note covers §6/§8 and the PR order (tester NO-GO on ecd5f5d)
+  - Merge pull request #220 from Jerin101/docs/218-osm-reports
+  - Search: Cox's Bazar beaches and spots as local names, and the second সাহাপুর (#219)
+  - Merge pull request #222 from Jerin101/fix/219-beach-search
+  - Raise VERSION to v51-2026-11-17 after #222 (search: Cox's Bazar beaches, সাহাপুর) and #217 (places data)
+  - Merge pull request #223 from Jerin101/chore/version-v51
+  - GPS -> upazila: rebuild the 18 collapsed upazila shapes (#221)
+  - Places test: with real upazila shapes a pin in the wrong upazila is an error (tester NO-GO on f2ce404); docstring
+  - Merge pull request #224 from Jerin101/fix/221-upazila-shapes
+  - Raise VERSION to v52-2026-11-17 after #224 (upazila shapes in data/locations.json)
+  - Merge pull request #225 from Jerin101/chore/version-v52
+  - Fuel stations from Padma's official dealer list (2019) (#226), part 1
+  - Places README: fix the build script path
+  - Padma list: data-checker fixes (#226)
+  - Padma list: the label for a hidden dealer name says 'পেট্রোল পাম্প' (the lists don't say which pumps sell CNG; bangla-reviewer)
+  - Padma list: data-checker leftovers (doubtful moves stay in their group for Jerin, DIST.-BARGUNA read, SHAPAHAR shown)
+  - Padma list: read 'DIST.-BARGUNA' (S.& B Filling Station moves to Barguna)
+  - Padma list: tester fixes (#226)
+  - Padma list: 'BUS TERMINAL' is not a terminated station (5 stations back, 903); a bare 'NETROKONA' is not Sadar (data-checker)
+  - Merge pull request #227 from Jerin101/data/226-fuel-lists
+  - Add demo v2 page (demo/) as delivered (#228)
+  - Demo: never store a GPS point, only an area picked from a list (#228)
+  - Demo: two safety texts from the Bangla review (#228)
+  - Merge pull request #229 from Jerin101/docs/228-demo-v2
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `3f1ea01` — Places: Bangla labels after bangla-reviewer (থানা বা ফাঁড়ি, পেট্রোল/সিএনজি পাম্প, ফায়ার সার্ভিস, Bus stand; 'OpenStreetMap থেকে, যাচাই করা হয়নি'); data rebuilt
+  - `d9e1ba4` — Merge pull request #214 from Jerin101/chore/gitattributes *(PR Merge)*
+  - `d8fdb1a` — Places docs: README craft wording (subcategory), DATA_GAPS note on unnamed places next to named ones (for Jerin's decision)
+  - `6aef457` — Merge pull request #217 from Jerin101/data/216-osm-places *(PR Merge)*
+  - `ecd5f5d` — Docs: OSM coverage and gaps reports for the places plan (#218)
+  - `6b71e55` — Docs reports: remove the last Padma account numbers and dealers' personal names; status note covers §6/§8 and the PR order (tester NO-GO on ecd5f5d)
+  - `c55f800` — Merge pull request #220 from Jerin101/docs/218-osm-reports *(PR Merge)*
+  - `5b980c5` — Search: Cox's Bazar beaches and spots as local names, and the second সাহাপুর (#219)
+  - `a0b2f6e` — Merge pull request #222 from Jerin101/fix/219-beach-search *(PR Merge)*
+  - `bc3ae30` — Raise VERSION to v51-2026-11-17 after #222 (search: Cox's Bazar beaches, সাহাপুর) and #217 (places data)
+  - `30af517` — Merge pull request #223 from Jerin101/chore/version-v51 *(PR Merge)*
+  - `3e4986e` — GPS -> upazila: rebuild the 18 collapsed upazila shapes (#221)
+  - `e558c9d` — Places test: with real upazila shapes a pin in the wrong upazila is an error (tester NO-GO on f2ce404); docstring
+  - `571c2d7` — Merge pull request #224 from Jerin101/fix/221-upazila-shapes *(PR Merge)*
+  - `4c931a9` — Raise VERSION to v52-2026-11-17 after #224 (upazila shapes in data/locations.json)
+  - `3ad3dbd` — Merge pull request #225 from Jerin101/chore/version-v52 *(PR Merge)*
+  - `31fe5dd` — Fuel stations from Padma's official dealer list (2019) (#226), part 1
+  - `403ab89` — Places README: fix the build script path
+  - `d52e2ba` — Padma list: data-checker fixes (#226)
+  - `9e751b4` — Padma list: the label for a hidden dealer name says 'পেট্রোল পাম্প' (the lists don't say which pumps sell CNG; bangla-reviewer)
+  - `ad0a680` — Padma list: data-checker leftovers (doubtful moves stay in their group for Jerin, DIST.-BARGUNA read, SHAPAHAR shown)
+  - `fbc18f0` — Padma list: read 'DIST.-BARGUNA' (S.& B Filling Station moves to Barguna)
+  - `0b5bc60` — Padma list: tester fixes (#226)
+  - `48542f2` — Padma list: 'BUS TERMINAL' is not a terminated station (5 stations back, 903); a bare 'NETROKONA' is not Sadar (data-checker)
+  - `7ed377c` — Merge pull request #227 from Jerin101/data/226-fuel-lists *(PR Merge)*
+  - `dc78391` — Add demo v2 page (demo/) as delivered (#228)
+  - `e06feee` — demo: never store a GPS point, only an area picked from a list (#228)
+  - `76888a3` — demo: two safety texts from the Bangla review (#228)
+  - `9e22128` — Merge pull request #229 from Jerin101/docs/228-demo-v2 *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-18 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Demo: filling stations from the official Padma list + অন্যান্য সেবা (#230)
+- **Completed Tasks:**
+  - Demo: filling stations from the official Padma list + অন্যান্য সেবা (#230)
+  - Merge pull request #231 from Jerin101/docs/230-demo-fuel
+  - Fuel stations from Meghna Petroleum's official list (2025), 845 stations (#226)
+  - Official fuel lists: trust Meghna's district column; no upazila from a road name (#226)
+  - Merge pull request #232 from Jerin101/data/226-meghna
+  - Demo: every official station shows "সরকারি তালিকা"; footnote names both lists (#233)
+  - Merge pull request #234 from Jerin101/fix/233-demo-meghna-label
+  - Demo v5: ডাকুন (live map on both sides + billing), with v4 problems and place status (#235)
+  - Demo: the map tooltip shows the provider's name as text, not HTML (#235)
+  - Demo: two true texts from the review (#235)
+  - Merge pull request #236 from Jerin101/feature/v5-dakun
+  - Service worker: VERSION v53 after #236 (#237)
+  - Merge pull request #238 from Jerin101/chore/237-version-v53
+  - DEMO_TO_REAL_PLAN v2 and PROJECT_BRIEF, with Jerin's answers (#239)
+  - Demo ডাকুন: sign-in always reachable, right sign-in text, refresh after sign-in, rates re-read, map under the header (#241)
+  - Demo: rebuild the page after sign-in only on ডাকুন, so a half-typed problem report stays (#241)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `7f18b4a` — demo: filling stations from the official Padma list + অন্যান্য সেবা (#230)
+  - `0bd1f70` — Merge pull request #231 from Jerin101/docs/230-demo-fuel *(PR Merge)*
+  - `ab1571c` — Fuel stations from Meghna Petroleum's official list (2025), 845 stations (#226)
+  - `229bc54` — Official fuel lists: trust Meghna's district column; no upazila from a road name (#226)
+  - `04d31a8` — Merge pull request #232 from Jerin101/data/226-meghna *(PR Merge)*
+  - `07925c4` — demo: every official station shows "সরকারি তালিকা"; footnote names both lists (#233)
+  - `59ac956` — Merge pull request #234 from Jerin101/fix/233-demo-meghna-label *(PR Merge)*
+  - `e423a49` — Demo v5: ডাকুন (live map on both sides + billing), with v4 problems and place status (#235)
+  - `70b55f2` — demo: the map tooltip shows the provider's name as text, not HTML (#235)
+  - `2d03b53` — demo: two true texts from the review (#235)
+  - `7892537` — Merge pull request #236 from Jerin101/feature/v5-dakun *(PR Merge)*
+  - `ef64316` — service worker: VERSION v53 after #236 (#237)
+  - `7f5781d` — Merge pull request #238 from Jerin101/chore/237-version-v53 *(PR Merge)*
+  - `a37dbad` — Docs: DEMO_TO_REAL_PLAN v2 and PROJECT_BRIEF, with Jerin's answers (#239)
+  - `f6f35b8` — demo ডাকুন: sign-in always reachable, right sign-in text, refresh after sign-in, rates re-read, map under the header (#241)
+  - `b80343c` — demo: rebuild the page after sign-in only on ডাকুন, so a half-typed problem report stays (#241)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-18 - Tasmin Jahan Toshi `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Tasmin Jahan Toshi
+- **Today's Objective:** Merge pull request #240 from Jerin101/docs/239-demo-to-real-plan
+- **Completed Tasks:**
+  - Merge pull request #240 from Jerin101/docs/239-demo-to-real-plan
+  - Merge pull request #187 from Jerin101/docs/nationwide-plan
+  - Merge pull request #166 from Jerin101/dependabot/github_actions/actions/setup-java-6.2.0
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `819f177` — Merge pull request #240 from Jerin101/docs/239-demo-to-real-plan *(PR Merge)*
+  - `513b99f` — Merge pull request #187 from Jerin101/docs/nationwide-plan *(PR Merge)*
+  - `9ca877b` — Merge pull request #166 from Jerin101/dependabot/github_actions/actions/setup-java-6.2.0 *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-19 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Demo: say why a Google sign-in failed (popup blocked, in-app browser, …) next to the button (#241)
+- **Completed Tasks:**
+  - Demo: say why a Google sign-in failed (popup blocked, in-app browser, …) next to the button (#241)
+  - Demo: the call sign-in text says truly what the provider sees (#241)
+  - Demo: live location is shared from acceptance, say so (#241)
+  - Merge pull request #243 from Jerin101/fix/241-dakun-signin
+  - Demo: premium map (CARTO Voyager / Dark Matter), vehicle that glides and turns, pins, dashed lines, distance chip; 'পথ দেখান' opens our own place page (#242)
+  - Demo map: back to OpenStreetMap tiles (CARTO now needs a key); chip at the bottom, calm camera, bigger vehicle, labels that fit, dark tiles and controls (#242)
+  - Demo map: the vehicle's direction arrow shows above its circle (#242)
+  - Demo map: the arrow touches the vehicle's circle (#242)
+  - Merge pull request #244 from Jerin101/feature/242-demo-premium-map
+  - A1: teal design tokens, line icons (js/icons.js), DESIGN.md, contrast test (#245)
+  - A1: darker gradient title, teal-2 and green-2 (all >= 4.5:1); contrast test checks them; icons: own names only (#245)
+  - Merge pull request #246 from Jerin101/feature/245-a1-design-tokens
+  - Service worker: VERSION v54 after A1 (#247)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `4afd917` — demo: say why a Google sign-in failed (popup blocked, in-app browser, …) next to the button (#241)
+  - `d73740e` — demo: the call sign-in text says truly what the provider sees (#241)
+  - `905a387` — demo: live location is shared from acceptance, say so (#241)
+  - `05ba6fd` — Merge pull request #243 from Jerin101/fix/241-dakun-signin *(PR Merge)*
+  - `ecd55cb` — demo: premium map (CARTO Voyager / Dark Matter), vehicle that glides and turns, pins, dashed lines, distance chip; 'পথ দেখান' opens our own place page (#242)
+  - `782d4e8` — demo map: back to OpenStreetMap tiles (CARTO now needs a key); chip at the bottom, calm camera, bigger vehicle, labels that fit, dark tiles and controls (#242)
+  - `829e1b2` — demo map: the vehicle's direction arrow shows above its circle (#242)
+  - `7fb2432` — demo map: the arrow touches the vehicle's circle (#242)
+  - `ece9bf6` — Merge pull request #244 from Jerin101/feature/242-demo-premium-map *(PR Merge)*
+  - `13909d0` — A1: teal design tokens, line icons (js/icons.js), DESIGN.md, contrast test (#245)
+  - `97a9d3c` — A1: darker gradient title, teal-2 and green-2 (all >= 4.5:1); contrast test checks them; icons: own names only (#245)
+  - `7affcb9` — Merge pull request #246 from Jerin101/feature/245-a1-design-tokens *(PR Merge)*
+  - `10ab852` — service worker: VERSION v54 after A1 (#247)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-20 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Kit v7: map in all categories, আনিয়ে দিন (errands), A11 safety, GD police station, admin problem status (#249)
+- **Completed Tasks:**
+  - Kit v7: map in all categories, আনিয়ে দিন (errands), A11 safety, GD police station, admin problem status (#249)
+  - Merge pull request #248 from Jerin101/chore/247-version-v54
+  - V7 review: true live-location and stale-close texts, provider online text, status note cleared with a new status (#251)
+  - Demo: same word as the button next to it, 'চার্জ' (#251)
+  - Merge pull request #252 from Jerin101/fix/251-v7-review-texts
+  - Service worker: VERSION v55 after #252 (#253)
+  - Merge pull request #254 from Jerin101/chore/253-version-v55
+  - README: the new project README, contributions from the real GitHub history (#255)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `a236070` — Kit v7: map in all categories, আনিয়ে দিন (errands), A11 safety, GD police station, admin problem status (#249)
+  - `9cabf6a` — Merge pull request #248 from Jerin101/chore/247-version-v54 *(PR Merge)*
+  - `27443f7` — v7 review: true live-location and stale-close texts, provider online text, status note cleared with a new status (#251)
+  - `20f45f9` — demo: same word as the button next to it, 'চার্জ' (#251)
+  - `fd4f5b1` — Merge pull request #252 from Jerin101/fix/251-v7-review-texts *(PR Merge)*
+  - `530c06f` — service worker: VERSION v55 after #252 (#253)
+  - `86ba352` — Merge pull request #254 from Jerin101/chore/253-version-v55 *(PR Merge)*
+  - `7377cf5` — README: the new project README, contributions from the real GitHub history (#255)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-20 - Tasmin Jahan Toshi `[RETROSPECTIVE ENTRY - Logged on 2026-11-21]`
+- **Contributor:** Tasmin Jahan Toshi
+- **Today's Objective:** Merge pull request #250 from Jerin101/feature/249-v7-map-errand-safety
+- **Completed Tasks:**
+  - Merge pull request #250 from Jerin101/feature/249-v7-map-errand-safety
+  - A2: app shell — bottom tabs on phones, side menu from 960 px, new addresses, visible sign-in (#257)
+  - A2: side menu 168 px; the page's own side column from 1200 px (#257)
+  - Merge pull request #258 from Jerin101/feature/257-a2-app-shell
+  - Merge pull request #256 from Jerin101/docs/255-readme
+  - A2 review: tab labels fit at 320 px with large text, no bottom space on reset.html, Object.hasOwn for addresses (#257)
+  - A2 review: tab labels fit at 320 px with large text, no bottom space on reset.html, Object.hasOwn for addresses (#257)
+  - Merge pull request #260 from Jerin101/fix/259-a2-review
+  - Service worker: VERSION v56 after A2 (#261)
+  - Merge pull request #262 from Jerin101/chore/261-version-v56
+  - Kit v8: final scope — towing, pickup orders, place page ফ্রি সহায়তা → সার্ভিস, 19 helplines in বিপদে; problems, service guides and GD removed (#263)
+  - Demo: a pickup bill has no shop-receipt row (it was paid at the shop) (#263)
+  - Plan v3: final scope and order (#265)
+  - Merge pull request #264 from Jerin101/feature/263-v8-final-scope
+  - Merge pull request #266 from Jerin101/docs/265-plan-v3
+  - R0 data: post offices, railway stations, food and hotels, tourist spots, cyclone/flood shelters (#268)
+  - R0: 'আশ্রয়ণ প্রকল্প' (housing for landless families) is not a shelter; a railway depot or yard is not a station (#268)
+  - R1: categories near the person on the real site — all 64 districts, 12 categories, map, list, place page (#267)
+  - Merge pull request #270 from Jerin101/feature/267-r1-category-pages
+  - R1 review fixes: "nearest" only for places with their own position (#267)
+  - Merge pull request #269 from Jerin101/data/268-places-more-categories
+  - Service worker: VERSION v57 after R0 + R1 (#271)
+  - Merge pull request #272 from Jerin101/chore/271-version-v57
+  - R2: new home and tabs (#267)
+  - Merge pull request #273 from Jerin101/feature/267-r2-home-tabs
+  - Footer and header chip: all 64 districts, not only the two pilot districts (#267)
+  - Service worker: VERSION v58 after R2 (#275)
+  - All of Bangladesh: no text names only Noakhali and Cox's Bazar (#267)
+  - Merge pull request #276 from Jerin101/chore/275-version-v58
+  - Merge pull request #274 from Jerin101/fix/267-r2-footer-text
+  - Service worker: VERSION v59 after the all-Bangladesh texts (#277)
+  - R3: সেবা ডাকুন on the real site (#267)
+  - Merge pull request #279 from Jerin101/feature/267-r3-dakun
+  - Merge pull request #278 from Jerin101/chore/277-version-v59
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `f55392e` — Merge pull request #250 from Jerin101/feature/249-v7-map-errand-safety *(PR Merge)*
+  - `1bd6ffb` — A2: app shell — bottom tabs on phones, side menu from 960 px, new addresses, visible sign-in (#257)
+  - `8d32ee7` — A2: side menu 168 px; the page's own side column from 1200 px (#257)
+  - `fce672f` — Merge pull request #258 from Jerin101/feature/257-a2-app-shell *(PR Merge)*
+  - `4fc4d5b` — Merge pull request #256 from Jerin101/docs/255-readme *(PR Merge)*
+  - `7853ead` — A2 review: tab labels fit at 320 px with large text, no bottom space on reset.html, Object.hasOwn for addresses (#257)
+  - `0f74174` — A2 review: tab labels fit at 320 px with large text, no bottom space on reset.html, Object.hasOwn for addresses (#257)
+  - `34d8bfb` — Merge pull request #260 from Jerin101/fix/259-a2-review *(PR Merge)*
+  - `336610a` — service worker: VERSION v56 after A2 (#261)
+  - `c49b417` — Merge pull request #262 from Jerin101/chore/261-version-v56 *(PR Merge)*
+  - `2a0b696` — Kit v8: final scope — towing, pickup orders, place page ফ্রি সহায়তা → সার্ভিস, 19 helplines in বিপদে; problems, service guides and GD removed (#263)
+  - `448f97b` — demo: a pickup bill has no shop-receipt row (it was paid at the shop) (#263)
+  - `5d90669` — Plan v3: final scope and order (#265)
+  - `297361a` — Merge pull request #264 from Jerin101/feature/263-v8-final-scope *(PR Merge)*
+  - `497463a` — Merge pull request #266 from Jerin101/docs/265-plan-v3 *(PR Merge)*
+  - `6f46dbd` — R0 data: post offices, railway stations, food and hotels, tourist spots, cyclone/flood shelters (#268)
+  - `3e60148` — R0: 'আশ্রয়ণ প্রকল্প' (housing for landless families) is not a shelter; a railway depot or yard is not a station (#268)
+  - `f2bfed9` — R1: categories near the person on the real site — all 64 districts, 12 categories, map, list, place page (#267)
+  - `da6b831` — Merge pull request #270 from Jerin101/feature/267-r1-category-pages *(PR Merge)*
+  - `065b369` — R1 review fixes: "nearest" only for places with their own position (#267)
+  - `828dd83` — Merge pull request #269 from Jerin101/data/268-places-more-categories *(PR Merge)*
+  - `651da81` — service worker: VERSION v57 after R0 + R1 (#271)
+  - `837d704` — Merge pull request #272 from Jerin101/chore/271-version-v57 *(PR Merge)*
+  - `31cab24` — R2: new home and tabs (#267)
+  - `a504615` — Merge pull request #273 from Jerin101/feature/267-r2-home-tabs *(PR Merge)*
+  - `bc1d18d` — Footer and header chip: all 64 districts, not only the two pilot districts (#267)
+  - `0c25789` — service worker: VERSION v58 after R2 (#275)
+  - `b5673c9` — All of Bangladesh: no text names only Noakhali and Cox's Bazar (#267)
+  - `54c9e12` — Merge pull request #276 from Jerin101/chore/275-version-v58 *(PR Merge)*
+  - `6ca7ca7` — Merge pull request #274 from Jerin101/fix/267-r2-footer-text *(PR Merge)*
+  - `2583f5e` — service worker: VERSION v59 after the all-Bangladesh texts (#277)
+  - `f334724` — R3: সেবা ডাকুন on the real site (#267)
+  - `2a7026c` — Merge pull request #279 from Jerin101/feature/267-r3-dakun *(PR Merge)*
+  - `0deb1ec` — Merge pull request #278 from Jerin101/chore/277-version-v59 *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-21 - Tasmin Jahan Toshi
+- **Contributor:** Tasmin Jahan Toshi
+- **Today's Objective:** R4: সেবা দিন on the real site: providers, approvals and rates (#267)
+- **Completed Tasks:**
+  - R4: সেবা দিন on the real site: providers, approvals and rates (#267)
+  - Merge pull request #280 from Jerin101/feature/267-r4-provide
+  - Service worker: VERSION v60 after R4 (#281)
+  - R4 fixes from the live test: "আবার দেখুন", online count early (#267)
+  - Merge pull request #283 from Jerin101/fix/267-r4-check-again
+  - Merge pull request #282 from Jerin101/chore/281-version-v60
+  - Add verified Git contribution tracker and submission report backup
+  - Merge pull request #284 from Jerin101/chore/git-contribution-tracker
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `9804417` — R4: সেবা দিন on the real site: providers, approvals and rates (#267)
+  - `36f7efb` — Merge pull request #280 from Jerin101/feature/267-r4-provide *(PR Merge)*
+  - `72a4c9d` — service worker: VERSION v60 after R4 (#281)
+  - `529b237` — R4 fixes from the live test: "আবার দেখুন", online count early (#267)
+  - `51143ed` — Merge pull request #283 from Jerin101/fix/267-r4-check-again *(PR Merge)*
+  - `bebdb5e` — Merge pull request #282 from Jerin101/chore/281-version-v60 *(PR Merge)*
+  - `d059085` — chore(tracking): add verified Git contribution tracker and submission report backup
+  - `f636fe3` — Merge pull request #284 from Jerin101/chore/git-contribution-tracker *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
