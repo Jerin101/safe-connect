@@ -83,7 +83,7 @@ export function initProvide(ctx) {
     const parts = [head];
     if (prov === null) parts.push(applyCard());
     else if (prov && !prov.approved) parts.push(card(el('h2', null, T().pendingTitle), el('p', 'muted', `${prov.name} · ${name(prov.type)} · ${prov.vehicle}`),
-      el('p', 'muted', T().pendingText), pills(btn('btn ghost', T().withdraw, null, () => act('withdraw'))), msgBox()));
+      el('p', 'muted', T().pendingText), pills(btn('btn solid', T().checkAgain, null, () => show(view)), btn('btn ghost', T().withdraw, null, () => act('withdraw'))), msgBox()));
     else if (prov) {
       const status = card();
       const sh = el('div', 'sec-head'); sh.append(el('h2', null, prov.name), el('span', 'badge b-ok', T().approved));

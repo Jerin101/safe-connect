@@ -244,10 +244,12 @@ export function initDakun(ctx) {
     if (!rates) { box.replaceChildren(el('div', 'skeleton')); return; }
     if (!rt) { box.replaceChildren(note(T().err.norates)); return; }
     const rateLine = fill(T().rateLine, { base: tk(rt.base), perKm: tk(rt.perKm), min: tk(rt.minFare) });
-    if (t.shop && !form.pick) { box.replaceChildren(el('p', 'small', `${T().needShopEst} ${rateLine}`)); return; }
-    if (t.dest && !form.drop) { box.replaceChildren(el('p', 'small', `${T().needDropEst} ${rateLine}`)); return; }
-    const m = t.dest ? RM.estimateMetres(form.pick, form.drop) : 0, f = RM.fare(rt, m, 0);
+    // how many providers of this service work in the district now: shown before the destination is chosen too
     const on = form.online == null ? '' : form.online.length ? fill(T().online, { n: num(form.online.length), who: who(form.type) }) : fill(T().noneOnline, { who: who(form.type) });
+    const onLine = on ? el('p', 'small dk-online', on) : null;
+    if (t.shop && !form.pick) { box.replaceChildren(...[onLine, el('p', 'small', `${T().needShopEst} ${rateLine}`)].filter(Boolean)); return; }
+    if (t.dest && !form.drop) { box.replaceChildren(...[onLine, el('p', 'small', `${T().needDropEst} ${rateLine}`)].filter(Boolean)); return; }
+    const m = t.dest ? RM.estimateMetres(form.pick, form.drop) : 0, f = RM.fare(rt, m, 0);
     const bill = el('div', 'bill');
     const row = (a, b, cls) => { const d = el('div', cls); d.append(el('span', null, a), el('b', null, b)); bill.append(d); };
     let after;
