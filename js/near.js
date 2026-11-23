@@ -319,6 +319,67 @@ export function initNear(ctx) {
     drawMap(mapBox, from, shown, cat, (it) => ctx.go(`c/${cat.id}/${encodeURIComponent(it.p.id)}`));
   }
 
+  /* ---------- এখন কেমন? (SRS FR05, UC-06) and ভুল জানান (FR15, UC-16) on the place page ---------- */
+  const statusValues = (cat) => ['open', 'closed', 'open_night', ...(cat.id === 'fuel' ? ['fuel_yes', 'fuel_no'] : []), ...(cat.id === 'shelter' ? ['shelter_open'] : [])];
+  function statusCard(p, cat) {
+    const S = T().status;
+    const box = el('section', 'card near-status');
+    const now = el('p', 'muted near-status-now', S.loading); now.setAttribute('role', 'status');
+    const msg = el('p', 'small'); msg.setAttribute('role', 'status');
+    const placeId = String(p.id || '').toLowerCase();
+    const show = async () => {
+      try {
+        const fb = await import('./firebase.js'), cm = await import('./community.js');
+        const st = await fb.readPlaceStatus(placeId);
+        if (!st || !(st.status || st.value)) { now.textContent = S.none; return; }
+        const nowMs = Date.now(), age = Math.max(1, Math.round((nowMs - cm.toMs(st.at)) / 60000));
+        const ago = age < 60 ? fill(S.minAgo, { n: num(age) }) : age < 1440 ? fill(S.hourAgo, { n: num(Math.round(age / 60)) }) : fill(S.dayAgo, { n: num(Math.round(age / 1440)) });
+        now.textContent = `${fill(S.said, { n: num(st.n || 1), v: S.values[st.status || st.value] || '' })} · ${ago}${cm.isOutdated(st, nowMs) ? ` · ${S.outdated}` : ''}`;
+      } catch { now.textContent = navigator.onLine ? S.none : S.offline; }
+    };
+    const buttons = el('div', 'pills');
+    for (const v of statusValues(cat)) {
+      const b = el('button', 'pill', S.values[v]); b.type = 'button';
+      b.addEventListener('click', async () => {
+        msg.textContent = '';
+        try {
+          const fb = await import('./firebase.js'), cm = await import('./community.js');
+          const user = await fb.currentUser();
+          if (!user) { msg.textContent = S.signIn; ctx.signIn(b); return; }          // UC-06 3.1
+          if (!(await fb.isVerified())) { msg.textContent = S.verify; return; }
+          const old = await fb.readPlaceStatus(placeId);
+          await fb.sendPlaceStatus(placeId, v, cm.nextPlaceStatus(old, v, Date.now()));
+          msg.textContent = S.thanks; show();
+        } catch (e) { msg.textContent = e && e.code === 'permission-denied' ? S.wait30 : navigator.onLine ? S.failed : S.offline; }   // UC-06 5.1
+      });
+      buttons.append(b);
+    }
+    box.append(el('h2', null, S.title), now, buttons, el('p', 'small', S.note), msg);
+    show();
+    return box;
+  }
+  function reportCard(p, cat, a) {
+    const R = T().report;
+    const box = el('section', 'card near-report');
+    const key = slug(a.district);
+    const rec = { id: String(p.id || ''), name_bn: nameOf(p), office_bn: T().cats[cat.id], phones: [] };
+    const wrong = el('button', 'btn', R.wrong); wrong.type = 'button'; wrong.prepend(icon('flag', { size: 'sm' }));
+    wrong.addEventListener('click', () => ctx.report(rec, { district: key, area: a.upazila, areaLabel: areaLabel(a) }, wrong));
+    // a place that is missing from the list (জায়গাটা যোগ করতে বলুন)
+    const l = el('label', null, R.addLabel); l.htmlFor = 'nearAddPlace';
+    const inp = el('input'); inp.id = 'nearAddPlace'; inp.maxLength = 80; inp.autocomplete = 'off'; inp.placeholder = R.addPh;
+    const msg = el('p', 'small'); msg.setAttribute('role', 'status');
+    const send = el('button', 'btn', R.addSend); send.type = 'button';
+    send.addEventListener('click', () => {
+      const name = inp.value.trim();
+      if (name.length < 2) { msg.textContent = R.addShort; return; }
+      if (/(?:\+?88)?0?1[3-9](?:[\s.-]?\d){8}|(?:\+?৮৮)?০?১[৩-৯](?:[\s.-]?[০-৯]){8}/.test(name)) { msg.textContent = R.noPhone; return; }   // UC-16 3.1
+      ctx.askPlace({ district: key, upazila: a.upazila, union: '', place: name }, send, (code) => { msg.textContent = R.done[code] || R.done.err; if (code === 'sent') inp.value = ''; });
+    });
+    box.append(el('h2', null, R.title), el('p', 'muted', R.text), wrong, l, inp, send, msg);
+    return box;
+  }
+
   function placePage(view, cat, a, it) {
     closeMap();
     const p = it.p;
@@ -368,7 +429,7 @@ export function initNear(ctx) {
     if (/^https:\/\//.test(p.source_url || '')) { const s = el('a', 'btn ghost', T().source); s.href = p.source_url; s.target = '_blank'; s.rel = 'noopener noreferrer'; acts.append(s); }
     way.append(acts);
     if (it.pt && it.pt.approx) way.append(el('p', 'small', T().approxNote));
-    view.replaceChildren(backLink(`c/${cat.id}`, T().backToList), head, free, way);
+    view.replaceChildren(backLink(`c/${cat.id}`, T().backToList), head, free, way, statusCard(p, cat), reportCard(p, cat, a));
   }
 
   /* ---------- home (R2): the area card, the 12 tiles, the area's emergency numbers ---------- */
