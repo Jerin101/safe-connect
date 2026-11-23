@@ -556,6 +556,7 @@ function showPage(page) {
   document.querySelectorAll('#home [data-pages]').forEach((e) => { e.hidden = !e.dataset.pages.split(' ').includes(page); });
   if (!$('iconSrc').hidden) $('iconSrc').open = page === 'numbers';
   if (page === 'home') { renderRecent(); renderHome(); }
+  if (page === 'numbers') renderDirectory();
   showView('home');
 }
 function setTitle() { const x = pageTitle(); document.title = x ? `${x} · SafeConnect` : 'SafeConnect'; }
@@ -931,7 +932,8 @@ function renderMyArea() {
 }
 let toastTimer = 0;
 // জরুরি সাহায্য (R5): the big 999, "এখন যা করবেন", this area's numbers and the helplines by need
-function showEmergency() { emergency?.show({ call: $('sosCall'), sit: sos.situation, steps: $('sitSteps'), area: $('sosArea'), lines: $('sosLines') }); }
+let sosAreaName = '';     // the chosen area's name for the SMS when there is no location
+function showEmergency() { near?.area().then((a) => { const n = a ? near.label(a) : ''; if (n !== sosAreaName) { sosAreaName = n; if (!$('sos').hidden) refreshMessage(); } }).catch(() => {}); emergency?.show({ call: $('sosCall'), sit: sos.situation, steps: $('sitSteps'), area: $('sosArea'), lines: $('sosLines') }); }
 // The pilot place (district key, upazila) of an area from js/near.js, when we have official numbers for it; else null.
 function pilotPlace(a) {
   const key = String(a.district).toLowerCase().replace(/[^a-z]/g, '');
@@ -1079,7 +1081,8 @@ function sosMessage() {
   const police = policeOf(place);
   const texts = { ...s.bipod.sms, noLoc: s.noLoc };
   if (police && !police.thana) texts.police = texts.policeDistrict;   // "পুলিশ:" unless it is the thana's OC
-  return buildSms({ texts, situation: s.sits[sos.situation][1], area: areaText(place, smsLang()), police: police?.phone || '',
+  // UC-08 3.1: no location → the SMS still says the chosen area
+  return buildSms({ texts, situation: s.sits[sos.situation][1], area: areaText(place, smsLang()) || (sos.pos ? '' : sosAreaName), police: police?.phone || '',
     link: sos.pos ? helpLink(sos.pos, sos.at, sos.situation) : '' });
 }
 function refreshMessage() { if (!sos.edited) $('sosMsg').value = sosMessage(); renderSend(); }
@@ -1745,6 +1748,41 @@ function renderWarm() {
 }
 // Home modules (SRS user manual 2): Nearby, SOS, Directory, Live Location, Dakun, Profile.
 const MODS = [['nearby', 'pin', '#/c'], ['sos', 'alert', '#/sos'], ['directory', 'gov', '#/numbers'], ['live', 'locate', '#/live'], ['dakun', 'car', '#/dakun'], ['profile', 'user', '#/account']];
+// Government Directory (SRS FR08, UC-09) on #/numbers: the chosen area's official numbers by role (থানা, UNO,
+// স্বাস্থ্য কমপ্লেক্স, ফায়ার সার্ভিস, ইউনিয়ন পরিষদ, গ্রাম পুলিশ), each with its source; an area without checked numbers
+// says so and shows 999 and the nearest mapped police station, fire station and hospital. Never an unverified number.
+let dirRun = 0;
+async function renderDirectory() {
+  const box = $('dirArea'), D = P().dir, run = ++dirRun;
+  const a = near ? await near.area() : null;
+  if (run !== dirRun) return;
+  const h = el('h2', null, a ? fill(D.forArea, { a: near.label(a) }) : D.title); h.id = 'dirTitle';
+  const change = el('button', 'btn', a ? D.change : D.pick); change.type = 'button'; change.addEventListener('click', pickArea);
+  if (!a) { box.replaceChildren(h, el('p', 'muted', D.noArea), change); return; }
+  const place = data ? (() => { const last = lastPlace(); return last && near.sameUpazila(last, a) ? last : pilotPlace(a); })() : null;
+  if (place) {
+    const groups = areaContacts(data, place).filter((g) => g.id !== 'emergency');
+    box.replaceChildren(h, el('p', 'muted', D.official), ...groupNodes(groups), change);
+    return;
+  }
+  const alt = el('div', 'sos-area-near');
+  box.replaceChildren(h, el('p', 'note', D.none), alt, change);
+  near.homeNums(alt, a, { titleId: 'dirNumsTitle', title: false });
+}
+// a list of contact groups as open/close boxes with every person row (and its source link)
+function groupNodes(list) {
+  return list.map((gr) => {
+    const items = gr.items, callable = items.filter(withPhone).length;
+    const d = el('details', 'cat'); const s = el('summary');
+    s.append(el('span', null, t().groups[gr.id] || gr.id), el('span', 'count', digits(callable)));
+    const body = el('div', 'cat-body');
+    if (gr.fallback) body.append(el('p', 'fallback', t().fallback));
+    if (gr.noNumbers) body.append(el('p', 'fallback', t().noNumbers));
+    [...items].sort((x, y) => withPhone(y) - withPhone(x)).forEach((r) => body.append(personRow(r)));
+    d.append(s, body);
+    return d;
+  });
+}
 function renderMods() {
   const m = P().mods;
   $('homeMods').setAttribute('aria-label', m.label);
@@ -1802,8 +1840,10 @@ $('fReset').addEventListener('click', () => setDistrict(''));
 $('backBtn').addEventListener('click', goHome);
 $('homeBtn').addEventListener('click', goHome);
 $('areaChip').addEventListener('click', pickArea);
-$('hFinder').addEventListener('click', pickArea);   // the area picker for all 64 districts (R2)
-$('hSearch').addEventListener('click', pickArea);
+// the header search: the everyday-word search of the categories (SRS FR03)
+const openSearch = () => go('c', { after: () => $('nearSearch')?.focus() });
+$('hFinder').addEventListener('click', openSearch);
+$('hSearch').addEventListener('click', openSearch);
 window.addEventListener('resize', markTab);      // keeps the active tab in view and the edge hints right
 const calmScroll = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
 $('ctaSend').addEventListener('click', () => openSos(null));
@@ -1867,6 +1907,7 @@ try {
   areaIndex = buildAreaIndex(data);
   renderRecent(); renderStats(); renderPlaces(); renderIconRow(); renderGuides(); renderMyArea();
   if ($('main').dataset.page === 'home') renderHome(); else syncArea();   // the pilot numbers need the data
+  if ($('main').dataset.page === 'numbers') renderDirectory();   // the directory needs the official data too
   if (!$('sos').hidden) showEmergency();   // the helplines need the data
   autoLoc.resume();                     // only when the person turned it on and the browser allows it
 } catch (err) {

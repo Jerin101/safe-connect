@@ -80,7 +80,7 @@ test('minutes ago never goes below 0', () => {
 });
 
 test('every situation has a short and a full text in both languages', () => {
-  for (const l of ['bn', 'en']) for (const k of ['danger', 'followed', 'accident', 'sick', 'lost']) {
+  for (const l of ['bn', 'en']) for (const k of ['danger', 'followed', 'accident', 'sick', 'lost', 'harassment']) {
     assert.equal(LANG[l].sits[k].length, 2);
     assert.ok(LANG[l].sits[k].every(Boolean));
   }

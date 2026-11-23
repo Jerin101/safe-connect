@@ -15,7 +15,9 @@ const GROUPS = [
   ['info', ['information']],
 ];
 // the nearest places that help in each situation (category ids of js/near.js)
-const SIT_CATS = { danger: ['police', 'hospital'], followed: ['police'], accident: ['hospital', 'police'], sick: ['hospital', 'pharmacy'], lost: ['police', 'transport'] };
+const SIT_CATS = { danger: ['police', 'hospital'], followed: ['police'], accident: ['hospital', 'police'], sick: ['hospital', 'pharmacy'], lost: ['police', 'transport'], harassment: ['police'] };
+// a situation's own helpline (SRS FR07: harassment → নারী ও শিশু সহায়তা ১০৯, from data/national_hotlines.json)
+const SIT_LINE = { harassment: 'women-children-violence-109', sick: 'health-call-centre-16263' };
 
 export function initEmergency(ctx) {
   const { el } = ctx;
@@ -39,6 +41,11 @@ export function initEmergency(ctx) {
     const ol = el('ol', 'sos-steps');
     for (const x of s.do) ol.append(el('li', null, x));
     const near = el('div', 'pills');
+    const line = SIT_LINE[sit] && (ctx.national() || []).find((r) => r.id === SIT_LINE[sit]);
+    if (line && line.phones && line.phones.length) {
+      const c = el('a', 'btn red', `${ctx.lang() === 'en' ? line.name_en || line.name_bn : line.name_bn} ${num(line.phones[0])}`); c.href = `tel:${line.phones[0]}`; c.prepend(icon('phone', { size: 'sm' }));
+      near.append(c);
+    }
     for (const c of SIT_CATS[sit] || []) {
       const b = el('button', 'btn', T().nearest[c]); b.type = 'button'; b.prepend(icon('pin', { size: 'sm' }));
       b.addEventListener('click', () => ctx.go(`c/${c}`));

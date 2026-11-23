@@ -653,3 +653,14 @@ main[data-page="home"] .feed { max-width: 900px; width: 100%; margin-inline: aut
 .home-mod:hover { border-color: var(--accent); }
 .home-mod .cat-ic { width: 40px; height: 40px; border-radius: 12px; }
 
+/* SRS PR-7: search, map on demand, directory */
+.near-search { display: grid; gap: 6px; }
+.near-search-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.near-search input { width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); color: var(--ink); padding: 10px 12px; font: inherit; }
+.near-showmap { justify-self: start; }
+.near-map[hidden], .near-recenter[hidden] { display: none; }
+.near-empty-help { display: grid; gap: 10px; }
+.dir-area { display: grid; gap: 10px; }
+.dir-area h2 { margin: 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+

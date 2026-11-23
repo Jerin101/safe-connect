@@ -63,6 +63,10 @@ await waitFor(`location.hash === '#/c/pharmacy' && document.querySelectorAll('#c
 const rows = await ev(`document.querySelectorAll('#cat .near-row').length`);
 const first = await ev(`document.querySelector('#cat .near-row .t')?.textContent || ''`);
 check('Sylhet pharmacies listed, the first one marked nearest', rows > 5 && /সবচেয়ে কাছে/.test(first), `${rows} rows; first: ${first.slice(0, 60)}`);
+// SRS PR-7: no map until "ম্যাপে দেখুন" (UC-05), road distance (× 1.3)
+check('no map before the tap (no Leaflet yet)', await ev(`!document.querySelector('#cat .leaflet-container') && !!document.querySelector('#cat .near-showmap')`));
+check('distance says "রাস্তায় প্রায়"', await ev(`/রাস্তায় প্রায়/.test(document.querySelector('#cat .near-row .m')?.textContent || '')`));
+await click('#cat .near-showmap');
 const mapOk = await waitFor(`document.querySelectorAll('#cat .leaflet-tile-loaded').length > 3 && document.querySelectorAll('#cat .mk-pin').length > 1`, 25000);
 check('the map shows tiles and pins, one green', mapOk && (await ev(`document.querySelectorAll('#cat .mk-pin.near').length`)) === 1,
   `${await ev(`document.querySelectorAll('#cat .mk-pin').length`)} pins`);
@@ -102,6 +106,7 @@ const fuel = await ev(`(() => { const r = [...document.querySelectorAll('#cat .n
     order: r.map((x) => /এই উপজেলায়/.test(x.textContent)).join('') }; })()`);
 check('Savar fuel: the nearest has its own position, no ~0 m', fuel.near <= 1 && !fuel.nearApprox && !fuel.zero, JSON.stringify(fuel).slice(0, 120));
 check('Savar fuel: "in this upazila" rows come after the exact ones', !/true.*false/.test(fuel.order), `${fuel.inUp} in upazila of ${fuel.n}`);
+await click('#cat .near-showmap');
 await waitFor(`document.querySelectorAll('#cat .mk-pin').length > 0`, 20000);
 const pins = await ev(`document.querySelectorAll('#cat .mk-pin').length`);
 const exactRows = await ev(`document.querySelectorAll('#cat .near-row').length - [...document.querySelectorAll('#cat .near-row')].filter((x) => /এই উপজেলায়/.test(x.textContent)).length`);
@@ -120,6 +125,13 @@ check('only names are stored, no coordinates', !/\d+\.\d{3,}/.test(stored), stor
 const outside = [...new Set(requests.filter((u) => /^https?:/.test(u)).map((u) => new URL(u).host))].filter((h) => h !== new URL(BASE).host);
 // map tiles; and since SRS PR-5 the public "এখন কেমন?" status of an opened place (Firebase; only the place id is sent)
 check('outside hosts: OpenStreetMap tiles and the public place status only', outside.every((h) => ['tile.openstreetmap.org', 'www.gstatic.com', 'firestore.googleapis.com'].includes(h)), outside.join(', '));
+// SRS PR-7: everyday-word search (FR03, UC-04)
+await send('Page.navigate', { url: `${BASE}#/c` }); await waitFor(`!!document.getElementById('nearSearch')`);
+await ev(`document.getElementById('nearSearch').value = 'osudher dokan'; document.querySelector('#cat .near-search button').click(); true`);
+check('search "osudher dokan" opens the pharmacies', await waitFor(`location.hash === '#/c/pharmacy'`));
+await send('Page.navigate', { url: `${BASE}#/c` }); await waitFor(`!!document.getElementById('nearSearch')`);
+await ev(`document.getElementById('nearSearch').value = 'xyzqq'; document.querySelector('#cat .near-search button').click(); true`);
+check('search with no match: says so, the categories stay', await waitFor(`/(কিছু পাওয়া যায়নি|Nothing found)/.test(document.querySelector('#cat .near-search-msg').textContent) && document.querySelectorAll('#cat .cat-tile').length === 12`));
 check('no errors on the page', errors.length === 0, errors.slice(0, 3).join(' | '));
 console.log(failed ? `\n${failed} failed` : '\nALL OK');
 process.exit(failed ? 1 : 0);
