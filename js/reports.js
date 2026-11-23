@@ -5,7 +5,9 @@
 export const PROBLEMS = ['off', 'other_person', 'changed', 'other'];
 export const MISSING = 'missing_place';   // "জায়গাটা যোগ করতে বলুন" (#159)
 export const STATUSES = ['open', 'review', 'fixed', 'same'];
-export const REPORT_DISTRICTS = ['noakhali', 'coxsbazar'];
+export const REPORT_DISTRICTS = ['noakhali', 'coxsbazar'];   // districts with official numbers (pilot)
+// A report may be about a number or a place in any of the 64 districts (SRS FR15): a district key is lower-case letters.
+export const districtOk = (d) => /^[a-z]{3,30}$/.test(String(d || ''));
 export const NOTE_MAX = 300;   // the rules allow 500; 300 keeps Bangla notes well inside it
 const AREA_MAX = 80;
 const ID_MAX = 120;
@@ -20,7 +22,7 @@ export const hasPhone = (text) => PHONE_IN_TEXT.test(String(text || ''));
 // The new report, with exactly the fields firestore.rules allow (js/firebase.js adds createdAt and updatedAt).
 // No name, phone number or address of the person: only who sent it (uid), which record, and what is wrong.
 export function reportFields(uid, draft) {
-  if (!uid || !draft || !PROBLEMS.includes(draft.problem) || !REPORT_DISTRICTS.includes(draft.district)) return null;
+  if (!uid || !draft || !PROBLEMS.includes(draft.problem) || !districtOk(draft.district)) return null;
   const recordId = String(draft.recordId || '');
   if (!recordId || recordId.length > ID_MAX) return null;
   const d = { uid, recordId, district: draft.district, problem: draft.problem, status: 'open' };
@@ -34,7 +36,7 @@ export function reportFields(uid, draft) {
 // A request to add a place the search did not know (#159): the name the person typed, the upazila (an upazila_en
 // from our data) and, if known, the union. No record and no phone number; same limits as every report.
 export function missingFields(uid, draft) {
-  if (!uid || !draft || !REPORT_DISTRICTS.includes(draft.district)) return null;
+  if (!uid || !draft || !districtOk(draft.district)) return null;
   const place = cut(draft.place, AREA_MAX), upazila = cut(draft.upazila, 60), union = cut(draft.union, AREA_MAX);
   if ([...place].length < 2 || [...upazila].length < 2 || hasPhone(place) || hasPhone(upazila) || hasPhone(union)) return null;
   const d = { uid, recordId: 'missing-place', district: draft.district, problem: MISSING, status: 'open', place, upazila };
@@ -226,7 +228,7 @@ export function initReports(helpers) {
     // record: a contact from data/ (never typed by the person); district: its district key;
     // area: the Bangla area name that is saved; areaLabel: the name shown in the form.
     open(record, { district, area, areaLabel }, from) {
-      if (!record || !record.id || !REPORT_DISTRICTS.includes(district)) return;
+      if (!record || !record.id || !districtOk(district)) return;
       opener = from || document.activeElement;
       draft = { recordId: record.id, district, area, areaLabel, record, problem: null, note: '', step: 0, busy: false, err: null };
       render();

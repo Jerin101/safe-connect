@@ -302,7 +302,8 @@ describe('report form and lists (issue #79)', () => {
     assert.equal(reportFields(KARIM, draft).status, 'open');
     assert.deepEqual(Object.keys(reportFields(KARIM, { ...draft, note: '  ', area: '' })).sort(), ['district', 'problem', 'recordId', 'status', 'uid']);
     assert.equal(reportFields(KARIM, { ...draft, problem: 'missing' }), null);
-    assert.equal(reportFields(KARIM, { ...draft, district: 'dhaka' }), null);
+    assert.ok(reportFields(KARIM, { ...draft, district: 'dhaka' }));   // any district (SRS FR15)
+    assert.equal(reportFields(KARIM, { ...draft, district: 'Dhaka 1' }), null);
     assert.equal(reportFields(null, draft), null);
     assert.equal([...reportFields(KARIM, { ...draft, note: 'ক'.repeat(NOTE_MAX + 50) }).note].length, NOTE_MAX);
   });
@@ -321,12 +322,15 @@ describe('report form and lists (issue #79)', () => {
       await assertSucceeds(sendWithLimits(db(KARIM), KARIM, written(KARIM, { ...draft, problem, district })));
     }
   });
-  test('wrong shapes are refused: extra fields, unknown problem, other district, browser time, signed out', async () => {
+  test('a report about a number or place in any district is accepted (SRS FR15)', async () => {
+    await assertSucceeds(sendWithLimits(db(KARIM), KARIM, written(KARIM, { ...draft, district: 'dhaka', recordId: 'osm-n4455' })));
+  });
+  test('wrong shapes are refused: extra fields, unknown problem, bad district key, browser time, signed out', async () => {
     const f = db(KARIM); const send = (data) => sendWithLimits(f, KARIM, data);
     await assertFails(send({ ...written(KARIM), phone: '01712345678' }));
     await assertFails(send({ ...written(KARIM), address: 'house 1' }));
     await assertFails(send({ ...written(KARIM), problem: 'missing' }));
-    await assertFails(send({ ...written(KARIM), district: 'dhaka' }));
+    await assertFails(send({ ...written(KARIM), district: 'Dhaka 1' }));
     await assertFails(send({ ...written(KARIM), createdAt: new Date() }));
     await assertFails(send({ ...written(KARIM), recordId: 7 }));
     await assertFails(setDoc(doc(collection(db(null), 'reports')), written('nobody')));

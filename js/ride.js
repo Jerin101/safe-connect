@@ -8,16 +8,23 @@ export const RIDE_TYPES = [
   { id: 'cng', bn: 'সিএনজি অটোরিকশা', who: 'চালক', kmh: 20, dest: true },
   { id: 'bike', bn: 'মোটরবাইক রাইড', who: 'চালক', kmh: 25, dest: true },
   { id: 'technician', bn: 'মিস্ত্রি ডাকুন (ইলেকট্রিক, পানি, মেকানিক)', who: 'মিস্ত্রি', kmh: 20, dest: false },
-  { id: 'help', bn: 'স্বেচ্ছাসেবক সাহায্য', who: 'স্বেচ্ছাসেবক', kmh: 15, dest: false },
+  // volunteer help in an emergency, including finding blood donors (no health data is stored)
+  { id: 'help', bn: 'স্বেচ্ছাসেবক / রক্তের খোঁজে সাহায্য', who: 'স্বেচ্ছাসেবক', kmh: 15, dest: false },
   // pickup = the shop, drop = the person; the bill = the shop's receipt (up to the person's limit) + the delivery fare
   { id: 'errand', bn: 'কিনে এনে দিন', who: 'ডেলিভারি রাইডার', kmh: 25, dest: true, errand: true, shop: true },
   // pickup point: the order is already paid at the shop; the rider collects it and brings it (bill = delivery only)
   { id: 'pickup', bn: 'অর্ডার তুলে এনে দিন', who: 'ডেলিভারি রাইডার', kmh: 25, dest: true, shop: true },
   // a tow truck from the person (pickup) to a workshop or filling station (destination)
   { id: 'towing', bn: 'গাড়ি টেনে নেওয়া (টোয়িং)', who: 'টোয়িং চালক', kmh: 20, dest: true },
+  // local vehicles of district towns and villages (SRS FR12)
+  { id: 'easybike', bn: 'ইজিবাইক / অটো', who: 'চালক', kmh: 18, dest: true },
+  { id: 'rickshaw', bn: 'রিকশা', who: 'রিকশাচালক', kmh: 10, dest: true },
+  { id: 'van', bn: 'ভ্যান / পিকআপ', who: 'চালক', kmh: 20, dest: true },
 ];
 export const typeOf = (id) => RIDE_TYPES.find((t) => t.id === id);
-// Example rates (admin sets the real ones in rates/{type}); "help" is never billed.
+// Example nationwide rates (an admin sets the real ones in fare_rates/default__{type}, and may set a district's own in
+// fare_rates/{district}__{type}); "help" is never billed. Inside the page a rate has the short names below; js/firebase.js
+// maps them to the stored names of the ER diagram (baseFare, perKmRate, waitingRate, minFare).
 export const DEFAULT_RATES = {
   ambulance: { base: 300, perKm: 40, perMin: 5, minFare: 500 },
   cng: { base: 40, perKm: 20, perMin: 2, minFare: 60 },
@@ -27,7 +34,13 @@ export const DEFAULT_RATES = {
   errand: { base: 30, perKm: 15, perMin: 1, minFare: 50 },
   pickup: { base: 30, perKm: 15, perMin: 1, minFare: 50 },
   towing: { base: 500, perKm: 60, perMin: 5, minFare: 800 },
+  easybike: { base: 20, perKm: 12, perMin: 1, minFare: 30 },
+  rickshaw: { base: 15, perKm: 15, perMin: 1, minFare: 20 },
+  van: { base: 50, perKm: 20, perMin: 2, minFare: 80 },
 };
+// Stored names (fare_rates) <-> page names.
+export const toStored = (r) => ({ baseFare: r.base, perKmRate: r.perKm, waitingRate: r.perMin, minFare: r.minFare });
+export const fromStored = (x) => ({ base: x.baseFare, perKm: x.perKmRate, perMin: x.waitingRate, minFare: x.minFare });
 export const ITEMS_MAX = 20000;   // the most a rider may allow for the things bought (the rules check it)
 // What the rider pays in cash: the delivery fare, plus the shop's receipt for an errand.
 export const billTotal = (r) => (r.fare || 0) + (r.itemsCost || 0);

@@ -5,7 +5,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {
   getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, sendEmailVerification, reload, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
+  createUserWithEmailAndPassword, sendEmailVerification, updateProfile, reload, sendPasswordResetEmail, signOut, verifyPasswordResetCode, confirmPasswordReset,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, collection, getDocs, writeBatch, query, where, orderBy, limit,
@@ -26,11 +26,27 @@ export const currentUser = async () => { await auth.authStateReady(); return aut
 export const signInGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
 export const signInEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
 // A new email account gets a verification email at once: reports need a verified email (issue #117).
-export const createAccount = async (email, password) => {
+// Registration (SRS FR01): name, email and password. The name goes on the account at once, so users/{uid} gets it.
+export const createAccount = async (email, password, name = '') => {
   const cred = await createUserWithEmailAndPassword(auth, email, password);
+  const clean = String(name || '').trim().slice(0, 60);
+  if (clean) { try { await updateProfile(cred.user, { displayName: clean }); } catch { /* the profile page can set it later */ } }
   try { await sendEmailVerification(cred.user); } catch { /* the report window can send it again */ }
   return cred;
 };
+// Profile & Preferences (SRS FR02): the owner may change only name and language (firestore.rules users/{uid}).
+// The theme (light/dark) stays on this phone (localStorage), like the area.
+export async function saveProfile({ name, lang }) {
+  const user = me(), upd = {};
+  if (name !== undefined) { const n = String(name).trim().slice(0, 60); if (!n) throw err('name-empty'); upd.name = n; }
+  if (lang !== undefined) upd.lang = lang === 'en' ? 'en' : 'bn';
+  await updateDoc(doc(db, 'users', user.uid), upd);
+  if (upd.name) { try { await updateProfile(user, { displayName: upd.name }); } catch { /* the stored name is what counts */ } }
+}
+export async function readProfile() {
+  const snap = await getDoc(doc(db, 'users', me().uid));
+  return snap.exists() ? snap.data() : null;
+}
 export const resendVerify = () => sendEmailVerification(auth.currentUser);
 // Has this person verified their email (maybe in another tab)? Refreshes the sign-in token so the rules see it too.
 // The rules read the token's email_verified claim, which can be older than the user object after a reload.
@@ -195,16 +211,20 @@ export async function listAudit({ action, actorUid, from, to } = {}) {
 
 // Place status ("এখন কেমন?"): js/community.js builds the next value; here only the server time is added. Public reads.
 // Place status: the public summary and this person's own answer, in one batch.
+// Community status "Ekhon Kemon?" (SRS FR05): stored as { status, n, at } (ER diagram); "value" is kept in what this
+// returns so older pages still read it.
 export async function readPlaceStatus(placeId) {
   const snap = await getDoc(doc(db, 'placeStatus', placeId));
-  return snap.exists() ? snap.data() : null;
+  if (!snap.exists()) return null;
+  const x = snap.data(), status = x.status || x.value;
+  return { ...x, status, value: status };
 }
 export async function sendPlaceStatus(placeId, value, next) {
   const user = auth.currentUser;
   if (!user) throw Object.assign(new Error('signed-out'), { code: 'signed-out' });
   const batch = writeBatch(db);
-  batch.set(doc(db, 'placeStatus', placeId), { value, n: next.n, at: serverTimestamp() });
-  batch.set(doc(db, 'placeStatus', placeId, 'by', user.uid), { value, at: serverTimestamp() });
+  batch.set(doc(db, 'placeStatus', placeId), { status: value, n: next.n, at: serverTimestamp() });
+  batch.set(doc(db, 'placeStatus', placeId, 'by', user.uid), { status: value, at: serverTimestamp() });
   await batch.commit();
 }
 
@@ -233,19 +253,41 @@ export async function approveProvider(uid, approved) {
   const batch = writeBatch(db), auditRef = doc(collection(db, 'audit'));
   batch.set(auditRef, { actorUid: me().uid, action: 'PROVIDER_APPROVED', entity: 'providers', entityId: uid,
     meta: { from: approved ? 'pending' : 'approved', to: approved ? 'approved' : 'pending' }, at: serverTimestamp() });
-  batch.update(doc(db, 'providers', uid), { approved, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
+  batch.update(doc(db, 'providers', uid), { approved, rejected: false, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
+  await batch.commit();
+}
+// Admins only: "not approved" (use case 14, 3.1). The applicant sees it and may withdraw and apply again.
+export async function rejectProvider(uid) {
+  const batch = writeBatch(db), auditRef = doc(collection(db, 'audit'));
+  batch.set(auditRef, { actorUid: me().uid, action: 'PROVIDER_REJECTED', entity: 'providers', entityId: uid,
+    meta: { from: 'pending', to: 'rejected' }, at: serverTimestamp() });
+  batch.update(doc(db, 'providers', uid), { approved: false, rejected: true, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
   await batch.commit();
 }
 
 // Rates: public; an admin changes them with an audit entry. Returns { type: { base, perKm, perMin, minFare } }.
-export async function readRates() {
-  const snap = await getDocs(collection(db, 'rates'));
-  return Object.fromEntries(snap.docs.map((d) => { const x = d.data(); return [d.id, { base: x.base, perKm: x.perKm, perMin: x.perMin, minFare: x.minFare }]; }));
+// Fare rates per district and service type (SRS FR14, FR16; ER fare_rates): fare_rates/{district}__{type} with
+// baseFare, perKmRate, waitingRate, minFare. A district without its own rate uses the nationwide one (district "default").
+// readRates(district) gives the page's short names { type: { base, perKm, perMin, minFare } }, the district's own winning.
+const RATE_ID = (district, type) => `${district || 'default'}__${type}`;
+const short = (x) => ({ base: x.baseFare, perKm: x.perKmRate, perMin: x.waitingRate, minFare: x.minFare });
+export async function readRates(district) {
+  const ds = district && district !== 'default' ? ['default', district] : ['default'];
+  const snap = await getDocs(query(collection(db, 'fare_rates'), where('district', 'in', ds)));
+  const out = {}, own = {};
+  for (const d of snap.docs) { const x = d.data(); if (x.district === 'default') out[x.serviceType] = short(x); else own[x.serviceType] = short(x); }
+  return { ...out, ...own };
 }
-export async function setRates(type, r) {
-  const batch = writeBatch(db), auditRef = doc(collection(db, 'audit'));
-  batch.set(auditRef, { actorUid: me().uid, action: 'RATES_CHANGED', entity: 'rates', entityId: type, at: serverTimestamp() });
-  batch.set(doc(db, 'rates', type), { base: r.base, perKm: r.perKm, perMin: r.perMin, minFare: r.minFare, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
+// Admins: every stored rate, for the rates table ({ id, district, serviceType, base, perKm, perMin, minFare }).
+export async function readRateTable() {
+  const snap = await getDocs(collection(db, 'fare_rates'));
+  return snap.docs.map((d) => { const x = d.data(); return { id: d.id, district: x.district, serviceType: x.serviceType, ...short(x) }; });
+}
+export async function setRates(type, r, district = 'default') {
+  const id = RATE_ID(district, type), batch = writeBatch(db), auditRef = doc(collection(db, 'audit'));
+  batch.set(auditRef, { actorUid: me().uid, action: 'RATES_CHANGED', entity: 'fare_rates', entityId: id, at: serverTimestamp() });
+  batch.set(doc(db, 'fare_rates', id), { district: district || 'default', serviceType: type, baseFare: r.base, perKmRate: r.perKm,
+    waitingRate: r.perMin, minFare: r.minFare, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
   await batch.commit();
 }
 
@@ -307,4 +349,40 @@ export const watchLive = (id, who, cb, onErr) => onSnapshot(doc(db, 'rides', id,
 // When the ride ends, both positions are deleted (either person may do it; nothing is kept).
 export async function clearLive(id) {
   await Promise.allSettled([deleteDoc(doc(db, 'rides', id, 'live', 'rider')), deleteDoc(doc(db, 'rides', id, 'live', 'provider'))]);
+}
+
+// Live location sharing and Safe Commute (SRS FR09–FR11). js/track.js has the ids, durations and checks; firestore.rules
+// (live_shares, shareLimits) decide. A share and shareLimits/{uid} are one batch (20 a day, 60 s apart).
+export const SHARE_LIMIT = { perDay: 20, gapMs: 60000 };
+export async function startShare(id, minutes, point, commute = {}) {
+  const user = me(), limRef = doc(db, 'shareLimits', user.uid);
+  const snap = await getDoc(limRef);
+  const old = snap.exists() ? snap.data() : null, nowMs = Date.now(), today = dayNumber(nowMs);
+  if (old && millis(old.lastAt) && nowMs < millis(old.lastAt) + SHARE_LIMIT.gapMs) throw err('limit-wait');
+  if (old && old.day === today && old.count >= SHARE_LIMIT.perDay) throw err('limit-day');
+  const mins = Math.min(480, Math.max(1, Math.round(minutes)));
+  const batch = writeBatch(db);
+  batch.set(doc(db, 'live_shares', id), { uid: user.uid, ...point, ...commute, status: 'active', startedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(), expiresAt: new Date(nowMs + mins * 60000) });
+  batch.set(limRef, { day: today, count: old && old.day === today ? old.count + 1 : 1, lastAt: serverTimestamp(), lastShare: id });
+  await batch.commit();
+}
+// A new point (lat, lon, speed, heading, battery); the rules refuse points closer than 4 s apart.
+export const updateShare = (id, point) => updateDoc(doc(db, 'live_shares', id), { ...point, updatedAt: serverTimestamp() });
+// Safe Commute: the vehicle and destination on the active share (FR10).
+export const setCommute = (id, { vehicleNo, vehicleType, destination }) => updateDoc(doc(db, 'live_shares', id),
+  { vehicleNo, vehicleType, destination, updatedAt: serverTimestamp() });
+// "I Have Reached Safely" or the timer: the document is deleted at once (TRK-05).
+export const endShare = (id) => deleteDoc(doc(db, 'live_shares', id));
+// The family view (no sign-in): one document by its id, live. null = ended, expired or never existed.
+export const watchShare = (id, cb, onErr) => onSnapshot(doc(db, 'live_shares', id), (d) => {
+  if (!d.exists()) return cb(null);
+  const x = d.data();
+  cb({ id: d.id, ...x, startedAt: millis(x.startedAt), updatedAt: millis(x.updatedAt), expiresAt: millis(x.expiresAt) });
+}, (e) => (e && e.code === 'permission-denied' ? cb(null) : onErr && onErr(e)));
+// Admins: delete shares whose time is over (the rules let an admin list and delete only expired ones).
+export async function cleanExpiredShares() {
+  const snap = await getDocs(query(collection(db, 'live_shares'), where('expiresAt', '<', new Date()), limit(100)));
+  await Promise.allSettled(snap.docs.map((d) => deleteDoc(d.ref)));
+  return snap.size;
 }
