@@ -281,6 +281,25 @@ class Validator(unittest.TestCase):
         r = self.run_validator(DATA)
         self.assertEqual(r.returncode, 0, r.stdout[-2000:])
 
+    def test_places_file_must_use_the_district_slug(self):
+        # NFR08 (SRS plan PR-8): a places file named after the wrong district is an error
+        tmp = tempfile.mkdtemp()
+        try:
+            shutil.copytree(DATA, os.path.join(tmp, "data"))
+            pdir = os.path.join(tmp, "data", "places")
+            ip = os.path.join(pdir, "index.json")
+            index = json.load(open(ip, encoding="utf-8"))
+            d = next(x for x in index["districts"] if x["district_en"] == "Sylhet")
+            old = d["files"][0]["file"]
+            d["files"][0]["file"] = "sylhet-town.json"
+            os.rename(os.path.join(pdir, old), os.path.join(pdir, "sylhet-town.json"))
+            json.dump(index, open(ip, "w", encoding="utf-8"), ensure_ascii=False)
+            r = self.run_validator(os.path.join(tmp, "data"))
+            self.assertEqual(r.returncode, 1)
+            self.assertIn("district's slug", r.stdout)
+        finally:
+            shutil.rmtree(tmp)
+
     def test_bad_manual_file_fails(self):
         tmp = tempfile.mkdtemp()
         try:
