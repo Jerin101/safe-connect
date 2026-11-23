@@ -465,5 +465,7 @@ export function initNear(ctx) {
     return out;
   }
   const area = async () => { try { await loadBase(); } catch { return null; } return getArea(); };
-  return { show, close: closeMap, home, homeNums, sameUpazila, forget, label, openPicker, here, nearby, loadLeaflet, area };
+  // the 64 districts with their keys (for the admin's district rates); empty until the base data is loaded
+  const districts = () => (base ? base.districts.map((d) => ({ key: slug(d.en), en: d.en, bn: d.bn })).sort((a, b) => a.en.localeCompare(b.en)) : []);
+  return { show, close: closeMap, home, homeNums, sameUpazila, forget, label, openPicker, here, nearby, loadLeaflet, area, districts };
 }
