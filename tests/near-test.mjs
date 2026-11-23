@@ -75,6 +75,11 @@ check('place page: ফ্রি সহায়তা, then the way there', h2[0
 check('999 on the place page, with a tel: link', await ev(`!!document.querySelector('#cat a[href="tel:999"]')`));
 check('Sylhet: no unofficial number, an honest note and the national numbers link', await ev(`!!document.querySelector('#cat a[href="#/numbers"]') && ![...document.querySelectorAll('#cat a[href^="tel:"]')].some((a) => a.getAttribute('href') !== 'tel:999')`));
 await shot('r1-sylhet-place-390');
+// SRS PR-5: এখন কেমন? (FR05) and ভুল জানান (FR15) on the place page
+check('place page: "এখন কেমন?" with খোলা / বন্ধ / রাতেও খোলা', await waitFor(`/এখন কেমন\\?/.test(document.getElementById('cat').textContent) && document.querySelectorAll('#cat .near-status .pill').length === 3 && !/খবর দেখা হচ্ছে/.test(document.querySelector('#cat .near-status-now').textContent)`, 20000));
+check('place page: "ভুল জানান" and "জায়গাটা যোগ করতে বলুন"', await ev(`!!document.querySelector('#cat .near-report') && /জায়গাটা যোগ করতে বলুন/.test(document.querySelector('#cat .near-report').textContent)`));
+await ev(`document.getElementById('nearAddPlace').value = 'রহিম ফার্মেসি ০১৭১২৩৪৫৬৭৮'; [...document.querySelectorAll('#cat .near-report button')].pop().click(); true`);
+check('a phone number in the place name is refused (UC-16 3.1)', await waitFor(`/ফোন নম্বর দেওয়া যাবে না/.test(document.querySelector('#cat .near-report').textContent)`));
 
 // 3. a pilot district: Noakhali Sadar shows the area's official numbers on the place page
 await send('Page.navigate', { url: `${BASE}#/c/hospital` }); await waitFor(`!!document.querySelector('#cat .near-area')`);
@@ -113,7 +118,8 @@ check('English: the hub title and tiles change', await ev(`document.querySelecto
 const stored = await ev(`JSON.stringify(Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)])))`);
 check('only names are stored, no coordinates', !/\d+\.\d{3,}/.test(stored), stored.slice(0, 160));
 const outside = [...new Set(requests.filter((u) => /^https?:/.test(u)).map((u) => new URL(u).host))].filter((h) => h !== new URL(BASE).host);
-check('outside hosts: only OpenStreetMap tiles', outside.every((h) => h === 'tile.openstreetmap.org'), outside.join(', '));
+// map tiles; and since SRS PR-5 the public "এখন কেমন?" status of an opened place (Firebase; only the place id is sent)
+check('outside hosts: OpenStreetMap tiles and the public place status only', outside.every((h) => ['tile.openstreetmap.org', 'www.gstatic.com', 'firestore.googleapis.com'].includes(h)), outside.join(', '));
 check('no errors on the page', errors.length === 0, errors.slice(0, 3).join(' | '));
 console.log(failed ? `\n${failed} failed` : '\nALL OK');
 process.exit(failed ? 1 : 0);

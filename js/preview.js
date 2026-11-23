@@ -977,6 +977,9 @@ function makeNear() {
     rerender: () => route(),
     remembers,
     callTo: (p, mode) => dakun.callTo(p, mode),   // সেবা ডাকুন from a place page (R3)
+    signIn: (button) => auth.tap(button),
+    report: (record, info, from) => auth.report(record, info, from),   // ভুল জানান on a place page (SRS FR15)
+    askPlace: (draft, from, done) => auth.askPlace(draft, from, done),
     // "আমার লোকেশন" in the area card: in the pilot districts the exact union is looked up on the phone, as with
     // "Find help near me"; the point stays in memory (lastFix) for "Send location"
     onGps: (p) => {
