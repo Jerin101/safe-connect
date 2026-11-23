@@ -438,6 +438,25 @@ async function saveStatus(r) {
 }
 const saving = new Set();   // report ids whose status is being saved right now
 
+// Profile (SRS FR02): the name on the account; "নাম লিখুন" when empty; "প্রোফাইল হালনাগাদ হয়েছে" when saved.
+let profileMsg = null;
+function profileCard() {
+  const w = W();
+  const id = 'wsProfileName';
+  const l = ctx.el('label', 'field'); const span = ctx.el('span', null, w.profileName);
+  const inp = ctx.el('input'); inp.id = id; inp.type = 'text'; inp.maxLength = 60; inp.autocomplete = 'name';
+  inp.value = (acct.user && acct.user.displayName) || '';
+  l.append(span, inp);
+  const m = ctx.el('p', profileMsg && profileMsg.err ? 'err wpad' : 'ok wpad', profileMsg ? profileMsg.text : ''); m.setAttribute('role', 'status'); m.hidden = !profileMsg;
+  const save = button(w.profileSave, 'btn sm', async () => {
+    const name = $(id).value.trim();
+    if (!name) { profileMsg = { err: true, text: w.nameEmpty }; render(); $(id)?.focus(); return; }
+    try { await acct.fb.saveProfile({ name }); profileMsg = { err: false, text: w.profileSaved }; }
+    catch { profileMsg = { err: true, text: navigator.onLine ? w.profileFailed : ctx.texts().auth.err.network }; }
+    render();
+  }, 'wsProfileSave');
+  return card(w.profileTitle, [l, m], save);
+}
 const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
 
 const SECTION = {
@@ -463,10 +482,11 @@ const SECTION = {
   audit() { return auditSection(); },
   settings() {
     const w = W(), dark = isDark();
-    const lang = button(w.langBtn, 'btn sm', () => { ctx.$('langBtn').click(); $('wsLangBtn')?.focus(); }, 'wsLangBtn');
+    // the language is applied at once and saved on the account (users/{uid}.lang, SRS FR02)
+    const lang = button(w.langBtn, 'btn sm', () => { ctx.$('langBtn').click(); acct.fb?.saveProfile({ lang: ctx.lang() }).catch(() => {}); $('wsLangBtn')?.focus(); }, 'wsLangBtn');
     lang.lang = ctx.lang() === 'bn' ? 'en' : 'bn';
     const theme = button(dark ? w.themeToDay : w.themeToNight, 'btn sm', () => { ctx.$('themeBtn').click(); render(); $('wsThemeBtn')?.focus(); }, 'wsThemeBtn');
-    return [card(w.nav.settings, [settingRow(w.langTitle, w.langNow, lang), settingRow(w.themeTitle, dark ? w.themeNight : w.themeDay, theme)]),
+    return [profileCard(), card(w.nav.settings, [settingRow(w.langTitle, w.langNow, lang), settingRow(w.themeTitle, dark ? w.themeNight : w.themeDay, theme)]),
       card(ctx.texts().ui.auto.title, ctx.autoSwitch('ws', render)),   // auto location (#105): on this phone only, like on home
       card(w.syncTitle, syncSwitch())];
   },
