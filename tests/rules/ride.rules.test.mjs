@@ -6,8 +6,9 @@ import { after, before, beforeEach, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, where } from 'firebase/firestore';
-import { DEFAULT_RATES, fare, cancelFee, estimateMetres, trackAdd, billLooksRight } from '../../js/ride.js';
+import { DEFAULT_RATES, fare, cancelFee, estimateMetres, trackAdd, billLooksRight, toStored } from '../../js/ride.js';
 
+const EASY = 'easy-uid';
 const ADMIN = 'admin-uid', RINA = 'rina-uid', KARIM = 'karim-uid', DRIVER = 'driver-uid', DRIVER2 = 'driver2-uid', PENDING = 'pending-uid', BIKER = 'biker-uid', FENI = 'feni-uid', HELPER = 'helper-uid', RUNNER = 'runner-uid', COURIER = 'courier-uid', TOWER = 'tower-uid';
 let env;
 const db = (uid) => (uid ? env.authenticatedContext(uid, { email: `${uid}@example.com`, email_verified: true }) : env.unauthenticatedContext()).firestore();
@@ -26,7 +27,8 @@ beforeEach(async () => {
   await env.withSecurityRulesDisabled(async (ctx) => {
     const f = ctx.firestore();
     await setDoc(doc(f, 'admins', ADMIN), { since: new Date(), addedBy: 'console' });
-    for (const [t, r] of Object.entries(DEFAULT_RATES)) await setDoc(doc(f, 'rates', t), { ...r, updatedAt: new Date() });
+    for (const [t, r] of Object.entries(DEFAULT_RATES)) await setDoc(doc(f, 'fare_rates', `default__${t}`), { district: 'default', serviceType: t, ...toStored(r), updatedAt: new Date() });
+    await setDoc(doc(f, 'providers', EASY), prov('easybike', 'noakhali', true, 'হাসান', 'ইজিবাইক ১২'));
     await setDoc(doc(f, 'providers', DRIVER), prov('cng', 'noakhali', true));
     await setDoc(doc(f, 'providers', DRIVER2), prov('cng', 'noakhali', true, 'করিম', 'নোয়াখালী-থ-৫৫৫৫'));
     await setDoc(doc(f, 'providers', PENDING), prov('cng', 'noakhali', false));
@@ -105,18 +107,58 @@ describe('the fare helpers (js/ride.js)', () => {
   });
 });
 
-describe('rates', () => {
-  test('anyone reads; only an admin with an audit entry writes; help is always free', async () => {
-    await assertSucceeds(getDoc(doc(db(null), 'rates', 'cng')));
-    await assertFails(setDoc(doc(db(RINA), 'rates', 'cng'), { base: 1, perKm: 1, perMin: 1, minFare: 1, updatedAt: serverTimestamp() }));
+describe('fare rates per district and service type (fare_rates, SRS FR14/FR16)', () => {
+  const rate = (district, serviceType, r, lastAuditId) => ({ district, serviceType, ...toStored(r), updatedAt: serverTimestamp(), ...(lastAuditId ? { lastAuditId } : {}) });
+  test('anyone reads; only an admin with an audit entry writes; help is always free; the id is district__type', async () => {
+    await assertSucceeds(getDoc(doc(db(null), 'fare_rates', 'default__cng')));
+    await assertFails(setDoc(doc(db(RINA), 'fare_rates', 'default__cng'), rate('default', 'cng', DEFAULT_RATES.cng)));
     const fa = db(ADMIN);
-    let { b, a } = await audited(fa, ADMIN, 'rates', 'cng', 'RATES_CHANGED');
-    b.set(doc(fa, 'rates', 'cng'), { base: 50, perKm: 22, perMin: 2, minFare: 70, updatedAt: serverTimestamp(), lastAuditId: a.id });
+    let { b, a } = await audited(fa, ADMIN, 'fare_rates', 'noakhali__cng', 'RATES_CHANGED');
+    b.set(doc(fa, 'fare_rates', 'noakhali__cng'), rate('noakhali', 'cng', { base: 50, perKm: 22, perMin: 2, minFare: 70 }, a.id));
     await assertSucceeds(b.commit());
-    ({ b, a } = await audited(fa, ADMIN, 'rates', 'help', 'RATES_CHANGED'));
-    b.set(doc(fa, 'rates', 'help'), { base: 10, perKm: 0, perMin: 0, minFare: 0, updatedAt: serverTimestamp(), lastAuditId: a.id });
+    ({ b, a } = await audited(fa, ADMIN, 'fare_rates', 'default__help', 'RATES_CHANGED'));
+    b.set(doc(fa, 'fare_rates', 'default__help'), rate('default', 'help', { base: 10, perKm: 0, perMin: 0, minFare: 0 }, a.id));
     await assertFails(b.commit());
-    await assertFails(setDoc(doc(db(ADMIN), 'rates', 'cng'), { base: 50, perKm: 22, perMin: 2, minFare: 70, updatedAt: serverTimestamp() }));
+    ({ b, a } = await audited(fa, ADMIN, 'fare_rates', 'feni__cng', 'RATES_CHANGED'));
+    b.set(doc(fa, 'fare_rates', 'feni__cng'), rate('noakhali', 'cng', DEFAULT_RATES.cng, a.id));   // id and district disagree
+    await assertFails(b.commit());
+    ({ b, a } = await audited(fa, ADMIN, 'fare_rates', 'Dhaka 1__cng', 'RATES_CHANGED'));
+    b.set(doc(fa, 'fare_rates', 'Dhaka 1__cng'), rate('Dhaka 1', 'cng', DEFAULT_RATES.cng, a.id));
+    await assertFails(b.commit());
+    await assertFails(setDoc(doc(db(ADMIN), 'fare_rates', 'default__cng'), rate('default', 'cng', DEFAULT_RATES.cng)));   // no audit entry
+    await assertFails(setDoc(doc(db(ADMIN), 'rates', 'cng'), { base: 1, perKm: 1, perMin: 1, minFare: 1, updatedAt: serverTimestamp() }));   // the old collection is closed
+  });
+  test("a district's own rate decides its bills; other districts keep the nationwide rate", async () => {
+    const own = { base: 60, perKm: 25, perMin: 2, minFare: 80 };
+    await env.withSecurityRulesDisabled(async (ctx) => { await setDoc(doc(ctx.firestore(), 'fare_rates', 'noakhali__cng'), { district: 'noakhali', serviceType: 'cng', ...toStored(own), updatedAt: new Date() }); });
+    const id = await rideTo('on_trip', 'cng');
+    const done = (f) => step(db(DRIVER), id, { status: 'completed', endedAt: serverTimestamp(), distM: 1500, waitMin: 0, fare: f, payStatus: 'pending' });
+    await assertFails(done(fare(DEFAULT_RATES.cng, 1500, 0)));
+    await assertSucceeds(done(fare(own, 1500, 0)));
+  });
+  test('a type with no rate at all cannot be requested', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => { await deleteDoc(doc(ctx.firestore(), 'fare_rates', 'default__van')); });
+    await assertFails(request(db(RINA), RINA, rideFields(RINA, { type: 'van', estFare: fare(DEFAULT_RATES.van, 1200) })));
+  });
+});
+
+describe('local vehicles: easybike, rickshaw, van (SRS FR12)', () => {
+  test('an easybike ride from request to paid, billed by the easybike rates', async () => {
+    await aMinuteLater(RINA);
+    const id = await request(db(RINA), RINA, rideFields(RINA, { type: 'easybike', estFare: fare(DEFAULT_RATES.easybike, 1200) }));
+    await assertFails(accept(db(DRIVER), id));
+    await assertSucceeds(accept(db(EASY), id, 'হাসান', 'ইজিবাইক ১২', EASY));
+    await step(db(EASY), id, { status: 'arrived', arrivedAt: serverTimestamp() });
+    await step(db(EASY), id, { status: 'on_trip', startedAt: serverTimestamp() });
+    await assertFails(step(db(EASY), id, { status: 'completed', endedAt: serverTimestamp(), distM: 2000, waitMin: 0, fare: fare(DEFAULT_RATES.cng, 2000, 0), payStatus: 'pending' }));
+    await assertSucceeds(step(db(EASY), id, { status: 'completed', endedAt: serverTimestamp(), distM: 2000, waitMin: 0, fare: fare(DEFAULT_RATES.easybike, 2000, 0), payStatus: 'pending' }));
+  });
+  test('rickshaw and van can be requested and a provider can apply for them', async () => {
+    for (const t of ['rickshaw', 'van']) {
+      await aMinuteLater(RINA);
+      await assertSucceeds(request(db(RINA), RINA, rideFields(RINA, { type: t, estFare: fare(DEFAULT_RATES[t], 1200) })));
+    }
+    await assertSucceeds(setDoc(doc(db('new-uid'), 'providers', 'new-uid'), { name: 'রফিক', type: 'rickshaw', vehicle: 'রিকশা নং ৪৫', district: 'noakhali', approved: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
   });
 });
 
@@ -137,6 +179,19 @@ describe('providers', () => {
     await assertFails(updateDoc(doc(db(ADMIN), 'providers', DRIVER), { approved: false, updatedAt: serverTimestamp() }));
     await assertFails(getDoc(doc(db(RINA), 'providers', DRIVER)));
     await assertSucceeds(getDoc(doc(db(DRIVER), 'providers', DRIVER)));
+  });
+  test('an admin rejects an application with an audit entry (use case 14, 3.1); the applicant may withdraw it', async () => {
+    const fa = db(ADMIN);
+    await assertFails(updateDoc(doc(fa, 'providers', PENDING), { approved: false, rejected: true, updatedAt: serverTimestamp() }));
+    let { b, a } = await audited(fa, ADMIN, 'providers', PENDING, 'PROVIDER_APPROVED', { from: 'pending', to: 'rejected' });
+    b.update(doc(fa, 'providers', PENDING), { approved: false, rejected: true, updatedAt: serverTimestamp(), lastAuditId: a.id });
+    await assertFails(b.commit());   // the wrong action name
+    ({ b, a } = await audited(fa, ADMIN, 'providers', PENDING, 'PROVIDER_REJECTED', { from: 'pending', to: 'rejected' }));
+    b.update(doc(fa, 'providers', PENDING), { approved: false, rejected: true, updatedAt: serverTimestamp(), lastAuditId: a.id });
+    await assertSucceeds(b.commit());
+    await assertSucceeds(getDoc(doc(db(PENDING), 'providers', PENDING)));
+    await assertFails(updateDoc(doc(db(PENDING), 'providers', PENDING), { rejected: false, updatedAt: serverTimestamp() }));
+    await assertSucceeds(deleteDoc(doc(db(PENDING), 'providers', PENDING)));
   });
   test('an approved provider cannot change their own name or vehicle (an admin checked them)', async () => {
     await assertFails(updateDoc(doc(db(DRIVER), 'providers', DRIVER), { vehicle: 'অন্য গাড়ি', updatedAt: serverTimestamp() }));

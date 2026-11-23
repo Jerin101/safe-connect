@@ -135,7 +135,7 @@ service cloud.firestore {
         && incoming().uid == request.auth.uid
         && incoming().status == 'open'
         && shortText(incoming().recordId, 120)
-        && incoming().district in ['noakhali', 'coxsbazar']
+        && incoming().district is string && incoming().district.matches('^[a-z]{3,30}$')   // a number or a place in any district (FR15)
         && shortText(incoming().get('area', ''), 80)
         && incoming().problem in ['off', 'other_person', 'changed', 'other', 'missing_place']
         // "জায়গাটা যোগ করতে বলুন" (#159): a place name the search did not know, with its upazila (and union if known).
@@ -168,7 +168,8 @@ service cloud.firestore {
         && ((incoming().action == 'REPORT_STATUS_CHANGED' && incoming().entity == 'reports')
           || (incoming().action == 'ROLE_CHANGED' && incoming().entity == 'users')
           || (incoming().action == 'PROVIDER_APPROVED' && incoming().entity == 'providers')
-          || (incoming().action == 'RATES_CHANGED' && incoming().entity == 'rates'))
+          || (incoming().action == 'PROVIDER_REJECTED' && incoming().entity == 'providers')
+          || (incoming().action == 'RATES_CHANGED' && incoming().entity == 'fare_rates'))
         && incoming().entityId is string
         && incoming().entityId.matches('^[A-Za-z0-9_-]{1,128}$')
         && incoming().at == request.time
@@ -188,25 +189,27 @@ service cloud.firestore {
     // Each person's own answer is in placeStatus/{placeId}/by/{uid} (only they read it), at most once in 30 minutes
     // per place. The count grows only when the same answer comes again within 6 hours; a new answer starts at 1.
     // Both writes are one batch and check each other.
+    function placeValues() { return ['open', 'closed', 'fuel_yes', 'fuel_no', 'open_night', 'shelter_open']; }
     match /placeStatus/{placeId} {
       allow read: if true;
       allow create, update: if signedIn() && verified()
         && placeId.matches('^[a-z0-9-]{3,80}$')
-        && incoming().keys().hasOnly(['value', 'n', 'at'])
-        && incoming().value in ['open', 'closed', 'fuel_yes', 'fuel_no', 'open_night']
+        && incoming().keys().hasOnly(['status', 'n', 'at'])
+        && incoming().status in placeValues()
         && incoming().at == request.time
         && getAfter(/databases/$(database)/documents/placeStatus/$(placeId)/by/$(request.auth.uid)).data.at == request.time
-        && getAfter(/databases/$(database)/documents/placeStatus/$(placeId)/by/$(request.auth.uid)).data.value == incoming().value
-        && (resource == null || resource.data.value != incoming().value || request.time > resource.data.at + duration.value(6, 'h')
+        && getAfter(/databases/$(database)/documents/placeStatus/$(placeId)/by/$(request.auth.uid)).data.status == incoming().status
+        && (resource == null || resource.data.get('status', '') != incoming().status || request.time > resource.data.at + duration.value(6, 'h')
           ? incoming().n == 1
           : incoming().n == resource.data.n + 1);
       allow delete: if false;
 
+      // each person's own answer (the "uid" of the ER diagram is this document's id); only they read it
       match /by/{uid} {
         allow read: if isMe(uid);
         allow create, update: if isMe(uid) && verified()
-          && incoming().keys().hasOnly(['value', 'at'])
-          && incoming().value in ['open', 'closed', 'fuel_yes', 'fuel_no', 'open_night']
+          && incoming().keys().hasOnly(['status', 'at'])
+          && incoming().status in placeValues()
           && incoming().at == request.time
           && (resource == null || request.time > resource.data.at + duration.value(30, 'm'))
           && getAfter(/databases/$(database)/documents/placeStatus/$(placeId)).data.at == request.time;
@@ -223,9 +226,12 @@ service cloud.firestore {
     // a rough position (about 100 m) for "nearby" counts. rideLimits/{uid}: at most 10 requests a day, 60 s apart.
     function ridePath(id) { return /databases/$(database)/documents/rides/$(id); }
     function provPath(uid) { return /databases/$(database)/documents/providers/$(uid); }
-    function rateOf(t) { return get(/databases/$(database)/documents/rates/$(t)).data; }
+    // fare_rates/{district}__{serviceType}: a district's own rate, else the nationwide one (district "default")
+    function rateDoc(d, t) { return /databases/$(database)/documents/fare_rates/$(d + '__' + t); }
+    function hasRate(d, t) { return exists(rateDoc(d, t)) || exists(rateDoc('default', t)); }
+    function rateFor(d, t) { return exists(rateDoc(d, t)) ? get(rateDoc(d, t)).data : get(rateDoc('default', t)).data; }
     function myProv() { return get(provPath(request.auth.uid)).data; }
-    function rideTypes() { return ['ambulance', 'cng', 'bike', 'technician', 'help', 'errand', 'towing', 'pickup']; }
+    function rideTypes() { return ['ambulance', 'cng', 'bike', 'technician', 'help', 'errand', 'towing', 'pickup', 'easybike', 'rickshaw', 'van']; }
     function inBd(lat, lon) { return lat is number && lon is number && lat >= 20.5 && lat <= 26.7 && lon >= 88.0 && lon <= 92.7; }
     // Stored points are rounded to 3 decimals (about 100 m, CLAUDE.md rule 5): the exact spot is only in the live
     // documents, which exist during the ride and are deleted at its end.
@@ -239,9 +245,9 @@ service cloud.firestore {
     function moved(from, to) { return resource.data.status == from && incoming().status == to; }
     function now(f) { return incoming().get(f, null) == request.time; }
     // The fare the rules accept: within 5 taka of max(minimum, base + perKm × km + perMin × (wait − 3)).
-    function fareOk(t, distM, waitMin, f) {
-      let rt = rateOf(t);
-      let raw = rt.base + rt.perKm * (distM / 1000.0) + rt.perMin * (waitMin > 3 ? waitMin - 3 : 0);
+    function fareOk(d, t, distM, waitMin, f) {
+      let rt = rateFor(d, t);
+      let raw = rt.baseFare + rt.perKmRate * (distM / 1000.0) + rt.waitingRate * (waitMin > 3 ? waitMin - 3 : 0);
       let want = raw > rt.minFare ? raw : rt.minFare;
       return f is int && f >= 0 && (want <= 0 ? f == 0 : (f >= want && f <= want + 5));
     }
@@ -258,24 +264,32 @@ service cloud.firestore {
       allow update: if (isMe(uid) && resource.data.approved == false
           && changed().hasOnly(['name', 'vehicle', 'updatedAt'])
           && placeText(incoming().name, 2, 60) && placeText(incoming().vehicle, 2, 40) && now('updatedAt'))
+        // approve: approved true (and not rejected); reject: approved false and rejected true (FR16, use case 14 "3.1")
         || (isAdmin() && uid != request.auth.uid
-          && changed().hasOnly(['approved', 'updatedAt', 'lastAuditId'])
-          && incoming().approved is bool && incoming().approved != resource.data.approved && now('updatedAt')
-          && audited('providers', uid, 'PROVIDER_APPROVED'));
+          && changed().hasOnly(['approved', 'rejected', 'updatedAt', 'lastAuditId']) && now('updatedAt')
+          && ((incoming().approved == true && incoming().get('rejected', false) == false && resource.data.approved == false
+              && audited('providers', uid, 'PROVIDER_APPROVED'))
+            || (incoming().approved == false && incoming().get('rejected', false) == true && resource.data.get('rejected', false) == false
+              && audited('providers', uid, 'PROVIDER_REJECTED'))
+            || (incoming().approved == false && incoming().get('rejected', false) == false && resource.data.approved == true
+              && audited('providers', uid, 'PROVIDER_APPROVED'))));
       allow delete: if isMe(uid) && resource.data.approved == false;
     }
 
-    match /rates/{t} {
+    match /fare_rates/{rateId} {
       allow read: if true;
-      allow create, update: if isAdmin() && t in rideTypes()
-        && incoming().keys().hasOnly(['base', 'perKm', 'perMin', 'minFare', 'updatedAt', 'lastAuditId'])
-        && incoming().base is int && incoming().base >= 0 && incoming().base <= 10000
-        && incoming().perKm is int && incoming().perKm >= 0 && incoming().perKm <= 1000
-        && incoming().perMin is int && incoming().perMin >= 0 && incoming().perMin <= 100
+      allow create, update: if isAdmin()
+        && incoming().keys().hasOnly(['district', 'serviceType', 'baseFare', 'perKmRate', 'waitingRate', 'minFare', 'updatedAt', 'lastAuditId'])
+        && incoming().serviceType in rideTypes()
+        && incoming().district is string && (incoming().district == 'default' || incoming().district.matches('^[a-z]{3,30}$'))
+        && rateId == incoming().district + '__' + incoming().serviceType
+        && incoming().baseFare is int && incoming().baseFare >= 0 && incoming().baseFare <= 10000
+        && incoming().perKmRate is int && incoming().perKmRate >= 0 && incoming().perKmRate <= 1000
+        && incoming().waitingRate is int && incoming().waitingRate >= 0 && incoming().waitingRate <= 100
         && incoming().minFare is int && incoming().minFare >= 0 && incoming().minFare <= 20000
-        && (t != 'help' || (incoming().base == 0 && incoming().perKm == 0 && incoming().perMin == 0 && incoming().minFare == 0))
+        && (incoming().serviceType != 'help' || (incoming().baseFare == 0 && incoming().perKmRate == 0 && incoming().waitingRate == 0 && incoming().minFare == 0))
         && now('updatedAt')
-        && audited('rates', t, 'RATES_CHANGED');
+        && audited('fare_rates', rateId, 'RATES_CHANGED');
       allow delete: if false;
     }
 
@@ -322,7 +336,7 @@ service cloud.firestore {
             ? ('drop' in incoming() && placeText(incoming().get('items', ''), 2, 300) && !('maxItems' in incoming()))
             : (!('items' in incoming()) && !('maxItems' in incoming())))
         && incoming().riderUid == request.auth.uid
-        && incoming().type in rideTypes() && exists(/databases/$(database)/documents/rates/$(incoming().type))
+        && incoming().type in rideTypes() && incoming().district is string && hasRate(incoming().district, incoming().type)
         && incoming().district is string && incoming().district.matches('^[a-z]{3,30}$')
         && placeMap(incoming().pickup)
         && (!('drop' in incoming()) || placeMap(incoming().drop))
@@ -350,7 +364,7 @@ service cloud.firestore {
             && incoming().waitMin is int && incoming().waitMin >= 0
             && incoming().waitMin <= (resource.data.startedAt.toMillis() - resource.data.arrivedAt.toMillis()) / 60000 + 1
             && incoming().payStatus == 'pending'
-            && fareOk(resource.data.type, incoming().distM, incoming().waitMin, incoming().fare))
+            && fareOk(resource.data.district, resource.data.type, incoming().distM, incoming().waitMin, incoming().fare))
           || (moved('completed', 'paid') && changed().hasOnly(['status', 'payStatus', 'paidAt', 'updatedAt'])
             && incoming().payStatus == 'paid' && now('paidAt'))
           || (resource.data.status in ['accepted', 'arrived'] && incoming().status == 'cancelled'
@@ -360,7 +374,7 @@ service cloud.firestore {
         || (resource.data.riderUid == request.auth.uid && (
           (resource.data.status in ['requested', 'accepted', 'arrived'] && incoming().status == 'cancelled'
             && changed().hasOnly(['status', 'cancelledBy', 'cancelFee', 'updatedAt']) && incoming().cancelledBy == 'rider'
-            && incoming().cancelFee == (resource.data.status == 'arrived' ? math.ceil(rateOf(resource.data.type).base / 10.0) * 5 : 0))
+            && incoming().cancelFee == (resource.data.status == 'arrived' ? math.ceil(rateFor(resource.data.district, resource.data.type).baseFare / 10.0) * 5 : 0))
           || (resource.data.status in ['completed', 'paid'] && !('billOk' in resource.data)
             && changed().hasOnly(['billOk', 'updatedAt']) && incoming().billOk is bool)
           // a ride with no answer: the rider may close it after 3 hours (before the trip) or 12 hours (on the trip or
@@ -387,6 +401,57 @@ service cloud.firestore {
           && (get(ridePath(rideId)).data.riderUid == request.auth.uid
             || get(ridePath(rideId)).data.get('providerUid', null) == request.auth.uid);
       }
+    }
+
+    // ---------- live location sharing and Safe Commute (FR09–FR11) ----------
+    // live_shares/{shareId}: started by a verified user for at most 8 hours; the id is long and random, so only someone
+    // who has the link can read it (get by id, no sign-in), and nobody can list them. Only the owner writes and deletes;
+    // updates at most every 4 s. Safe Commute adds the vehicle (number plate, type) and the destination. An expired share
+    // can no longer be read; an admin may list and delete expired ones only (cleanup), never an active one.
+    // shareLimits/{uid}: at most 20 shares a day, 60 s apart, written in the same batch as the share.
+    function shareLimitsAfter() { return getAfter(/databases/$(database)/documents/shareLimits/$(request.auth.uid)).data; }
+    function optNum(m, k, lo, hi) { return m.get(k, null) == null || (m.get(k, null) is number && m.get(k, null) >= lo && m.get(k, null) <= hi); }
+    function shareOk(m) {
+      return inBd(m.lat, m.lon)
+        && optNum(m, 'speed', 0, 100) && optNum(m, 'heading', 0, 360)
+        && (m.get('battery', null) == null || (m.get('battery', null) is int && m.get('battery', null) >= 0 && m.get('battery', null) <= 100))
+        && (!('vehicleNo' in m) || placeText(m.vehicleNo, 2, 30))
+        && (!('vehicleType' in m) || m.vehicleType in ['rickshaw', 'easybike', 'cng', 'bus', 'other'])
+        && (!('destination' in m) || placeText(m.destination, 2, 60));
+    }
+    match /live_shares/{shareId} {
+      allow get: if resource.data.expiresAt > request.time;
+      allow list: if isAdmin() && resource.data.expiresAt < request.time;
+      allow create: if signedIn() && verified() && shareId.matches('^[A-Za-z0-9]{24,40}$')
+        && shareLimitsAfter().lastShare == shareId && shareLimitsAfter().lastAt == request.time
+        && incoming().keys().hasOnly(['uid', 'lat', 'lon', 'speed', 'heading', 'battery', 'vehicleNo', 'vehicleType', 'destination', 'status', 'startedAt', 'updatedAt', 'expiresAt'])
+        && incoming().uid == request.auth.uid && incoming().status == 'active'
+        && incoming().startedAt == request.time && incoming().updatedAt == request.time
+        && incoming().expiresAt is timestamp && incoming().expiresAt > request.time
+        && incoming().expiresAt <= request.time + duration.value(482, 'm')
+        && shareOk(incoming());
+      allow update: if signedIn() && resource.data.uid == request.auth.uid && resource.data.expiresAt > request.time
+        && changed().hasOnly(['lat', 'lon', 'speed', 'heading', 'battery', 'vehicleNo', 'vehicleType', 'destination', 'updatedAt'])
+        && incoming().updatedAt == request.time
+        && request.time >= resource.data.updatedAt + duration.value(4, 's')
+        && shareOk(incoming());
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || (isAdmin() && resource.data.expiresAt < request.time));
+    }
+    match /shareLimits/{uid} {
+      allow read: if isMe(uid);
+      allow create, update: if isMe(uid) && verified()
+        && incoming().keys().hasOnly(['day', 'count', 'lastAt', 'lastShare'])
+        && incoming().day == today() && incoming().lastAt == request.time
+        && incoming().count is int && incoming().count <= 20
+        && incoming().lastShare is string
+        && !exists(/databases/$(database)/documents/live_shares/$(incoming().lastShare))
+        && existsAfter(/databases/$(database)/documents/live_shares/$(incoming().lastShare))
+        && getAfter(/databases/$(database)/documents/live_shares/$(incoming().lastShare)).data.uid == uid
+        && (resource == null
+          ? incoming().count == 1
+          : (request.time >= resource.data.lastAt + duration.value(60, 's')
+            && incoming().count == (resource.data.day == today() ? resource.data.count + 1 : 1)));
+      allow delete: if false;
     }
 
     // Everything else is closed (volunteer collections open in P38).
