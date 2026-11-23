@@ -402,11 +402,12 @@ export function initNear(ctx) {
   }
   // Outside the pilot districts: 999 first, then the nearest police station, fire station and hospital on the map.
   // No phone number is shown for them, because none comes from an official source.
-  async function homeNums(box, a) {
+  // titleId: home and জরুরি সাহায্য both show it, so each has its own heading id; title: false when the page has one
+  async function homeNums(box, a, { titleId = 'homeNumsTitle', title = true } = {}) {
     const H = T().home;
-    const h = el('h2', null, H.numsTitle); h.id = 'homeNumsTitle';
+    const h = el('h2', null, H.numsTitle); h.id = titleId;
     const call = el('a', 'btn red home-999', H.call999); call.href = 'tel:999'; call.prepend(icon('phone', { size: 'sm' }));
-    box.replaceChildren(h, call, el('p', 'note', H.noOfficial));
+    box.replaceChildren(...[title ? h : null, call, el('p', 'note', H.noOfficial)].filter(Boolean));
     let all;
     try { all = await placesOf(a.district); } catch { box.append(el('p', 'note', T().loadFailed)); return; }
     if (!box.isConnected) return;
