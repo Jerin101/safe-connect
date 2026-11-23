@@ -54,7 +54,7 @@ export function initProvide(ctx) {
     try {
       const [fb] = await load();
       user = await fb.currentUser();
-      here = await ctx.near.here();
+      here = await ctx.near.here();   // also loads the district list
       if (!view.isConnected) return;
       const h = el('h1', 'page-title', T().title); h.id = 'provideTitle'; h.tabIndex = -1;
       const head = card(el('p', 'eyebrow', T().eyebrow), h, el('p', 'muted', T().intro));
@@ -64,10 +64,10 @@ export function initProvide(ctx) {
         return;
       }
       if (!(await fb.isVerified())) { v.replaceChildren(head, card(note(D().err.unverified))); return; }
-      if (!rates) { try { rates = await fb.readRates(); } catch { rates = {}; } }
       prov = await fb.myProvider();
+      if (!rates) { try { rates = await fb.readRates(prov?.district); } catch { rates = {}; } }
       isAdm = (await fb.roleOf(user, ctx.lang())) === 'admin';
-      if (isAdm) { try { pend = await fb.pendingProviders(); } catch { pend = []; } }
+      if (isAdm) { try { pend = await fb.pendingProviders(); } catch { pend = []; } try { rateTable = await fb.readRateTable(); } catch { rateTable = []; } }
       if (prov?.approved) {
         if (!reqUnsub) reqUnsub = fb.watchRequests(prov, (list) => { reqs = list; paintReqs(); }, (e) => { const b = view?.querySelector('.pv-reqs'); if (b) b.replaceChildren(el('p', 'note', errText(e))); });
         myJobs = await fb.myRides('provider');
@@ -82,6 +82,8 @@ export function initProvide(ctx) {
     head = head || view.querySelector('section.card');
     const parts = [head];
     if (prov === null) parts.push(applyCard());
+    else if (prov && !prov.approved && prov.rejected) parts.push(card(el('h2', null, T().rejectedTitle), el('p', 'muted', `${prov.name} · ${name(prov.type)} · ${prov.vehicle}`),
+      el('p', 'muted', T().rejectedText), pills(btn('btn solid', T().withdraw, null, () => act('withdraw'))), msgBox()));
     else if (prov && !prov.approved) parts.push(card(el('h2', null, T().pendingTitle), el('p', 'muted', `${prov.name} · ${name(prov.type)} · ${prov.vehicle}`),
       el('p', 'muted', T().pendingText), pills(btn('btn solid', T().checkAgain, null, () => show(view)), btn('btn ghost', T().withdraw, null, () => act('withdraw'))), msgBox()));
     else if (prov) {
@@ -288,49 +290,82 @@ export function initProvide(ctx) {
       if (what === 'paid') { await fb.markPaid(job.id); ctx.toast(T().paidDone); return; }
       if (what === 'cancel') { await fb.cancelRide(job.id, 'provider', 0); await fb.clearLive(job.id); stopJob(); ctx.toast(D().cancelled); return paint(); }
       if (what === 'approve') { await fb.approveProvider(arg, true); pend = await fb.pendingProviders(); ctx.toast(T().approvedDone); return paint(); }
+      if (what === 'reject') { await fb.rejectProvider(arg); pend = await fb.pendingProviders(); ctx.toast(T().rejectedDone); return paint(); }
+      if (what === 'clean') { const n = await fb.cleanExpiredShares(); ctx.toast(fill(T().cleaned, { n: num(n) })); say(fill(T().cleaned, { n: num(n) })); return; }
       if (what === 'rates' || what === 'defaults') {
         const list = what === 'defaults' ? Object.entries(RM.DEFAULT_RATES)
           : [[val('rtType'), { base: toInt(val('rtBase')), perKm: toInt(val('rtKm')), perMin: toInt(val('rtMin')), minFare: toInt(val('rtMinF')) }]];
+        const district = what === 'defaults' ? 'default' : (val('rtDistrict') || 'default');
         for (const [k, r] of list) {
           if (![r.base, r.perKm, r.perMin, r.minFare].every((x) => Number.isInteger(x) && x >= 0)) return say(T().wholeNumbers);
-          await fb.setRates(k, k === 'help' ? { base: 0, perKm: 0, perMin: 0, minFare: 0 } : r);
+          await fb.setRates(k, k === 'help' ? { base: 0, perKm: 0, perMin: 0, minFare: 0 } : r, district);
         }
-        rates = await fb.readRates(); ctx.toast(T().ratesSaved); return paint();
+        rates = await fb.readRates(prov?.district); rateTable = await fb.readRateTable(); ctx.toast(T().ratesSaved); return paint();
       }
     } catch (e) { say(errText(e)); }
   }
 
-  /* ---------- admin: approvals and rates ---------- */
+  /* ---------- admin: approvals, rates per district, expired shares ---------- */
+  let rateTable = null, rateDistrict = 'default';
   function adminCards() {
     const ap = card(el('p', 'eyebrow', T().admin), el('h2', null, T().waitingApproval));
+    const waiting = (pend || []).filter((p) => !p.rejected);
     if (!pend) ap.append(el('div', 'skeleton'));
-    else if (!pend.length) ap.append(el('p', 'muted', T().nobodyWaiting));
+    else if (!waiting.length) ap.append(el('p', 'muted', T().nobodyWaiting));
     else {
       const rows = el('div', 'rows');
-      for (const p of pend) {
+      for (const p of waiting) {
         const row = el('div', 'r near-row'); const sq = el('span', 'cat-ic sm'); sq.append(icon(TYPE_IC[p.type] || 'car'));
         const b = el('div'); b.append(el('div', 't', `${p.name} · ${name(p.type)}`), el('div', 'm', `${p.vehicle} · ${p.district}`));
-        const acts = el('div', 'acts'); acts.append(btn('btn solid', T().approve, 'check', () => act('approve', p.id)));
+        const acts = el('div', 'acts');
+        acts.append(btn('btn solid', T().approve, 'check', () => act('approve', p.id)), btn('btn ghost', T().reject, null, () => act('reject', p.id)));
         row.append(sq, b, acts); rows.append(row);
       }
       ap.append(rows);
     }
+    // rates (SRS FR16): nationwide ("default") or one district's own; a district without its own uses the nationwide one
+    const dsel = el('select'); dsel.id = 'rtDistrict';
+    const dl = el('label', null, T().rateDistrict); dl.htmlFor = 'rtDistrict';
+    const all = el('option', null, T().wholeCountry); all.value = 'default'; dsel.append(all);
+    for (const d of ctx.near.districts()) { const o = el('option', null, ctx.lang() === 'bn' ? d.bn : d.en); o.value = d.key; dsel.append(o); }
+    dsel.value = rateDistrict;
     const sel = el('select'); sel.id = 'rtType';
     for (const x of RM.RIDE_TYPES.filter((y) => y.id !== 'help')) { const o = el('option', null, name(x.id)); o.value = x.id; sel.append(o); }
     const l = el('label', null, T().service); l.htmlFor = 'rtType';
-    const missing = RM.RIDE_TYPES.filter((x) => !rates?.[x.id]).map((x) => name(x.id));
+    const has = (d, t) => (rateTable || []).find((r) => r.district === d && r.serviceType === t);
+    const missing = RM.RIDE_TYPES.filter((x) => !has('default', x.id)).map((x) => name(x.id));
     const grid = el('div', 'pv-rates');
-    const fields = [['rtBase', T().rBase], ['rtKm', T().rKm], ['rtMin', T().rMin], ['rtMinF', T().rMinFare]].map(([id, label]) => { const d = el('div'); d.append(...field(id, label, '', { max: 5, tel: true })); return d; });
-    grid.append(...fields);
-    const fillForm = () => { const r = rates?.[sel.value] || RM.DEFAULT_RATES[sel.value]; const set = (id, x) => { const i = grid.querySelector(`#${id}`); if (i) i.value = num(x); };
-      set('rtBase', r.base); set('rtKm', r.perKm); set('rtMin', r.perMin); set('rtMinF', r.minFare); };
-    sel.addEventListener('change', fillForm);
+    grid.append(...[['rtBase', T().rBase], ['rtKm', T().rKm], ['rtMin', T().rMin], ['rtMinF', T().rMinFare]].map(([id, label]) => { const d = el('div'); d.append(...field(id, label, '', { max: 5, tel: true })); return d; }));
+    const which = el('p', 'small');
+    const fillForm = () => {
+      rateDistrict = dsel.value;
+      const own = has(rateDistrict, sel.value), base = has('default', sel.value);
+      const r = own || base || RM.DEFAULT_RATES[sel.value];
+      which.textContent = own ? T().rateOwn : rateDistrict !== 'default' && base ? T().rateFromCountry : T().rateNotSet;
+      const set = (id, x) => { const i = grid.querySelector(`#${id}`); if (i) i.value = num(x); };
+      set('rtBase', r.base); set('rtKm', r.perKm); set('rtMin', r.perMin); set('rtMinF', r.minFare);
+    };
+    dsel.addEventListener('change', fillForm); sel.addEventListener('change', fillForm);
+    // every stored rate, as a table
+    const table = el('div', 'rows pv-ratetable');
+    for (const r of (rateTable || []).slice().sort((a, b) => (a.district === 'default' ? -1 : 0) - (b.district === 'default' ? -1 : 0) || a.district.localeCompare(b.district) || a.serviceType.localeCompare(b.serviceType))) {
+      const row = el('div', 'r near-row'); const sq = el('span', 'cat-ic sm'); sq.append(icon(TYPE_IC[r.serviceType] || 'car', { size: 'sm' }));
+      const b = el('div');
+      b.append(el('div', 't', `${name(r.serviceType)} · ${r.district === 'default' ? T().wholeCountry : (ctx.near.districts().find((d) => d.key === r.district)?.[ctx.lang()] || r.district)}`),
+        el('div', 'm', fill(T().rateLine, { base: num(r.base), km: num(r.perKm), min: num(r.perMin), mf: num(r.minFare) })));
+      row.append(sq, b); table.append(row);
+    }
     const rc = card(el('p', 'eyebrow', T().admin), el('h2', null, T().ratesTitle),
       missing.length ? note(fill(T().missingRates, { list: missing.join(', ') })) : null,
-      l, sel, grid, pills(btn('btn solid', T().saveRates, null, () => act('rates')), btn('btn ghost', T().sampleRates, null, () => act('defaults'))),
-      el('p', 'small', T().ratesNote), msgBox());
+      dl, dsel, l, sel, which, grid,
+      pills(btn('btn solid', T().saveRates, null, () => act('rates')), btn('btn ghost', T().sampleRates, null, () => act('defaults'))),
+      el('p', 'small', T().ratesNote), msgBox(),
+      el('h3', null, fill(T().allRates, { n: num((rateTable || []).length) })), rateTable ? table : el('div', 'skeleton'));
     queueMicrotask(fillForm);
-    return [ap, rc];
+    // live shares whose time is over (the rules let an admin list and delete only those)
+    const sh = card(el('p', 'eyebrow', T().admin), el('h2', null, T().sharesTitle), el('p', 'muted', T().sharesText),
+      pills(btn('btn', T().cleanShares, null, () => act('clean'))));
+    return [ap, rc, sh];
   }
 
   return {
