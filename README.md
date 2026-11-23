@@ -8,7 +8,7 @@ works on cheap phones, the emergency part works offline.**
 
 > B1 Capstone Project · Team: Israt Jerin (lead: planning, data and backend) and Tasmin Toshi (frontend and testing)
 > Documents: SRS (coming, in `docs/srs/`) · [Journal](JOURNAL.md) · [Project brief](docs/PROJECT_BRIEF.md) ·
-> [From demo to the real site: the plan](docs/plans/DEMO_TO_REAL_PLAN.md) · Notion: _(add link)_
+> > [From demo to the real site: the plan](docs/plans/DEMO_TO_REAL_PLAN.md) · Notion: [SafeConnect Journal](https://app.notion.com/p/421039f69acf80cd9fc5c42e309e6fdf?v=421039f69acf80f5a330000caf0c617c&source=copy_link)
 
 ## The problem
 Bangladesh has official help (999, police, UNO, health complexes, union parishads) and local services (CNG, ambulance,
