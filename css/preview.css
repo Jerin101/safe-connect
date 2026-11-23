@@ -630,3 +630,18 @@ main[data-page="home"] .feed { max-width: 900px; width: 100%; margin-inline: aut
 #sosLines h3 { margin: 6px 0 0; font-size: 1rem; }
 .sos-area-near { display: grid; gap: 10px; }
 
+/* লাইভ লোকেশন শেয়ার and the family view (SRS PR-2) */
+#live { display: grid; gap: 14px; max-width: 900px; padding-block: 16px; }
+#live .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 10px; min-width: 0; }
+#live h2 { margin: 0; font-size: 1.15rem; }
+#live label { font-weight: 600; font-size: 0.92rem; }
+#live input, #live select { width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); color: var(--ink); padding: 10px 12px; font: inherit; }
+#live input[aria-invalid="true"] { border: 2px solid var(--danger); }
+.live-on { margin: 0; font-weight: 700; color: var(--ok); }
+.live-link { overflow-wrap: anywhere; color: var(--muted); }
+.live-map { height: 52vh; }
+.live-map[hidden] { display: none; }
+.bill > div.warn b, .bill > div.warn span { color: var(--danger); }
+.home-live { display: grid; gap: 10px; }
+.sos-live { justify-self: start; margin-top: 8px; }
+
