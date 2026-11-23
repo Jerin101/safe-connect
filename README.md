@@ -3,9 +3,8 @@
 **Everyday local help for Bangladesh: find what you need nearby, call a vehicle or a helper and see each other on a
 live map with a fair bill, report local problems, and reach the right official numbers in an emergency. Bangla first,
 works on cheap phones, the emergency part works offline.**
-
 🌐 **Live site:** https://jerin101.github.io/safe-connect/ (everything below is on the live site)
-
+🚀 **Vercel mirror:** https://safe-connect-phi.vercel.app/
 > B1 Capstone Project · Team: Israt Jerin (lead: planning, data and backend) and Tasmin Toshi (frontend and testing)
 > Documents: SRS (coming, in `docs/srs/`) · [Journal](JOURNAL.md) · [Project brief](docs/PROJECT_BRIEF.md) ·
 > [From demo to the real site: the plan](docs/plans/DEMO_TO_REAL_PLAN.md) · Notion: _(add link)_
