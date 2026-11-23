@@ -998,9 +998,11 @@ function makeNear() {
     provideTexts: () => LANG[lang].page.provide,
     signIn: (button) => auth.tap(button),
     pickArea,
+    officialRows: (a) => { const p = pilotPlace(a); if (!p) return null; try { return firstRows(p, areaContacts(data, p)); } catch { return null; } },
+    shareRide: (commute) => live.shareRide(commute),   // "পরিবারকে লাইভ দেখান" (SRS FR12)
   });
   live = initLive({
-    el, store, digits, near, lang: () => lang, toast: showToast,
+    el, store, digits, near, go, lang: () => lang, toast: showToast,
     texts: () => LANG[lang].page.live,
     people: () => getPeople(),
     signIn: (button) => auth.tap(button),

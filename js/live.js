@@ -21,6 +21,7 @@ export function initLive(ctx) {
   // the family view
   let trackUnsub = null, map = null, marker = null, tickTimer = null;
   let view = null;
+  let pendingCommute = null;                   // from সেবা ডাকুন: the ride's vehicle and destination
 
   const load = async () => { if (!TR) TR = await import('./track.js'); if (!FB) FB = await import('./firebase.js'); return [FB, TR]; };
   const btn = (cls, text, ic, onClick) => { const b = el('button', cls, text); b.type = 'button'; if (ic) b.prepend(icon(ic, { size: 'sm' })); if (onClick) b.addEventListener('click', onClick); return b; };
@@ -59,7 +60,8 @@ export function initLive(ctx) {
     }
     const start = btn('btn solid big', T().start, 'locate', startShare);
     const commute = btn('btn', T().safeCommute, 'car', () => say(T().startFirst));   // UC-11 5.2
-    view.replaceChildren(head, card(el('h2', null, T().howLong), opts, start, el('p', 'small', T().privacy), msg(), pills(commute)));
+    const ride = pendingCommute ? note(fill(T().fromRide, { v: [pendingCommute.vehicleNo, pendingCommute.destination].filter(Boolean).join(' → ') })) : null;
+    view.replaceChildren(head, card(el('h2', null, T().howLong), ride, opts, start, el('p', 'small', T().privacy), msg(), pendingCommute ? null : pills(commute)));
   }
   async function startShare() {
     const [fb, tr] = await load();
@@ -69,7 +71,10 @@ export function initLive(ctx) {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const id = tr.newShareId();
       try {
-        await fb.startShare(id, minutes, tr.pointFrom(pos.coords, battery?.level));
+        const commute = pendingCommute && tr.plateOk(pendingCommute.vehicleNo) ? pendingCommute : pendingCommute ? { vehicleType: pendingCommute.vehicleType, ...(pendingCommute.destination ? { destination: pendingCommute.destination } : {}) } : {};
+        if (commute.destination && !tr.destinationOk(commute.destination)) delete commute.destination;
+        await fb.startShare(id, minutes, tr.pointFrom(pos.coords, battery?.level), commute);
+        pendingCommute = null;
         share = { id, expiresAt: Date.now() + minutes * 60000 };
         store.set(KEY, JSON.stringify({ id, expiresAt: share.expiresAt }));
         last = pos.coords; lastSent = Date.now();
@@ -207,6 +212,8 @@ export function initLive(ctx) {
 
   return {
     show, track, close: closeTrack,
+    // from a ride (সেবা ডাকুন): open #/live with the vehicle and destination ready; the person taps Start
+    shareRide(commute) { pendingCommute = commute; minutes = 60; ctx.go('live'); },
     active: () => !!share,
     title: (page) => (page === 'track' ? T().trackTitle : T().title),
   };
