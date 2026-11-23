@@ -618,3 +618,15 @@ main[data-page="home"] .feed { max-width: 900px; width: 100%; margin-inline: aut
 .leaflet-tooltip.mtip::before { display: none; }
 @media (prefers-reduced-motion: reduce) { .mme-pulse { animation: none; } .mveh-rot { transition: none; } }
 
+/* জরুরি সাহায্য (R5, #267): the big 999, "এখন যা করবেন", area numbers, helplines by need */
+.sos-call { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; padding: 14px 16px; margin-bottom: 14px;
+  border-radius: var(--r); background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: var(--on-color); text-decoration: none; box-shadow: var(--shadow); }
+.sos-call b { display: block; font-size: 1.25rem; }
+.sos-call small { display: block; opacity: 0.92; }
+.sos-ring { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.18); }
+.sos-steps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+#sitSteps, #sosArea, #sosLines { display: grid; gap: 10px; }
+#sitSteps[hidden] { display: none; }
+#sosLines h3 { margin: 6px 0 0; font-size: 1rem; }
+.sos-area-near { display: grid; gap: 10px; }
+

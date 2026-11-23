@@ -11,6 +11,7 @@ import { icon as lineIcon } from './icons.js';
 import { initNear } from './near.js';
 import { initDakun } from './dakun.js';
 import { initProvide } from './provide.js';
+import { initEmergency } from './emergency.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -32,6 +33,7 @@ let data = null, locations = null, current = null, areaIndex = [];
 let near = null;          // categories near the person (js/near.js), created by makeNear() at start-up
 let dakun = null;         // সেবা ডাকুন (js/dakun.js, R3), created by makeNear() too
 let provide = null;       // সেবা দিন (js/provide.js, R4): providers, and approvals and rates for an admin
+let emergency = null;     // জরুরি সাহায্য additions (js/emergency.js, R5)
 let homeState = null;     // home (R2): { a: the area, place: its pilot place for the official numbers, or null }
 let acctOn = false;       // signed in (for the account tab's name)
 let activeTab = 'home'; // header tab that gets aria-current="page"
@@ -914,6 +916,8 @@ function renderMyArea() {
   if (keep && $(keep)) $(keep).focus();
 }
 let toastTimer = 0;
+// জরুরি সাহায্য (R5): the big 999, "এখন যা করবেন", this area's numbers and the helplines by need
+function showEmergency() { emergency?.show({ call: $('sosCall'), sit: sos.situation, steps: $('sitSteps'), area: $('sosArea'), lines: $('sosLines') }); }
 // The pilot place (district key, upazila) of an area from js/near.js, when we have official numbers for it; else null.
 function pilotPlace(a) {
   const key = String(a.district).toLowerCase().replace(/[^a-z]/g, '');
@@ -980,6 +984,12 @@ function makeNear() {
     provideTexts: () => LANG[lang].page.provide,
     signIn: (button) => auth.tap(button),
     pickArea,
+  });
+  emergency = initEmergency({
+    el, digits, go, near, pickArea, lang: () => lang,
+    texts: () => LANG[lang].page.emergency,
+    national: () => data?.national || null,
+    officialRows: (a) => { const p = pilotPlace(a); if (!p) return null; try { return firstRows(p, areaContacts(data, p)); } catch { return null; } },
   });
   provide = initProvide({
     el, store, digits, toast: showToast, near, lang: () => lang,
@@ -1053,7 +1063,7 @@ function renderSituations() {
   $('situations').replaceChildren(...Object.entries(t().sits).map(([k, [label]]) => {
     const b = el('button', 'chip', label); b.type = 'button';
     b.setAttribute('aria-pressed', String(k === sos.situation));
-    b.addEventListener('click', () => { sos.situation = k; sos.edited = false; renderSituations(); refreshMessage(); });
+    b.addEventListener('click', () => { sos.situation = k; sos.edited = false; renderSituations(); refreshMessage(); emergency?.steps($('sitSteps'), k); });
     return b;
   }));
 }
@@ -1250,6 +1260,7 @@ function showSos(pos, askLocation) {
     safe: false, short: sos.short, openedAt: sos.openedAt };
   renderSituations(); renderPeople();
   showView('sos');
+  showEmergency();
   const fresh = pos || (lastFix && Date.now() - lastFix.at < 120000 ? lastFix.pos : null);
   if (fresh) { setSosPos(fresh, lastFix && lastFix.pos === fresh ? lastFix.at : Date.now()); return; }
   if (askLocation) { requestSosLocation(); return; }
@@ -1775,6 +1786,7 @@ $('langBtn').addEventListener('click', () => {
   if (!$('cat').hidden) near.show($('cat'), readHash().slice(1));
   if (!$('dakun').hidden) dakun.show($('dakun'));
   if (!$('provide').hidden) provide.show($('provide'));
+  if (!$('sos').hidden) showEmergency();
   if ($('main').dataset.page === 'home') renderHome();
   if (!$('sos').hidden) { renderOpened(); renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
   auth.setText();
@@ -1813,6 +1825,7 @@ try {
   areaIndex = buildAreaIndex(data);
   renderRecent(); renderStats(); renderPlaces(); renderIconRow(); renderGuides(); renderMyArea();
   if ($('main').dataset.page === 'home') renderHome(); else syncArea();   // the pilot numbers need the data
+  if (!$('sos').hidden) showEmergency();   // the helplines need the data
   autoLoc.resume();                     // only when the person turned it on and the browser allows it
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);

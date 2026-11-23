@@ -257,6 +257,8 @@
       <button class="back" id="sosBack" type="button"></button>
       <h1 class="page-title" id="sosTitle" tabindex="-1"></h1>
     </div>
+    <!-- জরুরি সাহায্য (R5, #267): the big 999 call first; filled by js/emergency.js -->
+    <div id="sosCall"></div>
     <!-- বিপদ বার্তা (#134): opens the messages app with the message ready; the site never sends anything itself. -->
     <section class="bipod">
       <a class="bipod-btn" id="bipodBtn"><span id="bipodLabel"></span><small id="bipodSub"></small></a>
@@ -273,6 +275,8 @@
       <h2 id="sitTitle"></h2>
       <div class="chips" id="situations"></div>
     </section>
+    <!-- "এখন যা করবেন" for the chosen situation (R5) -->
+    <section class="panel glass sos-what" id="sitSteps" aria-labelledby="sitStepsTitle" hidden></section>
     <section class="panel glass" aria-labelledby="locTitle">
       <h2 id="locTitle"></h2>
       <p class="locline" id="sosLoc" role="status"></p>
@@ -313,6 +317,9 @@
         <p class="privacy" id="privacy"></p>
       </div>
     </details>
+    <!-- R5: this area's emergency numbers, then the national helplines by need -->
+    <section class="panel glass" id="sosArea" aria-labelledby="sosAreaTitle"></section>
+    <section class="panel glass" id="sosLines" aria-labelledby="sosLinesTitle"></section>
   </div>
 
   <!-- HELP PAGE FOR THE FAMILY (#/help/<lat>,<lng>,<time>[,<situation>], বিপদ বার্তা #134): everything comes from the address. -->

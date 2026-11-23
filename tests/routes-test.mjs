@@ -90,6 +90,16 @@ for (const hash of ['#/today', '#/near', '#/numbers', '#/sos']) {
     check(`${hash} in ${lang}: tabs say ${LABELS[lang].join(', ')}`, JSON.stringify(got) === JSON.stringify(LABELS[lang]) && (await ev('location.hash')) === hash, JSON.stringify(got));
   }
 }
+// R5 (#267): জরুরি সাহায্য: the big 999, "এখন যা করবেন", this area's numbers, the 19 helplines by need with sources
+await open('#/sos');
+await ev(`localStorage.setItem('sc-lang', 'bn'); localStorage.setItem('sc-near-area', JSON.stringify({ district: 'Sylhet', upazila: 'Sylhet Sadar' })); true`);
+await send('Page.reload'); await waitFor(`document.querySelectorAll('#sosLines .near-row').length > 0`, 15000);
+check('জরুরি সাহায্য: the big 999 call', await ev(`document.querySelector('#sosCall a')?.getAttribute('href') === 'tel:999' && document.getElementById('sosTitle').textContent === 'জরুরি সাহায্য'`));
+check('জরুরি সাহায্য: "এখন যা করবেন" for the situation', await ev(`!document.getElementById('sitSteps').hidden && document.querySelectorAll('#sitSteps li').length >= 3`));
+check('জরুরি সাহায্য: 19 helplines with a source each', await ev(`document.querySelectorAll('#sosLines .near-row').length === 19 && document.querySelectorAll('#sosLines .near-row a[href^="https://"]').length === 19`));
+check('জরুরি সাহায্য: the area numbers (Sylhet: 999 and the nearest police station)', await waitFor(`/কাছের থানা/.test(document.getElementById('sosArea').textContent) && !!document.querySelector('#sosArea a[href="tel:999"]')`, 15000));
+await ev(`[...document.querySelectorAll('#situations button')].find((b) => b.textContent === 'অসুস্থ').click(); true`);
+check('choosing "অসুস্থ" shows its steps and the nearest hospital and pharmacy', await waitFor(`/অসুস্থ/.test(document.getElementById('sitStepsTitle')?.textContent || '') && /কাছের ফার্মেসি/.test(document.getElementById('sitSteps').textContent)`));
 check('no errors on the page', errors.length === 0, errors.slice(0, 3).join(' | '));
 console.log(failed ? `\n${failed} failed` : '\nALL OK');
 process.exit(failed ? 1 : 0);
