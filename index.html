@@ -94,6 +94,8 @@
             <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
           </a>
         </section>
+        <!-- SRS user manual 2: the modules on Home; 999 stays in the header on every page -->
+        <nav class="row-sec home-mods" id="homeMods" aria-label="Modules" data-pages="home"></nav>
         <section class="row-sec home-cats" id="homeCats" aria-labelledby="homeCatsTitle" data-pages="home"></section>
         <section class="row-sec home-nums" id="homeNums" aria-labelledby="homeNumsTitle" data-pages="home"></section>
         <!-- My area (issue #105): "Call these first" for the last area, and the opt-in auto location switch; filled by js/preview.js. -->
@@ -424,6 +426,8 @@
           </button>
           <p class="msg" id="siGMsg" role="alert" hidden></p>
           <p class="or" id="siOr"></p>
+          <!-- SRS FR01: the name is used only for a new account ("নতুন অ্যাকাউন্ট") -->
+          <label class="field"><span id="siNameL"></span><input id="siName" type="text" autocomplete="name" maxlength="60"></label>
           <label class="field"><span id="siEmailL"></span><input id="siEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
           <label class="field"><span id="siPassL"></span><input id="siPass" type="password" autocomplete="current-password"></label>
           <p class="msg" id="siMsg" role="alert" hidden></p>

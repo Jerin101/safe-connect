@@ -645,3 +645,11 @@ main[data-page="home"] .feed { max-width: 900px; width: 100%; margin-inline: aut
 .home-live { display: grid; gap: 10px; }
 .sos-live { justify-self: start; margin-top: 8px; }
 
+/* Home modules (SRS PR-6) */
+.home-mods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 720px) { .home-mods { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.home-mod { display: grid; justify-items: center; gap: 6px; padding: 10px 4px; min-height: 84px; border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.84rem; text-align: center; }
+.home-mod:hover { border-color: var(--accent); }
+.home-mod .cat-ic { width: 40px; height: 40px; border-radius: 12px; }
+

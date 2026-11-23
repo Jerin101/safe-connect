@@ -1743,8 +1743,20 @@ function renderWarm() {
   const title = el('h2', null, P().welcomeTitle); title.id = 'welcomeTitle';
   w.replaceChildren(title, ol, row);
 }
+// Home modules (SRS user manual 2): Nearby, SOS, Directory, Live Location, Dakun, Profile.
+const MODS = [['nearby', 'pin', '#/c'], ['sos', 'alert', '#/sos'], ['directory', 'gov', '#/numbers'], ['live', 'locate', '#/live'], ['dakun', 'car', '#/dakun'], ['profile', 'user', '#/account']];
+function renderMods() {
+  const m = P().mods;
+  $('homeMods').setAttribute('aria-label', m.label);
+  $('homeMods').replaceChildren(...MODS.map(([k, ic, href]) => {
+    const a = el('a', 'home-mod'); a.href = href;
+    const sq = el('span', 'cat-ic'); sq.append(lineIcon(ic));
+    a.append(sq, el('span', null, m[k]));
+    return a;
+  }));
+}
 function renderPage() {
-  renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
+  renderMods(); renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
   renderRail(); renderRoles(); renderMyArea();
   $('findTitle').textContent = P().findTitle; $('areaPageTitle').textContent = P().titles.area; $('guidePageTitle').textContent = P().titles.guide; $('numbersTitle').textContent = P().titles.numbers; $('findText').textContent = P().findText;
   $('numRowTitle').textContent = P().numRow.title;
@@ -1823,8 +1835,10 @@ function toggleTheme() {
   const root = document.documentElement;
   const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
   root.dataset.theme = dark ? 'light' : 'dark';
+  store.set('sc-theme', root.dataset.theme);   // remembered on this phone (SRS FR02, NFR06)
 }
 $('themeBtn').addEventListener('click', toggleTheme);
+{ const th = store.get('sc-theme'); if (th === 'dark' || th === 'light') document.documentElement.dataset.theme = th; }
 
 setText();
 // Sign-in (P45, #73): the account button, the sign-in modal and #/account; help never waits for it.
@@ -1832,6 +1846,7 @@ setText();
 const auth = initAuth({
   $, el, store, fill, digits, lang: () => lang, texts: () => LANG[lang], showView, goHome, openSos, locate, go,
   accountChanged: (on) => { acctOn = on; renderNav(); },
+  toast: showToast,
   people: { get: getPeople, set: setPeople, norm: normPhone, changed: () => { renderHomeSos(); if (!$('sos').hidden) { renderPeople(); renderSend(); } } },
   placeName: (p) => (data && data.docs[p.district] ? { title: placeTitle(p), sub: placeSub(p) } : null),
   autoSwitch,                           // Settings shows the same auto-location switch as home (#105)
