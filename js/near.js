@@ -176,7 +176,9 @@ export function initNear(ctx) {
   // only a place with its own position can be "nearest" or get a pin; the others are listed after it as "in this upazila"
   const exact = (it) => !!(it.pt && !it.pt.approx);
   const rank = (it) => (exact(it) ? 0 : it.pt ? 1 : 2);
-  const distText = (it) => (exact(it) ? dist(it.k) : it.pt ? T().inUpazila : T().noLocation);
+  // SRS FR04: the list shows the approximate road distance (straight line × 1.3, no routing service)
+  const ROAD = 1.3;
+  const distText = (it) => (exact(it) ? `${T().byRoad} ${dist(it.k * ROAD)}` : it.pt ? T().inUpazila : T().noLocation);
   function badge(p) {
     const b = el('span', 'badge', p.source === 'official' ? T().officialList : T().osm);
     b.classList.add(p.source === 'official' ? 'b-ok' : 'b-osm');
@@ -243,12 +245,30 @@ export function initNear(ctx) {
     return catPage(view, cat, a, items, from);
   }
 
+  // SRS FR03 (UC-04): everyday words in Bangla, Banglish or English → the category near the person; nothing → say so
+  function searchBox() {
+    const S = T().search;
+    const f = el('form', 'near-search'); f.setAttribute('role', 'search');
+    const l = el('label', 'sr-only', S.label); l.htmlFor = 'nearSearch';
+    const inp = el('input'); inp.id = 'nearSearch'; inp.type = 'search'; inp.placeholder = S.ph; inp.autocomplete = 'off'; inp.maxLength = 60;
+    const go = el('button', 'btn solid', S.go); go.type = 'submit'; go.prepend(icon('search', { size: 'sm' }));
+    const msg = el('p', 'small near-search-msg'); msg.setAttribute('role', 'status');
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { matchCategory } = await import('./category-words.js');
+      const id = matchCategory(inp.value);
+      if (id) ctx.go(`c/${id}`); else msg.textContent = inp.value.trim() ? S.none : S.empty;
+    });
+    const row = el('div', 'near-search-row'); row.append(inp, go);
+    f.append(l, row, msg);
+    return f;
+  }
   function hub(view) {
     closeMap();
     const a = getArea();
     const head = el('section', 'card');
     const h = el('h1', 'page-title', T().hubTitle); h.id = 'catTitle'; h.tabIndex = -1;
-    head.append(h, el('p', 'muted', T().hubText), areaBar(a, () => ctx.rerender()));
+    head.append(h, el('p', 'muted', T().hubText), searchBox(), areaBar(a, () => ctx.rerender()));
     view.replaceChildren(head, tileGrid());
   }
   function tileGrid() {
@@ -286,9 +306,20 @@ export function initNear(ctx) {
     const mapBox = el('div', 'near-map'); mapBox.setAttribute('role', 'region'); mapBox.setAttribute('aria-label', T().mapLabel);
     const recenter = el('button', 'btn near-recenter', T().nearMe); recenter.type = 'button'; recenter.prepend(icon('locate', { size: 'sm' }));
     recenter.addEventListener('click', () => { if (mapObj) mapObj.setView([from.lat, from.lon], 15); });
-    mapCard.append(mapBox, recenter, el('p', 'small', T().mapNote));
+    // the map loads only after "ম্যাপে দেখুন" (SRS UC-05): Leaflet and the tiles are fetched then
+    mapBox.hidden = true; recenter.hidden = true;
+    let mapOpen = null;
+    const openMap = () => (mapOpen ||= (async () => { showMap.hidden = true; mapBox.hidden = false; recenter.hidden = false;
+      await drawMap(mapBox, from, shown, cat, (it) => ctx.go(`c/${cat.id}/${encodeURIComponent(it.p.id)}`)); })());
+    const showMap = el('button', 'btn solid near-showmap', T().showMap); showMap.type = 'button'; showMap.prepend(icon('pin', { size: 'sm' }));
+    showMap.addEventListener('click', openMap);
+    mapCard.append(showMap, mapBox, recenter, el('p', 'small', T().mapNote));
     const list = el('section', 'card');
-    if (!shown.length) list.append(el('p', 'note', T().empty));
+    if (!shown.length) {   // UC-05 2.1: 999 and the nearest mapped police station, fire station and hospital
+      const alt = el('div', 'near-empty-help');
+      list.append(el('p', 'note', T().empty), alt);
+      homeNums(alt, a, { titleId: 'catEmptyTitle', title: false });
+    }
     else {
       list.append(el('p', 'small', me ? T().fromYou : T().fromCentre));
       const rows = el('div', 'rows');
@@ -304,7 +335,7 @@ export function initNear(ctx) {
         const acts = el('div', 'acts');
         if (exact(it)) {
           const onMap = el('button', 'btn', T().onMap); onMap.type = 'button'; onMap.prepend(icon('pin', { size: 'sm' }));
-          onMap.addEventListener('click', () => { const m = markers[i]; if (!m || !mapObj) return; mapCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); mapObj.setView(m.getLatLng(), 16); m.openPopup(); });
+          onMap.addEventListener('click', async () => { await openMap(); const m = markers[i]; if (!m || !mapObj) return; mapCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); mapObj.setView(m.getLatLng(), 16); m.openPopup(); });
           acts.append(onMap);
         }
         const det = el('button', 'btn solid', T().details); det.type = 'button'; det.addEventListener('click', () => open(it));
@@ -316,7 +347,6 @@ export function initNear(ctx) {
     }
     list.append(el('p', 'small', T().credit));
     view.replaceChildren(backLink(), head, mapCard, list);
-    drawMap(mapBox, from, shown, cat, (it) => ctx.go(`c/${cat.id}/${encodeURIComponent(it.p.id)}`));
   }
 
   /* ---------- এখন কেমন? (SRS FR05, UC-06) and ভুল জানান (FR15, UC-16) on the place page ---------- */
@@ -485,7 +515,7 @@ export function initNear(ctx) {
       const r = el('div', 'r near-row');
       const sq = el('span', 'cat-ic sm'); sq.append(icon(CATS.find((c) => c.id === catId).ic, { size: 'sm' }));
       const body = el('div');
-      body.append(el('div', 't', H[k]), el('div', 'm', best ? `${nameOf(best)} · ${dist(bd)}` : H.notListed));
+      body.append(el('div', 't', H[k]), el('div', 'm', best ? `${nameOf(best)} · ${T().byRoad} ${dist(bd * ROAD)}` : H.notListed));
       r.append(sq, body);
       if (best) {
         const acts = el('div', 'acts');
