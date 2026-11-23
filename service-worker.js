@@ -22,6 +22,8 @@ const FILES = [
   'js/emergency.js',         // জরুরি সাহায্য (R5)
   'js/live.js',              // লাইভ লোকেশন শেয়ার + family view (SRS PR-2)
   'js/track.js',
+  'js/category-words.js',   // everyday-word search, offline (SRS FR03)
+  'js/community.js',        // এখন কেমন? helpers
   'js/ride.js',
   'js/bipod.js',
   'js/prepare.js',

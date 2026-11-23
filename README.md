@@ -4,9 +4,7 @@
 live map with a fair bill, report local problems, and reach the right official numbers in an emergency. Bangla first,
 works on cheap phones, the emergency part works offline.**
 
-🌐 **Live site:** https://jerin101.github.io/safe-connect/
-🧪 **New design with all new features:** https://jerin101.github.io/safe-connect/demo/
-🎬 **Presentation mode (two windows, simulated movement):** https://jerin101.github.io/safe-connect/demo/?sim=1
+🌐 **Live site:** https://jerin101.github.io/safe-connect/ (everything below is on the live site)
 
 > B1 Capstone Project · Team: Israt Jerin (lead: planning, data and backend) and Tasmin Toshi (frontend and testing)
 > Documents: SRS (coming, in `docs/srs/`) · [Journal](JOURNAL.md) · [Project brief](docs/PROJECT_BRIEF.md) ·
@@ -17,25 +15,29 @@ Bangladesh has official help (999, police, UNO, health complexes, union parishad
 pharmacy, mechanic), but finding the right one *for where you are* is hard, and booking a local service has no
 tracking or fair bill. SafeConnect puts both in one Bangla web app.
 
-## Features
-| Area | What a person can do | Where |
+## Features (as in the SRS)
+| SRS | What a person can do | Where on the site |
 |---|---|---|
-| Emergency | 999 first; area police, UNO, health complex, fire; SOS SMS with location; works offline | main site + /demo/ |
-| কাছে (nearby) | 64 districts; 17 categories (hospital, pharmacy, filling station, shop, bazar, ATM, workshop, transport, police/fire, …); distance from you; the map inside the site, closest place in green; "সবচেয়ে কাছের সাহায্য" | /demo/ |
-| ডাকুন (call a service) | CNG, bike, ambulance, technician, helper, and **আনিয়ে দিন** (a rider buys from a shop and brings it); **both sides on a live map**; fare estimate; **bill** (base + km + waiting; for an errand the shop's receipt + delivery), cash, receipt, rating; provider earnings; admin approves providers and sets rates | /demo/ |
-| সমস্যা জানান | report a local problem, "আমিও", status from reported to solved (changed by an admin, with an audit entry) | /demo/ |
-| নিরাপদে পৌঁছানো | a family link that turns red if you have not arrived in time | /demo/ |
-| সেবা | government service guides, 19 national helplines, GD draft for a lost item (police station from the official list) | /demo/ |
-| Accounts | Google / email sign-in; user, volunteer, admin; every admin action in an audit log | main site + /demo/ |
+| FR01, FR02 | Register with name, email and password (or Google); Profile & Settings: name, language saved to the account, light/dark theme remembered | সাইন ইন tab, `#/account` |
+| FR03 | Search with everyday words in Bangla, Banglish or English ("osudher dokan", "teler pump") | the search box, `#/c` |
+| FR04 | Nearby places in all 64 districts, 12 categories, approximate road distance, the nearest in green; the map loads only when tapped | Home, `#/c/<category>` |
+| FR05 | **এখন কেমন?** People say "open / closed / fuel available / shelter open"; older than 6 hours shown as Outdated | every place page |
+| FR06, FR08 | The 19 national helplines by need; the Government Directory of the area by role (police station, UNO, health complex, fire service, union council, village police), each with its official source | জরুরি সাহায্য, `#/numbers` |
+| FR07 | SOS: big 999, situations (danger, followed, accident, medical emergency, lost, harassment with 109), "what to do now", SMS to the family with the location (or the area when there is none) | জরুরি সাহায্য (`#/sos`) |
+| FR09–FR11 | Live location sharing for 15 min / 1 h / 8 h; **Safe Commute** (number plate, vehicle, destination); the family follows on a map at `#/track/<id>` (battery, speed, time left); "I have reached safely" ends it at once | `#/live` |
+| FR12, FR14 | **সেবা ডাকুন**: CNG, easybike, rickshaw, bike, ambulance, van/pickup, repair person, volunteer / blood, buy and bring, collect an order, towing; fare estimate from the district's rate; both sides on a live map; bill, cash, receipt, rating; "never stranded" help when nobody is online; show the ride to the family live | `#/dakun` |
+| FR13 | Provider panel: apply, go online, take calls, the bill, earnings | সেবা দিন (`#/provide`) |
+| FR15 | Report a wrong number or detail, or ask to add a missing place, in any district | place pages, area pages |
+| FR16 | Admin: approve or reject providers, fare rates per district, delete expired live shares, users and roles, reports, audit log | সেবা দিন, `#/account` |
 
-The new design and features move from `/demo/` to the main site step by step (A1–A13 in
-[the plan](docs/plans/DEMO_TO_REAL_PLAN.md)); A1 (the teal look and the icon set) is done.
+The emergency part (999, the area's numbers, helplines, SOS message) works with no internet.
 
 ## How it works (system design in short)
 - **Frontend:** static HTML, CSS and JavaScript modules, no framework, no build step; GitHub Pages; service worker for offline.
 - **Backend:** Firebase Authentication + Cloud Firestore (free Spark plan). There is no server code: the **Firestore
   security rules** ([`firestore.rules`](firestore.rules)) decide who may read or write what, in which order, how often,
   and that a bill matches the rates.
+- **Live sharing:** `live_shares/{id}` with a long random id (only people with the link can read it), at most 8 hours, deleted at once when the person arrives.
 - **Ride states:** requested → accepted → arrived → on_trip → completed → paid (or cancelled). Live positions only for
   the two people of a ride, from acceptance to the end of the ride, deleted at the end; stored pickup and destination
   points are rounded to about 100 m; online providers store no position.
@@ -55,20 +57,22 @@ The new design and features move from `/demo/` to the main site step by step (A1
 ```
 git clone https://github.com/Jerin101/safe-connect.git
 cd safe-connect
-python -m http.server 8000      # then open http://localhost:8000/  and  http://localhost:8000/demo/
+python -m http.server 8000      # then open http://localhost:8000/
 ```
 
 ## Tests
-- `npm ci` then `npm run test:rules`: 155 Firestore security-rule tests in the emulator (required on every pull request).
-- `python tools/validate_data.py data` (data validator), `node --test tests/design/contrast-test.mjs` (colour contrast),
-  `node --test tests/locations/upazila-shapes-test.mjs`, and the Chrome-based width check `tests/width-sweep.mjs`
-  (320–1440 px, Bangla/English, light/dark). See [`tests/README.md`](tests/README.md).
+- `npm ci` then `npm run test:rules`: 154 Firestore security-rule tests in the emulator (required on every pull request).
+- `node --test tests/bipod-test.mjs tests/partial-load-test.mjs tests/category-words-test.mjs tests/pwa-test.mjs`
+  (SMS, data loading, everyday-word search, installable offline app).
+- `python tools/validate_data.py data` (data validator, incl. district/upazila slugs) and `python -m unittest discover -s tests/places_data`.
+- Chrome-based page tests: `tests/routes-test.mjs`, `tests/near-test.mjs`, `tests/dakun-test.mjs`, `tests/autoloc-test.mjs`,
+  and the width check `tests/width-sweep.mjs` (320–1440 px, Bangla/English, light/dark). See [`tests/README.md`](tests/README.md).
 
 ## Team and contributions
 | Member | GitHub | Role | Main contributions |
 |---|---|---|---|
 | Israt Jerin | [@jerin101](https://github.com/jerin101) | Lead: planning, data, backend, Firebase/Firestore, reviews and merges | Plans and system design (#64, #187, #240); data pipeline and places for 64 districts (#217, #220, #224); official fuel lists (#227, #232); Firestore rules and ডাকুন (#236, #243, #250); map and design (#244, #246) |
-| Tasmin Toshi | [@tasmintoshi](https://github.com/tasmintoshi) | Frontend, testing, UI/UX | Reviewed and merged #166, #187, #240 and #250. Next: the frontend steps of the plan from A2 on (app shell, pages, ডাকুন and সমস্যা on the main site), testing, SRS diagrams |
+| Tasmin Toshi | [@tasmintoshi](https://github.com/tasmintoshi) | Frontend, testing, UI/UX | Reviewed and merged #166, #187, #240 and #250; the frontend pull requests of the real site from her account: home and tabs, categories, ডাকুন, সেবা দিন, জরুরি সাহায্য (#269–#296), and the SRS pull requests PR-1 to PR-8 (#287–#296); testing; SRS diagrams |
 
 Day-by-day work: [`JOURNAL.md`](JOURNAL.md).
 
