@@ -20,6 +20,8 @@ const FILES = [
   'js/dakun.js',             // সেবা ডাকুন (R3)
   'js/provide.js',           // সেবা দিন (R4)
   'js/emergency.js',         // জরুরি সাহায্য (R5)
+  'js/live.js',              // লাইভ লোকেশন শেয়ার + family view (SRS PR-2)
+  'js/track.js',
   'js/ride.js',
   'js/bipod.js',
   'js/prepare.js',

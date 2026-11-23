@@ -12,6 +12,7 @@ import { initNear } from './near.js';
 import { initDakun } from './dakun.js';
 import { initProvide } from './provide.js';
 import { initEmergency } from './emergency.js';
+import { initLive } from './live.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -34,6 +35,7 @@ let near = null;          // categories near the person (js/near.js), created by
 let dakun = null;         // সেবা ডাকুন (js/dakun.js, R3), created by makeNear() too
 let provide = null;       // সেবা দিন (js/provide.js, R4): providers, and approvals and rates for an admin
 let emergency = null;     // জরুরি সাহায্য additions (js/emergency.js, R5)
+let live = null;          // লাইভ লোকেশন শেয়ার and the family view (js/live.js, SRS PR-2)
 let homeState = null;     // home (R2): { a: the area, place: its pilot place for the official numbers, or null }
 let acctOn = false;       // signed in (for the account tab's name)
 let activeTab = 'home'; // header tab that gets aria-current="page"
@@ -430,9 +432,10 @@ function renderArea() {
 /* ---------- views ---------- */
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see index.html).
 function showView(name) {
-  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat', 'dakun', 'provide']) $(view).hidden = name !== view;
+  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat', 'dakun', 'provide', 'live']) $(view).hidden = name !== view;
   if (name !== 'cat') near?.close();   // the category map is closed when another page opens
   if (name !== 'dakun') dakun?.close();
+  if (name !== 'live') live?.close();   // the family map stops listening; an active share keeps sending
   // One sidebar for home and the area page (#108): it moves with the view; CSS shows it only on wide screens.
   const rail = $('rail');
   // After the content (999 first for keyboards and screen readers); CSS puts it on the left.
@@ -494,7 +497,7 @@ function goHome() {
 // #/ home · #/numbers · #/area (search) · #/area/<district>/<upazila>[/<union or town>[/<place id>]] · #/send
 // #/guide · #/about · #/faq · #/account · #/help/<lat>,<lng>,<time>[,<situation>] (বিপদ বার্তা, #134). Anything else opens home. The home sections carry data-pages="..."
 // in index.html: each page shows the sections that list its name, so no content or id is copied.
-const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare', 'c', 'dakun', 'provide'];
+const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare', 'c', 'dakun', 'provide', 'live', 'track'];
 const HEADING = { home: 'homeTitle', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
 let firstRoute = true;       // the first page after loading does not move focus
@@ -613,6 +616,17 @@ async function route() {
     if (location.hash !== at) return;
     finish('dakun', () => dakun.title(), 'dakunTitle', intent);
     syncArea();
+    return;
+  }
+  if (name === 'live' || name === 'track') {
+    // SRS FR09-FR11: #/live shares this phone's location; #/track/<id> is the family view (no sign-in)
+    $('main').dataset.page = name;
+    showView('live');
+    activeTab = name === 'live' ? 'send' : null; markTab();
+    const at = location.hash;
+    if (name === 'live') await live.show($('live')); else await live.track($('live'), rest[0]);
+    if (location.hash !== at) return;
+    finish(name === 'live' ? 'send' : null, () => live.title(name), name === 'live' ? 'liveTitle' : 'trackTitle', intent);
     return;
   }
   if (name === 'provide') {
@@ -984,6 +998,12 @@ function makeNear() {
     provideTexts: () => LANG[lang].page.provide,
     signIn: (button) => auth.tap(button),
     pickArea,
+  });
+  live = initLive({
+    el, store, digits, near, lang: () => lang, toast: showToast,
+    texts: () => LANG[lang].page.live,
+    people: () => getPeople(),
+    signIn: (button) => auth.tap(button),
   });
   emergency = initEmergency({
     el, digits, go, near, pickArea, lang: () => lang,
@@ -1746,6 +1766,7 @@ function setText() {
   $('shareTitle').textContent = s.shareTitle; $('shareText').textContent = s.shareText;
   $('firstTitle').textContent = s.first; $('firstCalm').textContent = s.firstCalm; $('moreTitle').textContent = s.more;
   $('sosBtnTitle').textContent = s.sosBtn;
+  { const L = P().live; $('liveBtnTitle').textContent = L.homeBtn; $('liveBtnSub').textContent = L.homeSub; $('sosLiveLink').textContent = L.homeBtn; }
   $('sosBack').textContent = s.back; $('sosTitle').textContent = s.sosTitle;
   $('sitTitle').textContent = s.sit; $('locTitle').textContent = s.loc; $('sendTitle').textContent = s.send; $('msgTitle').textContent = s.msgT;
   $('smsHint').textContent = s.smsHint; $('peopleTitle').textContent = s.people;
@@ -1786,6 +1807,7 @@ $('langBtn').addEventListener('click', () => {
   if (!$('cat').hidden) near.show($('cat'), readHash().slice(1));
   if (!$('dakun').hidden) dakun.show($('dakun'));
   if (!$('provide').hidden) provide.show($('provide'));
+  if (!$('live').hidden) route();
   if (!$('sos').hidden) showEmergency();
   if ($('main').dataset.page === 'home') renderHome();
   if (!$('sos').hidden) { renderOpened(); renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }

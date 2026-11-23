@@ -87,6 +87,12 @@
             <span><strong id="sosBtnTitle"></strong><small id="sosBtnSub"></small></span>
             <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
           </button>
+          <!-- SRS FR09: live location sharing (js/live.js) -->
+          <a class="act glass violet live-big" id="liveBtn" href="#/live">
+            <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg></span>
+            <span><strong id="liveBtnTitle"></strong><small id="liveBtnSub"></small></span>
+            <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
+          </a>
         </section>
         <section class="row-sec home-cats" id="homeCats" aria-labelledby="homeCatsTitle" data-pages="home"></section>
         <section class="row-sec home-nums" id="homeNums" aria-labelledby="homeNumsTitle" data-pages="home"></section>
@@ -220,6 +226,7 @@
   <div class="wrap page" id="cat" hidden></div>
   <div class="wrap page" id="dakun" hidden></div>
   <div class="wrap page" id="provide" hidden></div>
+  <div class="wrap page" id="live" hidden></div>
   <div class="wrap page" id="area" hidden>
     <!-- Wide screens: the home sidebar (My area, filter) is moved in here by js/preview.js, so both pages share one layout (#108). -->
     <div class="area-main">
@@ -270,6 +277,7 @@
         <details class="live" id="liveBox"><summary id="liveTitle"></summary><div class="live-body" id="liveBody"></div></details>
       </div>
       <a class="linkbtn prep-link" id="prepLink" href="#/prepare"></a>
+      <a class="btn violet sos-live" id="sosLiveLink" href="#/live"></a>
     </section>
     <section class="panel glass" aria-labelledby="sitTitle">
       <h2 id="sitTitle"></h2>

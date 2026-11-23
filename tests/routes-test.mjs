@@ -50,7 +50,7 @@ const CASES = [
   ['', '#/today', 'home', 'home'], ['#/', '#/today', 'home', 'home'], ['#/home', '#/today', 'home', 'home'], ['#/today', '#/today', 'home', 'home'],
   ['#/area', '#/near', 'area', 'home'], ['#/near', '#/near', 'area', 'home'],
   ['#/send', '#/sos', 'send', 'send'], ['#/sos', '#/sos', 'send', 'send'],
-  ['#/numbers', '#/numbers', 'numbers', 'home'], ['#/account', '#/account', 'account', 'account'], ['#/dakun', '#/dakun', 'dakun', 'dakun'], ['#/provide', '#/provide', 'provide', 'account'],
+  ['#/numbers', '#/numbers', 'numbers', 'home'], ['#/account', '#/account', 'account', 'account'], ['#/dakun', '#/dakun', 'dakun', 'dakun'], ['#/provide', '#/provide', 'provide', 'account'], ['#/live', '#/live', 'live', 'send'],
   ['#/guide', '#/guide', 'guide', null], ['#/about', '#/about', 'about', null], ['#/faq', '#/faq', 'faq', null], ['#/prepare', '#/prepare', 'prepare', null],
   ['#/area/noakhali/hatiya', '#/area/noakhali/hatiya', 'place', 'home'], ['#/c', '#/c', 'cat', 'home'], ['#/c/pharmacy', '#/c/pharmacy', 'cat', 'home'],
   ['#/help/22.29580,91.10660,1793624400,followed', '#/help/22.29580,91.10660,1793624400,followed', 'help', null],
@@ -100,6 +100,15 @@ check('জরুরি সাহায্য: 19 helplines with a source each', 
 check('জরুরি সাহায্য: the area numbers (Sylhet: 999 and the nearest police station)', await waitFor(`/কাছের থানা/.test(document.getElementById('sosArea').textContent) && !!document.querySelector('#sosArea a[href="tel:999"]')`, 15000));
 await ev(`[...document.querySelectorAll('#situations button')].find((b) => b.textContent === 'অসুস্থ').click(); true`);
 check('choosing "অসুস্থ" shows its steps and the nearest hospital and pharmacy', await waitFor(`/অসুস্থ/.test(document.getElementById('sitStepsTitle')?.textContent || '') && /কাছের ফার্মেসি/.test(document.getElementById('sitSteps').textContent)`));
+// SRS PR-2: live sharing needs sign-in; a wrong or ended link says so; home has the live-sharing button
+await open('#/live');
+check('#/live signed out: sign-in first (UC-10 2.1)', await waitFor(`/সাইন ইন লাগে/.test(document.getElementById('live').textContent) && !!document.querySelector('#live button.btn.solid')`, 15000));
+await open('#/track/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+check('#/track with an unknown id: "শেয়ার শেষ হয়েছে বা লিংকের মেয়াদ শেষ" (UC-12 3.1)', await waitFor(`/শেয়ার শেষ হয়েছে/.test(document.getElementById('live').textContent) && document.getElementById('main').dataset.page === 'track'`, 20000));
+await open('#/track/bad');
+check('#/track with a malformed id: ended message, no request', await waitFor(`/শেয়ার শেষ হয়েছে/.test(document.getElementById('live').textContent)`));
+await open('#/today');
+check('home: the "লাইভ লোকেশন শেয়ার" button opens #/live', await ev(`document.getElementById('liveBtn').getAttribute('href') === '#/live' && document.getElementById('liveBtnTitle').textContent === 'লাইভ লোকেশন শেয়ার'`));
 check('no errors on the page', errors.length === 0, errors.slice(0, 3).join(' | '));
 console.log(failed ? `\n${failed} failed` : '\nALL OK');
 process.exit(failed ? 1 : 0);
