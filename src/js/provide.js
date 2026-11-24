@@ -18,6 +18,7 @@ export function initProvide(ctx) {
   const fill = (s, v) => String(s).replace(/\{(\w+)\}/g, (all, k) => (k in v ? v[k] : all));
   let RM = null, HP = null, FBM = null;
   let view = null, here = null, user = null, prov, isAdm = false, pend = null, rates = null;
+  let ovUnsub = null, allRides = [], ovMap = null, reqMap = null;
   let reqs = [], reqUnsub = null, myJobs = null, online = false, onlineTimer = null;
   let job = null, jobUnsub = null, liveUnsub = null, other = null, mine = null, geoId = null, lastSent = null, track = null, itemsDraft = '';
 
@@ -68,6 +69,7 @@ export function initProvide(ctx) {
       prov = await fb.myProvider();
       if (!rates) { try { rates = await fb.readRates(prov?.district); } catch { rates = {}; } }
       isAdm = (await fb.roleOf(user, ctx.lang())) === 'admin';
+      if (isAdm && !ovUnsub) ovUnsub = fb.watchAllRides((l) => { allRides = l; paintOverview(); }, () => {});
       if (isAdm) { try { pend = await fb.pendingProviders(); } catch { pend = []; } try { rateTable = await fb.readRateTable(); } catch { rateTable = []; } }
       if (prov?.approved) {
         if (!reqUnsub) reqUnsub = fb.watchRequests(prov, (list) => { reqs = list; paintReqs(); }, (e) => { const b = view?.querySelector('.pv-reqs'); if (b) b.replaceChildren(el('p', 'note', errText(e))); });
@@ -80,7 +82,7 @@ export function initProvide(ctx) {
   }
   function paint(head) {
     if (!view?.isConnected) return;
-    destroyJobMap();
+    destroyJobMap(); destroyOvMap(); destroyReqMap();
     head = head || view.querySelector('section.card');
     const parts = [head];
     if (prov === null) parts.push(applyCard());
@@ -100,14 +102,17 @@ export function initProvide(ctx) {
         if (job.status !== 'completed') { const mb = el('div', 'near-map pv-map'); mb.setAttribute('role', 'region'); mb.setAttribute('aria-label', T().route); jp.append(mb); setTimeout(() => mountJobMap(mb), 0); }
         parts.push(card(el('p', 'eyebrow', T().nowJob), jp));
       } else {
-        const rb = el('div', 'pv-reqs');
-        parts.push(card(el('h2', null, T().newCalls), rb, msgBox()));
+        const rb = el('div', 'pv-reqs'), rm = el('div', 'near-map pv-map rq-map'); rm.hidden = true; rm.setAttribute('role', 'region'); rm.setAttribute('aria-label', T().callsMap);
+        parts.push(card(el('h2', null, T().newCalls), rm, rb, msgBox()));
       }
       parts.push(card(el('h2', null, T().earnings), earnBox()));
     }
     if (isAdm) parts.push(...adminCards());
     view.replaceChildren(...parts);
-    paintReqs();
+    paintReqs(); paintOverview();
+    const ob = view.querySelector('.ov-map'), rb2 = view.querySelector('.rq-map');
+    if (ob) setTimeout(() => mountMap(ob, (m) => { ovMap = m; paintOverview(); }), 0);
+    if (rb2) setTimeout(() => mountMap(rb2, (m) => { reqMap = m; paintReqs(); }), 0);
   }
 
   /* ---------- apply ---------- */
@@ -124,10 +129,13 @@ export function initProvide(ctx) {
   /* ---------- open calls ---------- */
   function paintReqs() {
     const box = view?.querySelector('.pv-reqs'); if (!box) return;
-    if (!reqs.length) { box.replaceChildren(el('p', 'muted', T().noCalls)); return; }
     const from = mine || (here ? { lat: here.lat, lon: here.lon } : null);
+    const mapEl = view?.querySelector('.rq-map'); if (mapEl) mapEl.hidden = !reqs.length;
+    if (!reqs.length) { box.replaceChildren(el('p', 'muted', T().noCalls)); return; }
+    const sorted = from ? [...reqs].sort((x, y) => RM.metres(from, x.pickup) - RM.metres(from, y.pickup)) : reqs;   // nearest first
+    if (reqMap) reqMap.update({ you: from, pins: sorted.map((r) => ({ lat: r.pickup.lat, lon: r.pickup.lon, label: r.pickup.label })), labels: { you: T().meLabel } });
     const rows = el('div', 'rows');
-    for (const r of reqs) {
+    for (const r of sorted) {
       const row = el('div', 'r near-row'); const sq = el('span', 'cat-ic sm'); sq.append(icon(TYPE_IC[r.type] || 'car'));
       const b = el('div');
       b.append(el('div', 't', `${r.pickup.label}${r.drop ? ' → ' + r.drop.label : ''}`),
@@ -333,7 +341,36 @@ export function initProvide(ctx) {
 
   /* ---------- admin: approvals, rates per district, expired shares ---------- */
   let rateTable = null, rateDistrict = 'default';
+  // admin overview: today's numbers and where the active rides are, live (the rules let only an admin read all rides)
+  function destroyOvMap() { if (ovMap) { ovMap.destroy(); ovMap = null; } }
+  function destroyReqMap() { if (reqMap) { reqMap.destroy(); reqMap = null; } }
+  async function mountMap(box, set) {
+    if (!navigator.onLine) { box.replaceChildren(el('p', 'note', T().mapOff)); return; }
+    let L; try { L = await ctx.near.loadLeaflet(); } catch { box.replaceChildren(el('p', 'note', T().mapOff)); return; }
+    if (!box.isConnected) return;
+    set(createLiveMap(L, box, { el }));
+  }
+  function paintOverview() {
+    const box = view?.querySelector('.ov-box'); if (!box) return;
+    const day = new Date(); day.setHours(0, 0, 0, 0); const t0 = day.getTime();
+    const today = allRides.filter((r) => (r.createdAt || 0) >= t0);
+    const waiting = allRides.filter((r) => r.status === 'requested'), active = allRides.filter((r) => RM.LIVE.includes(r.status));
+    const done = today.filter((r) => ['completed', 'paid'].includes(r.status)), cancelled = today.filter((r) => r.status === 'cancelled');
+    const money = today.filter((r) => r.status === 'paid').reduce((x, r) => x + (r.fare || 0), 0);
+    const stat = (n, label) => { const d = el('div', 'ov-stat'); d.append(el('b', null, num(n)), el('span', null, label)); return d; };
+    const O = T().ov, stats = el('div', 'ov-stats');
+    stats.append(stat(waiting.length, O.waiting), stat(active.length, O.active), stat(done.length, O.done), stat(cancelled.length, O.cancelled), stat(money, O.money), stat((pend || []).filter((p) => !p.rejected).length, O.pending));
+    const rows = el('div', 'rows');
+    for (const r of [...waiting, ...active].slice(0, 12)) {
+      const row = el('div', 'r near-row'); const sq = el('span', 'cat-ic sm'); sq.append(icon(TYPE_IC[r.type] || 'car', { size: 'sm' }));
+      const b = el('div'); b.append(el('div', 't', `${name(r.type)} · ${O.status[r.status] || r.status}`), el('div', 'm', `${r.pickup.label}${r.providerName ? ` · ${r.providerName}` : ''} · ${r.district}`));
+      row.append(sq, b); rows.append(row);
+    }
+    box.replaceChildren(stats, rows.childElementCount ? rows : el('p', 'muted', O.none));
+    if (ovMap) ovMap.update({ pins: [...waiting, ...active].map((r) => ({ lat: r.pickup.lat, lon: r.pickup.lon, label: `${name(r.type)} · ${O.status[r.status] || r.status}` })) });
+  }
   function adminCards() {
+    const ov = card(el('p', 'eyebrow', T().admin), el('h2', null, T().ov.title), el('div', 'ov-box', null), (() => { const m = el('div', 'near-map pv-map ov-map'); m.setAttribute('role', 'region'); m.setAttribute('aria-label', T().ov.title); return m; })());
     const ap = card(el('p', 'eyebrow', T().admin), el('h2', null, T().waitingApproval));
     const waiting = (pend || []).filter((p) => !p.rejected);
     if (!pend) ap.append(el('div', 'skeleton'));
@@ -391,7 +428,7 @@ export function initProvide(ctx) {
     // live shares whose time is over (the rules let an admin list and delete only those)
     const sh = card(el('p', 'eyebrow', T().admin), el('h2', null, T().sharesTitle), el('p', 'muted', T().sharesText),
       pills(btn('btn', T().cleanShares, null, () => act('clean'))));
-    return [ap, rc, sh];
+    return [ov, ap, rc, sh];
   }
 
   return {

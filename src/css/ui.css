@@ -150,3 +150,11 @@ main[data-page="home"] #iconSrc { display: none; }
 /* short pages: the footer stays at the bottom of the screen */
 body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 body > main { flex: 1 0 auto; }
+
+/* admin overview and driver call map (#309) */
+.ov-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin: 10px 0; }
+.ov-stat { padding: 12px; border-radius: 14px; background: var(--surface-2); text-align: center; }
+.ov-stat b { display: block; font-size: 1.6rem; line-height: 1.2; }
+.ov-stat span { font-size: 0.85rem; }
+.pv-map { height: 40vh; min-height: 260px; margin: 10px 0; }
+.pv-map[hidden] { display: none; }

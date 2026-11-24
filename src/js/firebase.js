@@ -317,6 +317,9 @@ export async function requestRide(fields) {
 export const watchRide = (id, cb, onErr) => onSnapshot(doc(db, 'rides', id), (d) => cb(d.exists() ? asRide(d) : null), onErr);
 export const watchRequests = (p, cb, onErr) => onSnapshot(query(collection(db, 'rides'), where('status', '==', 'requested'),
   where('type', '==', p.type), where('district', '==', p.district), limit(20)), (s) => cb(s.docs.map(asRide)), onErr);
+// Admins only (the rules check it): the 150 newest rides, live, for the admin's overview.
+export const watchAllRides = (cb, onErr) => onSnapshot(query(collection(db, 'rides'), orderBy('createdAt', 'desc'), limit(150)),
+  (s) => cb(s.docs.map(asRide)), onErr);
 // The person's own rides (as rider or as provider), newest first; equality filter only.
 export async function myRides(as = 'rider') {
   const snap = await getDocs(query(collection(db, 'rides'), where(as === 'rider' ? 'riderUid' : 'providerUid', '==', me().uid), limit(50)));

@@ -30,7 +30,7 @@ export function drawRoad(L, map, route, color = '#0B6E73') {
 export function createLiveMap(L, box, { el, tiles = true } = {}) {
   const map = L.map(box, { zoomControl: true, tap: true }).setView([23.7, 90.4], 12);
   if (tiles) L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
-  const marks = {}; let line = null, road = null, fitted = false;
+  const marks = {}, pinGroup = L.layerGroup().addTo(map); let line = null, road = null, fitted = false, lastPins = -1;
   const icons = {
     you: () => L.divIcon({ className: 'mk-wrap', html: el('span', 'mk-me'), iconSize: [22, 22], iconAnchor: [11, 11] }),
     goal: () => L.divIcon({ className: 'mk-wrap', html: el('span', 'mk-pin near'), iconSize: [34, 40], iconAnchor: [17, 38] }),
@@ -43,15 +43,18 @@ export function createLiveMap(L, box, { el, tiles = true } = {}) {
   }
   return {
     map,
-    update({ you, goal, other, labels = {} }) {
+    // pins: [{ lat, lon, label }] extra points (open calls, active rides) shown as pins
+    update({ you, goal, other, pins = [], labels = {} }) {
       put('you', you, labels.you); put('goal', goal, labels.goal); put('other', other, labels.other);
+      pinGroup.clearLayers();
+      for (const q of pins) L.marker([q.lat, q.lon], { icon: icons.other(), keyboard: false, title: q.label || '' }).addTo(pinGroup).bindTooltip(el('span', null, q.label || ''), { direction: 'top', offset: [0, -30] });
       const a = you || other;
       if (line) { line.remove(); line = null; }
       if (a && goal && !road) line = L.polyline([[a.lat, a.lon], [goal.lat, goal.lon]], { color: '#1F7A4F', weight: 4, dashArray: '2 9', lineCap: 'round', interactive: false }).addTo(map);
-      const pts = Object.values(marks).map((m) => m.getLatLng());
-      if (pts.length && (!fitted || !map.getBounds().pad(-0.1).contains(pts[pts.length - 1]))) {
+      const pts = [...Object.values(marks).map((m) => m.getLatLng()), ...pins.map((q) => L.latLng(q.lat, q.lon))];
+      if (pts.length && (!fitted || pins.length !== lastPins || !map.getBounds().pad(-0.1).contains(pts[pts.length - 1]))) {
         if (pts.length > 1) map.fitBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 16, animate: false }); else map.setView(pts[0], 15);
-        fitted = pts.length > 1;
+        fitted = pts.length > 1; lastPins = pins.length;
       }
     },
     showRoad(route) { if (road) road.remove(); if (line) { line.remove(); line = null; } road = drawRoad(L, map, route); },
