@@ -457,7 +457,7 @@ function profileCard() {
   }, 'wsProfileSave');
   return card(w.profileTitle, [l, m], save);
 }
-const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
+const isDark = () => document.documentElement.dataset.theme === 'dark';   // light unless night was picked
 
 const SECTION = {
   dash() {

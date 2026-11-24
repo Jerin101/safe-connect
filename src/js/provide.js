@@ -359,7 +359,7 @@ export function initProvide(ctx) {
       missing.length ? note(fill(T().missingRates, { list: missing.join(', ') })) : null,
       dl, dsel, l, sel, which, grid,
       pills(btn('btn solid', T().saveRates, null, () => act('rates')), btn('btn ghost', T().sampleRates, null, () => act('defaults'))),
-      el('p', 'small', T().ratesNote), msgBox(),
+      msgBox(),
       el('h3', null, fill(T().allRates, { n: num((rateTable || []).length) })), rateTable ? table : el('div', 'skeleton'));
     queueMicrotask(fillForm);
     // live shares whose time is over (the rules let an admin list and delete only those)

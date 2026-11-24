@@ -7,10 +7,10 @@ import { readFileSync } from 'node:fs';
 import { ICONS, icon } from '../../src/js/icons.js';
 
 const css = readFileSync('src/css/base.css', 'utf8');
-// the three colour blocks: day (:root {), night when the phone asks for it, night chosen with the switch
+// the two colour blocks: day (:root {) and night chosen with the switch (UI refresh 24 Nov 2026: the phone's dark mode no
+// longer switches the site; the night is a softer slate-navy)
 const blocks = {
-  day: css.slice(css.indexOf(':root {'), css.indexOf('@media (prefers-color-scheme: dark)')),
-  nightAuto: css.slice(css.indexOf(':root:not([data-theme="light"]) {'), css.indexOf(':root[data-theme="dark"] {')),
+  day: css.slice(css.indexOf(':root {'), css.indexOf(':root[data-theme="dark"] {')),
   nightSwitch: css.slice(css.indexOf(':root[data-theme="dark"] {')),
 };
 const vars = (block) => Object.fromEntries([...block.matchAll(/(--[a-z0-9-]+):\s*(#[0-9A-Fa-f]{6})\s*;/g)].map((m) => [m[1], m[2]]));
@@ -45,8 +45,8 @@ for (const name of Object.keys(blocks)) {
   });
 }
 
-test('both night blocks have the same colours', () => {
-  assert.deepEqual(vars(blocks.nightAuto.slice(0, blocks.nightAuto.indexOf('}'))), vars(blocks.nightSwitch.slice(0, blocks.nightSwitch.indexOf('}'))));
+test('the site is light unless the person picks night (no automatic dark from the phone)', () => {
+  assert.ok(!css.includes('prefers-color-scheme: dark'));
 });
 
 test('the accent colour is teal in day and night', () => {
