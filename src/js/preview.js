@@ -959,6 +959,18 @@ async function syncArea() {
 function refreshHome() { if ($('main').dataset.page === 'home') renderHome(); else { homeState = null; renderMyArea(); } }
 // The header area chip: the area picker on home (all 64 districts).
 function pickArea() { homePick = true; if ($('main').dataset.page === 'home') renderHome(); else go(''); }
+// After "আমার লোকেশন" (a GPS fix less than 10 minutes old): where the phone is right now, with a link to the map.
+// The point only stays in this page's memory (lastFix); it is shown here and never sent anywhere.
+function paintYouHere() {
+  const box = $('homeArea');
+  box.querySelector('.you-here')?.remove();
+  if (!lastFix || Date.now() - lastFix.at > 10 * 60000) return;
+  const T = LANG[lang].page.near, p = lastFix.pos;
+  const a = el('a', null, `${T.openMap} ↗`); a.href = mapsLink(p); a.target = '_blank'; a.rel = 'noopener';
+  const row = el('p', 'small you-here');
+  row.append(el('b', null, `${T.youHere}: `), document.createTextNode(`${digits(p.lat.toFixed(5))}, ${digits(p.lon.toFixed(5))}${p.accuracy ? ` (±${digits(p.accuracy)} ${T.metres})` : ''} · `), a);
+  box.append(row);
+}
 async function renderHome() {
   if (!near) return;
   const run = ++homeRun;
@@ -967,6 +979,7 @@ async function renderHome() {
   const last = lastPlace();
   const place = a ? (last && near.sameUpazila(last, a) ? last : pilotPlace(a)) : null;
   homeState = { a, place };
+  paintYouHere();
   renderMyArea(); renderChip();
   if (homePick) { homePick = false; near.openPicker($('homeArea')); }
   if (a && !place) await near.homeNums($('homeNums'), a); else $('homeNums').replaceChildren();

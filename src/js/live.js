@@ -39,13 +39,21 @@ export function initLive(ctx) {
   /* ---------- the sharer's page ---------- */
   async function show(v) {
     view = v;
-    v.replaceChildren(el('div', 'skeleton'));
-    let fb;
-    // A slow or broken connection must not leave an empty grey box: after 12 s the person sees the "check your connection" note.
-    try { [fb] = await Promise.race([load(), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 12000))]); } catch { v.replaceChildren(card(note(T().err.offline))); return; }
+    // Show the title and "Loading…" at once (Firebase is a big download on a slow phone), never an empty grey box.
+    // If the files or the sign-in check take more than 45 s, say so and offer Retry.
     const h = el('h1', 'page-title', T().title); h.id = 'liveTitle'; h.tabIndex = -1;
     const head = card(h, el('p', 'muted', T().intro));
-    const user = await fb.currentUser();
+    v.replaceChildren(head, card(el('p', 'live-loading', T().loading)));
+    const SLOW = Symbol('slow'), within = (p) => Promise.race([p, new Promise((r) => setTimeout(() => r(SLOW), 45000))]);
+    const failed = () => v.replaceChildren(head, card(note(navigator.onLine ? T().err.generic : T().err.offline), btn('btn solid', T().retry, null, () => show(v))));
+    let fb, user;
+    try {
+      const got = await within(load());
+      if (got === SLOW) return failed();
+      fb = got[0];
+      user = await within(fb.currentUser());
+      if (user === SLOW) return failed();
+    } catch { return failed(); }
     if (!view.isConnected) return;
     // UC-10 2.1: not signed in → sign in first; not verified → verify first
     if (!user) { v.replaceChildren(head, card(note(T().needSignIn), btn('btn solid', T().signIn, 'user', (e) => ctx.signIn(e.currentTarget)))); return; }
