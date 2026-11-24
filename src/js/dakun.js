@@ -263,8 +263,8 @@ export function initDakun(ctx) {
       if (!p) continue;
       const row = el('div', 'r near-row'); const sq = el('span', 'cat-ic sm'); sq.append(icon(cats[0] === 'hospital' ? 'health' : 'bus', { size: 'sm' }));
       const b = el('div'); b.append(el('div', 't', label), el('div', 'm', `${p.name} · ${dist(p.km * 1000)}`));
-      const acts = el('div', 'acts'); const g = el('a', 'btn', T().mapLink); g.href = `https://www.google.com/maps/dir/?api=1&destination=${Number(p.lat)},${Number(p.lon)}`;
-      g.target = '_blank'; g.rel = 'noopener noreferrer'; g.prepend(icon('nav', { size: 'sm' })); acts.append(g);
+      const acts = el('div', 'acts'); const g = el('a', 'btn', T().mapLink); g.href = `#/c/${p.cat}/${encodeURIComponent(p.id)}`;
+      g.prepend(icon('nav', { size: 'sm' })); acts.append(g);
       row.append(sq, b, acts); near.push(row);
     }
     if (near.length) { const rs = el('div', 'rows'); rs.append(...near); kids.push(rs); }

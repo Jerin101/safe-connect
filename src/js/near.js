@@ -5,6 +5,7 @@
 // Everything is built with createElement + textContent; Leaflet loads only when a map is shown.
 import { icon } from './icons.js';
 import { locate } from './geo.js';
+import { roadRoute, drawRoad } from './routemap.js';
 
 export const CATS = [
   { id: 'hospital', ic: 'health', match: (p) => p.category === 'health' && ['hospital', 'clinic', 'doctors'].includes(p.subcategory) },
@@ -82,6 +83,19 @@ export function initNear(ctx) {
       ]).then(([a, b]) => [...a, ...b]).catch((e) => { placeCache.delete(districtEn); throw e; }));
     }
     return placeCache.get(districtEn);
+  }
+  // The public details of the places (phone, hours, fee, facilities): data/details/details_<file>.json, made by
+  // tools/collect_place_details.py from OpenStreetMap. A missing file simply means "no details".
+  const detailCache = new Map();
+  function detailsOf(districtEn) {
+    if (!detailCache.has(districtEn)) {
+      const d = base.districts.find((x) => x.en === districtEn);
+      detailCache.set(districtEn, Promise.all((d ? d.files : []).map((f) => getJSON(`data/details/details_${f}`).catch(() => null)))
+        .then((xs) => { const out = { details: {}, checked: '' };
+          for (const x of xs) if (x) { Object.assign(out.details, x.details); out.checked = x.checked_on || out.checked; }
+          return out; }));
+    }
+    return detailCache.get(districtEn);
   }
   // the centres call a Sadar upazila by the district's name ("Noakhali"), other lists say "Noakhali Sadar" or "Sadar"
   const centreOf = (district, upazila) => {
@@ -224,8 +238,8 @@ export function initNear(ctx) {
       if (!exact(it)) return;     // no position of its own: no pin (it would sit on the area centre)
       const pin = el('span', i === 0 ? 'mk-pin near' : 'mk-pin'); pin.append(icon(cat.ic, { size: 'sm' }));
       const pop = el('div', 'mk-pop');
-      const go = el('button', 'btn solid', T().details); go.type = 'button'; go.addEventListener('click', () => onPick(it));
-      pop.append(el('b', null, nameOf(it.p)), el('span', 'small', `${i === 0 ? T().nearest + ' · ' : ''}${dist(it.k)}`), go);
+      pop.append(el('b', null, nameOf(it.p)), el('span', 'small', `${i === 0 && onPick ? T().nearest + ' · ' : ''}${dist(it.k)}`));
+      if (onPick) { const go = el('button', 'btn solid', T().details); go.type = 'button'; go.addEventListener('click', () => onPick(it)); pop.append(go); }
       const m = L.marker([it.pt.lat, it.pt.lon], { icon: L.divIcon({ className: 'mk-wrap', html: pin, iconSize: [34, 40], iconAnchor: [17, 38], popupAnchor: [0, -34] }),
         title: nameOf(it.p), zIndexOffset: i === 0 ? 1000 : 0 }).addTo(mapObj).bindPopup(pop);
       if (i === 0) m.bindTooltip(el('span', null, T().nearest), { permanent: true, direction: 'top', offset: [0, -34], className: 'mk-tip' });
@@ -325,7 +339,7 @@ export function initNear(ctx) {
     const showMap = el('button', 'btn solid near-showmap', T().showMap); showMap.type = 'button'; showMap.prepend(icon('pin', { size: 'sm' }));
     showMap.addEventListener('click', openMap);
     mapCard.append(showMap, mapBox, recenter, el('p', 'small', T().mapNote));
-    const list = el('section', 'card');
+    const list = el('section', 'card'); const rowParts = [];
     if (!shown.length) {   // UC-05 2.1: 999 and the nearest mapped police station, fire station and hospital
       const alt = el('div', 'near-empty-help');
       list.append(el('p', 'note', T().empty), alt);
@@ -352,12 +366,20 @@ export function initNear(ctx) {
         const det = el('button', 'btn solid', T().details); det.type = 'button'; det.addEventListener('click', () => open(it));
         acts.append(det);
         r.append(sq, body, acts);
-        rows.append(r);
+        rows.append(r); rowParts[i] = { body, acts };
       });
       list.append(rows);
+      // phone and the main facts from OpenStreetMap, when the place has them (filled in when the details file arrives)
+      detailsOf(a.district).then(({ details }) => shown.forEach((it, i) => {
+        const d = details[it.p.id], rp = rowParts[i]; if (!d || !rp) return;
+        const sum = summaryOf(it.p, d); if (sum) rp.body.append(el('div', 'm', sum));
+        if (d.phone) { const n = d.phone.split('; ')[0]; const c = el('a', 'btn', n); c.href = `tel:${n.replace(/[^\d+]/g, '')}`; c.prepend(icon('phone', { size: 'sm' })); rp.acts.prepend(c); }
+      })).catch(() => {});
     }
     list.append(el('p', 'small', T().credit));
-    view.replaceChildren(backLink(), head, mapCard, list);
+    const cards = [backLink(), head];
+    if (cat.id === 'tourism') { const box = el('div'); cards.push(box); officialSpots(a.district).then((c) => { if (c) box.replaceWith(c); }); }
+    view.replaceChildren(...cards, mapCard, list);
   }
 
   /* ---------- এখন কেমন? (SRS FR05, UC-06) and ভুল জানান (FR15, UC-16) on the place page ---------- */
@@ -421,8 +443,90 @@ export function initNear(ctx) {
     return box;
   }
 
+  // one short line of facts for a list row: hours, speciality, cuisine, fuel...
+  function summaryOf(p, d) {
+    const D = T().det, bits = [];
+    const hours = d.hours || p.hours; if (hours) bits.push(`${D.hours}: ${hours}`);
+    for (const k of ['speciality', 'cuisine', 'fee']) if (d[k]) bits.push(`${D[k]}: ${d[k].replace(/_/g, ' ').replace(/;\s*/g, ', ')}`);
+    const fuels = ['fuel_diesel', 'fuel_octane', 'fuel_cng', 'fuel_lpg'].filter((k) => d[k] === 'yes').map((k) => D[k]); if (fuels.length) bits.push(fuels.join(', '));
+    if (d.emergency === 'yes') bits.push(D.emergency);
+    return bits.slice(0, 3).join(' · ');
+  }
+  // the tourist spots the district's official portal lists (data/tourist_spots.json, from tools/collect_tourist_spots.py)
+  let spotsP = null;
+  async function officialSpots(districtEn) {
+    spotsP ||= getJSON('data/tourist_spots.json').catch(() => []);
+    const list = (await spotsP).filter((x) => x.district === districtEn);
+    if (!list.length) return null;
+    const D = T().det;
+    const card = el('section', 'card'); const box = el('details'); box.append(el('summary', null, D.officialSpots.replace('{n}', num(list.length))));
+    for (const x of list) {
+      const one = el('details', 'place-details'); one.append(el('summary', null, x.name_bn));
+      const txt = String(x.location_text || '').replace(/\s+/g, ' ').trim();
+      one.append(el('p', 'm', txt.length > 400 ? `${txt.slice(0, 400).replace(/\S*$/, '')}…` : txt));
+      if (/^https:\/\//.test(x.source_url || '')) { const a = el('a', null, `${D.fullPage} ↗`); a.href = x.source_url; a.target = '_blank'; a.rel = 'noopener noreferrer'; one.append(a); }
+      if (x.source_last_updated) one.append(el('p', 'small', `${D.portalDate} ${x.source_last_updated}`));
+      box.append(one);
+    }
+    card.append(box); return card;
+  }
+
+  // Which details matter for which kind of place, in the order they are shown (keys of tools/collect_place_details.py)
+  const DETAIL_KEYS = {
+    health: ['speciality', 'emergency', 'beds', 'operator', 'wheelchair'],
+    stay_food: ['cuisine', 'stars', 'rooms', 'internet', 'air_conditioning', 'outdoor_seating', 'takeaway', 'delivery', 'wheelchair'],
+    shops: ['brand', 'operator', 'delivery', 'air_conditioning', 'wheelchair'],
+    money: ['brand', 'operator', 'atm', 'cash_in'],
+    fuel_transport: ['operator', 'brand', 'fuel_diesel', 'fuel_octane', 'fuel_cng', 'fuel_lpg'],
+    tourism: ['fee', 'toilets', 'parking', 'wheelchair', 'operator'],
+    public_offices: ['operator'],
+    workshops: ['brand', 'operator'],
+    other_services: ['brand', 'operator'],
+    shelter: ['capacity', 'operator', 'wheelchair'],
+  };
+  const YESNO_KEYS = new Set(['emergency', 'internet', 'air_conditioning', 'outdoor_seating', 'takeaway', 'delivery', 'atm', 'cash_in',
+    'fuel_diesel', 'fuel_octane', 'fuel_cng', 'fuel_lpg', 'wheelchair', 'toilets']);
+  function detailsCard(p, d, checked) {
+    const D = T().det;
+    const card = el('section', 'card place-details');
+    const head = el('div', 'sec-head'); head.append(el('h2', null, D.title), el('span', 'badge', D.osm));
+    card.append(head);
+    const rows = el('div', 'rows');
+    const add = (label, node) => { const r = el('div', 'r'); const b = el('div'); b.append(el('div', 't', label)); b.append(node); r.append(b); rows.append(r); };
+    const text = (v) => el('div', 'm', v);
+    const hours = d.hours || p.hours;
+    if (d.phone) {
+      const box = el('div', 'm');
+      d.phone.split('; ').forEach((n, i) => { if (i) box.append(' · '); const a = el('a', null, n); a.href = `tel:${n.replace(/[^\d+]/g, '')}`; box.append(a); });
+      add(D.phone, box);
+    }
+    if (hours) add(D.hours, text(hours));
+    if (d.description) add(D.description, text(d.description));
+    const addr = [d.address, [d.housename, d.street].filter(Boolean).join(', ')].find(Boolean);
+    if (addr) add(D.address, text(addr));
+    for (const k of DETAIL_KEYS[p.category] || []) {
+      if (!d[k]) continue;
+      const v = YESNO_KEYS.has(k) ? (D.yn[d[k]] || d[k]) : d[k].replace(/_/g, ' ').replace(/;\s*/g, ', ');
+      add(D[k], text(v));
+    }
+    const links = el('div', 'm');
+    for (const [k, label] of [['website', D.website], ['facebook', D.facebook]]) {
+      if (!d[k]) continue;
+      const a = el('a', null, `${label} ↗`); a.href = d[k]; a.target = '_blank'; a.rel = 'noopener noreferrer'; links.append(a, ' ');
+    }
+    if (d.wikipedia) { const [lang, title] = d.wikipedia.split(/:(.+)/); const a = el('a', null, `${D.wikipedia} ↗`);
+      a.href = `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`; a.target = '_blank'; a.rel = 'noopener noreferrer'; links.append(a); }
+    if (links.childNodes.length) add(D.links, links);
+    card.append(rows.childElementCount ? rows : el('p', 'note', D.none));
+    const foot = el('p', 'small');
+    if (/^https:\/\//.test(p.source_url || '')) { const a = el('a', null, D.fix); a.href = p.source_url; a.target = '_blank'; a.rel = 'noopener noreferrer'; foot.append(a); }
+    if (checked) foot.append(` · ${D.checked} ${checked}`);
+    card.append(foot);
+    return card;
+  }
+
   function placePage(view, cat, a, it) {
-    closeMap();
+    closeMap(); let routeLine = null;
     const p = it.p;
     const head = el('section', 'card');
     const h = el('h1', 'page-title', nameOf(p)); h.id = 'catTitle'; h.tabIndex = -1;
@@ -441,22 +545,31 @@ export function initNear(ctx) {
       const more = el('a', 'btn', T().nationalNumbers); more.href = '#/numbers';
       free.append(el('p', 'small', T().noAreaNumbers), more);
     }
-    // the way there: our map first, Google Maps for turn-by-turn
+    // the way there: the map is inside the page (no jump to Google Maps)
     const way = el('section', 'card');
     way.append(el('h2', null, T().wayThere));
     const acts = el('div', 'pills');
-    if (it.pt) {
-      const g = el('a', 'btn', T().googleMaps); g.target = '_blank'; g.rel = 'noopener noreferrer'; g.prepend(icon('nav', { size: 'sm' }));
-      g.href = it.pt.approx ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.name_en || ''} ${a.upazila} ${a.district}`.trim())}`
-        : `https://www.google.com/maps/dir/?api=1&destination=${it.pt.lat},${it.pt.lon}`;
-      acts.append(g);
-    }
     const share = el('button', 'btn', T().share); share.type = 'button'; share.prepend(icon('share', { size: 'sm' }));
     share.addEventListener('click', async () => {
       const text = `${nameOf(p)} (${T().cats[cat.id]}), ${areaLabel(a)}`;
       try { if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); ctx.toast(T().copied); } } catch { /* the person closed the share sheet */ }
     });
     acts.append(share);
+    if (exact(it)) {   // directions inside the site: the road route is drawn on the map above (asked for only on this tap)
+      const D = T().det;
+      const info = el('p', 'small route-info'); info.setAttribute('role', 'status');
+      const go = el('button', 'btn solid', D.route); go.type = 'button'; go.prepend(icon('nav', { size: 'sm' }));
+      go.addEventListener('click', async () => {
+        const from = fromPoint(a); go.disabled = true; info.textContent = D.routeWait;
+        const r = await roadRoute(from, it.pt); go.disabled = false;
+        if (!mapObj || !window.L) { info.textContent = D.routeFail; return; }
+        if (!r) { info.textContent = `${D.routeFail} ${dist(km(from, it.pt))}`; return; }
+        if (routeLine) routeLine.remove();
+        routeLine = drawRoad(window.L, mapObj, r);
+        info.textContent = D.routeInfo.replace('{d}', dist(r.metres / 1000)).replace('{m}', num(Math.max(1, Math.round(r.secs / 60))));
+      });
+      acts.prepend(go); way.append(info, el('p', 'small', D.routeNote));
+    }
     if (exact(it) && ctx.callTo) {   // সেবা ডাকুন (R3): a ride there, and the service that fits the place
       const call = (label, ic, mode) => { const b = el('button', 'btn', label); b.type = 'button'; b.prepend(icon(ic, { size: 'sm' }));
         b.addEventListener('click', () => ctx.callTo({ name: nameOf(p), lat: it.pt.lat, lon: it.pt.lon }, mode)); return b; };
@@ -470,7 +583,16 @@ export function initNear(ctx) {
     if (/^https:\/\//.test(p.source_url || '')) { const s = el('a', 'btn ghost', T().source); s.href = p.source_url; s.target = '_blank'; s.rel = 'noopener noreferrer'; acts.append(s); }
     way.append(acts);
     if (it.pt && it.pt.approx) way.append(el('p', 'small', T().approxNote));
-    view.replaceChildren(backLink(`c/${cat.id}`, T().backToList), head, free, way, statusCard(p, cat), reportCard(p, cat, a));
+    const cards = [backLink(`c/${cat.id}`, T().backToList), head];
+    if (exact(it)) {   // the map of this one place, drawn inside the page
+      const mapCard = el('section', 'card near-mapcard');
+      const mapBox = el('div', 'near-map'); mapBox.setAttribute('role', 'region'); mapBox.setAttribute('aria-label', T().mapLabel);
+      mapCard.append(mapBox); cards.push(mapCard);
+      setTimeout(() => { if (mapBox.isConnected) drawMap(mapBox, fromPoint(a), [it], cat, null); }, 0);
+    }
+    const det = el('div'); cards.push(det);
+    detailsOf(a.district).then(({ details, checked }) => { det.replaceWith(detailsCard(p, details[p.id] || {}, checked)); }).catch(() => { /* no details: the page works without them */ });
+    view.replaceChildren(...cards, free, way, statusCard(p, cat), reportCard(p, cat, a));
   }
 
   /* ---------- home (R2): the area card, the 12 tiles, the area's emergency numbers ---------- */
@@ -561,7 +683,7 @@ export function initNear(ctx) {
     const out = [];
     for (const id of catIds) {
       const c = CATS.find((x) => x.id === id); if (!c) continue;
-      out.push(...all.filter((p) => p.lat != null && c.match(p)).map((p) => ({ name: nameOf(p), lat: p.lat, lon: p.lon, km: km(h, p) }))
+      out.push(...all.filter((p) => p.lat != null && c.match(p)).map((p) => ({ id: p.id, cat: id, name: nameOf(p), lat: p.lat, lon: p.lon, km: km(h, p) }))
         .sort((x, y) => x.km - y.km).slice(0, max));
     }
     return out;

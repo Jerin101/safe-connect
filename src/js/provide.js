@@ -4,6 +4,7 @@
 // with a bill worked out from the admin's rates (firestore.rules check the same arithmetic). Being "online" stores no
 // position at all: riders only see how many providers work in the district. Built with createElement + textContent.
 import { icon } from './icons.js';
+import { createLiveMap, roadRoute } from './routemap.js';
 
 const TYPE_IC = { ambulance: 'amb', cng: 'car', bike: 'bike', technician: 'wrench', help: 'hands', errand: 'basket', pickup: 'bag', towing: 'car' };
 const r5 = (x) => Math.round(x * 1e5) / 1e5;
@@ -79,6 +80,7 @@ export function initProvide(ctx) {
   }
   function paint(head) {
     if (!view?.isConnected) return;
+    destroyJobMap();
     head = head || view.querySelector('section.card');
     const parts = [head];
     if (prov === null) parts.push(applyCard());
@@ -95,6 +97,7 @@ export function initProvide(ctx) {
       parts.push(status);
       if (job && ['accepted', 'arrived', 'on_trip', 'completed'].includes(job.status)) {
         const jp = el('div', 'pv-job'); jp.append(...jobPanel());
+        if (job.status !== 'completed') { const mb = el('div', 'near-map pv-map'); mb.setAttribute('role', 'region'); mb.setAttribute('aria-label', T().route); jp.append(mb); setTimeout(() => mountJobMap(mb), 0); }
         parts.push(card(el('p', 'eyebrow', T().nowJob), jp));
       } else {
         const rb = el('div', 'pv-reqs');
@@ -137,11 +140,33 @@ export function initProvide(ctx) {
   }
 
   /* ---------- the job ---------- */
+  // Directions inside the site: the live map above shows both of you; this draws the road to the goal (asked for on tap only)
+  const goalOf = (r) => (r.status === 'on_trip' && r.drop ? r.drop : r.pickup);
   function navLink(r) {
-    const goal = r.status === 'on_trip' && r.drop ? r.drop : r.pickup;
-    const a = el('a', 'btn', T().directions); a.target = '_blank'; a.rel = 'noopener noreferrer'; a.prepend(icon('nav', { size: 'sm' }));
-    a.href = `https://www.google.com/maps/dir/?api=1&destination=${Number(goal.lat)},${Number(goal.lon)}`;
-    return a;
+    const b = btn('btn', T().route, 'nav', async () => {
+      const from = mine || here; if (!from || !liveMap) return;
+      const goal = (r.status !== 'on_trip' && other) || goalOf(r);
+      b.disabled = true; const route = await roadRoute(from, goal); b.disabled = false;
+      if (!route) { say(T().routeFail); return; }
+      liveMap.showRoad(route);
+      const d = view?.querySelector('.pv-dist'); if (d) d.textContent = `${dist(route.metres)} · ~${num(Math.max(1, Math.round(route.secs / 60)))} ${D().min || ''}`.trim();
+    });
+    return b;
+  }
+  // the live map: you (blue), the customer's live point (green line), the pickup pin; it moves as the positions arrive
+  let liveMap = null;
+  function destroyJobMap() { if (liveMap) { liveMap.destroy(); liveMap = null; } }
+  function paintJobMap() {
+    if (!liveMap || !job) return;
+    const goal = goalOf(job), toRider = job.status !== 'on_trip' && other;
+    liveMap.update({ you: mine, goal: toRider ? other : goal, other: toRider ? goal : null,
+      labels: { you: T().meLabel, goal: toRider ? T().riderNow : (goal.label || ''), other: goal.label || '' } });
+  }
+  async function mountJobMap(box) {
+    if (!navigator.onLine) { box.replaceChildren(el('p', 'note', T().mapOff)); return; }
+    let L; try { L = await ctx.near.loadLeaflet(); } catch { box.replaceChildren(el('p', 'note', T().mapOff)); return; }
+    if (!box.isConnected) return;
+    destroyJobMap(); liveMap = createLiveMap(L, box, { el }); paintJobMap();
   }
   function jobPanel() {
     const r = job, t = RM.typeOf(r.type);
@@ -215,7 +240,7 @@ export function initProvide(ctx) {
       const was = job ? job.status : null; job = r;
       if (!r) { stopJob(); paint(); return; }
       const live = RM.LIVE.includes(r.status);
-      if (live && !liveUnsub) liveUnsub = fb.watchLive(r.id, 'rider', (p) => { other = p; const d = view?.querySelector('.pv-dist'); if (d) d.textContent = jobDist(); }, () => {});
+      if (live && !liveUnsub) liveUnsub = fb.watchLive(r.id, 'rider', (p) => { other = p; const d = view?.querySelector('.pv-dist'); if (d) d.textContent = jobDist(); paintJobMap(); }, () => {});
       if (live) startGeo(); else stopGeo();
       if (['completed', 'paid', 'cancelled'].includes(r.status) && was && RM.LIVE.includes(was)) fb.clearLive(r.id).catch(() => {});
       if (r.status === 'cancelled') {
@@ -228,7 +253,7 @@ export function initProvide(ctx) {
   }
   function stopGeo() { if (geoId != null) navigator.geolocation.clearWatch(geoId); geoId = null; }
   function stopJob(clear = true) {
-    stopGeo(); if (jobUnsub) jobUnsub(); if (liveUnsub) liveUnsub(); jobUnsub = liveUnsub = null; other = null; lastSent = null;
+    stopGeo(); destroyJobMap(); if (jobUnsub) jobUnsub(); if (liveUnsub) liveUnsub(); jobUnsub = liveUnsub = null; other = null; lastSent = null;
     if (clear) { job = null; track = null; }
   }
   function startGeo() {
@@ -243,6 +268,7 @@ export function initProvide(ctx) {
     const due = !lastSent || (p.at - lastSent.at >= 8000 && RM.metres(lastSent, p) >= 25) || p.at - lastSent.at >= 60000;
     if (due) { lastSent = p; try { const [fb] = await load(); await fb.sendLive(job.id, 'provider', lat, lon); } catch { /* the next point tries again */ } }
     const d = view?.querySelector('.pv-dist'); if (d) d.textContent = jobDist();
+    paintJobMap();
   }
   function keepOnline() {
     clearInterval(onlineTimer); onlineTimer = null;
