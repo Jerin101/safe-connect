@@ -1724,7 +1724,7 @@ function renderRoles() {
     d.append(h, el('p', null, r[key]), el('span', 'tag', tag));
     return d;
   }));
-  $('rolesNote').replaceChildren(el('b', null, r.noteB), document.createTextNode(r.note));
+  $('rolesNote').replaceChildren(el('b', null, r.noteB), document.createTextNode(` ${r.note}`));
 }
 // Warm opening (DESIGN.md §2): greeting by time of day, trust ticks, a one-time welcome that never covers 999.
 function renderWarm() {

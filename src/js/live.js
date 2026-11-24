@@ -41,7 +41,8 @@ export function initLive(ctx) {
     view = v;
     v.replaceChildren(el('div', 'skeleton'));
     let fb;
-    try { [fb] = await load(); } catch { v.replaceChildren(card(note(T().err.offline))); return; }
+    // A slow or broken connection must not leave an empty grey box: after 12 s the person sees the "check your connection" note.
+    try { [fb] = await Promise.race([load(), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 12000))]); } catch { v.replaceChildren(card(note(T().err.offline))); return; }
     const h = el('h1', 'page-title', T().title); h.id = 'liveTitle'; h.tabIndex = -1;
     const head = card(h, el('p', 'muted', T().intro));
     const user = await fb.currentUser();

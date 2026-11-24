@@ -10,7 +10,8 @@ export const CATS = [
   { id: 'hospital', ic: 'health', match: (p) => p.category === 'health' && ['hospital', 'clinic', 'doctors'].includes(p.subcategory) },
   { id: 'pharmacy', ic: 'pill', match: (p) => ['pharmacy', 'chemist'].includes(p.subcategory) },
   { id: 'police', ic: 'shield', match: (p) => ['police', 'fire_station'].includes(p.subcategory) },
-  { id: 'fuel', ic: 'fuel', match: (p) => p.subcategory === 'fuel' || p.source === 'official' },
+  // A few OpenStreetMap points are tagged fuel but are really fire stations: never list those as filling stations.
+  { id: 'fuel', ic: 'fuel', match: (p) => (p.subcategory === 'fuel' && !/fire\s*station/i.test(p.name_en || '')) || p.source === 'official' },
   { id: 'transport', ic: 'bus', match: (p) => ['bus_station', 'ferry_terminal', 'railway_station'].includes(p.subcategory) },
   { id: 'bank', ic: 'bank', match: (p) => p.category === 'money' },
   { id: 'market', ic: 'basket', match: (p) => p.category === 'shops' },
