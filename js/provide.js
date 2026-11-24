@@ -341,7 +341,7 @@ export function initProvide(ctx) {
       rateDistrict = dsel.value;
       const own = has(rateDistrict, sel.value), base = has('default', sel.value);
       const r = own || base || RM.DEFAULT_RATES[sel.value];
-      which.textContent = own ? T().rateOwn : rateDistrict !== 'default' && base ? T().rateFromCountry : T().rateNotSet;
+      which.textContent = rateDistrict === 'default' ? (base ? T().rateCountry : T().rateNotSet) : own ? T().rateOwn : base ? T().rateFromCountry : T().rateNotSet;
       const set = (id, x) => { const i = grid.querySelector(`#${id}`); if (i) i.value = num(x); };
       set('rtBase', r.base); set('rtKm', r.perKm); set('rtMin', r.perMin); set('rtMinF', r.minFare);
     };
