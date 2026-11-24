@@ -91,7 +91,6 @@ def from_table(page, url):
             continue
         head = rows[0]
         name_col = next((i for i, h in enumerate(head) if re.search(N(r"নাম|স্থান"), h)), None)
-        loc_col = next((i for i, h in enumerate(head) if re.search(N(r"অবস্থান|ঠিকানা"), h)), None)
         if name_col is None:
             continue
         for r in rows[1:]:

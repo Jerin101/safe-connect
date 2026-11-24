@@ -9,7 +9,7 @@ In an emergency, call **999** first.
 
 ## Firebase web API key
 
-`js/firebase-config.js` contains the Firebase **web** API key (it starts with `AIza`). This key is **public by
+`src/js/firebase-config.js` contains the Firebase **web** API key (it starts with `AIza`). This key is **public by
 design**: every visitor's browser needs it to talk to Firebase, so it is in the website and in Git history on
 purpose. It is not a password and gives no special access. Access is protected by:
 

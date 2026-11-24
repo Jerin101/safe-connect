@@ -5,10 +5,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { nearestPlace } from '../../js/location.js';
+import { nearestPlace } from '../../src/js/location.js';
 
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
-const loc = read(process.env.LOCATIONS || 'data/locations.json');
+const loc = read(process.env.LOCATIONS || 'src/data/locations.json');
 const upazilaOf = (lat, lon) => nearestPlace(loc, { lat, lon })?.upazila ?? null;
 
 test('every upazila ring is a real closed shape (at least 4 points, first = last)', () => {
@@ -52,7 +52,7 @@ test('OSM places in the pilot districts mostly agree with the OSM upazila', () =
   const carved = new Set(['Sonaimuri', 'Kabirhat', 'Eidgaon']);
   let n = 0;
   let same = 0;
-  for (const f of ['data/places/noakhali.json', 'data/places/coxsbazar.json']) {
+  for (const f of ['src/data/places/noakhali.json', 'src/data/places/coxsbazar.json']) {
     for (const p of read(f).places) {
       if (!p.upazila) continue;
       const got = upazilaOf(p.lat, p.lon);

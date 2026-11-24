@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { loadAll, areaIndex, findAreas } from '../js/data.js';
+import { loadAll, areaIndex, findAreas } from '../src/js/data.js';
 
 // fetch reads the repo's data/ folder; the names in `fail` answer 503 like a broken connection would.
 const withFetch = (fail) => {
@@ -13,18 +13,18 @@ const withFetch = (fail) => {
     catch { return { ok: false, status: 404, json: async () => ({}) }; }
   };
 };
-const LANG = (l) => JSON.parse(readFileSync(`js/lang/${l}.json`, 'utf8')).ui;
+const LANG = (l) => JSON.parse(readFileSync(`src/js/lang/${l}.json`, 'utf8')).ui;
 
 test('everything loads: nothing is listed as partial', async () => {
   withFetch([]);
-  const data = await loadAll('data/');
+  const data = await loadAll('src/data/');
   assert.deepEqual(data.partial, []);
   assert.ok(data.villages.length > 100);
 });
 
 test('the village lists fail: listed once, and unions, upazilas and thanas are still found', async () => {
   withFetch(['villages.json', 'villages_bbs.json']);
-  const data = await loadAll('data/');
+  const data = await loadAll('src/data/');
   assert.deepEqual(data.partial, ['villages']);
   assert.equal(data.villages.length, 0);
   assert.deepEqual(data.missing, []);
@@ -36,7 +36,7 @@ test('the village lists fail: listed once, and unions, upazilas and thanas are s
 
 test('only the BBS list fails: listed, and the portal villages are still found', async () => {
   withFetch(['villages_bbs.json']);
-  const data = await loadAll('data/');
+  const data = await loadAll('src/data/');
   assert.deepEqual(data.partial, ['villages']);
   assert.ok(data.villages.length > 100);
   assert.ok(data.villages.every((v) => !v.bbs));
@@ -45,7 +45,7 @@ test('only the BBS list fails: listed, and the portal villages are still found',
 
 test('BBS villages (#179): found in English and Bangla, in their union; English-only names work too', async () => {
   withFetch([]);
-  const idx = areaIndex(await loadAll('data/'));
+  const idx = areaIndex(await loadAll('src/data/'));
   for (const q of ['Mekrarchar', 'মেকরারচর']) {
     const h = findAreas(idx, q).hits[0];
     assert.equal(h?.kind, 'village', q);
@@ -61,7 +61,7 @@ test('BBS villages (#179): found in English and Bangla, in their union; English-
 
 test('the landmark lists fail: listed once, the rest still works', async () => {
   withFetch(['landmarks/noakhali.json', 'landmarks/coxsbazar.json']);
-  const data = await loadAll('data/');
+  const data = await loadAll('src/data/');
   assert.deepEqual(data.partial, ['landmarks']);
   assert.equal(findAreas(areaIndex(data), 'teknaf').hits[0]?.place.upazila, 'Teknaf');
 });

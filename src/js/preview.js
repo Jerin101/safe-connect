@@ -1522,7 +1522,6 @@ function openFaq(key) {
     d.open = true; d.scrollIntoView({ block: 'center' }); d.querySelector('summary').focus({ preventScroll: true });
   } });
 }
-function openQuick(key) { const q = quickPlaces().find(([k]) => k === key); if (!q) return; const [, , item] = q; const p = { ...item.place }; if (item.named) p.label = lang === 'bn' ? item.named.name_bn : item.named.name_en; openArea(p, null); }
 const textBtn = (label, fn) => { const b = el('button', null, label); b.type = 'button'; b.addEventListener('click', fn); return b; };
 const extLink = (label, href) => { const a = el('a', null, `${label} ↗`); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a; };
 
@@ -1746,8 +1745,6 @@ function renderWarm() {
   const title = el('h2', null, P().welcomeTitle); title.id = 'welcomeTitle';
   w.replaceChildren(title, ol, row);
 }
-// Home modules (SRS user manual 2): Nearby, SOS, Directory, Live Location, Dakun, Profile.
-const MODS = [['nearby', 'pin', '#/c'], ['sos', 'alert', '#/sos'], ['directory', 'gov', '#/numbers'], ['live', 'locate', '#/live'], ['dakun', 'car', '#/dakun'], ['profile', 'user', '#/account']];
 // Government Directory (SRS FR08, UC-09) on #/numbers: the chosen area's official numbers by role (থানা, UNO,
 // স্বাস্থ্য কমপ্লেক্স, ফায়ার সার্ভিস, ইউনিয়ন পরিষদ, গ্রাম পুলিশ), each with its source; an area without checked numbers
 // says so and shows 999 and the nearest mapped police station, fire station and hospital. Never an unverified number.
@@ -1783,18 +1780,8 @@ function groupNodes(list) {
     return d;
   });
 }
-function renderMods() {
-  const m = P().mods;
-  $('homeMods').setAttribute('aria-label', m.label);
-  $('homeMods').replaceChildren(...MODS.map(([k, ic, href]) => {
-    const a = el('a', 'home-mod'); a.href = href;
-    const sq = el('span', 'cat-ic'); sq.append(lineIcon(ic));
-    a.append(sq, el('span', null, m[k]));
-    return a;
-  }));
-}
 function renderPage() {
-  renderMods(); renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
+  renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
   renderRail(); renderRoles(); renderMyArea();
   $('findTitle').textContent = P().findTitle; $('areaPageTitle').textContent = P().titles.area; $('guidePageTitle').textContent = P().titles.guide; $('numbersTitle').textContent = P().titles.numbers; $('findText').textContent = P().findText;
   $('numRowTitle').textContent = P().numRow.title;
@@ -1845,7 +1832,6 @@ const openSearch = () => go('c', { after: () => $('nearSearch')?.focus() });
 $('hFinder').addEventListener('click', openSearch);
 $('hSearch').addEventListener('click', openSearch);
 window.addEventListener('resize', markTab);      // keeps the active tab in view and the edge hints right
-const calmScroll = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
 $('ctaSend').addEventListener('click', () => openSos(null));
 $('hcArea').addEventListener('click', openMyArea);
 $('autoNoteBtn').addEventListener('click', goToSwitch);

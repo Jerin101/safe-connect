@@ -13,9 +13,10 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# secrets – never commit keys
+# secrets – never commit keys (.env.example is the safe template and IS committed)
 .env
 .env.*
+!.env.example
 *serviceAccount*.json
 *-firebase-adminsdk-*.json
 *.pem
@@ -36,3 +37,18 @@ ui-debug.log
 # Git Contribution Tracker generated outputs
 project_management/git_tracker/reports/
 project_management/git_tracker/hook.log
+
+# Docker: personal overrides
+docker-compose.override.yml
+
+# More editor / OS / log files
+.idea/
+*.swp
+*.log
+*.tmp
+desktop.ini
+
+# Test and tool output
+coverage/
+test-results/
+.pytest_cache/

@@ -3,7 +3,7 @@
 A match counts only if it lies in the right district and within 25 km of its own upazila's point.
 Usage: python fill_locations.py <locations_raw.json> <output data/locations.json>
 """
-import json, math, re, sys, time, urllib.parse, urllib.request
+import math, re, sys
 sys.path.insert(0, __import__("os").path.dirname(__import__("os").path.abspath(__file__)))
 from collect_locations import nominatim, load_json, save_json  # noqa: E402  (same polite helpers)
 

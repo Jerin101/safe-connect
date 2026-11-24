@@ -4,9 +4,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ICONS, icon } from '../../js/icons.js';
+import { ICONS, icon } from '../../src/js/icons.js';
 
-const css = readFileSync('css/base.css', 'utf8');
+const css = readFileSync('src/css/base.css', 'utf8');
 // the three colour blocks: day (:root {), night when the phone asks for it, night chosen with the switch
 const blocks = {
   day: css.slice(css.indexOf(':root {'), css.indexOf('@media (prefers-color-scheme: dark)')),

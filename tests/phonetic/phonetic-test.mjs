@@ -3,13 +3,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { loadAll, areaIndex, findAreas, norm } from '../../js/data.js';
+import { loadAll, areaIndex, findAreas, norm } from '../../src/js/data.js';
 
 globalThis.fetch = async (url) => {
   try { const body = readFileSync(url, 'utf8'); return { ok: true, status: 200, json: async () => JSON.parse(body) }; }
   catch { return { ok: false, status: 404, json: async () => ({}) }; }
 };
-const index = areaIndex(await loadAll('data/'));
+const index = areaIndex(await loadAll('src/data/'));
 const N = (s) => norm(s).replace(/\s*(ইউনিয়ন|পৌরসভা)$/, '');
 const nameOf = (h) => N(h.village || h.named?.name_bn || h.place.area?.bn || '');
 const placeOf = (h) => `${h.place.district}|${h.place.upazila}|${N(h.place.area?.bn || '')}`;
@@ -30,7 +30,7 @@ const KIT = [
 ];
 // Upazilas are named in English in the index; their Bangla names come from the district files.
 const UPAZILA_BN = new Map();
-for (const d of ['noakhali', 'coxsbazar']) for (const u of JSON.parse(readFileSync(`data/contacts_${d}.json`, 'utf8')).unions) UPAZILA_BN.set(u.upazila_en, norm(u.upazila_bn));
+for (const d of ['noakhali', 'coxsbazar']) for (const u of JSON.parse(readFileSync(`src/data/contacts_${d}.json`, 'utf8')).unions) UPAZILA_BN.set(u.upazila_en, norm(u.upazila_bn));
 const textOf = (h) => norm([nameOf(h), h.place.area?.bn, UPAZILA_BN.get(h.place.upazila), h.place.upazila, ...(h.names || [])].filter(Boolean).join(' '));
 
 test(`the kit's ${KIT.length} Banglish/English queries find their place`, () => {

@@ -6,7 +6,7 @@ import { after, before, beforeEach, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import { doc, getDoc, getDocs, collection, setDoc, writeBatch, serverTimestamp, deleteDoc } from 'firebase/firestore';
-import { nextPlaceStatus, placeStatusText, isOutdated } from '../../js/community.js';
+import { nextPlaceStatus, placeStatusText, isOutdated } from '../../src/js/community.js';
 
 const ADMIN = 'admin-uid', RINA = 'rina-uid', KARIM = 'karim-uid';
 let env;

@@ -4,13 +4,13 @@
 // Entries with "gap" (no page names their upazila yet) are listed, not counted; they are in docs/DATA_GAPS.md.
 // --strict exits with 1 below 100%; --list prints every name not found.
 import { readFileSync } from 'node:fs';
-import { loadAll, areaIndex, findAreas, norm } from '../../js/data.js';
+import { loadAll, areaIndex, findAreas, norm } from '../../src/js/data.js';
 
 globalThis.fetch = async (url) => {
   try { const body = readFileSync(url, 'utf8'); return { ok: true, status: 200, json: async () => JSON.parse(body) }; }
   catch { return { ok: false, status: 404, json: async () => ({}) }; }
 };
-const index = areaIndex(await loadAll('data/'));
+const index = areaIndex(await loadAll('src/data/'));
 const strict = process.argv.includes('--strict'), list = process.argv.includes('--list');
 let all = true;
 for (const key of ['noakhali', 'coxsbazar']) {

@@ -8,10 +8,10 @@ Collects what the first pass (collect_contacts.py) cannot see:
     addresses themselves are not saved.
 Static pages show their own "last updated" date, so those records keep it.
 """
-import datetime, html, json, os, re, sys, unicodedata, urllib.parse
+import datetime, json, os, re, sys, unicodedata, urllib.parse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fetch import get, get_json
-from collect_contacts import API, DISTRICTS, UNION_PORTAL, BN, clean, phones, last_updated, officers, offices, paged
+from collect_contacts import API, DISTRICTS, UNION_PORTAL, BN, clean, phones, officers, offices, paged
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "union_pages_raw.json"
 TODAY = datetime.date.today().isoformat()

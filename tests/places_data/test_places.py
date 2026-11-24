@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 import places_rules as R  # noqa: E402
 import import_manual_places as I  # noqa: E402
 
-DATA = os.path.join(ROOT, "data")
+DATA = os.path.join(ROOT, "src", "data")
 FIXTURE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "notun-jayga-test.csv")
 TODAY = datetime.date(2026, 11, 15)
 

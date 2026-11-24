@@ -40,7 +40,6 @@ export const DEFAULT_RATES = {
 };
 // Stored names (fare_rates) <-> page names.
 export const toStored = (r) => ({ baseFare: r.base, perKmRate: r.perKm, waitingRate: r.perMin, minFare: r.minFare });
-export const fromStored = (x) => ({ base: x.baseFare, perKm: x.perKmRate, perMin: x.waitingRate, minFare: x.minFare });
 export const ITEMS_MAX = 20000;   // the most a rider may allow for the things bought (the rules check it)
 // What the rider pays in cash: the delivery fare, plus the shop's receipt for an errand.
 export const billTotal = (r) => (r.fare || 0) + (r.itemsCost || 0);
@@ -49,7 +48,6 @@ export const ROAD_FACTOR = 1.3;
 export const STATUSES = ['requested', 'accepted', 'arrived', 'on_trip', 'completed', 'paid', 'cancelled'];
 export const STATUS_BN = { requested: 'চালক খোঁজা হচ্ছে', accepted: 'আসছেন', arrived: 'পৌঁছেছেন', on_trip: 'যাত্রা চলছে',
   completed: 'শেষ: বিল তৈরি', paid: 'পরিশোধ হয়েছে', cancelled: 'বাতিল' };
-export const ACTIVE = ['requested', 'accepted', 'arrived', 'on_trip', 'completed'];
 export const LIVE = ['accepted', 'arrived', 'on_trip'];
 
 const R = 6371000, rad = Math.PI / 180;
@@ -92,8 +90,6 @@ export function trackAdd(track, p) {
 export const billLooksRight = (rates, distM, waitMin, f) => Math.abs(f - fare(rates, distM, waitMin)) <= 5;
 export const distanceSuspicious = (estM, distM) => distM > estM * 2 + 3000;
 
-// Round a position for the "online providers" list (about 100 m), so nobody's exact spot is shown before a booking.
-export const coarse = (x) => Math.round(x * 1000) / 1000;
 export const inBangladesh = (lat, lon) => lat >= 20.5 && lat <= 26.7 && lon >= 88.0 && lon <= 92.7;
 
 export function receiptText(r, bn = (x) => String(x)) {

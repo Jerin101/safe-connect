@@ -3,7 +3,6 @@
 export const PLACE_VALUES = [
   ['open', 'এখন খোলা'], ['closed', 'এখন বন্ধ'], ['fuel_yes', 'তেল আছে'], ['fuel_no', 'তেল নেই'], ['open_night', 'রাতেও খোলা'], ['shelter_open', 'আশ্রয়কেন্দ্র খোলা'],
 ];
-export const PLACE_GAP_MS = 30 * 60000;    // one answer per place per person in 30 minutes (the rules check it)
 export const PLACE_FRESH_MS = 6 * 3600000; // older answers are shown as old
 
 const label = (list, key) => (list.find((x) => x[0] === key) || [key, key])[1];

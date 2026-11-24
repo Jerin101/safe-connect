@@ -43,10 +43,6 @@ export async function saveProfile({ name, lang }) {
   await updateDoc(doc(db, 'users', user.uid), upd);
   if (upd.name) { try { await updateProfile(user, { displayName: upd.name }); } catch { /* the stored name is what counts */ } }
 }
-export async function readProfile() {
-  const snap = await getDoc(doc(db, 'users', me().uid));
-  return snap.exists() ? snap.data() : null;
-}
 export const resendVerify = () => sendEmailVerification(auth.currentUser);
 // Has this person verified their email (maybe in another tab)? Refreshes the sign-in token so the rules see it too.
 // The rules read the token's email_verified claim, which can be older than the user object after a reload.

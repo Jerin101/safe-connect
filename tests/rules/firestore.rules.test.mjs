@@ -6,8 +6,8 @@ import { after, before, beforeEach, describe, test } from 'node:test';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import assert from 'node:assert/strict';
 import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, where, orderBy, limit } from 'firebase/firestore';
-import { reportFields, auditFields, hasPhone, PROBLEMS, REPORT_DISTRICTS, NOTE_MAX, missingFields } from '../../js/reports.js';
-import { roleAuditFields, SITE_ROLES } from '../../js/admin.js';
+import { reportFields, auditFields, hasPhone, PROBLEMS, REPORT_DISTRICTS, NOTE_MAX, missingFields } from '../../src/js/reports.js';
+import { roleAuditFields, SITE_ROLES } from '../../src/js/admin.js';
 
 const ADMIN = 'admin-uid';
 const ADMIN2 = 'admin2-uid';

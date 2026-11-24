@@ -1,6 +1,6 @@
 // Runs the area search tests from tests/search-cases.json (issue #36) and shows PASS, FAIL or PENDING.
 // Open tests/search-test.html through a local server (python -m http.server 8000).
-import { loadAll, areaIndex, findAreas, norm } from '../js/data.js';
+import { loadAll, areaIndex, findAreas, norm } from '../src/js/data.js';
 
 const N = (s) => norm(s || '');
 const name = (i) => i.village || i.named?.name_bn || i.place.area?.bn || i.place.upazila;
@@ -30,7 +30,7 @@ function check(c, r) {
 }
 
 const [data, cases] = await Promise.all([
-  loadAll('../data/'),
+  loadAll('../src/data/'),
   fetch('search-cases.json').then((res) => res.json()),
 ]);
 const index = areaIndex(data);
