@@ -50,7 +50,7 @@ const CASES = [
   ['', '#/today', 'home', 'home'], ['#/', '#/today', 'home', 'home'], ['#/home', '#/today', 'home', 'home'], ['#/today', '#/today', 'home', 'home'],
   ['#/area', '#/near', 'area', 'home'], ['#/near', '#/near', 'area', 'home'],
   ['#/send', '#/sos', 'send', 'send'], ['#/sos', '#/sos', 'send', 'send'],
-  ['#/numbers', '#/numbers', 'numbers', 'home'], ['#/account', '#/account', 'account', 'account'], ['#/dakun', '#/dakun', 'dakun', 'dakun'], ['#/provide', '#/provide', 'provide', 'account'],
+  ['#/numbers', '#/numbers', 'numbers', 'home'], ['#/account', '#/account', 'account', 'account'], ['#/dakun', '#/dakun', 'dakun', 'dakun'], ['#/provide', '#/provide', 'provide', 'account'], ['#/live', '#/live', 'live', 'send'],
   ['#/guide', '#/guide', 'guide', null], ['#/about', '#/about', 'about', null], ['#/faq', '#/faq', 'faq', null], ['#/prepare', '#/prepare', 'prepare', null],
   ['#/area/noakhali/hatiya', '#/area/noakhali/hatiya', 'place', 'home'], ['#/c', '#/c', 'cat', 'home'], ['#/c/pharmacy', '#/c/pharmacy', 'cat', 'home'],
   ['#/help/22.29580,91.10660,1793624400,followed', '#/help/22.29580,91.10660,1793624400,followed', 'help', null],
@@ -90,6 +90,50 @@ for (const hash of ['#/today', '#/near', '#/numbers', '#/sos']) {
     check(`${hash} in ${lang}: tabs say ${LABELS[lang].join(', ')}`, JSON.stringify(got) === JSON.stringify(LABELS[lang]) && (await ev('location.hash')) === hash, JSON.stringify(got));
   }
 }
+// R5 (#267): জরুরি সাহায্য: the big 999, "এখন যা করবেন", this area's numbers, the 19 helplines by need with sources
+await open('#/sos');
+await ev(`localStorage.setItem('sc-lang', 'bn'); localStorage.setItem('sc-near-area', JSON.stringify({ district: 'Sylhet', upazila: 'Sylhet Sadar' })); true`);
+await send('Page.reload'); await waitFor(`document.querySelectorAll('#sosLines .near-row').length > 0`, 15000);
+check('জরুরি সাহায্য: the big 999 call', await ev(`document.querySelector('#sosCall a')?.getAttribute('href') === 'tel:999' && document.getElementById('sosTitle').textContent === 'জরুরি সাহায্য'`));
+check('জরুরি সাহায্য: "এখন যা করবেন" for the situation', await ev(`!document.getElementById('sitSteps').hidden && document.querySelectorAll('#sitSteps li').length >= 3`));
+check('জরুরি সাহায্য: 19 helplines with a source each', await ev(`document.querySelectorAll('#sosLines .near-row').length === 19 && document.querySelectorAll('#sosLines .near-row a[href^="https://"]').length === 19`));
+check('জরুরি সাহায্য: the area numbers (Sylhet: 999 and the nearest police station)', await waitFor(`/কাছের থানা/.test(document.getElementById('sosArea').textContent) && !!document.querySelector('#sosArea a[href="tel:999"]')`, 15000));
+await ev(`[...document.querySelectorAll('#situations button')].find((b) => b.textContent === 'জরুরি চিকিৎসা').click(); true`);
+check('choosing "জরুরি চিকিৎসা" shows its steps and the nearest hospital and pharmacy', await waitFor(`/জরুরি চিকিৎসা/.test(document.getElementById('sitStepsTitle')?.textContent || '') && /কাছের ফার্মেসি/.test(document.getElementById('sitSteps').textContent)`));
+// SRS PR-2: live sharing needs sign-in; a wrong or ended link says so; home has the live-sharing button
+await open('#/live');
+check('#/live signed out: sign-in first (UC-10 2.1)', await waitFor(`/সাইন ইন লাগে/.test(document.getElementById('live').textContent) && !!document.querySelector('#live button.btn.solid')`, 15000));
+await open('#/track/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+check('#/track with an unknown id: "শেয়ার শেষ হয়েছে বা লিংকের মেয়াদ শেষ" (UC-12 3.1)', await waitFor(`/শেয়ার শেষ হয়েছে/.test(document.getElementById('live').textContent) && document.getElementById('main').dataset.page === 'track'`, 20000));
+await open('#/track/bad');
+check('#/track with a malformed id: ended message, no request', await waitFor(`/শেয়ার শেষ হয়েছে/.test(document.getElementById('live').textContent)`));
+await open('#/today');
+check('home: the "লাইভ লোকেশন শেয়ার" button opens #/live', await ev(`document.getElementById('liveBtn').getAttribute('href') === '#/live' && document.getElementById('liveBtnTitle').textContent === 'লাইভ লোকেশন শেয়ার'`));
+// SRS PR-6: Home modules, the theme is remembered, registration asks for a name
+await open('#/today');
+check('home: the six modules (Nearby, SOS, Directory, Live, Dakun, Profile)', await ev(`JSON.stringify([...document.querySelectorAll('#homeMods a')].map((a) => a.getAttribute('href'))) === JSON.stringify(['#/c', '#/sos', '#/numbers', '#/live', '#/dakun', '#/account'])`));
+const themeBefore = await ev(`document.documentElement.dataset.theme || ''`);
+await ev(`document.getElementById('themeBtn').click(); true`);
+const themeNow = await ev(`document.documentElement.dataset.theme`);
+await send('Page.reload'); await waitFor(`!!document.querySelector('#dock button')`, 15000);
+check('the theme is remembered after a reload (sc-theme)', (await ev(`document.documentElement.dataset.theme`)) === themeNow && themeNow !== themeBefore, `${themeBefore} -> ${themeNow}`);
+await ev(`document.getElementById('themeBtn').click(); true`);
+await ev(`document.querySelector('#dock [data-key="account"]').click(); true`);
+await waitFor(`!!document.querySelector('dialog[open] #siName')`, 15000);
+await ev(`document.getElementById('siEmail').value = 'someone@example.com'; document.getElementById('siPass').value = 'abcdef12'; document.getElementById('siName').value = ''; document.getElementById('siCreate').click(); true`);
+check('registration without a name: "সব ঘর ঠিকমতো পূরণ করুন" (UC-01)', await waitFor(`/সব ঘর ঠিকমতো পূরণ করুন/.test(document.getElementById('siMsg').textContent)`, 15000));
+await ev(`document.querySelector('dialog[open]')?.close(); true`);
+// SRS PR-7: SOS situations as the SRS; the Government Directory (Sylhet: no checked numbers → 999 + nearest)
+await open('#/sos');
+const sits = await ev(`[...document.querySelectorAll('#situations button')].map((b) => b.textContent)`);
+check('SOS situations: বিপদে আছি, কেউ পিছু নিয়েছে, দুর্ঘটনা, জরুরি চিকিৎসা, পথ হারিয়েছি, হয়রানি', JSON.stringify(sits) === JSON.stringify(['বিপদে আছি', 'কেউ পিছু নিয়েছে', 'দুর্ঘটনা', 'জরুরি চিকিৎসা', 'পথ হারিয়েছি', 'হয়রানি']), JSON.stringify(sits));
+await ev(`[...document.querySelectorAll('#situations button')].find((b) => b.textContent === 'হয়রানি').click(); true`);
+check('হয়রানি: steps and the 109 helpline', await waitFor(`/হয়রানি/.test(document.getElementById('sitStepsTitle')?.textContent || '') && !!document.querySelector('#sitSteps a[href="tel:109"]')`));
+check('no location: the SMS still names the area (UC-08 3.1)', await waitFor(`/সিলেট/.test(document.getElementById('sosMsg').value)`, 15000));
+await open('#/numbers');
+check('Directory (#/numbers): the area, "যাচাই করা নম্বর এখনো নেই", 999 and the nearest', await waitFor(`/সিলেট/.test(document.getElementById('dirTitle')?.textContent || '') && /যাচাই করা নম্বর এখনো নেই/.test(document.getElementById('dirArea').textContent) && !!document.querySelector('#dirArea a[href="tel:999"]') && /কাছের থানা/.test(document.getElementById('dirArea').textContent)`, 20000));
+await ev(`localStorage.setItem('sc-near-area', JSON.stringify({ district: 'Noakhali', upazila: 'Hatiya' })); true`); await send('Page.reload');
+check('Directory in a pilot area: official numbers by role, each with a source', await waitFor(`document.querySelectorAll('#dirArea details.cat').length >= 3 && document.querySelectorAll('#dirArea a[href^="https://"]').length > 3`, 20000));
 check('no errors on the page', errors.length === 0, errors.slice(0, 3).join(' | '));
 console.log(failed ? `\n${failed} failed` : '\nALL OK');
 process.exit(failed ? 1 : 0);

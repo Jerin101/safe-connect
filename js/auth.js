@@ -167,6 +167,7 @@ function renderSignin() {
   $('siFormTitle').textContent = a.roles[pick].form;
   $('siGoogleText').textContent = a.google;
   $('siOr').textContent = a.or;
+  $('siNameL').textContent = a.nameForNew;
   $('siEmailL').textContent = a.email;
   $('siPassL').textContent = a.password;
   $('siSubmit').textContent = busy ? a.wait : a.submit;
@@ -219,14 +220,23 @@ async function enter(u) {
   closeModal(false);
   ctx.go('account');
 }
+let created = false;   // the last action was "create account"
 async function run(action, where = 'email') {
   if (!canTry()) { renderOnline(); return; }
   busy = true; say(null); renderSignin();
   try {
     await loadFirebase();
     const cred = await action();
-    if (cred && cred.user) { $('siPass').value = ''; await enter(cred.user); }
+    if (cred && cred.user) {
+      $('siPass').value = '';
+      // UC-01: "নিবন্ধন হয়েছে। ইমেইল যাচাই করুন।"; UC-02: an unverified email keeps the guest features
+      if (created) ctx.toast?.(A().registered);
+      else if (!cred.user.emailVerified && (cred.user.providerData || []).some((x) => x.providerId === 'password')) ctx.toast?.(A().verifyForLive);
+      created = false;
+      await enter(cred.user);
+    }
   } catch (err) {
+    created = false;
     if (dlg().open) say(errKey(err && err.code, navigator.onLine), false, where);
   } finally {
     busy = false;
@@ -352,7 +362,14 @@ export function initAuth(helpers) {
     e.preventDefault();
     const f = fields(true); if (f) run(() => fb.signInEmail(f.email, f.password));
   });
-  $('siCreate').addEventListener('click', () => { const f = fields(true); if (f) run(() => fb.createAccount(f.email, f.password)); });
+  // registration (SRS FR01): name, email and password; every field is needed (UC-01 "সব ঘর ঠিকমতো পূরণ করুন")
+  $('siCreate').addEventListener('click', () => {
+    const f = fields(true), name = $('siName').value.trim();
+    if (!f) return;
+    if (name.length < 2) { say('needBoth'); $('siName').focus(); return; }
+    created = true;
+    run(() => fb.createAccount(f.email, f.password, name));
+  });
   $('siForgot').addEventListener('click', () => {
     const f = fields(false);
     if (f) run(async () => { await fb.resetPassword(f.email); say('resetSent', true); });

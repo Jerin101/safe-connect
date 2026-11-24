@@ -176,7 +176,9 @@ export function initNear(ctx) {
   // only a place with its own position can be "nearest" or get a pin; the others are listed after it as "in this upazila"
   const exact = (it) => !!(it.pt && !it.pt.approx);
   const rank = (it) => (exact(it) ? 0 : it.pt ? 1 : 2);
-  const distText = (it) => (exact(it) ? dist(it.k) : it.pt ? T().inUpazila : T().noLocation);
+  // SRS FR04: the list shows the approximate road distance (straight line × 1.3, no routing service)
+  const ROAD = 1.3;
+  const distText = (it) => (exact(it) ? `${T().byRoad} ${dist(it.k * ROAD)}` : it.pt ? T().inUpazila : T().noLocation);
   function badge(p) {
     const b = el('span', 'badge', p.source === 'official' ? T().officialList : T().osm);
     b.classList.add(p.source === 'official' ? 'b-ok' : 'b-osm');
@@ -243,12 +245,30 @@ export function initNear(ctx) {
     return catPage(view, cat, a, items, from);
   }
 
+  // SRS FR03 (UC-04): everyday words in Bangla, Banglish or English → the category near the person; nothing → say so
+  function searchBox() {
+    const S = T().search;
+    const f = el('form', 'near-search'); f.setAttribute('role', 'search');
+    const l = el('label', 'sr-only', S.label); l.htmlFor = 'nearSearch';
+    const inp = el('input'); inp.id = 'nearSearch'; inp.type = 'search'; inp.placeholder = S.ph; inp.autocomplete = 'off'; inp.maxLength = 60;
+    const go = el('button', 'btn solid', S.go); go.type = 'submit'; go.prepend(icon('search', { size: 'sm' }));
+    const msg = el('p', 'small near-search-msg'); msg.setAttribute('role', 'status');
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { matchCategory } = await import('./category-words.js');
+      const id = matchCategory(inp.value);
+      if (id) ctx.go(`c/${id}`); else msg.textContent = inp.value.trim() ? S.none : S.empty;
+    });
+    const row = el('div', 'near-search-row'); row.append(inp, go);
+    f.append(l, row, msg);
+    return f;
+  }
   function hub(view) {
     closeMap();
     const a = getArea();
     const head = el('section', 'card');
     const h = el('h1', 'page-title', T().hubTitle); h.id = 'catTitle'; h.tabIndex = -1;
-    head.append(h, el('p', 'muted', T().hubText), areaBar(a, () => ctx.rerender()));
+    head.append(h, el('p', 'muted', T().hubText), searchBox(), areaBar(a, () => ctx.rerender()));
     view.replaceChildren(head, tileGrid());
   }
   function tileGrid() {
@@ -286,9 +306,20 @@ export function initNear(ctx) {
     const mapBox = el('div', 'near-map'); mapBox.setAttribute('role', 'region'); mapBox.setAttribute('aria-label', T().mapLabel);
     const recenter = el('button', 'btn near-recenter', T().nearMe); recenter.type = 'button'; recenter.prepend(icon('locate', { size: 'sm' }));
     recenter.addEventListener('click', () => { if (mapObj) mapObj.setView([from.lat, from.lon], 15); });
-    mapCard.append(mapBox, recenter, el('p', 'small', T().mapNote));
+    // the map loads only after "ম্যাপে দেখুন" (SRS UC-05): Leaflet and the tiles are fetched then
+    mapBox.hidden = true; recenter.hidden = true;
+    let mapOpen = null;
+    const openMap = () => (mapOpen ||= (async () => { showMap.hidden = true; mapBox.hidden = false; recenter.hidden = false;
+      await drawMap(mapBox, from, shown, cat, (it) => ctx.go(`c/${cat.id}/${encodeURIComponent(it.p.id)}`)); })());
+    const showMap = el('button', 'btn solid near-showmap', T().showMap); showMap.type = 'button'; showMap.prepend(icon('pin', { size: 'sm' }));
+    showMap.addEventListener('click', openMap);
+    mapCard.append(showMap, mapBox, recenter, el('p', 'small', T().mapNote));
     const list = el('section', 'card');
-    if (!shown.length) list.append(el('p', 'note', T().empty));
+    if (!shown.length) {   // UC-05 2.1: 999 and the nearest mapped police station, fire station and hospital
+      const alt = el('div', 'near-empty-help');
+      list.append(el('p', 'note', T().empty), alt);
+      homeNums(alt, a, { titleId: 'catEmptyTitle', title: false });
+    }
     else {
       list.append(el('p', 'small', me ? T().fromYou : T().fromCentre));
       const rows = el('div', 'rows');
@@ -304,7 +335,7 @@ export function initNear(ctx) {
         const acts = el('div', 'acts');
         if (exact(it)) {
           const onMap = el('button', 'btn', T().onMap); onMap.type = 'button'; onMap.prepend(icon('pin', { size: 'sm' }));
-          onMap.addEventListener('click', () => { const m = markers[i]; if (!m || !mapObj) return; mapCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); mapObj.setView(m.getLatLng(), 16); m.openPopup(); });
+          onMap.addEventListener('click', async () => { await openMap(); const m = markers[i]; if (!m || !mapObj) return; mapCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); mapObj.setView(m.getLatLng(), 16); m.openPopup(); });
           acts.append(onMap);
         }
         const det = el('button', 'btn solid', T().details); det.type = 'button'; det.addEventListener('click', () => open(it));
@@ -316,7 +347,67 @@ export function initNear(ctx) {
     }
     list.append(el('p', 'small', T().credit));
     view.replaceChildren(backLink(), head, mapCard, list);
-    drawMap(mapBox, from, shown, cat, (it) => ctx.go(`c/${cat.id}/${encodeURIComponent(it.p.id)}`));
+  }
+
+  /* ---------- এখন কেমন? (SRS FR05, UC-06) and ভুল জানান (FR15, UC-16) on the place page ---------- */
+  const statusValues = (cat) => ['open', 'closed', 'open_night', ...(cat.id === 'fuel' ? ['fuel_yes', 'fuel_no'] : []), ...(cat.id === 'shelter' ? ['shelter_open'] : [])];
+  function statusCard(p, cat) {
+    const S = T().status;
+    const box = el('section', 'card near-status');
+    const now = el('p', 'muted near-status-now', S.loading); now.setAttribute('role', 'status');
+    const msg = el('p', 'small'); msg.setAttribute('role', 'status');
+    const placeId = String(p.id || '').toLowerCase();
+    const show = async () => {
+      try {
+        const fb = await import('./firebase.js'), cm = await import('./community.js');
+        const st = await fb.readPlaceStatus(placeId);
+        if (!st || !(st.status || st.value)) { now.textContent = S.none; return; }
+        const nowMs = Date.now(), age = Math.max(1, Math.round((nowMs - cm.toMs(st.at)) / 60000));
+        const ago = age < 60 ? fill(S.minAgo, { n: num(age) }) : age < 1440 ? fill(S.hourAgo, { n: num(Math.round(age / 60)) }) : fill(S.dayAgo, { n: num(Math.round(age / 1440)) });
+        now.textContent = `${fill(S.said, { n: num(st.n || 1), v: S.values[st.status || st.value] || '' })} · ${ago}${cm.isOutdated(st, nowMs) ? ` · ${S.outdated}` : ''}`;
+      } catch { now.textContent = navigator.onLine ? S.none : S.offline; }
+    };
+    const buttons = el('div', 'pills');
+    for (const v of statusValues(cat)) {
+      const b = el('button', 'pill', S.values[v]); b.type = 'button';
+      b.addEventListener('click', async () => {
+        msg.textContent = '';
+        try {
+          const fb = await import('./firebase.js'), cm = await import('./community.js');
+          const user = await fb.currentUser();
+          if (!user) { msg.textContent = S.signIn; ctx.signIn(b); return; }          // UC-06 3.1
+          if (!(await fb.isVerified())) { msg.textContent = S.verify; return; }
+          const old = await fb.readPlaceStatus(placeId);
+          await fb.sendPlaceStatus(placeId, v, cm.nextPlaceStatus(old, v, Date.now()));
+          msg.textContent = S.thanks; show();
+        } catch (e) { msg.textContent = e && e.code === 'permission-denied' ? S.wait30 : navigator.onLine ? S.failed : S.offline; }   // UC-06 5.1
+      });
+      buttons.append(b);
+    }
+    box.append(el('h2', null, S.title), now, buttons, el('p', 'small', S.note), msg);
+    show();
+    return box;
+  }
+  function reportCard(p, cat, a) {
+    const R = T().report;
+    const box = el('section', 'card near-report');
+    const key = slug(a.district);
+    const rec = { id: String(p.id || ''), name_bn: nameOf(p), office_bn: T().cats[cat.id], phones: [] };
+    const wrong = el('button', 'btn', R.wrong); wrong.type = 'button'; wrong.prepend(icon('flag', { size: 'sm' }));
+    wrong.addEventListener('click', () => ctx.report(rec, { district: key, area: a.upazila, areaLabel: areaLabel(a) }, wrong));
+    // a place that is missing from the list (জায়গাটা যোগ করতে বলুন)
+    const l = el('label', null, R.addLabel); l.htmlFor = 'nearAddPlace';
+    const inp = el('input'); inp.id = 'nearAddPlace'; inp.maxLength = 80; inp.autocomplete = 'off'; inp.placeholder = R.addPh;
+    const msg = el('p', 'small'); msg.setAttribute('role', 'status');
+    const send = el('button', 'btn', R.addSend); send.type = 'button';
+    send.addEventListener('click', () => {
+      const name = inp.value.trim();
+      if (name.length < 2) { msg.textContent = R.addShort; return; }
+      if (/(?:\+?88)?0?1[3-9](?:[\s.-]?\d){8}|(?:\+?৮৮)?০?১[৩-৯](?:[\s.-]?[০-৯]){8}/.test(name)) { msg.textContent = R.noPhone; return; }   // UC-16 3.1
+      ctx.askPlace({ district: key, upazila: a.upazila, union: '', place: name }, send, (code) => { msg.textContent = R.done[code] || R.done.err; if (code === 'sent') inp.value = ''; });
+    });
+    box.append(el('h2', null, R.title), el('p', 'muted', R.text), wrong, l, inp, send, msg);
+    return box;
   }
 
   function placePage(view, cat, a, it) {
@@ -368,7 +459,7 @@ export function initNear(ctx) {
     if (/^https:\/\//.test(p.source_url || '')) { const s = el('a', 'btn ghost', T().source); s.href = p.source_url; s.target = '_blank'; s.rel = 'noopener noreferrer'; acts.append(s); }
     way.append(acts);
     if (it.pt && it.pt.approx) way.append(el('p', 'small', T().approxNote));
-    view.replaceChildren(backLink(`c/${cat.id}`, T().backToList), head, free, way);
+    view.replaceChildren(backLink(`c/${cat.id}`, T().backToList), head, free, way, statusCard(p, cat), reportCard(p, cat, a));
   }
 
   /* ---------- home (R2): the area card, the 12 tiles, the area's emergency numbers ---------- */
@@ -402,11 +493,12 @@ export function initNear(ctx) {
   }
   // Outside the pilot districts: 999 first, then the nearest police station, fire station and hospital on the map.
   // No phone number is shown for them, because none comes from an official source.
-  async function homeNums(box, a) {
+  // titleId: home and জরুরি সাহায্য both show it, so each has its own heading id; title: false when the page has one
+  async function homeNums(box, a, { titleId = 'homeNumsTitle', title = true } = {}) {
     const H = T().home;
-    const h = el('h2', null, H.numsTitle); h.id = 'homeNumsTitle';
+    const h = el('h2', null, H.numsTitle); h.id = titleId;
     const call = el('a', 'btn red home-999', H.call999); call.href = 'tel:999'; call.prepend(icon('phone', { size: 'sm' }));
-    box.replaceChildren(h, call, el('p', 'note', H.noOfficial));
+    box.replaceChildren(...[title ? h : null, call, el('p', 'note', H.noOfficial)].filter(Boolean));
     let all;
     try { all = await placesOf(a.district); } catch { box.append(el('p', 'note', T().loadFailed)); return; }
     if (!box.isConnected) return;
@@ -423,7 +515,7 @@ export function initNear(ctx) {
       const r = el('div', 'r near-row');
       const sq = el('span', 'cat-ic sm'); sq.append(icon(CATS.find((c) => c.id === catId).ic, { size: 'sm' }));
       const body = el('div');
-      body.append(el('div', 't', H[k]), el('div', 'm', best ? `${nameOf(best)} · ${dist(bd)}` : H.notListed));
+      body.append(el('div', 't', H[k]), el('div', 'm', best ? `${nameOf(best)} · ${T().byRoad} ${dist(bd * ROAD)}` : H.notListed));
       r.append(sq, body);
       if (best) {
         const acts = el('div', 'acts');
@@ -464,5 +556,7 @@ export function initNear(ctx) {
     return out;
   }
   const area = async () => { try { await loadBase(); } catch { return null; } return getArea(); };
-  return { show, close: closeMap, home, homeNums, sameUpazila, forget, label, openPicker, here, nearby, loadLeaflet, area };
+  // the 64 districts with their keys (for the admin's district rates); empty until the base data is loaded
+  const districts = () => (base ? base.districts.map((d) => ({ key: slug(d.en), en: d.en, bn: d.bn })).sort((a, b) => a.en.localeCompare(b.en)) : []);
+  return { show, close: closeMap, home, homeNums, sameUpazila, forget, label, openPicker, here, nearby, loadLeaflet, area, districts };
 }

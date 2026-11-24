@@ -11,6 +11,8 @@ import { icon as lineIcon } from './icons.js';
 import { initNear } from './near.js';
 import { initDakun } from './dakun.js';
 import { initProvide } from './provide.js';
+import { initEmergency } from './emergency.js';
+import { initLive } from './live.js';
 
 // Texts shown to people live in js/lang/bn.json and js/lang/en.json (CLAUDE.md); "ui" = buttons, labels and
 // messages, "page" = the home page sections. {name} marks a blank that fill() puts a value into.
@@ -32,6 +34,8 @@ let data = null, locations = null, current = null, areaIndex = [];
 let near = null;          // categories near the person (js/near.js), created by makeNear() at start-up
 let dakun = null;         // সেবা ডাকুন (js/dakun.js, R3), created by makeNear() too
 let provide = null;       // সেবা দিন (js/provide.js, R4): providers, and approvals and rates for an admin
+let emergency = null;     // জরুরি সাহায্য additions (js/emergency.js, R5)
+let live = null;          // লাইভ লোকেশন শেয়ার and the family view (js/live.js, SRS PR-2)
 let homeState = null;     // home (R2): { a: the area, place: its pilot place for the official numbers, or null }
 let acctOn = false;       // signed in (for the account tab's name)
 let activeTab = 'home'; // header tab that gets aria-current="page"
@@ -428,9 +432,10 @@ function renderArea() {
 /* ---------- views ---------- */
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see index.html).
 function showView(name) {
-  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat', 'dakun', 'provide']) $(view).hidden = name !== view;
+  for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat', 'dakun', 'provide', 'live']) $(view).hidden = name !== view;
   if (name !== 'cat') near?.close();   // the category map is closed when another page opens
   if (name !== 'dakun') dakun?.close();
+  if (name !== 'live') live?.close();   // the family map stops listening; an active share keeps sending
   // One sidebar for home and the area page (#108): it moves with the view; CSS shows it only on wide screens.
   const rail = $('rail');
   // After the content (999 first for keyboards and screen readers); CSS puts it on the left.
@@ -492,7 +497,7 @@ function goHome() {
 // #/ home · #/numbers · #/area (search) · #/area/<district>/<upazila>[/<union or town>[/<place id>]] · #/send
 // #/guide · #/about · #/faq · #/account · #/help/<lat>,<lng>,<time>[,<situation>] (বিপদ বার্তা, #134). Anything else opens home. The home sections carry data-pages="..."
 // in index.html: each page shows the sections that list its name, so no content or id is copied.
-const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare', 'c', 'dakun', 'provide'];
+const PAGES = ['home', 'numbers', 'area', 'send', 'guide', 'about', 'faq', 'account', 'help', 'prepare', 'c', 'dakun', 'provide', 'live', 'track'];
 const HEADING = { home: 'homeTitle', numbers: 'numbersTitle', area: 'areaPageTitle', guide: 'guidePageTitle', about: 'aboutTitle', faq: 'faqTitle' };
 let pending = null;          // what the tap wants (e.g. the place with its name, or "ask for location"), used once
 let firstRoute = true;       // the first page after loading does not move focus
@@ -551,6 +556,7 @@ function showPage(page) {
   document.querySelectorAll('#home [data-pages]').forEach((e) => { e.hidden = !e.dataset.pages.split(' ').includes(page); });
   if (!$('iconSrc').hidden) $('iconSrc').open = page === 'numbers';
   if (page === 'home') { renderRecent(); renderHome(); }
+  if (page === 'numbers') renderDirectory();
   showView('home');
 }
 function setTitle() { const x = pageTitle(); document.title = x ? `${x} · SafeConnect` : 'SafeConnect'; }
@@ -611,6 +617,17 @@ async function route() {
     if (location.hash !== at) return;
     finish('dakun', () => dakun.title(), 'dakunTitle', intent);
     syncArea();
+    return;
+  }
+  if (name === 'live' || name === 'track') {
+    // SRS FR09-FR11: #/live shares this phone's location; #/track/<id> is the family view (no sign-in)
+    $('main').dataset.page = name;
+    showView('live');
+    activeTab = name === 'live' ? 'send' : null; markTab();
+    const at = location.hash;
+    if (name === 'live') await live.show($('live')); else await live.track($('live'), rest[0]);
+    if (location.hash !== at) return;
+    finish(name === 'live' ? 'send' : null, () => live.title(name), name === 'live' ? 'liveTitle' : 'trackTitle', intent);
     return;
   }
   if (name === 'provide') {
@@ -914,6 +931,9 @@ function renderMyArea() {
   if (keep && $(keep)) $(keep).focus();
 }
 let toastTimer = 0;
+// জরুরি সাহায্য (R5): the big 999, "এখন যা করবেন", this area's numbers and the helplines by need
+let sosAreaName = '';     // the chosen area's name for the SMS when there is no location
+function showEmergency() { near?.area().then((a) => { const n = a ? near.label(a) : ''; if (n !== sosAreaName) { sosAreaName = n; if (!$('sos').hidden) refreshMessage(); } }).catch(() => {}); emergency?.show({ call: $('sosCall'), sit: sos.situation, steps: $('sitSteps'), area: $('sosArea'), lines: $('sosLines') }); }
 // The pilot place (district key, upazila) of an area from js/near.js, when we have official numbers for it; else null.
 function pilotPlace(a) {
   const key = String(a.district).toLowerCase().replace(/[^a-z]/g, '');
@@ -959,6 +979,9 @@ function makeNear() {
     rerender: () => route(),
     remembers,
     callTo: (p, mode) => dakun.callTo(p, mode),   // সেবা ডাকুন from a place page (R3)
+    signIn: (button) => auth.tap(button),
+    report: (record, info, from) => auth.report(record, info, from),   // ভুল জানান on a place page (SRS FR15)
+    askPlace: (draft, from, done) => auth.askPlace(draft, from, done),
     // "আমার লোকেশন" in the area card: in the pilot districts the exact union is looked up on the phone, as with
     // "Find help near me"; the point stays in memory (lastFix) for "Send location"
     onGps: (p) => {
@@ -980,6 +1003,20 @@ function makeNear() {
     provideTexts: () => LANG[lang].page.provide,
     signIn: (button) => auth.tap(button),
     pickArea,
+    officialRows: (a) => { const p = pilotPlace(a); if (!p) return null; try { return firstRows(p, areaContacts(data, p)); } catch { return null; } },
+    shareRide: (commute) => live.shareRide(commute),   // "পরিবারকে লাইভ দেখান" (SRS FR12)
+  });
+  live = initLive({
+    el, store, digits, near, go, lang: () => lang, toast: showToast,
+    texts: () => LANG[lang].page.live,
+    people: () => getPeople(),
+    signIn: (button) => auth.tap(button),
+  });
+  emergency = initEmergency({
+    el, digits, go, near, pickArea, lang: () => lang,
+    texts: () => LANG[lang].page.emergency,
+    national: () => data?.national || null,
+    officialRows: (a) => { const p = pilotPlace(a); if (!p) return null; try { return firstRows(p, areaContacts(data, p)); } catch { return null; } },
   });
   provide = initProvide({
     el, store, digits, toast: showToast, near, lang: () => lang,
@@ -1044,7 +1081,8 @@ function sosMessage() {
   const police = policeOf(place);
   const texts = { ...s.bipod.sms, noLoc: s.noLoc };
   if (police && !police.thana) texts.police = texts.policeDistrict;   // "পুলিশ:" unless it is the thana's OC
-  return buildSms({ texts, situation: s.sits[sos.situation][1], area: areaText(place, smsLang()), police: police?.phone || '',
+  // UC-08 3.1: no location → the SMS still says the chosen area
+  return buildSms({ texts, situation: s.sits[sos.situation][1], area: areaText(place, smsLang()) || (sos.pos ? '' : sosAreaName), police: police?.phone || '',
     link: sos.pos ? helpLink(sos.pos, sos.at, sos.situation) : '' });
 }
 function refreshMessage() { if (!sos.edited) $('sosMsg').value = sosMessage(); renderSend(); }
@@ -1053,7 +1091,7 @@ function renderSituations() {
   $('situations').replaceChildren(...Object.entries(t().sits).map(([k, [label]]) => {
     const b = el('button', 'chip', label); b.type = 'button';
     b.setAttribute('aria-pressed', String(k === sos.situation));
-    b.addEventListener('click', () => { sos.situation = k; sos.edited = false; renderSituations(); refreshMessage(); });
+    b.addEventListener('click', () => { sos.situation = k; sos.edited = false; renderSituations(); refreshMessage(); emergency?.steps($('sitSteps'), k); });
     return b;
   }));
 }
@@ -1250,6 +1288,7 @@ function showSos(pos, askLocation) {
     safe: false, short: sos.short, openedAt: sos.openedAt };
   renderSituations(); renderPeople();
   showView('sos');
+  showEmergency();
   const fresh = pos || (lastFix && Date.now() - lastFix.at < 120000 ? lastFix.pos : null);
   if (fresh) { setSosPos(fresh, lastFix && lastFix.pos === fresh ? lastFix.at : Date.now()); return; }
   if (askLocation) { requestSosLocation(); return; }
@@ -1707,8 +1746,55 @@ function renderWarm() {
   const title = el('h2', null, P().welcomeTitle); title.id = 'welcomeTitle';
   w.replaceChildren(title, ol, row);
 }
+// Home modules (SRS user manual 2): Nearby, SOS, Directory, Live Location, Dakun, Profile.
+const MODS = [['nearby', 'pin', '#/c'], ['sos', 'alert', '#/sos'], ['directory', 'gov', '#/numbers'], ['live', 'locate', '#/live'], ['dakun', 'car', '#/dakun'], ['profile', 'user', '#/account']];
+// Government Directory (SRS FR08, UC-09) on #/numbers: the chosen area's official numbers by role (থানা, UNO,
+// স্বাস্থ্য কমপ্লেক্স, ফায়ার সার্ভিস, ইউনিয়ন পরিষদ, গ্রাম পুলিশ), each with its source; an area without checked numbers
+// says so and shows 999 and the nearest mapped police station, fire station and hospital. Never an unverified number.
+let dirRun = 0;
+async function renderDirectory() {
+  const box = $('dirArea'), D = P().dir, run = ++dirRun;
+  const a = near ? await near.area() : null;
+  if (run !== dirRun) return;
+  const h = el('h2', null, a ? fill(D.forArea, { a: near.label(a) }) : D.title); h.id = 'dirTitle';
+  const change = el('button', 'btn', a ? D.change : D.pick); change.type = 'button'; change.addEventListener('click', pickArea);
+  if (!a) { box.replaceChildren(h, el('p', 'muted', D.noArea), change); return; }
+  const place = data ? (() => { const last = lastPlace(); return last && near.sameUpazila(last, a) ? last : pilotPlace(a); })() : null;
+  if (place) {
+    const groups = areaContacts(data, place).filter((g) => g.id !== 'emergency');
+    box.replaceChildren(h, el('p', 'muted', D.official), ...groupNodes(groups), change);
+    return;
+  }
+  const alt = el('div', 'sos-area-near');
+  box.replaceChildren(h, el('p', 'note', D.none), alt, change);
+  near.homeNums(alt, a, { titleId: 'dirNumsTitle', title: false });
+}
+// a list of contact groups as open/close boxes with every person row (and its source link)
+function groupNodes(list) {
+  return list.map((gr) => {
+    const items = gr.items, callable = items.filter(withPhone).length;
+    const d = el('details', 'cat'); const s = el('summary');
+    s.append(el('span', null, t().groups[gr.id] || gr.id), el('span', 'count', digits(callable)));
+    const body = el('div', 'cat-body');
+    if (gr.fallback) body.append(el('p', 'fallback', t().fallback));
+    if (gr.noNumbers) body.append(el('p', 'fallback', t().noNumbers));
+    [...items].sort((x, y) => withPhone(y) - withPhone(x)).forEach((r) => body.append(personRow(r)));
+    d.append(s, body);
+    return d;
+  });
+}
+function renderMods() {
+  const m = P().mods;
+  $('homeMods').setAttribute('aria-label', m.label);
+  $('homeMods').replaceChildren(...MODS.map(([k, ic, href]) => {
+    const a = el('a', 'home-mod'); a.href = href;
+    const sq = el('span', 'cat-ic'); sq.append(lineIcon(ic));
+    a.append(sq, el('span', null, m[k]));
+    return a;
+  }));
+}
 function renderPage() {
-  renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
+  renderMods(); renderWarm(); renderIconRow(); renderGuides(); renderDuo(); renderHelp(); renderNet(); renderHead(); renderNav(); renderAbout(); renderFaq(); renderFooter();
   renderRail(); renderRoles(); renderMyArea();
   $('findTitle').textContent = P().findTitle; $('areaPageTitle').textContent = P().titles.area; $('guidePageTitle').textContent = P().titles.guide; $('numbersTitle').textContent = P().titles.numbers; $('findText').textContent = P().findText;
   $('numRowTitle').textContent = P().numRow.title;
@@ -1735,6 +1821,7 @@ function setText() {
   $('shareTitle').textContent = s.shareTitle; $('shareText').textContent = s.shareText;
   $('firstTitle').textContent = s.first; $('firstCalm').textContent = s.firstCalm; $('moreTitle').textContent = s.more;
   $('sosBtnTitle').textContent = s.sosBtn;
+  { const L = P().live; $('liveBtnTitle').textContent = L.homeBtn; $('liveBtnSub').textContent = L.homeSub; $('sosLiveLink').textContent = L.homeBtn; }
   $('sosBack').textContent = s.back; $('sosTitle').textContent = s.sosTitle;
   $('sitTitle').textContent = s.sit; $('locTitle').textContent = s.loc; $('sendTitle').textContent = s.send; $('msgTitle').textContent = s.msgT;
   $('smsHint').textContent = s.smsHint; $('peopleTitle').textContent = s.people;
@@ -1753,8 +1840,10 @@ $('fReset').addEventListener('click', () => setDistrict(''));
 $('backBtn').addEventListener('click', goHome);
 $('homeBtn').addEventListener('click', goHome);
 $('areaChip').addEventListener('click', pickArea);
-$('hFinder').addEventListener('click', pickArea);   // the area picker for all 64 districts (R2)
-$('hSearch').addEventListener('click', pickArea);
+// the header search: the everyday-word search of the categories (SRS FR03)
+const openSearch = () => go('c', { after: () => $('nearSearch')?.focus() });
+$('hFinder').addEventListener('click', openSearch);
+$('hSearch').addEventListener('click', openSearch);
 window.addEventListener('resize', markTab);      // keeps the active tab in view and the edge hints right
 const calmScroll = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
 $('ctaSend').addEventListener('click', () => openSos(null));
@@ -1775,6 +1864,8 @@ $('langBtn').addEventListener('click', () => {
   if (!$('cat').hidden) near.show($('cat'), readHash().slice(1));
   if (!$('dakun').hidden) dakun.show($('dakun'));
   if (!$('provide').hidden) provide.show($('provide'));
+  if (!$('live').hidden) route();
+  if (!$('sos').hidden) showEmergency();
   if ($('main').dataset.page === 'home') renderHome();
   if (!$('sos').hidden) { renderOpened(); renderSituations(); renderLoc(); renderPeople(); refreshMessage(); if (!$('sosDemo').hidden) fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos); }
   auth.setText();
@@ -1784,8 +1875,10 @@ function toggleTheme() {
   const root = document.documentElement;
   const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
   root.dataset.theme = dark ? 'light' : 'dark';
+  store.set('sc-theme', root.dataset.theme);   // remembered on this phone (SRS FR02, NFR06)
 }
 $('themeBtn').addEventListener('click', toggleTheme);
+{ const th = store.get('sc-theme'); if (th === 'dark' || th === 'light') document.documentElement.dataset.theme = th; }
 
 setText();
 // Sign-in (P45, #73): the account button, the sign-in modal and #/account; help never waits for it.
@@ -1793,6 +1886,7 @@ setText();
 const auth = initAuth({
   $, el, store, fill, digits, lang: () => lang, texts: () => LANG[lang], showView, goHome, openSos, locate, go,
   accountChanged: (on) => { acctOn = on; renderNav(); },
+  toast: showToast,
   people: { get: getPeople, set: setPeople, norm: normPhone, changed: () => { renderHomeSos(); if (!$('sos').hidden) { renderPeople(); renderSend(); } } },
   placeName: (p) => (data && data.docs[p.district] ? { title: placeTitle(p), sub: placeSub(p) } : null),
   autoSwitch,                           // Settings shows the same auto-location switch as home (#105)
@@ -1813,6 +1907,8 @@ try {
   areaIndex = buildAreaIndex(data);
   renderRecent(); renderStats(); renderPlaces(); renderIconRow(); renderGuides(); renderMyArea();
   if ($('main').dataset.page === 'home') renderHome(); else syncArea();   // the pilot numbers need the data
+  if ($('main').dataset.page === 'numbers') renderDirectory();   // the directory needs the official data too
+  if (!$('sos').hidden) showEmergency();   // the helplines need the data
   autoLoc.resume();                     // only when the person turned it on and the browser allows it
 } catch (err) {
   msg(`${err.message}. Please reload the page.`);

@@ -7,7 +7,10 @@
 // person taps the button, and Firebase loads only then. Everything is built with createElement + textContent.
 import { icon } from './icons.js';
 
-const TYPE_IC = { ambulance: 'amb', cng: 'car', bike: 'bike', technician: 'wrench', help: 'hands', errand: 'basket', pickup: 'bag', towing: 'car' };
+const TYPE_IC = { ambulance: 'amb', cng: 'car', bike: 'bike', technician: 'wrench', help: 'hands', errand: 'basket', pickup: 'bag', towing: 'car',
+  easybike: 'car', rickshaw: 'bike', van: 'bus' };
+// the live-share vehicle type of a ride type (live_shares allows rickshaw, easybike, cng, bus, other)
+const SHARE_VEHICLE = { cng: 'cng', easybike: 'easybike', rickshaw: 'rickshaw' };
 const r5 = (x) => Math.round(x * 1e5) / 1e5;
 const r3 = (x) => Math.round(x * 1e3) / 1e3;          // stored ride points: about 100 m (the rules refuse more exact ones)
 const RSTEPS = ['requested', 'accepted', 'arrived', 'on_trip', 'completed', 'paid'];
@@ -232,12 +235,40 @@ export function initDakun(ctx) {
     // সেবা দিতে চান? → the provider page (R4)
     const P = ctx.provideTexts();
     const give = card(el('h2', null, P.wantToProvide), el('p', 'muted', P.wantText), pills(btn('btn', P.iProvide, 'wrench', () => ctx.go('provide'))));
-    view.replaceChildren(top, what, where, card(histHead, hist), give);
+    const fallback = el('section', 'card dk-fallback');
+    view.replaceChildren(top, what, where, fallback, card(histHead, hist), give);
+    paintFallback();
     paintEst();
     drawMap();
   }
   const warn999 = () => { const n = el('div', 'note dk-note'); n.append(icon('alert', { size: 'sm' }));
     const p = el('p'); const a = el('a', null, T().n999); a.href = 'tel:999'; p.append(T().warn999a, a, T().warn999b); n.append(p); return n; };
+  // "never stranded" (SRS FR12, UC-13 3.1): nobody online (or not known yet) → 999, the area's official numbers and the
+  // nearest hospital and bus stand or ghat; the request can still be sent. Hidden while someone is online.
+  let fbRun = 0;
+  async function paintFallback() {
+    const box = view?.querySelector('.dk-fallback'); if (!box) return;
+    if (form.online && form.online.length) { box.hidden = true; return; }
+    box.hidden = false;
+    const run = ++fbRun;
+    const call = el('a', 'btn red', T().n999); call.href = 'tel:999'; call.prepend(icon('phone', { size: 'sm' }));
+    const kids = [el('h2', null, form.online ? fill(T().noneTitle, { who: who(form.type) }) : T().ifNobody), el('p', 'muted', T().fallbackText), pills(call)];
+    const a = await ctx.near.area();
+    const rows = a ? ctx.officialRows(a) : null;
+    if (rows && rows.length) { const list = el('div', 'first'); list.append(...rows.slice(0, 4)); kids.push(el('h3', null, T().officialHere), list); }
+    const near = [];
+    for (const [cats, label] of [[['hospital'], T().nearHospital], [['transport'], T().nearStand]]) {
+      const [p] = await ctx.near.nearby(cats, 1);
+      if (!p) continue;
+      const row = el('div', 'r near-row'); const sq = el('span', 'cat-ic sm'); sq.append(icon(cats[0] === 'hospital' ? 'health' : 'bus', { size: 'sm' }));
+      const b = el('div'); b.append(el('div', 't', label), el('div', 'm', `${p.name} · ${dist(p.km * 1000)}`));
+      const acts = el('div', 'acts'); const g = el('a', 'btn', T().mapLink); g.href = `https://www.google.com/maps/dir/?api=1&destination=${Number(p.lat)},${Number(p.lon)}`;
+      g.target = '_blank'; g.rel = 'noopener noreferrer'; g.prepend(icon('nav', { size: 'sm' })); acts.append(g);
+      row.append(sq, b, acts); near.push(row);
+    }
+    if (near.length) { const rs = el('div', 'rows'); rs.append(...near); kids.push(rs); }
+    if (run === fbRun && box.isConnected) box.replaceChildren(...kids);
+  }
   function paintEst() {
     const box = view?.querySelector('.dk-est'); if (!box || !RM) return;
     const t = RM.typeOf(form.type), rt = rates && rates[form.type];
@@ -291,7 +322,7 @@ export function initDakun(ctx) {
   async function refreshOnline() {
     try {
       const [fb, cm] = await load(); if (!(await fb.currentUser())) return;
-      form.online = await fb.onlineCount(form.type, cm.districtKey(here.district)); paintEst();
+      form.online = await fb.onlineCount(form.type, cm.districtKey(here.district)); paintEst(); paintFallback();
     } catch { /* not checked yet, or offline: the line is just not shown */ }
   }
 
@@ -302,7 +333,7 @@ export function initDakun(ctx) {
     form.pickLabel = form.pickLabel.trim(); form.dropLabel = form.dropLabel.trim();
     const say = (k, focus) => { msg.textContent = T().check[k]; if (focus) view.querySelector(focus)?.focus(); };
     try { if (!(await needUser(msg, T().whyCall))) return; } catch (e) { msg.textContent = errText(e); return; }
-    if (noRates() || !rates[form.type]) { try { const [fb] = await load(); rates = await fb.readRates(); paintEst(); } catch { /* said below */ } }
+    if (noRates() || !rates[form.type]) { try { const [fb, cm] = await load(); rates = await fb.readRates(cm.districtKey(here.district)); paintEst(); } catch { /* said below */ } }
     const rt = rates && rates[form.type];
     if (!rt) { msg.textContent = T().err.norates; return; }
     if (form.pickLabel.length < 2) return say(t.shop ? 'shopName' : 'pickName', '#dkPick');
@@ -342,7 +373,7 @@ export function initDakun(ctx) {
   async function follow(id) {
     const [fb] = await load();
     stopRide();
-    if (noRates()) { try { rates = await fb.readRates(); } catch { rates = {}; } }
+    if (noRates()) { try { rates = await fb.readRates(ride?.district); } catch { rates = {}; } }
     rideUnsub = fb.watchRide(id, onRide, (e) => { const m = view?.querySelector('.dk-ridemsg'); if (m) m.textContent = errText(e); });
   }
   async function onRide(r) {
@@ -445,12 +476,12 @@ export function initDakun(ctx) {
     } else if (r.status === 'accepted' || r.status === 'arrived') {
       out.push(el('h2', null, fill(r.status === 'arrived' ? T().arrived : T().coming, { who: w })), provLine(r),
         el('p', 'muted', r.status === 'accepted' ? etaText(far(r.pickup)) : fill(T().waiting, { place: r.pickup.label })),
-        cancelBtn(r.status === 'arrived' && rt ? RM.cancelFee(rt, 'arrived') : 0));
+        pills(shareBtn(r)), cancelBtn(r.status === 'arrived' && rt ? RM.cancelFee(rt, 'arrived') : 0));
     } else if (r.status === 'on_trip') {
       const fam = el('div', 'dk-family');
       out.push(el('h2', null, r.type === 'technician' ? T().working : r.type === 'help' ? T().helping : T().onTrip), provLine(r),
         r.drop ? el('p', 'muted', fill(T().toward, { place: r.drop.label })) : null,
-        pills(btn('btn', T().family, 'msg', () => familyMsg(fam))), fam);
+        pills(shareBtn(r), btn('btn', T().family, 'msg', () => familyMsg(fam))), fam);
     } else if (r.status === 'completed') {
       out.push(el('h2', null, T().bill), provLine(r), ...billBox(r), el('p', 'muted', fill(T().payCash, { who: w, t: tk(RM.billTotal(r)) })),
         'billOk' in r ? el('p', 'small', `${T().youSaid}: ${r.billOk ? T().billOk : T().billWrong}`)
@@ -490,6 +521,11 @@ export function initDakun(ctx) {
       if (what === 'new') { stopRide(); ride = null; store.set('sc-ride', ''); form.drop = null; form.dropLabel = ''; show(view); }
     } catch (e) { if (m) m.textContent = errText(e); }
   }
+  // "পরিবারকে লাইভ দেখান": a live share with this ride's vehicle and destination (Safe Commute filled in)
+  const shareBtn = (r) => btn('btn solid', T().shareLive, 'locate', () => ctx.shareRide({
+    vehicleNo: String(r.vehicle || '').slice(0, 30), vehicleType: SHARE_VEHICLE[r.type] || 'other',
+    ...(r.drop && r.drop.label ? { destination: String(r.drop.label).slice(0, 60) } : {}),
+  }));
   function familyMsg(box) {
     const r = ride;
     const text = fill(T().familyText, { what: name(r.type), from: r.pickup.label, to: r.drop ? fill(T().familyTo, { place: r.drop.label }) : '', who: who(r.type), name: r.providerName || '', veh: r.vehicle || '' });
@@ -544,7 +580,7 @@ export function initDakun(ctx) {
     await quickPicks();
     formPage();
     // the rates and the online count come in the background; the form works meanwhile
-    (async () => { if (noRates()) { try { const [fb] = await load(); rates = await fb.readRates(); } catch { rates = {}; } paintEst(); } refreshOnline(); })();
+    (async () => { if (noRates()) { try { const [fb, cm] = await load(); rates = await fb.readRates(cm.districtKey(here.district)); } catch { rates = {}; } paintEst(); } refreshOnline(); })();
   }
   // From a place page: "এখানে যেতে ডাকুন" (pickup = the area, destination = the place), an ambulance to a hospital,
   // "কিনে এনে দিন" from a shop, or a tow to a workshop. The person can still change everything on the form.

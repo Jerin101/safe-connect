@@ -3,7 +3,7 @@
 // (CLAUDE.md rule 5). Tested in tests/bipod-test.mjs.
 
 export const SITE_URL = 'https://jerin101.github.io/safe-connect/';   // the site is index.html (#141); old preview.html links still work
-export const SITUATIONS = ['danger', 'followed', 'accident', 'sick', 'lost'];
+export const SITUATIONS = ['danger', 'followed', 'accident', 'sick', 'lost', 'harassment'];   // SRS FR07
 
 // A box around Bangladesh (incl. St Martin's Island): a link outside it shows the calm "check the link" page.
 const BD = { south: 20.5, north: 26.7, west: 88.0, east: 92.7 };

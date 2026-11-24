@@ -52,9 +52,13 @@ await send('Page.navigate', { url: `${BASE}#/c` }); await waitFor(`!!document.qu
 await pickArea('Sylhet', 'Sylhet Sadar');
 await waitFor(`/সিলেট/.test(document.querySelector('#cat .near-where')?.textContent || '')`);
 await click('#dock [data-key="dakun"]');
-await waitFor(`location.hash === '#/dakun' && document.querySelectorAll('#dakun .tcard').length === 8`);
+await waitFor(`location.hash === '#/dakun' && document.querySelectorAll('#dakun .tcard').length === 11`);
 const names = await ev(`[...document.querySelectorAll('#dakun .tcard span:last-child')].map((x) => x.textContent)`);
-check('eight services with the meaningful names', JSON.stringify(names) === JSON.stringify(['অ্যাম্বুলেন্স', 'সিএনজি অটোরিকশা', 'মোটরবাইক রাইড', 'মিস্ত্রি ডাকুন', 'স্বেচ্ছাসেবক সাহায্য', 'কিনে এনে দিন', 'অর্ডার তুলে এনে দিন', 'গাড়ি টেনে নেওয়া']), JSON.stringify(names));
+check('eleven services with the SRS names (FR12)', JSON.stringify(names) === JSON.stringify(['অ্যাম্বুলেন্স', 'সিএনজি অটোরিকশা', 'মোটরবাইক রাইড', 'মিস্ত্রি ডাকুন', 'স্বেচ্ছাসেবক / রক্তের খোঁজ', 'কিনে এনে দিন', 'অর্ডার তুলে এনে দিন', 'গাড়ি টেনে নেওয়া', 'ইজিবাইক / অটো', 'রিকশা', 'ভ্যান / পিকআপ']), JSON.stringify(names));
+check('never stranded: 999 and the nearest hospital and bus stand or ghat (UC-13 3.1)', await waitFor(`!document.querySelector('#dakun .dk-fallback').hidden && !!document.querySelector('#dakun .dk-fallback a[href="tel:999"]') && /কাছের হাসপাতাল/.test(document.querySelector('#dakun .dk-fallback').textContent)`, 20000));
+await click('#dakun .tcard[data-type="easybike"]');
+check('ইজিবাইক: chosen, "চালক ডাকুন"', await waitFor(`document.querySelector('#dakun .tcard[aria-pressed="true"]')?.dataset.type === 'easybike' && /চালক ডাকুন/.test(document.querySelector('#dakun .dk-go')?.textContent || '')`));
+await click('#dakun .tcard[data-type="cng"]');
 check('the ডাকুন tab is marked', await ev(`document.querySelector('#dock [aria-current="page"]')?.dataset.key === 'dakun'`));
 check('pickup starts at the chosen area', await ev(`/সিলেট/.test(document.getElementById('dkPick').value)`));
 check('the map shows tiles', await waitFor(`document.querySelectorAll('#dakun .leaflet-tile-loaded').length > 3`, 25000));

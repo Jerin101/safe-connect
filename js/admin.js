@@ -5,7 +5,7 @@
 
 // The only roles the site can set. New admins are added only in the Firebase console (admins/{uid}).
 export const SITE_ROLES = ['user', 'volunteer'];
-export const AUDIT_ACTIONS = ['ROLE_CHANGED', 'REPORT_STATUS_CHANGED'];
+export const AUDIT_ACTIONS = ['ROLE_CHANGED', 'REPORT_STATUS_CHANGED', 'PROVIDER_APPROVED', 'PROVIDER_REJECTED', 'RATES_CHANGED'];
 const ID_OK = /^[A-Za-z0-9_-]{1,128}$/;   // the same check as firestore.rules
 
 // The audit entry written in the same batch as a role change (js/firebase.js adds "at").
@@ -208,7 +208,7 @@ export function usersSection() {
 /* ---------- audit log (read only: the rules allow no edit and no delete) ---------- */
 function metaText(e) {
   const m = e.meta && typeof e.meta === 'object' ? e.meta : {};
-  const name = (v) => (e.action === 'ROLE_CHANGED' ? roleName(v) : (h.ctx.texts().report.statuses[v] || v));
+  const name = (v) => (e.action === 'ROLE_CHANGED' ? roleName(v) : (W().provStates?.[v] || h.ctx.texts().report.statuses[v] || v));
   return m.from || m.to ? `${name(String(m.from || '—'))} → ${name(String(m.to || '—'))}` : '';
 }
 function auditRow(e) {
@@ -216,7 +216,8 @@ function auditRow(e) {
   const row = c.el('div', 'wrow');
   const ic = c.el('span', 'avatar'); ic.append(h.icon(e.action === 'ROLE_CHANGED' ? ADMIN_ICON.users : ADMIN_ICON.check));
   const txt = c.el('div');
-  const about = e.entity === 'users' ? personName(e.entityId) : c.fill(w.aboutReport, { id: shortId(e.entityId) });
+  const about = e.entity === 'users' ? personName(e.entityId) : e.entity === 'reports' ? c.fill(w.aboutReport, { id: shortId(e.entityId) })
+    : e.entity === 'fare_rates' ? c.fill(w.aboutRate, { id: String(e.entityId || '').replace('__', ' · ') }) : c.fill(w.aboutProvider, { id: shortId(e.entityId) });
   txt.append(c.el('b', null, w.actions[e.action] || String(e.action || '')),
     c.el('small', null, [about, metaText(e)].filter(Boolean).join(' · ')),
     c.el('small', null, [c.fill(w.by, { who: personName(e.actorUid) }), e.at ? when(e.at) : ''].filter(Boolean).join(' · ')));

@@ -6,7 +6,7 @@ import { after, before, beforeEach, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import { doc, getDoc, getDocs, collection, setDoc, writeBatch, serverTimestamp, deleteDoc } from 'firebase/firestore';
-import { nextPlaceStatus, placeStatusText } from '../../js/community.js';
+import { nextPlaceStatus, placeStatusText, isOutdated } from '../../js/community.js';
 
 const ADMIN = 'admin-uid', RINA = 'rina-uid', KARIM = 'karim-uid';
 let env;
@@ -24,18 +24,21 @@ beforeEach(async () => {
 
 async function vote(f, uid, placeId, value, n) {
   const b = writeBatch(f);
-  b.set(doc(f, 'placeStatus', placeId), { value, n, at: serverTimestamp() });
-  b.set(doc(f, 'placeStatus', placeId, 'by', uid), { value, at: serverTimestamp() });
+  b.set(doc(f, 'placeStatus', placeId), { status: value, n, at: serverTimestamp() });
+  b.set(doc(f, 'placeStatus', placeId, 'by', uid), { status: value, at: serverTimestamp() });
   return b.commit();
 }
 
 describe('the page helpers (js/community.js)', () => {
-  test('place status text: count, value, age; nothing after 6 hours', () => {
+  test('place status text: count, status, age; older than 6 hours is shown as "Outdated" (SRS FR05)', () => {
     const now = Date.now();
-    assert.match(placeStatusText({ value: 'fuel_yes', n: 3, at: new Date(now - 20 * 60000) }, now), /3 জন বলেছেন: তেল আছে · 20 মিনিট আগে/);
-    assert.equal(placeStatusText({ value: 'open', n: 1, at: new Date(now - 7 * 3600000) }, now), null);
-    assert.deepEqual(nextPlaceStatus({ value: 'open', n: 2, at: new Date(now - 60000) }, 'open', now), { value: 'open', n: 3 });
-    assert.deepEqual(nextPlaceStatus({ value: 'open', n: 2, at: new Date(now - 60000) }, 'closed', now), { value: 'closed', n: 1 });
+    assert.match(placeStatusText({ status: 'fuel_yes', n: 3, at: new Date(now - 20 * 60000) }, now), /3 জন বলেছেন: তেল আছে · 20 মিনিট আগে$/);
+    assert.match(placeStatusText({ status: 'open', n: 1, at: new Date(now - 7 * 3600000) }, now), /Outdated/);
+    assert.ok(isOutdated({ at: new Date(now - 7 * 3600000) }, now) && !isOutdated({ at: new Date(now - 60000) }, now));
+    assert.equal(placeStatusText(null, now), null);
+    assert.equal(nextPlaceStatus({ status: 'open', n: 2, at: new Date(now - 60000) }, 'open', now).n, 3);
+    assert.equal(nextPlaceStatus({ status: 'open', n: 2, at: new Date(now - 60000) }, 'closed', now).n, 1);
+    assert.equal(nextPlaceStatus({ status: 'open', n: 2, at: new Date(now - 60000) }, 'closed', now).status, 'closed');
   });
 });
 
@@ -61,12 +64,19 @@ describe('place status ("এখন খোলা? তেল আছে?")', () => 
     await assertFails(vote(db(ADMIN), ADMIN, 'osm-n123', 'closed', 3));
     await assertSucceeds(vote(db(ADMIN), ADMIN, 'osm-n123', 'closed', 1));
   });
+  test('"Shelter Open" is a status; the old field name "value" is refused (ER diagram: status)', async () => {
+    await assertSucceeds(vote(db(RINA), RINA, 'osm-n777', 'shelter_open', 1));
+    const f = db(KARIM), b = writeBatch(f);
+    b.set(doc(f, 'placeStatus', 'osm-n778'), { value: 'open', n: 1, at: serverTimestamp() });
+    b.set(doc(f, 'placeStatus', 'osm-n778', 'by', KARIM), { value: 'open', at: serverTimestamp() });
+    await assertFails(b.commit());
+  });
   test('the same person again within 30 minutes: refused', async () => {
     await vote(db(RINA), RINA, 'osm-n123', 'open', 1);
     await assertFails(vote(db(RINA), RINA, 'osm-n123', 'open', 2));
   });
   test('the summary alone, signed out, unverified, an unknown answer or a bad place id: refused', async () => {
-    await assertFails(setDoc(doc(db(RINA), 'placeStatus', 'osm-n123'), { value: 'open', n: 1, at: serverTimestamp() }));
+    await assertFails(setDoc(doc(db(RINA), 'placeStatus', 'osm-n123'), { status: 'open', n: 1, at: serverTimestamp() }));
     await assertFails(vote(db(null), RINA, 'osm-n123', 'open', 1));
     await assertFails(vote(dbUnverified(RINA), RINA, 'osm-n123', 'open', 1));
     await assertFails(vote(db(RINA), RINA, 'osm-n123', 'maybe', 1));

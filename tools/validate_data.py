@@ -243,6 +243,9 @@ def check_places():
         for fi in x.get("files", []):
             name = fi.get("file")
             listed.add(name)
+            # NFR08: every places file is named after its district's slug (as in areas_bangladesh.json): <slug>.json or <slug>-<n>.json
+            if not re.fullmatch(re.escape(R.slug(den or "")) + r"(-\d+)?\.json", str(name or "")):
+                err(f, den, f"places file {name} must be named after the district's slug ({R.slug(den or '')}.json)")
             fp = os.path.join("places", name)
             if not os.path.exists(os.path.join(DATA, fp)):
                 err(f, den, f"listed file {name} is missing")

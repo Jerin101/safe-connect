@@ -618,3 +618,49 @@ main[data-page="home"] .feed { max-width: 900px; width: 100%; margin-inline: aut
 .leaflet-tooltip.mtip::before { display: none; }
 @media (prefers-reduced-motion: reduce) { .mme-pulse { animation: none; } .mveh-rot { transition: none; } }
 
+/* জরুরি সাহায্য (R5, #267): the big 999, "এখন যা করবেন", area numbers, helplines by need */
+.sos-call { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; padding: 14px 16px; margin-bottom: 14px;
+  border-radius: var(--r); background: linear-gradient(140deg, var(--red-1), var(--red-2)); color: var(--on-color); text-decoration: none; box-shadow: var(--shadow); }
+.sos-call b { display: block; font-size: 1.25rem; }
+.sos-call small { display: block; opacity: 0.92; }
+.sos-ring { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.18); }
+.sos-steps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+#sitSteps, #sosArea, #sosLines { display: grid; gap: 10px; }
+#sitSteps[hidden] { display: none; }
+#sosLines h3 { margin: 6px 0 0; font-size: 1rem; }
+.sos-area-near { display: grid; gap: 10px; }
+
+/* লাইভ লোকেশন শেয়ার and the family view (SRS PR-2) */
+#live { display: grid; gap: 14px; max-width: 900px; padding-block: 16px; }
+#live .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 10px; min-width: 0; }
+#live h2 { margin: 0; font-size: 1.15rem; }
+#live label { font-weight: 600; font-size: 0.92rem; }
+#live input, #live select { width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); color: var(--ink); padding: 10px 12px; font: inherit; }
+#live input[aria-invalid="true"] { border: 2px solid var(--danger); }
+.live-on { margin: 0; font-weight: 700; color: var(--ok); }
+.live-link { overflow-wrap: anywhere; color: var(--muted); }
+.live-map { height: 52vh; }
+.live-map[hidden] { display: none; }
+.bill > div.warn b, .bill > div.warn span { color: var(--danger); }
+.home-live { display: grid; gap: 10px; }
+.sos-live { justify-self: start; margin-top: 8px; }
+
+/* Home modules (SRS PR-6) */
+.home-mods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 720px) { .home-mods { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.home-mod { display: grid; justify-items: center; gap: 6px; padding: 10px 4px; min-height: 84px; border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.84rem; text-align: center; }
+.home-mod:hover { border-color: var(--accent); }
+.home-mod .cat-ic { width: 40px; height: 40px; border-radius: 12px; }
+
+/* SRS PR-7: search, map on demand, directory */
+.near-search { display: grid; gap: 6px; }
+.near-search-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.near-search input { width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); color: var(--ink); padding: 10px 12px; font: inherit; }
+.near-showmap { justify-self: start; }
+.near-map[hidden], .near-recenter[hidden] { display: none; }
+.near-empty-help { display: grid; gap: 10px; }
+.dir-area { display: grid; gap: 10px; }
+.dir-area h2 { margin: 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+

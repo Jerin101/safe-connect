@@ -87,12 +87,22 @@
             <span><strong id="sosBtnTitle"></strong><small id="sosBtnSub"></small></span>
             <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
           </button>
+          <!-- SRS FR09: live location sharing (js/live.js) -->
+          <a class="act glass violet live-big" id="liveBtn" href="#/live">
+            <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg></span>
+            <span><strong id="liveBtnTitle"></strong><small id="liveBtnSub"></small></span>
+            <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.2 5.3 20 12l-6.8 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg></span>
+          </a>
         </section>
+        <!-- SRS user manual 2: the modules on Home; 999 stays in the header on every page -->
+        <nav class="row-sec home-mods" id="homeMods" aria-label="Modules" data-pages="home"></nav>
         <section class="row-sec home-cats" id="homeCats" aria-labelledby="homeCatsTitle" data-pages="home"></section>
         <section class="row-sec home-nums" id="homeNums" aria-labelledby="homeNumsTitle" data-pages="home"></section>
         <!-- My area (issue #105): "Call these first" for the last area, and the opt-in auto location switch; filled by js/preview.js. -->
         <section class="row-sec myarea" id="myArea" aria-labelledby="myAreaTitle" data-pages="home"></section>
 
+        <!-- SRS FR08: the Government Directory of the chosen area (js/preview.js renderDirectory) -->
+        <section class="row-sec dir-area" id="dirArea" aria-labelledby="dirTitle" data-pages="numbers"></section>
         <section class="row-sec icons" aria-labelledby="numbersTitle" data-pages="home numbers">
           <div class="row-head">
             <h1 class="page-title" id="numbersTitle" tabindex="-1" data-pages="numbers"></h1>
@@ -220,6 +230,7 @@
   <div class="wrap page" id="cat" hidden></div>
   <div class="wrap page" id="dakun" hidden></div>
   <div class="wrap page" id="provide" hidden></div>
+  <div class="wrap page" id="live" hidden></div>
   <div class="wrap page" id="area" hidden>
     <!-- Wide screens: the home sidebar (My area, filter) is moved in here by js/preview.js, so both pages share one layout (#108). -->
     <div class="area-main">
@@ -257,6 +268,8 @@
       <button class="back" id="sosBack" type="button"></button>
       <h1 class="page-title" id="sosTitle" tabindex="-1"></h1>
     </div>
+    <!-- জরুরি সাহায্য (R5, #267): the big 999 call first; filled by js/emergency.js -->
+    <div id="sosCall"></div>
     <!-- বিপদ বার্তা (#134): opens the messages app with the message ready; the site never sends anything itself. -->
     <section class="bipod">
       <a class="bipod-btn" id="bipodBtn"><span id="bipodLabel"></span><small id="bipodSub"></small></a>
@@ -268,11 +281,14 @@
         <details class="live" id="liveBox"><summary id="liveTitle"></summary><div class="live-body" id="liveBody"></div></details>
       </div>
       <a class="linkbtn prep-link" id="prepLink" href="#/prepare"></a>
+      <a class="btn violet sos-live" id="sosLiveLink" href="#/live"></a>
     </section>
     <section class="panel glass" aria-labelledby="sitTitle">
       <h2 id="sitTitle"></h2>
       <div class="chips" id="situations"></div>
     </section>
+    <!-- "এখন যা করবেন" for the chosen situation (R5) -->
+    <section class="panel glass sos-what" id="sitSteps" aria-labelledby="sitStepsTitle" hidden></section>
     <section class="panel glass" aria-labelledby="locTitle">
       <h2 id="locTitle"></h2>
       <p class="locline" id="sosLoc" role="status"></p>
@@ -313,6 +329,9 @@
         <p class="privacy" id="privacy"></p>
       </div>
     </details>
+    <!-- R5: this area's emergency numbers, then the national helplines by need -->
+    <section class="panel glass" id="sosArea" aria-labelledby="sosAreaTitle"></section>
+    <section class="panel glass" id="sosLines" aria-labelledby="sosLinesTitle"></section>
   </div>
 
   <!-- HELP PAGE FOR THE FAMILY (#/help/<lat>,<lng>,<time>[,<situation>], বিপদ বার্তা #134): everything comes from the address. -->
@@ -409,6 +428,8 @@
           </button>
           <p class="msg" id="siGMsg" role="alert" hidden></p>
           <p class="or" id="siOr"></p>
+          <!-- SRS FR01: the name is used only for a new account ("নতুন অ্যাকাউন্ট") -->
+          <label class="field"><span id="siNameL"></span><input id="siName" type="text" autocomplete="name" maxlength="60"></label>
           <label class="field"><span id="siEmailL"></span><input id="siEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
           <label class="field"><span id="siPassL"></span><input id="siPass" type="password" autocomplete="current-password"></label>
           <p class="msg" id="siMsg" role="alert" hidden></p>
