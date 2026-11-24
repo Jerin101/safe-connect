@@ -229,13 +229,13 @@ export function initDakun(ctx) {
     const est = el('div', 'dk-est');
     const go = btn('btn solid big dk-go', shop ? (errand ? T().goErrand : T().goPickup) : fill(T().go, { who: who(form.type) }), TYPE_IC[form.type], callGo);
     const msg = el('div', 'small dk-msg'); msg.setAttribute('role', 'status');
-    where.append(mapWrap, est, go, msg, el('p', 'small', T().privacy));
+    where.append(mapWrap, est, go, msg);
     // earlier calls
     const hist = el('div', 'dk-hist');
     const histHead = el('div', 'sec-head'); histHead.append(el('h2', null, T().history), btn('linkbtn', T().showHistory, null, () => showHistory(hist)));
     // সেবা দিতে চান? → the provider page (R4)
     const P = ctx.provideTexts();
-    const give = card(el('h2', null, P.wantToProvide), el('p', 'muted', P.wantText), pills(btn('btn', P.iProvide, 'wrench', () => ctx.go('provide'))));
+    const give = card(el('h2', null, P.wantToProvide), pills(btn('btn', P.iProvide, 'wrench', () => ctx.go('provide'))));
     const fallback = el('section', 'card dk-fallback');
     view.replaceChildren(top, what, where, fallback, card(histHead, hist), give);
     paintFallback();

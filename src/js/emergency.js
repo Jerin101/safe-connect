@@ -83,7 +83,9 @@ export function initEmergency(ctx) {
     const all = ctx.national();
     const h = el('h2', null, T().linesTitle); h.id = 'sosLinesTitle';
     if (!all) { box.replaceChildren(h, el('div', 'skeleton')); return; }
-    const kids = [h, el('p', 'muted', T().linesText)];
+    // folded by default: the page stays short; the area's numbers above are what most people need
+    const fold = el('details', 'fold'); const sum = el('summary'); sum.append(h);
+    const kids = [sum];
     for (const [key, cats] of GROUPS) {
       const rs = all.filter((r) => cats.includes(r.category) && r.phones && r.phones.length);
       if (!rs.length) continue;
@@ -101,7 +103,8 @@ export function initEmergency(ctx) {
       }
       kids.push(rows);
     }
-    box.replaceChildren(...kids);
+    fold.replaceChildren(...kids);
+    box.replaceChildren(fold);
   }
 
   return {

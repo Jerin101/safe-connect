@@ -279,7 +279,7 @@ export function initNear(ctx) {
     const a = getArea();
     const head = el('section', 'card');
     const h = el('h1', 'page-title', T().hubTitle); h.id = 'catTitle'; h.tabIndex = -1;
-    head.append(h, el('p', 'muted', T().hubText), searchBox(), areaBar(a, () => ctx.rerender()));
+    head.append(h, searchBox(), areaBar(a, () => ctx.rerender()));
     view.replaceChildren(head, tileGrid());
   }
   function tileGrid() {
@@ -495,7 +495,7 @@ export function initNear(ctx) {
     const card = el('div', 'home-card');
     const h = el('h1', 'home-place', a ? areaLabel(a) : H.pickArea); h.id = 'homeTitle'; h.tabIndex = -1;
     card.append(el('p', 'eyebrow', H.yourArea), h);
-    if (a) { const s = sunLine(a); if (s) card.append(s); } else card.append(el('p', 'muted', T().askArea));
+    if (a) { const s = sunLine(a); if (s) card.append(s); }
     card.append(areaBar(a, () => ctx.rerender(), { showWhere: false }));
     area.replaceChildren(card);
     const ch = el('h2', null, H.catsTitle); ch.id = 'homeCatsTitle';

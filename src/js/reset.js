@@ -195,7 +195,7 @@ $('langBtn').addEventListener('click', async () => {
 });
 $('themeBtn').addEventListener('click', () => {
   const root = document.documentElement;
-  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  const dark = root.dataset.theme === 'dark';   // light unless night was picked (UI refresh)
   root.dataset.theme = dark ? 'light' : 'dark';
 });
 // Internet back while waiting: check the link now (the person already asked for it by opening it).

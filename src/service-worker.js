@@ -12,7 +12,7 @@ const FILES = [
   'js/old-link.js',
   'reset.html',
   'css/base.css',
-  'css/preview.css',
+  'css/preview.css', 'css/ui.css',
   'manifest.json',
   'js/preview.js',
   'js/icons.js',             // line icons (A1)

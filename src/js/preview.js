@@ -554,7 +554,7 @@ function readHash() {
 function showPage(page) {
   $('main').dataset.page = page;
   document.querySelectorAll('#home [data-pages]').forEach((e) => { e.hidden = !e.dataset.pages.split(' ').includes(page); });
-  if (!$('iconSrc').hidden) $('iconSrc').open = page === 'numbers';
+  if (!$('iconSrc').hidden) $('iconSrc').open = false;   // sources folded on every page; one tap opens them
   if (page === 'home') { renderRecent(); renderHome(); }
   if (page === 'numbers') renderDirectory();
   showView('home');
@@ -1235,7 +1235,7 @@ function renderBipod() {
     btn.href = '#/send';
     $('bipodSub').textContent = b.btnNone;
   }
-  $('bipodHint').textContent = ios ? `${b.hint} ${b.iosHint}` : b.hint;
+  $('bipodHint').textContent = ios ? b.iosHint : ''; $('bipodHint').hidden = !ios;   // only the iPhone note; the button says the rest
   $('smsParts').textContent = fill(b.parts, { n: digits(smsParts($('sosMsg').value).parts) });
   $('smsEnBox').hidden = lang !== 'bn' || sos.safe;
   $('smsEnLabel').textContent = b.shortEn;
@@ -1639,8 +1639,8 @@ function renderIconRow() {
   }
   $('iconRow').replaceChildren(...items);
   $('iconSrc').hidden = !shown.length;
-  if ($('main').dataset.page === 'numbers') $('iconSrc').open = true;   // the numbers page shows the sources open
   $('iconSrcTitle').textContent = P().iconSrc;
+  $('numAll').textContent = P().seeMore;   // home shows the first 8; the numbers page shows all
   $('iconSrcList').replaceChildren(...shown.map((n) => {
     const line = el('p', 'src');
     const a = el('a', null, `${t().source} ↗`); a.href = n.source_url; a.target = '_blank'; a.rel = 'noopener';
@@ -1859,7 +1859,7 @@ $('langBtn').addEventListener('click', () => {
 });
 function toggleTheme() {
   const root = document.documentElement;
-  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  const dark = root.dataset.theme === 'dark';   // light unless night was picked (UI refresh)
   root.dataset.theme = dark ? 'light' : 'dark';
   store.set('sc-theme', root.dataset.theme);   // remembered on this phone (SRS FR02, NFR06)
 }

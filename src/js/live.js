@@ -44,7 +44,7 @@ export function initLive(ctx) {
     // A slow or broken connection must not leave an empty grey box: after 12 s the person sees the "check your connection" note.
     try { [fb] = await Promise.race([load(), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 12000))]); } catch { v.replaceChildren(card(note(T().err.offline))); return; }
     const h = el('h1', 'page-title', T().title); h.id = 'liveTitle'; h.tabIndex = -1;
-    const head = card(h, el('p', 'muted', T().intro));
+    const head = card(h);
     const user = await fb.currentUser();
     if (!view.isConnected) return;
     // UC-10 2.1: not signed in → sign in first; not verified → verify first
@@ -63,7 +63,7 @@ export function initLive(ctx) {
     const start = btn('btn solid big', T().start, 'locate', startShare);
     const commute = btn('btn', T().safeCommute, 'car', () => say(T().startFirst));   // UC-11 5.2
     const ride = pendingCommute ? note(fill(T().fromRide, { v: [pendingCommute.vehicleNo, pendingCommute.destination].filter(Boolean).join(' → ') })) : null;
-    view.replaceChildren(head, card(el('h2', null, T().howLong), ride, opts, start, el('p', 'small', T().privacy), msg(), pendingCommute ? null : pills(commute)));
+    view.replaceChildren(head, card(el('h2', null, T().howLong), ride, opts, start, msg(), pendingCommute ? null : pills(commute)));
   }
   async function startShare() {
     const [fb, tr] = await load();
@@ -141,7 +141,7 @@ export function initLive(ctx) {
   }
   async function copy(text) { try { await navigator.clipboard.writeText(text); ctx.toast(T().copied); } catch { ctx.toast(T().copyFailed); } }
   function paintActive(head) {
-    head = head || (() => { const h = el('h1', 'page-title', T().title); h.id = 'liveTitle'; h.tabIndex = -1; return card(h, el('p', 'muted', T().intro)); })();
+    head = head || (() => { const h = el('h1', 'page-title', T().title); h.id = 'liveTitle'; h.tabIndex = -1; return card(h); })();
     const left = TR.minutesLeft(share.expiresAt, Date.now());
     const status = card(el('p', 'live-on', T().sharingNow), el('p', 'muted', fill(T().endsIn, { m: num(left) })),
       el('p', 'small live-sent', lastSent ? fill(T().lastSent, { t: time(lastSent) }) : T().waitingFix),
@@ -167,7 +167,7 @@ export function initLive(ctx) {
         say(T().commuteSaved);
       } catch (e) { say(e && e.code === 'permission-denied' ? T().tooFast : errText(e)); }
     });
-    return card(el('h2', null, T().safeCommute), el('p', 'muted', T().commuteText), ...f('lvPlate', T().plate, T().platePh, 30), sl, sel,
+    return card(el('h2', null, T().safeCommute), ...f('lvPlate', T().plate, T().platePh, 30), sl, sel,
       ...f('lvDest', T().destination, T().destPh, 60), save);
   }
 

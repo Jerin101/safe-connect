@@ -13,65 +13,61 @@
    Colours (A1, DEMO_TO_REAL_PLAN, Jerin 18 Nov 2026): the /demo/ look: warm off-white by day, near-black by night, one
    teal accent. The old names stay (--violet-1/2 = the teal button gradient) so no class changes in A1. */
 :root {
-  --bg: #F4F5F2; --band: #EDF0EB; --surface: #FFFFFF; --surface-2: #EDF0EB; --line: rgba(15, 26, 23, 0.11); --line-2: rgba(15, 26, 23, 0.19);
-  --tint: #E0EDEB; --tint-2: #CFE4E1;
-  --ink: #0F1A17; --ink-2: #33433E; --muted: #5A6863; --accent: #0B4A4E; --accent-ink: #FFFFFF; --link: #0B5E63;
-  --danger: #D7263D; --danger-ink: #FFFFFF; --ok-soft: rgba(31, 122, 79, 0.10); --glow: rgba(11, 74, 78, 0.10);
-  --title-2: #0B4A4E; --title-3: #0E6E76;
-  --sky-1: #D5ECE8; --sky-2: #EAF4EF; --sky-3: #FBEFDA; --sky-4: #F6C98A; --hill-1: #A9D4CC; --hill-2: #6FB3A8; --water: #D3EBE6;
-  --stars: 0; --orb-1: #FFF8E1; --orb-2: #F0A64A;
-  --red-1: #DC2650; --red-2: #B5103A; --red-ink: #C0123A; --amber-1: #FFC94D; --amber-2: #FF8F3F; --amber-ink: #2A1500;
-  --violet-1: #11767C; --violet-2: #0B4A4E; --on-color: #FFFFFF;
+  /* UI refresh (24 Nov 2026): light by default (the phone's dark mode no longer switches it), a calm cool background,
+     teal as the main colour, indigo-violet and coral as second colours. Night is a softer slate-navy, only by the switch. */
+  --bg: #F4F7FB; --band: #EAF1F8; --surface: #FFFFFF; --surface-2: #EEF3F8; --line: rgba(16, 32, 58, 0.10); --line-2: rgba(16, 32, 58, 0.18);
+  --tint: #E2F3F1; --tint-2: #CBEBE7;
+  --ink: #10203A; --ink-2: #33415C; --muted: #566279; --accent: #0E7C86; --accent-ink: #FFFFFF; --link: #0B6870;
+  --danger: #DB1F45; --danger-ink: #FFFFFF; --ok-soft: rgba(21, 128, 61, 0.10); --glow: rgba(14, 124, 134, 0.12);
+  --title-2: #4338CA; --title-3: #0B6E77;
+  --sky-1: #D9EEF6; --sky-2: #EEF5FB; --sky-3: #FDEBDD; --sky-4: #F8B98A; --hill-1: #B5DCD6; --hill-2: #79BFB4; --water: #D6EEF0;
+  --stars: 0; --orb-1: #FFF7E6; --orb-2: #F59E0B;
+  --red-1: #DB1F45; --red-2: #B8123A; --red-ink: #B8123A; --amber-1: #FFC94D; --amber-2: #FF8F3F; --amber-ink: #2A1500;
+  --violet-1: #5B4FE0; --violet-2: #0E7C86; --on-color: #FFFFFF;
   /* Reds (issue #72): white text on --danger, --red-1 and --red-2 is at least 4.5:1 in both themes; --red-ink is for red text on the page. */
-  --orange-1: #FF9B5C; --orange-2: #E8542E; --green-1: #3FC98A; --green-2: #127A50; --pink-1: #FF7AB8; --pink-2: #C8327E; --blue-1: #6FA8FF; --blue-2: #2E5BD6; --teal-1: #4FD6D0; --teal-2: #11777F; --slate-1: #9AA3C7; --slate-2: #59618A;
-  --warn: #8F5300; --warn-bg: #FBEFDA; --ok: #1F7A4F;
-  --danger-soft: rgba(215, 38, 61, 0.09); --accent-soft: rgba(11, 74, 78, 0.09); --backdrop: rgba(4, 20, 18, 0.5);
+  --orange-1: #FF9B5C; --orange-2: #E8542E; --green-1: #3FC98A; --green-2: #15803D; --pink-1: #FF7AB8; --pink-2: #C8327E; --blue-1: #6FA8FF; --blue-2: #2E5BD6; --teal-1: #4FD6D0; --teal-2: #0E7C86; --slate-1: #9AA3C7; --slate-2: #59618A;
+  /* second colours for icons, chips and the background wash */
+  --c-indigo: #6366F1; --c-violet: #8B5CF6; --c-coral: #F43F5E; --c-amber: #F59E0B; --c-sky: #0EA5E9; --c-green: #10B981;
+  --c-indigo-soft: rgba(99, 102, 241, 0.12); --c-coral-soft: rgba(244, 63, 94, 0.12); --c-amber-soft: rgba(245, 158, 11, 0.14);
+  --c-sky-soft: rgba(14, 165, 233, 0.12); --c-green-soft: rgba(16, 185, 129, 0.13); --c-teal-soft: rgba(14, 124, 134, 0.12);
+  /* icon colours on the soft tiles (3:1 or more), and the two gradients that carry white text (4.5:1 or more at both ends) */
+  --ic-coral: #E11D48; --ic-green: #15803D; --ic-indigo: #4F46E5; --ic-amber: #B45309; --ic-sky: #0369A1; --ic-teal: #0E7C86;
+  --grad-1: #4F46E5; --grad-2: #0E7C86; --grad-red-1: #DB1F45; --grad-red-2: #B8123A;
+  --warn: #92400E; --warn-bg: #FEF3C7; --ok: #15803D;
+  --danger-soft: rgba(219, 31, 69, 0.09); --accent-soft: rgba(14, 124, 134, 0.10); --backdrop: rgba(16, 24, 40, 0.45);
   /* Google sign-in button: colours from Google's sign-in branding guidelines (light / dark theme). */
   --gbtn-bg: #FFFFFF; --gbtn-line: #747775; --gbtn-ink: #1F1F1F;
-  --shadow: 0 14px 40px rgba(60, 40, 20, 0.08);
-  --foot-bg: #E6ECE7; --foot-ink: #0F1A17; --foot-muted: #5A6863; --foot-line: rgba(15, 26, 23, 0.11);
+  --shadow: 0 10px 28px rgba(16, 32, 58, 0.08); --shadow-sm: 0 2px 8px rgba(16, 32, 58, 0.06);
+  --glass: rgba(255, 255, 255, 0.78);
+  --foot-bg: #E8EFF7; --foot-ink: #10203A; --foot-muted: #4F5B73; --foot-line: rgba(16, 32, 58, 0.10);
   --font: "Manrope", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --r: 16px;
+  --r: 18px;
   --ic: 20px; --ic-sm: 16px; --ic-lg: 24px;   /* line icons from js/icons.js (A1) */
-  --dock-h: 62px; --rail-w: 168px;   /* main tabs: bottom bar height on phones, side menu width from 960 px (A2) */
-  --header-h: 150px;   /* height of header.site; js/preview.js replaces it with the measured height (issue #103) */
+  --dock-h: 64px; --rail-w: 220px;   /* main tabs: floating bar on phones, side menu from 960 px (A2) */
+  --header-h: 64px;   /* height of header.site; js/preview.js replaces it with the measured height (issue #103) */
   --fade: 200ms;   /* page change fade (issue #71) */
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0A0E0D; --band: #0E1312; --surface: #121816; --surface-2: #19211E; --line: rgba(255, 255, 255, 0.08); --line-2: rgba(255, 255, 255, 0.15);
-    --tint: #13302E; --tint-2: #1A3D3A;
-    --ink: #E6EEEA; --ink-2: #C2D0CA; --muted: #98AAA3; --accent: #6FC7C3; --accent-ink: #04211F; --link: #8FD8D4;
-    --danger: #E0264F; --danger-ink: #FFFFFF; --ok-soft: rgba(92, 198, 144, 0.12); --glow: rgba(111, 199, 195, 0.14);
-    --title-2: #A8E3DF; --title-3: #6FC7C3;
-    --sky-1: #0B1F1F; --sky-2: #133636; --sky-3: #2F5A55; --sky-4: #C98A4A; --hill-1: #12302D; --hill-2: #0C2220; --water: #0F2A28;
-    --stars: 1; --orb-1: #EEF8F6; --orb-2: #6FC7C3;
-    --red-1: #E0264F; --red-2: #C0123A; --red-ink: #FF6B81; --amber-1: #FFCB5C; --amber-2: #FF9548;
-    --violet-1: #13706F; --violet-2: #0B4A4E;
-    --warn: #F2B65A; --warn-bg: rgba(242, 182, 90, 0.12); --ok: #5CC690;
-    --danger-soft: rgba(255, 92, 108, 0.12); --accent-soft: rgba(111, 199, 195, 0.13); --backdrop: rgba(0, 0, 0, 0.6);
-    --gbtn-bg: #131314; --gbtn-line: #8E918F; --gbtn-ink: #E3E3E3;
-    --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-    --foot-bg: #070A09; --foot-ink: #E6EEEA; --foot-muted: #98AAA3; --foot-line: rgba(255, 255, 255, 0.08);
-    color-scheme: dark;
-  }
-}
+/* Night (only by the switch, remembered in sc-theme): a soft slate-navy, not black. */
 :root[data-theme="dark"] {
-  --bg: #0A0E0D; --band: #0E1312; --surface: #121816; --surface-2: #19211E; --line: rgba(255, 255, 255, 0.08); --line-2: rgba(255, 255, 255, 0.15);
-  --tint: #13302E; --tint-2: #1A3D3A;
-  --ink: #E6EEEA; --ink-2: #C2D0CA; --muted: #98AAA3; --accent: #6FC7C3; --accent-ink: #04211F; --link: #8FD8D4;
-  --danger: #E0264F; --danger-ink: #FFFFFF; --ok-soft: rgba(92, 198, 144, 0.12); --glow: rgba(111, 199, 195, 0.14);
-  --title-2: #A8E3DF; --title-3: #6FC7C3;
-  --sky-1: #0B1F1F; --sky-2: #133636; --sky-3: #2F5A55; --sky-4: #C98A4A; --hill-1: #12302D; --hill-2: #0C2220; --water: #0F2A28;
-  --stars: 1; --orb-1: #EEF8F6; --orb-2: #6FC7C3;
-  --red-1: #E0264F; --red-2: #C0123A; --red-ink: #FF6B81; --amber-1: #FFCB5C; --amber-2: #FF9548;
-  --violet-1: #13706F; --violet-2: #0B4A4E;
-  --warn: #F2B65A; --warn-bg: rgba(242, 182, 90, 0.12); --ok: #5CC690;
-  --danger-soft: rgba(255, 92, 108, 0.12); --accent-soft: rgba(111, 199, 195, 0.13); --backdrop: rgba(0, 0, 0, 0.6);
+  --bg: #172033; --band: #1B2539; --surface: #222D44; --surface-2: #2A3652; --line: rgba(255, 255, 255, 0.09); --line-2: rgba(255, 255, 255, 0.16);
+  --tint: #1E3B48; --tint-2: #24495A;
+  --ink: #EEF2FA; --ink-2: #CBD3E6; --muted: #A7B1CA; --accent: #5EEAD4; --accent-ink: #0B2530; --link: #99F6E4;
+  --danger: #DB1F45; --danger-ink: #FFFFFF; --ok-soft: rgba(74, 222, 128, 0.12); --glow: rgba(94, 234, 212, 0.14);
+  --title-2: #C4B5FD; --title-3: #5EEAD4;
+  --sky-1: #1A2B45; --sky-2: #22385A; --sky-3: #3B4A6B; --sky-4: #C98A4A; --hill-1: #1E3A4A; --hill-2: #17303D; --water: #1C3446;
+  --stars: 1; --orb-1: #EEF8F6; --orb-2: #5EEAD4;
+  --red-1: #DB1F45; --red-2: #B8123A; --red-ink: #FDA4AF; --amber-1: #FFCB5C; --amber-2: #FF9548;
+  --violet-1: #5B4FE0; --violet-2: #0E7C86;
+  --c-indigo-soft: rgba(129, 140, 248, 0.16); --c-coral-soft: rgba(251, 113, 133, 0.16); --c-amber-soft: rgba(252, 211, 77, 0.14);
+  --c-sky-soft: rgba(56, 189, 248, 0.15); --c-green-soft: rgba(52, 211, 153, 0.15); --c-teal-soft: rgba(94, 234, 212, 0.14);
+  --ic-coral: #FB7185; --ic-green: #34D399; --ic-indigo: #A5B4FC; --ic-amber: #FCD34D; --ic-sky: #7DD3FC; --ic-teal: #5EEAD4;
+  --warn: #FCD34D; --warn-bg: rgba(252, 211, 77, 0.12); --ok: #4ADE80;
+  --danger-soft: rgba(251, 113, 133, 0.14); --accent-soft: rgba(94, 234, 212, 0.14); --backdrop: rgba(0, 0, 0, 0.55);
   --gbtn-bg: #131314; --gbtn-line: #8E918F; --gbtn-ink: #E3E3E3;
-  --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-  --foot-bg: #070A09; --foot-ink: #E6EEEA; --foot-muted: #98AAA3; --foot-line: rgba(255, 255, 255, 0.08);
+  --shadow: 0 14px 36px rgba(0, 0, 0, 0.30); --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --glass: rgba(34, 45, 68, 0.82);
+  --foot-bg: #121A2A; --foot-ink: #EEF2FA; --foot-muted: #A7B1CA; --foot-line: rgba(255, 255, 255, 0.08);
   color-scheme: dark;
 }
 
