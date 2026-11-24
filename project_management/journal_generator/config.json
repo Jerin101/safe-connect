@@ -1,0 +1,18 @@
+{
+  "project_name": "SafeConnect Capstone Project",
+  "submission_deadline": "2026-12-09",
+  "git_tracker_config": "../git_tracker/config.json",
+  "journal_root": "../../journal",
+  "display_names": {
+    "Israt Jerin Nafisa": "Israt Jerin Nafisa",
+    "Tasmin Toshi": "Tasmin Jahan Toshi"
+  },
+  "member_folders": {
+    "Israt Jerin Nafisa": "israt_jerin_nafisa",
+    "Tasmin Jahan Toshi": "tasmin_jahan_toshi"
+  },
+  "active_months": [
+    "2026-11",
+    "2026-12"
+  ]
+}

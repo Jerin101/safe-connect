@@ -1,0 +1,17 @@
+# Keep the image small and free of anything private: only src/ and docker/ are copied, but this also speeds up the build context.
+.git
+.github
+.claude
+.env
+.env.*
+!.env.example
+node_modules
+docs
+journal
+project_management
+submission_reports
+tests
+tools
+*.md
+*.zip
+*.log

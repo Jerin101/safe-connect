@@ -9,7 +9,7 @@ Plain browser pages, no build step (CLAUDE.md rule 3).
 | `search-cases.json` | Every test word and what the search must (or must NOT) show |
 | `search-test.html` + `search-test.js` | The page that runs all cases and shows PASS, FAIL or PENDING |
 
-**Run:** in the project folder, `python -m http.server 8000` (or VS Code → Live Server), then open
+**Run:** in the project folder, `python -m http.server 8000` (from the project folder, not `src/`; or VS Code → Live Server), then open
 `http://localhost:8000/tests/search-test.html`. The preview page's footer also links to it.
 
 **Add a test:** add one line to `cases` in `search-cases.json`, for example
@@ -21,7 +21,7 @@ Plain browser pages, no build step (CLAUDE.md rule 3).
 The checks you can use are listed under `how` at the top of the file. A test that waits for data the team still
 has to confirm (for example Hasan Hat) gets `"pending": "why"`; it is shown but not counted as failed.
 
-Before a pull request that changes `js/data.js`, `data/villages.json` or `data/aliases.json`: open the test page and
+Before a pull request that changes `src/js/data.js`, `src/data/villages.json` or `src/data/aliases.json`: open the test page and
 check that it says **0 failed**.
 
 ## Auto location (issue #105)
@@ -29,7 +29,7 @@ check that it says **0 failed**.
 `autoloc-test.mjs` drives the Chrome (or Edge) already on this computer through its DevTools port, with a fake
 position and fake location permission. No packages to install.
 
-**Run:** `python -m http.server 8000` in the project folder, then in a second terminal `node tests/autoloc-test.mjs`.
+**Run:** `python -m http.server 8000 -d src` in the project folder, then in a second terminal `node tests/autoloc-test.mjs`.
 It must end with **ALL OK**. Optional: `SHOTS=<folder>` saves 360 px screenshots, `CHROME=<path>` picks the browser.
 
 It checks: off by default and no location call when off; the explanation comes before the browser asks; on → the
@@ -66,7 +66,7 @@ district, each with its expected upazila (and union when an official page gives 
 - pourashavas
 - tourist spots: from the portals, Banglapedia and Jerin's list
 - 50 villages, in Bangla and Banglish
-- BBS villages (`bbs_village`): one per union in `data/villages_bbs.json`, in English, and in Bangla where BBS gives it
+- BBS villages (`bbs_village`): one per union in `src/data/villages_bbs.json`, in English, and in Bangla where BBS gives it
 
 Entries with `gap` are listed in `docs/DATA_GAPS.md` §12 and left out of the %. The plan is in `docs/plans/coverage-fix.md`.
 
@@ -89,6 +89,6 @@ for its hint. Every UI pull request must pass it.
 - **Signed in** = the `sc-signed-in` flag; on page load the header shows exactly what a signed-in person sees.
 - **130 % text** = the root font size set to 130 %, the way Android's font size setting scales a web page's text.
 
-**Run:** `python -m http.server 8000` in the project folder, then `node tests/width-sweep.mjs` (about 10 minutes).
+**Run:** `python -m http.server 8000 -d src` in the project folder, then `node tests/width-sweep.mjs` (about 10 minutes).
 Options: `BASE=http://127.0.0.1:8000/`, `PAGES="#/,#/send"`, `WIDTHS=360,412`. In Git Bash put `MSYS_NO_PATHCONV=1`
 in front when `PAGES` has `#/...`. It stops if less than 5 GB is free, and always removes its temporary Chrome profile.

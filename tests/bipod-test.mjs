@@ -3,9 +3,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { helpPath, helpLink, parseHelp, buildSms, smsParts, minutesAgo, inBangladesh, SITE_URL } from '../js/bipod.js';
+import { helpPath, helpLink, parseHelp, buildSms, smsParts, minutesAgo, inBangladesh, SITE_URL } from '../src/js/bipod.js';
 
-const LANG = { bn: JSON.parse(readFileSync('js/lang/bn.json', 'utf8')).ui, en: JSON.parse(readFileSync('js/lang/en.json', 'utf8')).ui };
+const LANG = { bn: JSON.parse(readFileSync('src/js/lang/bn.json', 'utf8')).ui, en: JSON.parse(readFileSync('src/js/lang/en.json', 'utf8')).ui };
 const texts = (l) => ({ ...LANG[l].bipod.sms, noLoc: LANG[l].noLoc });
 const HATIYA = { lat: 22.36123456, lon: 91.12987654 };
 const AT = Date.UTC(2026, 10, 2, 13, 0, 0);
@@ -87,11 +87,11 @@ test('every situation has a short and a full text in both languages', () => {
 });
 
 // Police number for the SMS (#143), on the real data: the thana's officer-in-charge, never an outpost.
-import { loadAll, localAreas, areaContacts } from '../js/data.js';
-import { pickPolice } from '../js/bipod.js';
+import { loadAll, localAreas, areaContacts } from '../src/js/data.js';
+import { pickPolice } from '../src/js/bipod.js';
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (url) => { try { return { ok: true, json: async () => JSON.parse(readFileSync(url, 'utf8')) }; } catch { return { ok: false, status: 404 }; } };
-const DATA = await loadAll('data/');
+const DATA = await loadAll('src/data/');
 globalThis.fetch = realFetch;
 const police = (district, upazila, areaBn = null) => {
   const doc = DATA.docs[district];
@@ -134,7 +134,7 @@ test('new SMS texts: no-location asks for a message first; every Bangla message 
 });
 
 test('every Bangla SMS fits in 3 parts: every upazila, every situation, with its real police number and label', async () => {
-  const { DISTRICTS, upazilas } = await import('../js/data.js');
+  const { DISTRICTS, upazilas } = await import('../src/js/data.js');
   const link = helpLink({ lat: 22.29580, lon: 91.10660 }, AT, 'followed');      // the longest link (5 decimals, 10-digit time, longest situation)
   let n = 0;
   for (const d of DISTRICTS) for (const u of upazilas(DATA.docs[d.key])) {

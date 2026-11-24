@@ -1,6 +1,6 @@
 # SafeConnect – Design guide
 
-Follow this for every screen, button and sentence on the site. Reference page: `design/portal-v2.html` (the earlier `design/portal.html` is kept only as history).
+Follow this for every screen, button and sentence on the site. Reference page: `docs/design/portal-v2.html` (the earlier `docs/design/portal.html` is kept only as history).
 If a change breaks a rule here, fix the change, not the rule. To change a rule, open an issue first.
 
 ## 1. Who it is for
@@ -35,7 +35,7 @@ Never block the screen with a welcome, pop-up or loading splash: 999 must be one
 
 No carousels, no auto-sliding, no autoplay video, no flashing (except the siren page, P30).
 
-## 3b. v3 layout (`design/portal-v3.html`, issue #68)
+## 3b. v3 layout (`docs/design/portal-v3.html`, issue #68)
 The reference shows the look; it is not code to copy (it uses outside fonts, a QR library from the web, `innerHTML` and fixed colours).
 Build each part from its own issue in milestone v1.0.
 - **Header:** logo · area picker ("এলাকা বেছে নিন") · **999 first** · সাইন ইন · EN/বাং · night/day. Second row: tabs with icons and a round search pill.
@@ -58,7 +58,7 @@ Build each part from its own issue in milestone v1.0.
   - **Amber only for warnings** (e.g. "পুরোনো তথ্য হতে পারে", the offline notice).
   - **Green only for "done"** (e.g. a tick, "ঠিক করা হয়েছে").
   - No other colours for decoration.
-- **Icons:** single-colour line icons in quiet tiles. No rainbow icon circles. The set is `js/icons.js` (the same icons as
+- **Icons:** single-colour line icons in quiet tiles. No rainbow icon circles. The set is `src/js/icons.js` (the same icons as
   `/demo/`): `icon('phone')` returns an `<svg class="sc-ic">` built with DOM calls (never `innerHTML`); sizes `--ic`, `--ic-sm`, `--ic-lg`.
 - **Every colour is a CSS variable** in `:root`, with night values in both dark-mode blocks. No colour written directly in a component.
 - **Fonts:** Manrope (English) + Noto Sans Bengali (Bangla), self-hosted (#50). No letter-spacing on Bangla text.

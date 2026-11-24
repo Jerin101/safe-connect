@@ -6,7 +6,7 @@ import { after, before, beforeEach, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, where } from 'firebase/firestore';
-import { newShareId, SHARE_ID, parseTrack, plateOk, pointFrom, lowBattery, DURATIONS } from '../../js/track.js';
+import { newShareId, SHARE_ID, parseTrack, plateOk, pointFrom, lowBattery, DURATIONS } from '../../src/js/track.js';
 
 const ADMIN = 'admin-uid', RINA = 'rina-uid', KARIM = 'karim-uid';
 let env;

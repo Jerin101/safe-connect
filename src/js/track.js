@@ -6,7 +6,6 @@ export const DURATIONS = [15, 60, 480];           // minutes: 15 minutes, 1 hour
 export const SEND_EVERY_MS = 8000;                // a new point every 5–10 s while sharing (the rules refuse < 4 s)
 export const LOW_BATTERY = 10;                    // percent: below this the family view shows a warning
 export const VEHICLE_TYPES = ['rickshaw', 'easybike', 'cng', 'bus', 'other'];
-export const VEHICLE_BN = { rickshaw: 'রিকশা', easybike: 'ইজিবাইক', cng: 'সিএনজি', bus: 'বাস', other: 'অন্য গাড়ি' };
 
 // A long random id (base62, 32 characters): nobody can guess a link, and shares cannot be listed.
 const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -16,7 +15,6 @@ export function newShareId(rand = (n) => crypto.getRandomValues(new Uint8Array(n
   return out;
 }
 export const SHARE_ID = /^[A-Za-z0-9]{24,40}$/;
-export const trackPath = (id) => `track/${id}`;
 // "#/track/<id>" (or "track/<id>") -> the id, or null for anything else.
 export function parseTrack(hash) {
   const m = /^#?\/?track\/([A-Za-z0-9]{24,40})$/.exec(String(hash || '').trim());

@@ -5,8 +5,8 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 
 ## Team
 
-- **jerin101**: team lead. Owns `data/`, `tools/`, `js/data.js`, `js/location.js`, Firebase, GitHub Actions, docs.
-- **tasmintoshi**: frontend. Owns `index.html`, `pages/`, `css/`, the UI modules in `js/`, PWA, accessibility.
+- **jerin101**: team lead. Owns `src/data/`, `tools/`, `src/js/data.js`, `src/js/location.js`, Firebase, GitHub Actions, docs.
+- **tasmintoshi**: frontend. Owns `src/index.html`, `pages/`, `src/css/`, the UI modules in `src/js/`, PWA, accessibility.
 - Both are **beginners**. Explain in short, simple English. Before running or suggesting any Git command, say what it does.
 
 ## Hard rules
@@ -15,7 +15,7 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 2. **Zero budget.** No paid services, no paid APIs, no paid datasets. Free tiers only: GitHub Pages, GitHub Actions, Firebase Spark (no Cloud Functions, no file storage), OpenStreetMap Nominatim only in the `tools/` scripts (at most 1 request per second, with credit).
 3. **No frameworks and no build step** for the website: plain HTML, CSS and JavaScript (ES modules). The Python tools use only the standard library.
 4. **Never turn off certificate checking** (`verify=False`, `-k`, etc.).
-4a. **Never commit a real secret** (passwords, private keys, service-account files, tokens). The only allowed key is the public Firebase web apiKey in `js/firebase-config.js` (`.gitleaks.toml`). If a secret was committed, **rotate it first** (make a new one, turn off the old one), then remove it; deleting the file is not enough because Git history keeps it.
+4a. **Never commit a real secret** (passwords, private keys, service-account files, tokens). The only allowed key is the public Firebase web apiKey in `src/js/firebase-config.js` (`.gitleaks.toml`). If a secret was committed, **rotate it first** (make a new one, turn off the old one), then remove it; deleting the file is not enough because Git history keeps it.
 5. **Privacy:** without login, nothing leaves the phone. Location is read only when the user taps SOS or 'Find help near me', or when the user has turned on 'Update my area automatically' (off by default). The lookup happens on the phone; coordinates are never stored or uploaded; they leave the phone only when the user sends their location. Never log or upload personal data. Volunteer applications are private, verification is hidden from users, and no home address is ever shown.
 6. **The humans commit.** Make small changes, explain them, and let the person review the diff and commit it themselves. Never push, merge or force-push.
 7. Every change belongs to a GitHub issue (planning ID `Pxx` in `docs/ISSUES.md`) and a branch: `docs/`, `data/`, `feature/` or `fix/` + **GitHub issue number** + short name.
@@ -24,22 +24,22 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 
 ## Code style
 
-- **Design:** for any page, button or text, follow `docs/DESIGN.md`. `design/portal-v2.html` is the reference.
+- **Design:** for any page, button or text, follow `docs/DESIGN.md`. `docs/design/portal-v2.html` is the reference.
 - HTML: semantic tags, a `lang` attribute, a label for every button and input, no inline JavaScript.
-- CSS: colours and sizes only as variables in `css/base.css`; dark and light themes; mobile-first (test at 360 px).
+- CSS: colours and sizes only as variables in `src/css/base.css`; dark and light themes; mobile-first (test at 360 px).
 - JavaScript: ES modules, `const`/`let`, small functions, no global variables, `textContent` (never `innerHTML` with data), and `tel:` links with normal digits.
-- Text shown to users lives in `js/lang/bn.json` and `js/lang/en.json`, never hard-coded.
+- Text shown to users lives in `src/js/lang/bn.json` and `src/js/lang/en.json`, never hard-coded.
 - Python tools: standard library only, polite to government servers (a delay between requests), UTF-8 everywhere.
 
 ## Data rules
 
-- Data files live in `data/`. Change them only with the scripts in `tools/` or through `data/manual_additions.json` (with a `source_url` and a `source_quote_bn`).
-- `python tools/validate_data.py data` must report **0 errors** before any data PR.
+- Data files live in `src/data/`. Change them only with the scripts in `tools/` or through `src/data/manual_additions.json` (with a `source_url` and a `source_quote_bn`).
+- `python tools/validate_data.py src/data` must report **0 errors** before any data PR.
 - Cards must show: the source link, the check date, and badges for the flags `number_not_published`, `source_older_than_2_years`, `administrator_not_elected`.
 
 ## Save usage
 
-- Never read `data/*.json` or `design/portal-v2.html` in full. Use grep or read only the needed lines.
+- Never read `src/data/*.json` or `docs/design/portal-v2.html` in full. Use grep or read only the needed lines.
 - For one step, show all commands together with one simple sentence each, then wait for one OK.
 - Don't print long command output; show only errors or the last few lines.
 - Keep replies short.
@@ -47,9 +47,10 @@ Full details: `docs/BUILD_PLAN.md` (technology, data pipeline, fallback chain), 
 
 ## Commands
 
-- Run the site: VS Code → right-click `index.html` → **Open with Live Server** (or `python -m http.server 8000`).
-- Check data: `python tools/validate_data.py data`
-- Coverage: `python tools/coverage_report.py data > docs/COVERAGE.md`
+- Run the site: VS Code → right-click `src/index.html` → **Open with Live Server**, or `python -m http.server 8000 -d src`, or `docker compose up` (then open http://localhost:8080).
+- Folders: `src/` = the website (this is what gets deployed), `tools/` = Python data scripts, `tests/` = all tests, `docs/` = documents and design drafts, `.github/` = CI. The Firebase files (`firebase.json`, `firestore.rules`) stay at the top level.
+- Check data: `python tools/validate_data.py src/data`
+- Coverage: `python tools/coverage_report.py src/data > docs/COVERAGE.md`
 
 ## Agents (`.claude/agents/`)
 

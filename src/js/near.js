@@ -4,12 +4,14 @@
 // a GPS position stays in memory for distances and is never stored or sent (CLAUDE.md rule 5).
 // Everything is built with createElement + textContent; Leaflet loads only when a map is shown.
 import { icon } from './icons.js';
+import { locate } from './geo.js';
 
 export const CATS = [
   { id: 'hospital', ic: 'health', match: (p) => p.category === 'health' && ['hospital', 'clinic', 'doctors'].includes(p.subcategory) },
   { id: 'pharmacy', ic: 'pill', match: (p) => ['pharmacy', 'chemist'].includes(p.subcategory) },
   { id: 'police', ic: 'shield', match: (p) => ['police', 'fire_station'].includes(p.subcategory) },
-  { id: 'fuel', ic: 'fuel', match: (p) => p.subcategory === 'fuel' || p.source === 'official' },
+  // A few OpenStreetMap points are tagged fuel but are really fire stations: never list those as filling stations.
+  { id: 'fuel', ic: 'fuel', match: (p) => (p.subcategory === 'fuel' && !/fire\s*station/i.test(p.name_en || '')) || p.source === 'official' },
   { id: 'transport', ic: 'bus', match: (p) => ['bus_station', 'ferry_terminal', 'railway_station'].includes(p.subcategory) },
   { id: 'bank', ic: 'bank', match: (p) => p.category === 'money' },
   { id: 'market', ic: 'basket', match: (p) => p.category === 'shops' },
@@ -89,9 +91,18 @@ export function initNear(ctx) {
       || (/sadar/i.test(upazila || '') && inD.find((c) => c.upazila_en === district || /sadar/i.test(c.upazila_en))) || null;
   };
   const districtBn = (en) => (base.districts.find((d) => d.en === en) || {}).bn || en;
+  // OpenStreetMap English names sometimes end with the kind of place ("Nibir Pharmacy, Pharmacy"): the card already
+  // shows the kind, so that tail is dropped. Area names after a comma ("..., Dhaka") are kept.
+  const KIND_TAIL = new Set(['hospital', 'pharmacy', 'gas station', 'bank', 'market', 'restaurant', 'shopping mall', 'auto repair shop',
+    'post office', 'auto parts store', 'bazar', 'homeopathic pharmacy', 'motorcycle repair shop', 'supermarket', 'fire station', 'doctor',
+    'private hospital', 'hotel', 'coffee shop', 'motorcycle dealer', 'car repair and maintenance service', 'motorcycle parts store',
+    'gas company', 'government hospital', 'cell phone store', 'fast food restaurant', 'mobile phone repair shop', 'medical center',
+    'police station', 'public sector bank', 'motorcycle shop', 'private sector bank', 'family restaurant', 'tourist attraction',
+    'general hospital', 'cafe', 'hostel', 'veterinary pharmacy', 'resort hotel']);
+  const withoutKind = (n) => { const i = (n || '').lastIndexOf(', '); return i > 0 && KIND_TAIL.has(n.slice(i + 2).trim().toLowerCase()) ? n.slice(0, i) : n; };
   const nameOf = (p) => {
     if (p.source === 'official' && p.name_hidden) return bnLang() ? p.list.hidden_name_label_bn : p.list.hidden_name_label_en;
-    const n = bnLang() ? (p.name_bn || p.name_en) : (p.name_en || p.name_bn);
+    const n = bnLang() ? (p.name_bn || withoutKind(p.name_en)) : (withoutKind(p.name_en) || p.name_bn);
     return n || (base.labels[p.subcategory] || {})[ctx.lang()] || T().noName;
   };
 
@@ -135,7 +146,7 @@ export function initNear(ctx) {
     gps.addEventListener('click', () => {
       if (!navigator.geolocation) { msg.textContent = T().noGps; return; }
       msg.textContent = T().finding;
-      navigator.geolocation.getCurrentPosition((pos) => {
+      locate((pos) => {
         const p = { lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy), at: pos.timestamp };
         let best = null, bd = Infinity;
         for (const c of base.centres) { const k = km(p, c); if (k < bd) { bd = k; best = c; } }
@@ -143,7 +154,7 @@ export function initNear(ctx) {
         me = p; setArea({ district: best.district, upazila: best.upazila_en });
         ctx.onGps(p);                          // the pilot districts: the exact union for the area numbers
         onChange();
-      }, () => { msg.textContent = T().gpsFailed; }, { timeout: 15000, enableHighAccuracy: true });
+      }, (e) => { msg.textContent = e && e.code === 1 ? T().gpsDenied : T().gpsFailed; }, { precise: false, timeout: 15000 });
     });
     // district and upazila for all 64 districts
     const dSel = el('select'); dSel.setAttribute('aria-label', T().district);

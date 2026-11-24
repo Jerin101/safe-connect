@@ -57,14 +57,25 @@ The emergency part (999, the area's numbers, helplines, SOS message) works with 
 ```
 git clone https://github.com/Jerin101/safe-connect.git
 cd safe-connect
-python -m http.server 8000      # then open http://localhost:8000/
+python -m http.server 8000 -d src   # then open http://localhost:8000/
+```
+Or with Docker: `cp .env.example .env` then `docker compose up --build` and open http://localhost:8080/.
+
+## Folders
+```
+src/        the website: index.html, js/, css/, data/, fonts/, icons/, demo/, manifest.json, service-worker.js
+tools/      Python scripts that collect and check the data (standard library only)
+tests/      all tests (rules, data, search, PWA, browser checks)
+docs/       plans, reports, design drafts (docs/design/), SRS
+.github/    CI workflows, issue and PR templates
+project_management/  journal and Git contribution tracker
 ```
 
 ## Tests
 - `npm ci` then `npm run test:rules`: 154 Firestore security-rule tests in the emulator (required on every pull request).
 - `node --test tests/bipod-test.mjs tests/partial-load-test.mjs tests/category-words-test.mjs tests/pwa-test.mjs`
   (SMS, data loading, everyday-word search, installable offline app).
-- `python tools/validate_data.py data` (data validator, incl. district/upazila slugs) and `python -m unittest discover -s tests/places_data`.
+- `python tools/validate_data.py src/data` (data validator, incl. district/upazila slugs) and `python -m unittest discover -s tests/places_data`.
 - Chrome-based page tests: `tests/routes-test.mjs`, `tests/near-test.mjs`, `tests/dakun-test.mjs`, `tests/autoloc-test.mjs`,
   and the width check `tests/width-sweep.mjs` (320–1440 px, Bangla/English, light/dark). See [`tests/README.md`](tests/README.md).
 

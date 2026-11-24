@@ -112,7 +112,7 @@ await permission('granted');
 await open();
 const [A, B] = await ev(`(async () => {
   const L = await import('./js/location.js');
-  const locs = await L.loadLocations('data/');
+  const locs = await L.loadLocations('src/data/');
   const us = locs.unions.filter((u) => u.upazila_en === 'Begumganj');
   for (const a of us) for (const b of us) {
     const d = L.distanceKm(a, b);

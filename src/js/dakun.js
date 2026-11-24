@@ -6,6 +6,7 @@
 // "accepted" to the end of the trip, only for those two people, and are deleted at the end. Nothing is sent before the
 // person taps the button, and Firebase loads only then. Everything is built with createElement + textContent.
 import { icon } from './icons.js';
+import { locate } from './geo.js';
 
 const TYPE_IC = { ambulance: 'amb', cng: 'car', bike: 'bike', technician: 'wrench', help: 'hands', errand: 'basket', pickup: 'bag', towing: 'car',
   easybike: 'car', rickshaw: 'bike', van: 'bus' };
@@ -311,13 +312,13 @@ export function initDakun(ctx) {
     const m = view.querySelector('.dk-msg');
     if (!navigator.geolocation) { m.textContent = T().noGps; return; }
     m.textContent = T().finding;
-    navigator.geolocation.getCurrentPosition((p) => {
+    locate((p) => {
       const la = r5(p.coords.latitude), lo = r5(p.coords.longitude);
       if (!RM.inBangladesh(la, lo)) { m.textContent = T().outsideBd; return; }
       if (typeOf(form.type).shop) { form.drop = { lat: la, lon: lo }; m.textContent = T().gpsDrop; }
       else { form.pick = { lat: la, lon: lo }; m.textContent = T().gpsPick; }
       paintMarkers(true); paintEst();
-    }, () => { m.textContent = T().gpsFailed; }, { timeout: 15000, enableHighAccuracy: true });
+    }, (e) => { m.textContent = e && e.code === 1 ? T().gpsDenied : T().gpsFailed; }, { precise: false, timeout: 15000 });
   }
   async function refreshOnline() {
     try {

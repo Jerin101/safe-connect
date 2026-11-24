@@ -1,0 +1,26 @@
+# Local development: `docker compose up --build`, then open http://localhost:8080/ (port: WEB_PORT in .env).
+# Copy .env.example to .env first. Nothing here needs a secret.
+services:
+  web:
+    build: .
+    container_name: safeconnect-web
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    environment:
+      TZ: ${TZ:-Asia/Dhaka}
+    volumes:
+      # Edit files in src/ and refresh the browser: no rebuild needed while developing.
+      - ./src:/usr/share/nginx/html:ro
+    restart: unless-stopped
+
+  # `docker compose --profile tools run --rm data-check` : the same data check the pull request runs (must say 0 errors).
+  data-check:
+    profiles: ["tools"]
+    image: python:3.12-slim
+    working_dir: /app
+    volumes:
+      - .:/app:ro
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONIOENCODING: utf-8
+    command: python tools/validate_data.py src/data

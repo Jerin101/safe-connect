@@ -3,6 +3,7 @@
 // the area on the phone. Positions stay in memory only: never stored, never uploaded (CLAUDE.md rule 5).
 
 import { permissionState, distanceKm } from './location.js';
+import { locate } from './geo.js';
 
 const KEY = 'sc-autoloc';           // '1' = on (this phone only)
 const MOVE_KM = 0.3;                // act after moving at least 300 m ...
@@ -43,7 +44,7 @@ export function createAutoLoc({ store, onPosition, onFix, onError }) {
   function start() {
     const g = geo();
     if (!g) { onError('unsupported'); return; }
-    g.getCurrentPosition((p) => act(p, true), fail, FIRST);
+    locate((p) => act(p, true), fail, { precise: false, timeout: FIRST.timeout, maximumAge: FIRST.maximumAge });
     if (watchId === null) watchId = g.watchPosition((p) => act(p, false), (e) => { if (e.code === 1) fail(e); }, WATCH);
   }
   // Page open, or the page is visible again: only when on and the browser already allows it (never a surprise prompt).

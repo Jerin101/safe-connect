@@ -6,6 +6,7 @@
 // the vehicle, destination, battery, speed, last update and minutes left; ended or expired → a clear message.
 // Only the share id is kept on this phone (to end it after a reload), never a position. createElement + textContent.
 import { icon } from './icons.js';
+import { locate } from './geo.js';
 
 const SITE = 'https://jerin101.github.io/safe-connect/';
 const KEY = 'sc-live';                         // { id, expiresAt } of this phone's active share (no position)
@@ -40,7 +41,8 @@ export function initLive(ctx) {
     view = v;
     v.replaceChildren(el('div', 'skeleton'));
     let fb;
-    try { [fb] = await load(); } catch { v.replaceChildren(card(note(T().err.offline))); return; }
+    // A slow or broken connection must not leave an empty grey box: after 12 s the person sees the "check your connection" note.
+    try { [fb] = await Promise.race([load(), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 12000))]); } catch { v.replaceChildren(card(note(T().err.offline))); return; }
     const h = el('h1', 'page-title', T().title); h.id = 'liveTitle'; h.tabIndex = -1;
     const head = card(h, el('p', 'muted', T().intro));
     const user = await fb.currentUser();
@@ -68,7 +70,7 @@ export function initLive(ctx) {
     if (!navigator.geolocation) return say(T().noGps);
     say(T().finding);
     try { const b = await navigator.getBattery?.(); battery = b ? b : null; } catch { battery = null; }
-    navigator.geolocation.getCurrentPosition(async (pos) => {
+    locate(async (pos) => {
       const id = tr.newShareId();
       try {
         const commute = pendingCommute && tr.plateOk(pendingCommute.vehicleNo) ? pendingCommute : pendingCommute ? { vehicleType: pendingCommute.vehicleType, ...(pendingCommute.destination ? { destination: pendingCommute.destination } : {}) } : {};
@@ -81,12 +83,14 @@ export function initLive(ctx) {
         startWatch();
         paintActive();
       } catch (e) { say(errText(e)); }
-    }, () => say(T().allowLocation), { enableHighAccuracy: true, timeout: 20000 });   // UC-10 5.2
+    }, (e) => say(e && e.code === 1 ? T().allowLocation : T().noFix), { precise: true, timeout: 20000, maximumAge: 30000 });   // UC-10 5.2
   }
   function startWatch() {
     if (watchId != null || !navigator.geolocation) return;
-    watchId = navigator.geolocation.watchPosition((p) => { last = p.coords; }, () => say(T().allowLocation), { enableHighAccuracy: true, maximumAge: 4000, timeout: 30000 });
+    // A slow GPS fix (timeout) is not an error here: the last good point keeps being sent. Only "denied" is reported.
+    watchId = navigator.geolocation.watchPosition((p) => { last = p.coords; }, (e) => { if (e && e.code === 1) say(T().allowLocation); }, { enableHighAccuracy: true, maximumAge: 4000 });
     clearInterval(sendTimer);
+    keepAwake();
     sendTimer = setInterval(sendPoint, TR.SEND_EVERY_MS);
     clearTimeout(endTimer);
     endTimer = setTimeout(() => finish(false), Math.max(0, share.expiresAt - Date.now()));   // TRK-05: the time is over
@@ -99,7 +103,17 @@ export function initLive(ctx) {
     catch (e) { if (e && e.code === 'permission-denied') finish(false); }
   }
   function warnLeave(e) { if (share) { e.preventDefault(); e.returnValue = T().leaveWarn; return T().leaveWarn; } return undefined; }
+  // Keep the screen on while sharing: a phone that sleeps stops the GPS and the timer, and the family sees a frozen point.
+  // Not every browser has it; the page works without it, and it is asked for again when the person comes back to the page.
+  let wake = null;
+  async function keepAwake() {
+    try { if (share && !wake && document.visibilityState === 'visible') wake = await navigator.wakeLock?.request('screen'); } catch { wake = null; }
+    wake?.addEventListener?.('release', () => { wake = null; });
+  }
+  function letSleep() { try { wake?.release(); } catch { /* fine */ } wake = null; }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
   function stopWatch() {
+    letSleep();
     if (watchId != null) navigator.geolocation.clearWatch(watchId); watchId = null;
     clearInterval(sendTimer); clearTimeout(endTimer); sendTimer = endTimer = null;
     removeEventListener('beforeunload', warnLeave);

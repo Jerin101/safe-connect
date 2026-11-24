@@ -2,7 +2,7 @@
 // Run: node --test tests/category-words-test.mjs (no browser, no network).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { matchCategory, CATEGORY_WORDS } from '../js/category-words.js';
+import { matchCategory, CATEGORY_WORDS } from '../src/js/category-words.js';
 
 test('the SRS examples: "osudher dokan" is pharmacy, "teler pump" is a filling station', () => {
   assert.equal(matchCategory('osudher dokan'), 'pharmacy');

@@ -6,7 +6,7 @@ import { after, before, beforeEach, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, where } from 'firebase/firestore';
-import { DEFAULT_RATES, fare, cancelFee, estimateMetres, trackAdd, billLooksRight, toStored } from '../../js/ride.js';
+import { DEFAULT_RATES, fare, cancelFee, estimateMetres, trackAdd, billLooksRight, toStored } from '../../src/js/ride.js';
 
 const EASY = 'easy-uid';
 const ADMIN = 'admin-uid', RINA = 'rina-uid', KARIM = 'karim-uid', DRIVER = 'driver-uid', DRIVER2 = 'driver2-uid', PENDING = 'pending-uid', BIKER = 'biker-uid', FENI = 'feni-uid', HELPER = 'helper-uid', RUNNER = 'runner-uid', COURIER = 'courier-uid', TOWER = 'tower-uid';

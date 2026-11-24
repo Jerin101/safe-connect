@@ -111,7 +111,7 @@ await open('#/today');
 check('home: the "লাইভ লোকেশন শেয়ার" button opens #/live', await ev(`document.getElementById('liveBtn').getAttribute('href') === '#/live' && document.getElementById('liveBtnTitle').textContent === 'লাইভ লোকেশন শেয়ার'`));
 // SRS PR-6: Home modules, the theme is remembered, registration asks for a name
 await open('#/today');
-check('home: the six modules (Nearby, SOS, Directory, Live, Dakun, Profile)', await ev(`JSON.stringify([...document.querySelectorAll('#homeMods a')].map((a) => a.getAttribute('href'))) === JSON.stringify(['#/c', '#/sos', '#/numbers', '#/live', '#/dakun', '#/account'])`));
+check('home: the duplicate six-tile block is gone (the bottom bar and the category tiles stay)', await ev(`!document.getElementById('homeMods')`));
 const themeBefore = await ev(`document.documentElement.dataset.theme || ''`);
 await ev(`document.getElementById('themeBtn').click(); true`);
 const themeNow = await ev(`document.documentElement.dataset.theme`);

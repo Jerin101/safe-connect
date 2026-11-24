@@ -21,16 +21,16 @@ Two people build SafeConnect: **jerin101** (lead: data and backend) and **tasmin
 ## Data rules (most important)
 
 - Every phone number comes from an **official `*.gov.bd` page** (or `acc.org.bd`) and keeps its `source_url`. Never type a number from memory, news, Facebook or "someone said".
-- Change files in `data/` only with the scripts in `tools/` or through `data/manual_additions.json`. Never hand-edit the other `data/*.json` files.
-- Hand-entered records go into `data/manual_additions.json` with **both** a `source_url` and a `source_quote_bn` copied from the page.
+- Change files in `src/data/` only with the scripts in `tools/` or through `src/data/manual_additions.json`. Never hand-edit the other `src/data/*.json` files.
+- Hand-entered records go into `src/data/manual_additions.json` with **both** a `source_url` and a `source_quote_bn` copied from the page.
 - Before a data PR, run `python tools/validate_data.py data`. It must say **0 errors**. GitHub runs it again automatically (after P11).
-- **Any PR that changes a file in `data/` must raise `VERSION` in `service-worker.js`, otherwise phones keep the old numbers.**
+- **Any PR that changes a file in `src/data/` must raise `VERSION` in `src/service-worker.js`, otherwise phones keep the old numbers.**
   Why: the offline app (P34, #53) saves the data on each phone. A new `VERSION` (for example `v1-2026-10-23` → `v2-2026-11-02`) tells every phone to throw away its saved copy and download the new numbers. Put the version change in the same PR as the data change.
 
 ## Code rules
 
 - Plain HTML, CSS and JavaScript; no frameworks, no paid services.
-- Text shown to people lives in `js/lang/bn.json` and `js/lang/en.json`.
+- Text shown to people lives in `src/js/lang/bn.json` and `src/js/lang/en.json`.
 - Use `textContent` for data, never `innerHTML`.
 - Test at phone width (360 px), in both languages and both themes.
 - Privacy: without login, nothing leaves the phone. Read the location only when the user taps SOS or "Find help near me", or when they turned on "Update my area automatically" (off by default). Never log or upload personal data.

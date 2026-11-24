@@ -3,6 +3,7 @@
 // boundaries and union / town centre points (Bangladesh Bureau of Statistics, via OCHA HDX).
 
 import { DISTRICTS, norm } from './data.js';
+import { locate, geoCode } from './geo.js';
 
 const TOWN_RADIUS_KM = 2.5;   // closer than this to a town centre -> use the town
 const UNION_MAX_KM = 6;       // farther than this from every union centre in the upazila -> show the whole upazila
@@ -31,10 +32,10 @@ export function getPosition({ timeout = 15000, maximumAge = 60000 } = {}) {
   return new Promise((resolve, reject) => {
     const fail = (code) => { const e = new Error(code); e.code = code; reject(e); };
     if (!('geolocation' in navigator)) return fail('unsupported');
-    navigator.geolocation.getCurrentPosition(
+    locate(
       (p) => resolve({ lat: p.coords.latitude, lon: p.coords.longitude, accuracy: Math.round(p.coords.accuracy), at: p.timestamp }),
-      (err) => fail(['unavailable', 'denied', 'unavailable', 'timeout'][err.code] || 'unavailable'),
-      { enableHighAccuracy: true, timeout, maximumAge },
+      (err) => fail(geoCode(err)),
+      { precise: true, timeout, maximumAge },
     );
   });
 }
