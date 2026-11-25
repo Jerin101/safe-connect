@@ -189,7 +189,8 @@ export function initDakun(ctx) {
     const t = typeOf(form.type), shop = !!t.shop, errand = !!t.errand;
     const top = card();
     const h = el('h1', 'page-title', T().title); h.id = 'dakunTitle'; h.tabIndex = -1;
-    top.append(el('p', 'eyebrow', `${T().tab} · ${here.label}`), h, el('p', 'muted', T().intro));
+    top.append(el('p', 'eyebrow', `${T().tab} · ${here.label}`), h, el('p', 'muted', T().intro),
+      pills(btn('btn', ctx.provideTexts().signInDriver, 'wrench', () => ctx.go('provide'))));   // drivers and helpers sign in here
     // the eight services
     const grid = el('div', 'tgrid');
     for (const x of RM.RIDE_TYPES) {

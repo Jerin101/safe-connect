@@ -61,7 +61,7 @@ export function initProvide(ctx) {
       const h = el('h1', 'page-title', T().title); h.id = 'provideTitle'; h.tabIndex = -1;
       const head = card(el('p', 'eyebrow', T().eyebrow), h, el('p', 'muted', T().intro));
       if (!user) {
-        const b = btn('btn solid', D().signIn, 'user', (e) => ctx.signIn(e.currentTarget));
+        const b = btn('btn solid', T().signInDriver, 'user', (e) => ctx.signIn(e.currentTarget));
         v.replaceChildren(head, card(note(T().whySignIn), b));
         return;
       }
