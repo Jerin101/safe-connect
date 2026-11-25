@@ -31,3 +31,17 @@ export function placeStatusText(st, nowMs, bn = (x) => String(x)) {
   const ago = min < 60 ? `${bn(min)} মিনিট আগে` : min < 1440 ? `${bn(Math.round(min / 60))} ঘণ্টা আগে` : `${bn(Math.round(min / 1440))} দিন আগে`;
   return `${bn(st.n)} জন বলেছেন: ${placeValueBn(v)} · ${ago}${age > PLACE_FRESH_MS ? ' · পুরোনো (Outdated)' : ''}`;
 }
+
+// Confidence in a community answer (plan section 5). Rule-based, no AI: more people saying the same thing raises it, and it
+// fades with time (it halves every 6 hours). After 24 hours the answer is treated as expired and is not shown as current.
+// A conflict (two different answers) is not stored yet: the current document keeps only the latest answer. Planned.
+export const CONF_HALF_LIFE_MS = PLACE_FRESH_MS;
+export const CONF_EXPIRE_MS = 24 * 3600000;
+export function confidence(st, nowMs) {
+  const v = st && (st.status || st.value);
+  if (!v) return { level: 'none', score: 0 };
+  const age = Math.max(0, nowMs - toMs(st.at));
+  if (age > CONF_EXPIRE_MS) return { level: 'expired', score: 0 };
+  const score = Math.max(1, Number(st.n) || 1) * Math.pow(0.5, age / CONF_HALF_LIFE_MS);
+  return { level: score >= 2.5 ? 'high' : score >= 1.2 ? 'medium' : 'low', score };
+}

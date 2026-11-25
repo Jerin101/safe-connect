@@ -43,6 +43,7 @@ let fbLoad = null;       // the import('./firebase.js') promise, started once (o
 let fb = null;           // the module, once loaded
 let user = null;         // the signed-in Firebase user (only in memory)
 let wsRole = null;       // the workspace that is open: 'user', 'volunteer' or 'admin'
+let mode = 'login';     // 'login' or 'signup' (one simple page, like Facebook)
 let pick = 'user';       // the option chosen in the sign-in modal
 let mismatch = null;     // the option that did not match, for the short note
 let busy = false;        // a sign-in is running in the modal
@@ -154,38 +155,39 @@ function renderSignin() {
   $('addsList').replaceChildren(...a.adds.map((x) => ctx.el('li', null, x)));
   $('addsSoon').textContent = a.addsSoon;
   $('siEyebrow').textContent = a.eyebrow;
-  $('siT1').textContent = a.title1;
-  $('siT2').textContent = a.title2;
+  const up = mode === 'signup';
+  $('siT1').textContent = up ? a.signupTitle : a.title1;
+  $('siT2').textContent = up ? a.signupSub : a.title2;
+  // Four small role chips (one line). The chosen role's short text is shown under the chips.
   $('rolePick').setAttribute('aria-label', a.pickLabel);
+  $('rolePick').hidden = up;   // a new account is always a general user; roles apply when signing in
   $('rolePick').replaceChildren(...ROLES.map((r) => {
-    const b = ctx.el('button', 'role-opt'); b.type = 'button';
+    const b = ctx.el('button', 'role-chip'); b.type = 'button';
     b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(r === pick));
     const i = ctx.el('span', 'ico'); i.append(icon(ICON[r]));
-    b.append(i, ctx.el('b', null, a.roles[r].name), ctx.el('small', null, a.roles[r].desc), ctx.el('span', 'tag', a.roles[r].tag));
+    b.append(i, ctx.el('span', null, a.roles[r].name));
     b.addEventListener('click', () => { pick = r; say(null); renderSignin(); });
     return b;
   }));
-  $('siFormTitle').textContent = a.roles[pick].form;
+  $('siFormTitle').textContent = up ? a.signupForm : a.roles[pick].form;
+  $('siName').closest('label').hidden = !up;
+  $('siPass').autocomplete = up ? 'new-password' : 'current-password';
+  $('siForgot').hidden = up;
   $('siGoogleText').textContent = a.google;
   $('siOr').textContent = a.or;
   $('siNameL').textContent = a.nameForNew;
   $('siEmailL').textContent = a.email;
   $('siPassL').textContent = a.password;
-  $('siSubmit').textContent = busy ? a.wait : a.submit;
-  $('siCreate').textContent = a.create;
+  $('siSubmit').textContent = busy ? a.wait : (up ? a.signupSubmit : a.submit);
+  $('siCreate').textContent = up ? a.haveAccount : a.create;
+  $('siCreate').classList.toggle('si-new', !up);
   $('siForgot').textContent = a.forgot;
-  $('siNote').textContent = a.roles[pick].note;
-  const extra = $('siExtra'); extra.replaceChildren();
-  if (pick === 'volunteer') {
-    const b = ctx.el('button', 'linkbtn', a.asUser); b.type = 'button';
-    b.addEventListener('click', () => { pick = 'user'; renderSignin(); });
-    extra.append(b);
-  }
+  $('siNote').textContent = up ? '' : a.roles[pick].desc; $('siExtra').replaceChildren();
   renderOnline();
 }
 // Opened only by a tap. This is the moment Firebase may start loading (with internet only).
-function openModal(from) {
-  opener = from || document.activeElement;
+function openModal(from, startMode = 'login') {
+  opener = from || document.activeElement; mode = startMode;
   say(null);
   const loading = navigator.onLine ? loadFirebase().catch(() => {}) : null;
   renderSignin();
@@ -359,18 +361,18 @@ export function initAuth(helpers) {
   ws = initWorkspace({ ...ctx, askSignOut });
   rep = initReports({ ...ctx, withUser, openMine, knownUser: () => Boolean(user), reportSent: () => ws.reportsChanged() });
   $('siGoogle').addEventListener('click', () => run(() => fb.signInGoogle(), 'google'));
+  // registration (SRS FR01): name, email and password; every field is needed (UC-01 "সব ঘর ঠিকমতো পূরণ করুন")
   $('siForm').addEventListener('submit', (e) => {
     e.preventDefault();
-    const f = fields(true); if (f) run(() => fb.signInEmail(f.email, f.password));
-  });
-  // registration (SRS FR01): name, email and password; every field is needed (UC-01 "সব ঘর ঠিকমতো পূরণ করুন")
-  $('siCreate').addEventListener('click', () => {
-    const f = fields(true), name = $('siName').value.trim();
-    if (!f) return;
+    const f = fields(true); if (!f) return;
+    if (mode === 'login') { run(() => fb.signInEmail(f.email, f.password)); return; }
+    const name = $('siName').value.trim();
     if (name.length < 2) { say('needBoth'); $('siName').focus(); return; }
     created = true;
     run(() => fb.createAccount(f.email, f.password, name));
   });
+  // "Create new account" and "I already have an account" only switch the page
+  $('siCreate').addEventListener('click', () => { mode = mode === 'login' ? 'signup' : 'login'; say(null); renderSignin(); $('siEmail').focus(); });
   $('siForgot').addEventListener('click', () => {
     const f = fields(false);
     if (f) run(async () => { await fb.resetPassword(f.email); say('resetSent', true); });

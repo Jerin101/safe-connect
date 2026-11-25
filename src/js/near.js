@@ -87,10 +87,12 @@ export function initNear(ctx) {
   // The public details of the places (phone, hours, fee, facilities): data/details/details_<file>.json, made by
   // tools/collect_place_details.py from OpenStreetMap. A missing file simply means "no details".
   const detailCache = new Map();
+  // the details files exist only for the pilot districts so far (python tools/collect_place_details.py adds more)
+  const DETAIL_DISTRICTS = new Set(['coxsbazar', 'noakhali']);
   function detailsOf(districtEn) {
     if (!detailCache.has(districtEn)) {
       const d = base.districts.find((x) => x.en === districtEn);
-      detailCache.set(districtEn, Promise.all((d ? d.files : []).map((f) => getJSON(`data/details/details_${f}`).catch(() => null)))
+      detailCache.set(districtEn, Promise.all((d ? d.files : []).filter((f) => DETAIL_DISTRICTS.has(f.replace(/\.json$/, ''))).map((f) => getJSON(`data/details/details_${f}`).catch(() => null)))
         .then((xs) => { const out = { details: {}, checked: '' };
           for (const x of xs) if (x) { Object.assign(out.details, x.details); out.checked = x.checked_on || out.checked; }
           return out; }));
@@ -395,9 +397,11 @@ export function initNear(ctx) {
         const fb = await import('./firebase.js'), cm = await import('./community.js');
         const st = await fb.readPlaceStatus(placeId);
         if (!st || !(st.status || st.value)) { now.textContent = S.none; return; }
+        const cf = cm.confidence(st, Date.now());
+        if (cf.level === 'expired') { now.textContent = S.conf.expired; return; }   // older than 24 hours: not shown as current
         const nowMs = Date.now(), age = Math.max(1, Math.round((nowMs - cm.toMs(st.at)) / 60000));
         const ago = age < 60 ? fill(S.minAgo, { n: num(age) }) : age < 1440 ? fill(S.hourAgo, { n: num(Math.round(age / 60)) }) : fill(S.dayAgo, { n: num(Math.round(age / 1440)) });
-        now.textContent = `${fill(S.said, { n: num(st.n || 1), v: S.values[st.status || st.value] || '' })} · ${ago}${cm.isOutdated(st, nowMs) ? ` · ${S.outdated}` : ''}`;
+        now.textContent = `${fill(S.said, { n: num(st.n || 1), v: S.values[st.status || st.value] || '' })} · ${ago}${cm.isOutdated(st, nowMs) ? ` · ${S.outdated}` : ''} · ${S.conf[cf.level]}`;
       } catch { now.textContent = navigator.onLine ? S.none : S.offline; }
     };
     const buttons = el('div', 'pills');

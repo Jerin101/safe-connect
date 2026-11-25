@@ -5,6 +5,8 @@ import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.j
 import { createAutoLoc } from './autoloc.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS, hasPhone } from './reports.js';
+import { review, isEmergency } from './verify.js';
+import { initNetStatus } from './netstatus.js';
 import { helpLink, parseHelp, buildSms, smsParts, minutesAgo, pickPolice } from './bipod.js';
 import { BRANDS, LIVE, CHECKED } from './prepare.js';
 import { icon as lineIcon } from './icons.js';
@@ -280,6 +282,20 @@ function flagTags(r, tags = el('div', 'tags')) {
   for (const f of r.flags || []) if (t().flags[f]) tags.append(el('span', 'tag warn', t().flags[f]));
   return tags;
 }
+// Trust line (plan section 1): who checked, how, and when the next check is due. After the review time the number is not
+// shown as verified: the row says so and, for emergency numbers, points to 999. Dates come from the data, never invented.
+function verifyBits(r) {
+  const v = review(r), V = t().verify, box = el('div', 'vfy');
+  if (v.state === 'expired' || v.state === 'unknown') {
+    box.classList.add('bad');
+    box.append(el('span', 'tag warn', v.state === 'unknown' ? V.unknown : fill(V.expired, { date: fmtDate(v.checkedOn) })));
+    if (isEmergency(r)) box.append(el('small', null, V.alt));
+  } else {
+    if (v.state === 'soon') box.append(el('span', 'tag warn', fill(V.soon, { date: fmtDate(v.nextOn) })));
+    box.append(el('small', null, fill(V.line, { by: V.by[v.by], method: V.method[v.method], next: fmtDate(v.nextOn) })));
+  }
+  return box;
+}
 // "Report a wrong number" (P18, issue #79): only on area numbers from data/ with a record id, in the districts the
 // rules accept. National hotlines have no district, so they get no link. The tap opens the form; nothing is sent yet.
 function reportLink(r) {
@@ -324,7 +340,7 @@ function personRow(r) {
     const src = el('p', 'src');
     const a = el('a', null, `${t().source} ↗`); a.href = r.source_url; a.target = '_blank'; a.rel = 'noopener';
     src.append(a, ` · ${t().checked} ${fmtDate(r.script_check?.on || r.checked_on || r.retrieved_on)}`);
-    row.append(src);
+    row.append(src, verifyBits(r));
   }
   const rep = reportLink(r);
   if (rep) { const line = el('p', 'rep-line'); line.append(rep); row.append(line); }
@@ -342,7 +358,7 @@ function firstRow(what, r, red = false) {
     const src = el('span', 'src');
     const a = el('a', null, `${t().source} ↗`); a.href = r.source_url; a.target = '_blank'; a.rel = 'noopener';
     src.append(a, ` · ${t().checked} ${fmtDate(r.script_check?.on || r.checked_on || r.retrieved_on)}`);
-    info.append(src);
+    info.append(src, verifyBits(r));
   }
   const rep = reportLink(r);
   if (rep) info.append(rep);
@@ -1016,6 +1032,7 @@ function makeNear() {
     el, digits, go, near, pickArea, lang: () => lang,
     texts: () => LANG[lang].page.emergency,
     national: () => data?.national || null,
+    situation: () => sos.situation,
     officialRows: (a) => { const p = pilotPlace(a); if (!p) return null; try { return firstRows(p, areaContacts(data, p)); } catch { return null; } },
   });
   provide = initProvide({
@@ -1903,6 +1920,7 @@ if (isPlace()) route();
 
 // Calm notice while the phone has no internet; it goes away by itself when the internet is back.
 function showOnline() { $('offlineNote').hidden = navigator.onLine; }
+initNetStatus(() => t().net);
 window.addEventListener('online', showOnline);
 window.addEventListener('offline', showOnline);
 // WhatsApp and Messenger turn off and on with the internet.

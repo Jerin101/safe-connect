@@ -120,7 +120,7 @@ check('the theme is remembered after a reload (sc-theme)', (await ev(`document.d
 await ev(`document.getElementById('themeBtn').click(); true`);
 await ev(`document.querySelector('#dock [data-key="account"]').click(); true`);
 await waitFor(`!!document.querySelector('dialog[open] #siName')`, 15000);
-await ev(`document.getElementById('siEmail').value = 'someone@example.com'; document.getElementById('siPass').value = 'abcdef12'; document.getElementById('siName').value = ''; document.getElementById('siCreate').click(); true`);
+await ev(`document.getElementById('siEmail').value = 'someone@example.com'; document.getElementById('siPass').value = 'abcdef12'; document.getElementById('siCreate').click(); document.getElementById('siName').value = ''; document.getElementById('siSubmit').click(); true`);   // "Create new account" opens the sign-up page; Sign up with no name
 check('registration without a name: "সব ঘর ঠিকমতো পূরণ করুন" (UC-01)', await waitFor(`/সব ঘর ঠিকমতো পূরণ করুন/.test(document.getElementById('siMsg').textContent)`, 15000));
 await ev(`document.querySelector('dialog[open]')?.close(); true`);
 // SRS PR-7: SOS situations as the SRS; the Government Directory (Sylhet: no checked numbers → 999 + nearest)
