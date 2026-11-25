@@ -20,6 +20,7 @@ export function roleAuditFields(actorUid, uid, from, to) {
 // h: helpers from js/workspace.js (ctx, acct, render, visible, card, button, icon, select, note, stateNotes, reloadBtn, show, reports)
 let h = null;
 let users = null, usersBusy = false, usersErr = null;
+let pendProv = null;   // providers (drivers, helpers) waiting for approval: a number, or null until loaded
 let admins = new Set();
 let uFilter = { role: '', find: '' };
 let uChoice = {};      // the role picked in each row, not saved yet
@@ -70,6 +71,12 @@ async function loadUsers() {
   usersBusy = false;
   redraw();
 }
+// Provider applications (the "সেবা দিন" page): only the count here; approving happens on that page.
+async function loadPending() {
+  const a = h.acct();
+  if (!a || a.role !== 'admin' || !online()) return;
+  try { const list = await a.fb.pendingProviders(); if (h.acct() === a) { pendProv = list.filter((p) => !p.rejected).length; redraw(); } } catch { /* the card keeps its dash */ }
+}
 function auditQuery() {
   const day = (v) => (v ? new Date(`${v}T00:00`).getTime() : null);
   const from = day(aFilter.from), to = day(aFilter.to);
@@ -115,7 +122,14 @@ function checkSummary() {
   }
   return { value: c.fmtDate(verify.checked_on), sub: c.fill(w.lastCheckSub, { n: c.digits(n), removed: c.digits(removed), unreach: c.digits(unreach) }) };
 }
-// Applications and volunteers have no collection yet (P38): the cards say so instead of showing a made-up number.
+function appsCard() {
+  const w = W(), c = h.ctx;
+  const n = pendProv;
+  const card = adminStat(w.waitingApps, ADMIN_ICON.apps, n === null ? '—' : c.digits(n), n === null ? (online() ? A().wait : w.statNet) : c.fill(w.waitingAppsSub, { n: c.digits(n) }));
+  card.append(h.button(w.reviewApps, 'ws-more', () => c.go('provide')));
+  return card;
+}
+// Volunteers have no collection yet (P38): the cards say so instead of showing a made-up number.
 export function dashCards(reportIcon) {
   const w = W(), c = h.ctx, all = h.reports();
   const grid = c.el('div', 'wstats');
@@ -125,7 +139,7 @@ export function dashCards(reportIcon) {
   const last = checkSummary();
   grid.append(
     adminStat(w.openReports, reportIcon, open === null ? '—' : c.digits(open), repSub, 'check'),
-    adminStat(w.waitingApps, ADMIN_ICON.apps, '—', w.notBuilt),
+    appsCard(),
     adminStat(w.activeVols, ADMIN_ICON.users, '—', w.notBuilt),
     adminStat(w.lastCheck, ADMIN_ICON.check, last.value, last.sub, null, 'date'));
   return h.card(w.overview, [grid]);
@@ -258,11 +272,11 @@ export function auditSection() {
 /* ---------- life cycle ---------- */
 export function initAdmin(helpers) { h = helpers; }
 // The admin workspace opened (admins/{uid} exists): load what the cards and lists need.
-export function openAdmin() { loadUsers(); loadAudit(); if (verify === undefined) loadVerify(); }
-export function adminOnline() { if (!users) loadUsers(); if (!audit) loadAudit(); }
+export function openAdmin() { loadUsers(); loadAudit(); loadPending(); if (verify === undefined) loadVerify(); }
+export function adminOnline() { if (!users) loadUsers(); if (!audit) loadAudit(); loadPending(); }
 export function clearAdminMsg() { uMsg = null; }
 // Sign-out: nothing of this account stays in memory.
 export function resetAdmin() {
-  users = null; usersErr = null; admins = new Set(); uFilter = { role: '', find: '' }; uChoice = {}; uMsg = null;
+  pendProv = null; users = null; usersErr = null; admins = new Set(); uFilter = { role: '', find: '' }; uChoice = {}; uMsg = null;
   audit = null; auditErr = null; aFilter = { action: '', actor: '', from: '', to: '' }; aMsg = null;
 }
