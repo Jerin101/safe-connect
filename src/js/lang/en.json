@@ -859,6 +859,8 @@
       "openReports": "Open reports",
       "reviewSub": "{n} being checked",
       "waitingApps": "Waiting applications",
+      "waitingAppsSub": "driver and provider applications waiting",
+      "reviewApps": "Review and approve",
       "activeVols": "Active volunteers",
       "notBuilt": "not built yet",
       "lastCheck": "Last source check",
