@@ -75,7 +75,7 @@ await shot('r1-sylhet-pharmacy-390');
 await click('#cat .near-row .btn.solid');
 await waitFor(`/^#\\/c\\/pharmacy\\/osm-/.test(location.hash) && !!document.querySelector('#cat h2')`);
 const h2 = await ev(`[...document.querySelectorAll('#cat h2')].map((h) => h.textContent)`);
-check('place page: ফ্রি সহায়তা, then the way there', h2[0] === 'ফ্রি সহায়তা' && h2.length >= 2, JSON.stringify(h2));
+check('place page: ফ্রি সহায়তা, then the way there', h2.indexOf('ফ্রি সহায়তা') >= 0 && h2.length >= 2 && h2.indexOf('ফ্রি সহায়তা') < h2.indexOf('যেতে চাইলে'), JSON.stringify(h2));
 check('999 on the place page, with a tel: link', await ev(`!!document.querySelector('#cat a[href="tel:999"]')`));
 check('Sylhet: no unofficial number, an honest note and the national numbers link', await ev(`!!document.querySelector('#cat a[href="#/numbers"]') && ![...document.querySelectorAll('#cat a[href^="tel:"]')].some((a) => a.getAttribute('href') !== 'tel:999')`));
 await shot('r1-sylhet-place-390');
