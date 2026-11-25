@@ -240,7 +240,13 @@ async function run(action, where = 'email') {
     }
   } catch (err) {
     created = false;
-    if (dlg().open) say(errKey(err && err.code, navigator.onLine), false, where);
+    if (dlg().open) {
+      const key = errKey(err && err.code, navigator.onLine);
+      say(key, false, where);
+      // An unknown error shows its short Firebase code, so the team can find the cause (no personal data in a code).
+      const code = err && typeof err.code === 'string' && /^[\w/-]{3,60}$/.test(err.code) ? err.code : '';
+      if (key === 'other' && code) $(where === 'google' ? 'siGMsg' : 'siMsg').textContent += ` (${code})`;
+    }
   } finally {
     busy = false;
     if (dlg().open) renderSignin();
