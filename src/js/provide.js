@@ -381,7 +381,8 @@ export function initProvide(ctx) {
         const row = el('div', 'r near-row'); const sq = el('span', 'cat-ic sm'); sq.append(icon(TYPE_IC[p.type] || 'car'));
         const b = el('div'); b.append(el('div', 't', `${p.name} · ${name(p.type)}`), el('div', 'm', `${p.vehicle} · ${p.district}`));
         const acts = el('div', 'acts');
-        acts.append(btn('btn solid', T().approve, 'check', () => act('approve', p.id)), btn('btn ghost', T().reject, null, () => act('reject', p.id)));
+        if (p.id === user?.uid) b.append(el('div', 'small', T().selfNote));   // the rules do not let an admin approve their own application
+        else acts.append(btn('btn solid', T().approve, 'check', () => act('approve', p.id)), btn('btn ghost', T().reject, null, () => act('reject', p.id)));
         row.append(sq, b, acts); rows.append(row);
       }
       ap.append(rows);

@@ -30,7 +30,32 @@ export function initEmergency(ctx) {
     const ring = el('span', 'sos-ring'); ring.append(icon('phone'));
     const txt = el('span'); txt.append(el('b', null, T().call999), el('small', null, T().call999Sub));
     a.append(ring, txt);
-    box.replaceChildren(a);
+    const ask = el('div', 'esc'); ask.hidden = true;
+    // The page cannot know whether the call connected, so the person tells us; the next steps are guided, never automatic.
+    a.addEventListener('click', () => { ask.hidden = false; escalate(ask, 'ask'); });
+    box.replaceChildren(a, ask);
+  }
+  // Emergency escalation (plan section 2): 999 first, then one step at a time. Nothing is dialled or sent for the person.
+  function escalate(box, stage) {
+    const E = T().esc, line = el('div', 'esc-box');
+    line.append(el('b', null, E.asked), el('small', null, E.note));
+    const row = el('div', 'pills');
+    const yes = el('button', 'btn', E.yes); yes.type = 'button'; yes.addEventListener('click', () => { box.replaceChildren(el('p', 'esc-ok', E.thanks)); });
+    const no = el('button', 'btn red', E.no); no.type = 'button'; no.addEventListener('click', () => escalate(box, 'next'));
+    row.append(yes, no); line.append(row);
+    if (stage === 'next') {
+      const ol = el('ol', 'sos-steps');
+      const li = (txt, node) => { const x = el('li'); x.append(node || txt); ol.append(x); return x; };
+      const again = el('a', 'btn red', E.s1); again.href = 'tel:999'; li('', again);
+      const sit = ctx.situation && ctx.situation();
+      const hl = sit && SIT_LINE[sit] && (ctx.national() || []).find((r) => r.id === SIT_LINE[sit]);
+      if (hl && hl.phones && hl.phones.length) { const c = el('a', 'btn', `${E.s2}: ${num(hl.phones[0])}`); c.href = `tel:${hl.phones[0]}`; li('', c); }
+      const pol = el('button', 'btn', E.s3); pol.type = 'button'; pol.addEventListener('click', () => ctx.go('c/police')); li('', pol);
+      const sms = el('button', 'btn', E.s4); sms.type = 'button'; sms.addEventListener('click', () => ctx.go('send')); li('', sms);
+      const fam = el('button', 'btn', E.s5); fam.type = 'button'; fam.addEventListener('click', () => ctx.go('live')); li('', fam);
+      line.append(el('p', null, E.next), ol);
+    }
+    box.replaceChildren(line);
   }
 
   // "এখন যা করবেন" for the chosen situation; hidden while none is chosen

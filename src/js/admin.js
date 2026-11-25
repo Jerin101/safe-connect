@@ -29,6 +29,7 @@ const uSaving = new Set();
 let audit = null, auditBusy = false, auditErr = null;
 let aFilter = { action: '', actor: '', from: '', to: '' };
 let aMsg = null;       // key in auth.ws under the audit filters
+let recheck;           // undefined: loading; null: could not load; object: tasks() of js/verify.js
 let verify;            // undefined: not loaded yet; null: no report found; object: data/verify_report.json
 const USERS_MAX = 200; // the same limit as listUsers() in js/firebase.js
 const DAY = 86400000;
@@ -102,6 +103,18 @@ async function loadVerify() {
   redraw();
 }
 
+// Plan section 1: numbers whose review time is over become a task for the admin (counted from the data files, nothing made up).
+async function loadRecheck() {
+  try {
+    const { tasks } = await import('./verify.js');
+    const files = ['data/contacts_noakhali.json', 'data/contacts_coxsbazar.json'];
+    const recs = [];
+    for (const f of files) { const r = await fetch(f); if (!r.ok) throw new Error(f); recs.push(...((await r.json()).records || [])); }
+    recheck = tasks(recs);
+  } catch { recheck = null; }
+  redraw();
+}
+
 /* ---------- dashboard cards ---------- */
 function adminStat(label, d, value, sub, go, cls) {
   const s = h.ctx.el('div', 'wstat');
@@ -141,6 +154,9 @@ export function dashCards(reportIcon) {
     adminStat(w.openReports, reportIcon, open === null ? '—' : c.digits(open), repSub, 'check'),
     appsCard(),
     adminStat(w.activeVols, ADMIN_ICON.users, '—', w.notBuilt),
+    adminStat(w.recheck, ADMIN_ICON.check, recheck ? c.digits(recheck.due) : '—', recheck ? c.fill(w.recheckSub, { soon: c.digits(recheck.soon), fresh: c.digits(recheck.fresh) }) : recheck === null ? w.lastCheckNone : A().wait),
+    adminStat(w.coverage, ADMIN_ICON.check, recheck ? `${c.digits(Math.round(100 * recheck.sourced / (recheck.total || 1)))}%` : '—', recheck ? c.fill(w.coverageSub, { n: c.digits(recheck.sourced), t: c.digits(recheck.total) }) : A().wait),
+    adminStat(w.overduePct, ADMIN_ICON.check, recheck ? `${c.digits(Math.round(100 * recheck.due / (recheck.total || 1)))}%` : '—', w.impact),
     adminStat(w.lastCheck, ADMIN_ICON.check, last.value, last.sub, null, 'date'));
   return h.card(w.overview, [grid]);
 }
@@ -272,7 +288,7 @@ export function auditSection() {
 /* ---------- life cycle ---------- */
 export function initAdmin(helpers) { h = helpers; }
 // The admin workspace opened (admins/{uid} exists): load what the cards and lists need.
-export function openAdmin() { loadUsers(); loadAudit(); loadPending(); if (verify === undefined) loadVerify(); }
+export function openAdmin() { loadUsers(); loadAudit(); loadPending(); if (verify === undefined) loadVerify(); if (recheck === undefined) loadRecheck(); }
 export function adminOnline() { if (!users) loadUsers(); if (!audit) loadAudit(); loadPending(); }
 export function clearAdminMsg() { uMsg = null; }
 // Sign-out: nothing of this account stays in memory.

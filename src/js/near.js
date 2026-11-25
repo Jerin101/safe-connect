@@ -395,9 +395,11 @@ export function initNear(ctx) {
         const fb = await import('./firebase.js'), cm = await import('./community.js');
         const st = await fb.readPlaceStatus(placeId);
         if (!st || !(st.status || st.value)) { now.textContent = S.none; return; }
+        const cf = cm.confidence(st, Date.now());
+        if (cf.level === 'expired') { now.textContent = S.conf.expired; return; }   // older than 24 hours: not shown as current
         const nowMs = Date.now(), age = Math.max(1, Math.round((nowMs - cm.toMs(st.at)) / 60000));
         const ago = age < 60 ? fill(S.minAgo, { n: num(age) }) : age < 1440 ? fill(S.hourAgo, { n: num(Math.round(age / 60)) }) : fill(S.dayAgo, { n: num(Math.round(age / 1440)) });
-        now.textContent = `${fill(S.said, { n: num(st.n || 1), v: S.values[st.status || st.value] || '' })} · ${ago}${cm.isOutdated(st, nowMs) ? ` · ${S.outdated}` : ''}`;
+        now.textContent = `${fill(S.said, { n: num(st.n || 1), v: S.values[st.status || st.value] || '' })} · ${ago}${cm.isOutdated(st, nowMs) ? ` · ${S.outdated}` : ''} · ${S.conf[cf.level]}`;
       } catch { now.textContent = navigator.onLine ? S.none : S.offline; }
     };
     const buttons = el('div', 'pills');
