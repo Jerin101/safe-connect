@@ -240,7 +240,13 @@ async function run(action, where = 'email') {
     }
   } catch (err) {
     created = false;
-    if (dlg().open) say(errKey(err && err.code, navigator.onLine), false, where);
+    if (dlg().open) {
+      const key = errKey(err && err.code, navigator.onLine);
+      say(key, false, where);
+      // An unknown error shows its short Firebase code, so the team can find the cause (no personal data in a code).
+      const code = err && typeof err.code === 'string' && /^[\w/-]{3,60}$/.test(err.code) ? err.code : '';
+      if (key === 'other' && code) $(where === 'google' ? 'siGMsg' : 'siMsg').textContent += ` (${code})`;
+    }
   } finally {
     busy = false;
     if (dlg().open) renderSignin();
@@ -307,6 +313,7 @@ async function openAccount() {
 // Admins and volunteers see the user workspace for now (their own tools come with later issues).
 function openWorkspace(role) {
   wsRole = role;
+  if (rep) rep.flush().catch(() => {});   // reports saved while offline go now (plan section 3C)
   ws.open({ user, fb, role, mismatch, who: user ? (user.displayName || user.email || '') : '', letter: user ? initial(user) : '' });
   ctx.showView('ws');
 }
@@ -359,7 +366,7 @@ export function initAuth(helpers) {
   // Moving to another page (Back, a link) closes the modal, so it never stays over the new page.
   window.addEventListener('hashchange', () => closeModal(false));
   ws = initWorkspace({ ...ctx, askSignOut });
-  rep = initReports({ ...ctx, withUser, openMine, knownUser: () => Boolean(user), reportSent: () => ws.reportsChanged() });
+  rep = initReports({ ...ctx, withUser, openMine, session: () => (fb && user ? { fb, user } : null), queueChanged: () => window.dispatchEvent(new Event('sc-queue')), knownUser: () => Boolean(user), reportSent: () => ws.reportsChanged() });
   $('siGoogle').addEventListener('click', () => run(() => fb.signInGoogle(), 'google'));
   // registration (SRS FR01): name, email and password; every field is needed (UC-01 "সব ঘর ঠিকমতো পূরণ করুন")
   $('siForm').addEventListener('submit', (e) => {

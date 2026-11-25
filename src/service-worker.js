@@ -1,7 +1,7 @@
 // SafeConnect offline app (P34). After one visit with internet, the site opens with no internet.
 // Change VERSION whenever a file in FILES changes in a way that must reach every phone at once
 // (new data, a new page or script): the old cache is then deleted and everything is saved again.
-const VERSION = 'v66-2026-11-25';
+const VERSION = 'v67-2026-11-25';
 const CACHE = `safeconnect-${VERSION}`;
 
 // Every page, script, data file, font and icon the site needs (paths relative to this file).
@@ -17,7 +17,7 @@ const FILES = [
   'js/preview.js',
   'js/icons.js',             // line icons (A1)
   'js/near.js',              // categories near the person (R1)
-  'js/routemap.js', 'js/verify.js', 'js/netstatus.js', 'js/offlinepack.js',          // directions inside the site: road route and live route map (#309)
+  'js/routemap.js', 'js/verify.js', 'js/netstatus.js', 'js/offlinepack.js', 'js/reportqueue.js',          // directions inside the site: road route and live route map (#309)
   'js/dakun.js',             // সেবা ডাকুন (R3)
   'js/provide.js',           // সেবা দিন (R4)
   'js/emergency.js',         // জরুরি সাহায্য (R5)
