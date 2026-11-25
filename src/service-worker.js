@@ -17,6 +17,7 @@ const FILES = [
   'js/preview.js',
   'js/icons.js',             // line icons (A1)
   'js/near.js',              // categories near the person (R1)
+  'js/routemap.js',          // directions inside the site: road route and live route map (#309)
   'js/dakun.js',             // সেবা ডাকুন (R3)
   'js/provide.js',           // সেবা দিন (R4)
   'js/emergency.js',         // জরুরি সাহায্য (R5)

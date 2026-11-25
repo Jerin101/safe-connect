@@ -189,7 +189,8 @@ export function initDakun(ctx) {
     const t = typeOf(form.type), shop = !!t.shop, errand = !!t.errand;
     const top = card();
     const h = el('h1', 'page-title', T().title); h.id = 'dakunTitle'; h.tabIndex = -1;
-    top.append(el('p', 'eyebrow', `${T().tab} · ${here.label}`), h, el('p', 'muted', T().intro));
+    top.append(el('p', 'eyebrow', `${T().tab} · ${here.label}`), h, el('p', 'muted', T().intro),
+      pills(btn('btn', ctx.provideTexts().signInDriver, 'wrench', () => ctx.go('provide'))));   // drivers and helpers sign in here
     // the eight services
     const grid = el('div', 'tgrid');
     for (const x of RM.RIDE_TYPES) {
@@ -263,8 +264,8 @@ export function initDakun(ctx) {
       if (!p) continue;
       const row = el('div', 'r near-row'); const sq = el('span', 'cat-ic sm'); sq.append(icon(cats[0] === 'hospital' ? 'health' : 'bus', { size: 'sm' }));
       const b = el('div'); b.append(el('div', 't', label), el('div', 'm', `${p.name} · ${dist(p.km * 1000)}`));
-      const acts = el('div', 'acts'); const g = el('a', 'btn', T().mapLink); g.href = `https://www.google.com/maps/dir/?api=1&destination=${Number(p.lat)},${Number(p.lon)}`;
-      g.target = '_blank'; g.rel = 'noopener noreferrer'; g.prepend(icon('nav', { size: 'sm' })); acts.append(g);
+      const acts = el('div', 'acts'); const g = el('a', 'btn', T().mapLink); g.href = `#/c/${p.cat}/${encodeURIComponent(p.id)}`;
+      g.prepend(icon('nav', { size: 'sm' })); acts.append(g);
       row.append(sq, b, acts); near.push(row);
     }
     if (near.length) { const rs = el('div', 'rows'); rs.append(...near); kids.push(rs); }

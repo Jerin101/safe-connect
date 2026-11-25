@@ -1,0 +1,8 @@
+.sim { max-width: 1100px; margin: 0 auto; padding: 16px; }
+.sim-warn { padding: 10px 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line, currentColor); }
+.sim-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 4px; }
+.sim-grid { display: grid; gap: 14px; grid-template-columns: 1fr; margin-top: 10px; }
+@media (min-width: 800px) { .sim-grid { grid-template-columns: 1fr 1fr; } }
+.sim-map { height: 52vh; min-height: 320px; }
+.sim-chip { font-weight: 700; margin: 6px 0 10px; }
+.sim-chip.near { color: var(--ok, #1F7A4F); }

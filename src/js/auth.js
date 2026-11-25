@@ -7,10 +7,11 @@
 import { initWorkspace, LOCAL_KEYS, SYNC, syncOn } from './workspace.js';
 import { initReports } from './reports.js';
 
-const ROLES = ['user', 'volunteer', 'admin'];
+const ROLES = ['user', 'driver', 'volunteer', 'admin'];
 const FLAG = 'sc-signed-in';
 export const ICON = {
   user: 'M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm-8 9c0-4.4 3.6-7 8-7s8 2.6 8 7H4Z',
+  driver: 'M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11v6h-2v2h-2v-2H9v2H7v-2H5v-6Zm2.2 0h9.6l-1-3H8.2l-1 3ZM7.5 15a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Zm9 0a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z',
   volunteer: 'M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10Z',
   admin: 'M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1 14-4-4 1.4-1.4L11 13.2l4.6-4.6L17 10l-6 6Z',
 };
@@ -210,15 +211,15 @@ async function enter(u) {
   // Do not wait for watchUser: it may come a moment later than the sign-in answer.
   user = u; ctx.store.set(FLAG, '1'); renderButton();
   const role = await fb.roleOf(u, ctx.lang());
-  const ok = pick === 'user' || pick === role;
+  const ok = pick === 'user' || pick === 'driver' || pick === role;   // a driver signs in as a normal user, then applies on the driver page
   mismatch = ok ? null : pick;
-  wsRole = ok ? pick : 'user';
+  wsRole = ok && pick !== 'driver' ? pick : 'user';
   // The report form asked for this sign-in: go back to it (it sends the report), not to the account page.
   if (pending) { const p = pending; pending = null; closeModal(); p.onUser({ fb, user: u }); return; }
   // Closed (Esc, ×) or moved to another page while signing in: stay where the person is now.
   if (!dlg().open) return;
   closeModal(false);
-  ctx.go('account');
+  ctx.go(pick === 'driver' ? 'provide' : 'account');
 }
 let created = false;   // the last action was "create account"
 async function run(action, where = 'email') {

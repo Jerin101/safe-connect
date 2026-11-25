@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self' https://router.project-osrm.org; base-uri 'self'; form-action 'none'; object-src 'none'">
+<title>লাইভ রাইড সিমুলেশন</title>
+<link rel="stylesheet" href="../vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/preview.css">
+<link rel="stylesheet" href="../css/ui.css">
+<link rel="stylesheet" href="ride-sim.css">
+<script src="../vendor/leaflet/leaflet.js" defer></script>
+<script type="module" src="ride-sim.js"></script>
+</head>
+<body>
+<main class="sim">
+  <h1>লাইভ রাইড সিমুলেশন</h1>
+  <p class="sim-warn" role="note">এটি সিমুলেশন (পরীক্ষা)। এখানে কোনো সত্যিকারের রাইডার বা গ্রাহক নেই; শুধু দেখানো হচ্ছে সত্যিকারের সেবায় দুই ফোনে কী দেখা যাবে। রাস্তা OpenStreetMap-এর ফ্রি OSRM সার্ভার থেকে আসে।</p>
+  <div class="sim-bar">
+    <button class="btn solid" id="simStart" type="button">রাইডার ডাকুন</button>
+    <button class="btn" id="simReset" type="button">আবার শুরু</button>
+    <label for="simSpeed">গতি</label>
+    <select id="simSpeed">
+      <option value="1">স্বাভাবিক</option>
+      <option value="4" selected>৪ গুণ দ্রুত</option>
+      <option value="10">১০ গুণ দ্রুত</option>
+    </select>
+  </div>
+  <p class="small" id="simHint">গ্রাহকের ম্যাপে ট্যাপ করলে গ্রাহক সেই জায়গায় সরে যান, রাইডার নতুন পথে আসেন।</p>
+  <div class="sim-grid">
+    <section class="card">
+      <h2>গ্রাহকের ফোন</h2>
+      <p class="sim-chip" id="custChip" role="status">রাইডার ডাকুন চাপুন।</p>
+      <div class="near-map sim-map" id="custMap" role="region" aria-label="গ্রাহকের ম্যাপ"></div>
+    </section>
+    <section class="card">
+      <h2>রাইডারের ফোন</h2>
+      <p class="sim-chip" id="ridChip" role="status">কাজ আসার অপেক্ষায়।</p>
+      <div class="near-map sim-map" id="ridMap" role="region" aria-label="রাইডারের ম্যাপ"></div>
+    </section>
+  </div>
+  <p class="small">ম্যাপ: © OpenStreetMap contributors</p>
+</main>
+</body>
+</html>
