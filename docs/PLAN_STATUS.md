@@ -21,7 +21,8 @@ Targets in the plan are proposed targets, not achieved results (they need real d
 | 4. Self-approval prohibited, audit log | Done | `firestore.rules` |
 | 4. Rate limiting, malicious report filter | Partial | reports have limits and no phone numbers; no server-side rate limit |
 | 5. Community status with confidence logic | Partial | "How is it now?" exists; several confirmations, decay and conflicts are Planned |
-| 6. Disaster mode, accessibility mode, analytics | Partial | shelters and large text exist; voice and aggregate analytics Planned |
+| 6. Accessibility: easy mode | Done | "Aa" button in the header: bigger text and buttons, stronger contrast, clear focus; kept on the phone |
+| 6. Disaster mode, voice navigation, analytics | Partial | shelters exist; voice navigation and aggregate analytics Planned |
 | 7. Measurable NFR targets | Partial | coverage and overdue % are measured now in the admin overview; speed, offline success, SOS failure need real tests |
 | 8. Impact dashboard | Partial | only what can be measured today; the rest says "not measured yet" |
 | Rides (supporting feature) | Done | demo works; kept as a supporting feature, not the main pillar |
