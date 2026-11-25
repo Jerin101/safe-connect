@@ -215,6 +215,42 @@ The app's **"Report a lost/stolen item"** helper builds a GD-ready text: date, t
 
 Location is read only when the user taps, or while the user has turned on "Update my area automatically" (off by default; CLAUDE.md rule 5), and the lookup happens on the phone.
 
+### 9.1 Offline emergency pack and trust dates (teacher's plan, sections 1 and 3)
+
+The service worker (`service-worker.js`) keeps the app files and `data/`. Two small modules add a second safety net and make
+old data visible. Both are plain ES modules with no build step and no server.
+
+| Part | File | What it does |
+|---|---|---|
+| Review times | `src/js/verify.js` | Each contact shows who checked it, how, and when the next check is due. Local numbers: 30 days. National helplines: 90 days. After that the number is **not shown as verified** (the row says "Check overdue" and, for emergency numbers, points to 999). These times are the team's own starting rule, **not an official standard**. Dates come from the data (`script_check.on`, `checked_on`, `retrieved_on`); `status: verified` means a person checked it. Nothing is invented. |
+| Offline emergency pack | `src/js/offlinepack.js` | 999, the national helplines and (only if the phone may remember the area) this area's key numbers are saved in IndexedDB database `safeconnect`, store `pack`, with source link and check date. The SOS page shows this copy, labelled "saved copy", when the data files cannot load. The person can remove it. |
+| Network chip | `src/js/netstatus.js` | Says Slow connection or Offline (hidden while online). It reads only the browser's online flag and connection speed. |
+| Guided escalation | `src/js/emergency.js` | After the 999 tap the page asks "Did the call connect?" (a browser cannot know). If not, it lists the next steps one at a time: 999 again, the situation's helpline, the nearest police station, SMS, family. Nothing is dialled or sent automatically. |
+
+### 9.2 Sync queue for reports written offline (`src/js/reportqueue.js`)
+
+A wrong-number report or a "missing place" request written with **no internet** is saved on the phone and sent later.
+
+**How it works**
+1. Offline, the report form's button changes to "Save to send later". The report goes into IndexedDB database `safeconnect-queue`, store `items`.
+2. The network chip shows "N waiting to send".
+3. When the internet is back **and** the person is signed in (Firebase already loaded), the queue is sent one by one with the normal `sendReport` call, so the same Firestore rules and limits apply (verified email, 10 per day, 1 per minute).
+4. If the person is not signed in, the items wait. They are sent when the person next opens their account.
+
+**Privacy and safety rules** (CLAUDE.md rules 4a, 5 and 9)
+- The queue holds **only the report**: record id, district, area name, problem and a short note. It does **not** keep the user id, name, email or location. The uid is added at send time from the account that is signed in then.
+- A note with a phone number is refused, offline and online.
+- At most 10 items, and an item that fails 5 times is dropped, so one bad item cannot block the others.
+- A duplicate (same record, problem and note) is not saved twice.
+- Nothing is sent without a signed-in account. A report never changes a number on the site: an admin checks it against the official page.
+
+**Limits we state openly**
+- The browser can only send while a page is open. There is no background sync, because a free static site has no server to wake it.
+- A queue saved on one phone cannot be sent from another phone.
+- Clearing the site data removes the queue.
+
+**Tests:** `tests/reportqueue-test.mjs` (pure part), `tests/offlinepack-test.mjs`, `tests/verify-test.mjs`, and checks in `tests/routes-test.mjs` (run it with `BASE=http://127.0.0.1:8001/`, the port of the site you are testing, not an old server).
+
 ## 10. Backend: Firebase Spark + volunteer service
 
 **Cost: 0.** The free **Spark plan has no Cloud Functions** (no server code) and we use **no file storage**. So:
