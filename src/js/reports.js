@@ -2,6 +2,7 @@
 // A report never changes a number on the site: an admin checks it against the official page, and a fix goes
 // through tools/ and a pull request (CLAUDE.md rule 1).
 // The top part has no browser code, so tests/rules/firestore.rules.test.mjs can check the exact documents.
+import { enqueue, flushQueue } from './reportqueue.js';
 export const PROBLEMS = ['off', 'other_person', 'changed', 'other'];
 export const MISSING = 'missing_place';   // "জায়গাটা যোগ করতে বলুন" (#159)
 export const STATUSES = ['open', 'review', 'fixed', 'same'];
@@ -122,7 +123,7 @@ function stepCheck() {
   const r = R(), online = navigator.onLine;
   const note = cut(draft.note, NOTE_MAX);
   const out = [review([...who(), [r.kProblem, r.problems[draft.problem]], [r.kNote, note || r.noNote], [r.kNextStep, r.noChange]])];
-  if (!online) { const m = ctx.el('p', 'offline-note', r.offline); m.setAttribute('role', 'status'); out.push(m); }
+  if (!online) { const m = ctx.el('p', 'offline-note', r.offline); m.setAttribute('role', 'status'); out.push(m); }   // offline: the button saves it to send later
   else if (!ctx.knownUser()) out.push(ctx.el('p', 'si-note', r.signNeeded));
   if (draft.err) { const m = ctx.el('p', 'err', r[draft.err]); m.setAttribute('role', 'alert'); out.push(m); }
   // Email not verified yet (issue #117): a button sends the verification email again.
@@ -131,15 +132,15 @@ function stepCheck() {
     const st = ctx.el('p', 'si-note', draft.resent === true ? r.resent : draft.resent === false ? r.err : '');
     st.setAttribute('role', 'status'); out.push(st);
   }
-  const send = button(draft.busy ? ctx.texts().auth.wait : r.send, 'btn violet', trySend, 'repSend');
-  send.disabled = !online || draft.busy;
+  const send = button(draft.busy ? ctx.texts().auth.wait : online ? r.send : r.queueBtn, 'btn violet', trySend, 'repSend');
+  send.disabled = draft.busy;
   out.push(actions(button(r.back, 'btn', () => go(1)), send));
   return out;
 }
 function stepSent() {
   const r = R();
   const box = ctx.el('div', 'success');
-  box.append(ctx.el('span', 'big', '✓'), ctx.el('h2', null, r.sentTitle), ctx.el('p', null, r.sentText));
+  box.append(ctx.el('span', 'big', '✓'), ctx.el('h2', null, draft.queued ? r.queuedTitle : r.sentTitle), ctx.el('p', null, draft.queued ? r.queuedText : r.sentText));
   box.append(actions(button(r.toMine, 'btn violet', toMine, 'repMine'), button(r.close, 'btn', () => close())));
   return [box];
 }
@@ -150,7 +151,7 @@ function render() {
   $('rep999Text').textContent = u.h999;
   $('repClose').setAttribute('aria-label', r.close);
   $('repEyebrow').textContent = r.eyebrow;
-  $('repTitle').textContent = draft.step === STEPS ? r.sentTitle : r.title;
+  $('repTitle').textContent = draft.step === STEPS ? (draft.queued ? r.queuedTitle : r.sentTitle) : r.title;
   $('repLead').textContent = r.lead;
   $('repLead').hidden = draft.step === STEPS;
   $('repSteps').hidden = draft.step === STEPS;
@@ -171,9 +172,21 @@ function go(step) {
 // "Send": sign-in is needed (the rules refuse a report without it). Signed out: the calm sign-in modal from #73;
 // Firebase loads only now, after this tap. After signing in, the report is sent at once (the person already tapped Send).
 function trySend() {
-  if (!draft || draft.busy || !navigator.onLine) { render(); return; }
+  if (!draft || draft.busy) { render(); return; }
+  if (!navigator.onLine) { queueDraft(); return; }
   draft.busy = true; draft.err = null; render();
   ctx.withUser($('repSend'), send, () => { if (draft) { draft.busy = false; render(); } });
+}
+// No internet: keep the report on the phone (plan section 3C). It is sent later, with the account that is signed in then.
+async function queueDraft() {
+  const r = R();
+  const res = await enqueue('report', draft);
+  if (!draft) return;
+  if (res === 'saved' || res === 'duplicate') {
+    if (res === 'duplicate') { draft.err = 'queueDup'; render(); return; }
+    draft.queued = true; draft.step = STEPS; draft.err = null; render(); $('repTitle').focus({ preventScroll: true }); ctx.queueChanged?.(); return;
+  }
+  draft.err = res === 'full' ? 'queueFull' : 'err'; render();
 }
 async function send({ fb, user }) {
   if (!draft) return;
@@ -185,6 +198,7 @@ async function send({ fb, user }) {
     await fb.sendReport(fields);
     draft.busy = false; draft.step = STEPS;
     ctx.reportSent();
+    flush();
     render();
     $('repTitle').focus({ preventScroll: true });
   } catch (e) {
@@ -213,6 +227,14 @@ function onClosed() {
   if (o && o.isConnected && !o.closest('[hidden]')) o.focus();
 }
 
+// Sends the reports saved while offline, when the internet is back and the person is signed in (Firebase already loaded).
+export async function flush() {
+  const s = ctx && ctx.session ? ctx.session() : null;
+  if (!s) return;
+  const { sent } = await flushQueue(s);
+  ctx.queueChanged?.();
+  if (sent > 0) { ctx.toast?.(ctx.fill ? ctx.fill(R().queuedSent, { n: sent }) : String(sent)); ctx.reportSent?.(); }
+}
 export function initReports(helpers) {
   ctx = helpers;
   $('repClose').addEventListener('click', () => close());
@@ -221,7 +243,7 @@ export function initReports(helpers) {
   // The sign-in modal opens over this one; when it closes, this one is still open and keeps the page still.
   $('signin').addEventListener('close', () => { if (dlg().open) document.body.classList.add('modal-open'); });
   window.addEventListener('hashchange', () => close(false));
-  const onNet = () => { if (dlg().open) render(); };
+  const onNet = () => { if (dlg().open) render(); if (navigator.onLine) flush().catch(() => {}); };
   window.addEventListener('online', onNet);
   window.addEventListener('offline', onNet);
   return {
@@ -237,10 +259,11 @@ export function initReports(helpers) {
       $('repTitle').focus();
     },
     setText() { if (dlg().open) render(); },
+    flush,
     // "জায়গাটা যোগ করতে বলুন" (#159): sign in if needed (Firebase loads only after this tap), then one request with the
     // same limits as reports. done(code): 'sent' | 'verify' | 'limitWait' | 'limitDay' | 'invalid' | 'err' | 'cancel'.
     askPlace(draft, from, done) {
-      if (!navigator.onLine) { done('offline'); return; }
+      if (!navigator.onLine) { enqueue('missing', draft).then((res) => { done(res === 'saved' ? 'queued' : res === 'duplicate' ? 'queued' : res === 'full' ? 'offline' : 'invalid'); ctx.queueChanged?.(); }); return; }
       ctx.withUser(from, async ({ fb, user }) => {
         const fields = missingFields(user.uid, draft);
         if (!fields) { done('invalid'); return; }
