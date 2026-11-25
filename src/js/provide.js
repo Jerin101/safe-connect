@@ -107,7 +107,7 @@ export function initProvide(ctx) {
       }
       parts.push(card(el('h2', null, T().earnings), earnBox()));
     }
-    if (isAdm) parts.push(...adminCards());
+    if (isAdm) parts.splice(1, 0, ...adminCards());   // admins see the approvals first, right under the title
     view.replaceChildren(...parts);
     paintReqs(); paintOverview();
     const ob = view.querySelector('.ov-map'), rb2 = view.querySelector('.rq-map');
@@ -323,7 +323,7 @@ export function initProvide(ctx) {
       }
       if (what === 'paid') { await fb.markPaid(job.id); ctx.toast(T().paidDone); return; }
       if (what === 'cancel') { await fb.cancelRide(job.id, 'provider', 0); await fb.clearLive(job.id); stopJob(); ctx.toast(D().cancelled); return paint(); }
-      if (what === 'approve') { await fb.approveProvider(arg, true); pend = await fb.pendingProviders(); ctx.toast(T().approvedDone); return paint(); }
+      if (what === 'approve') { await fb.approveProvider(arg, true); pend = await fb.pendingProviders(); ctx.toast(T().approvedDone); if (arg === user?.uid) return show(view); return paint(); }
       if (what === 'reject') { await fb.rejectProvider(arg); pend = await fb.pendingProviders(); ctx.toast(T().rejectedDone); return paint(); }
       if (what === 'clean') { const n = await fb.cleanExpiredShares(); ctx.toast(fill(T().cleaned, { n: num(n) })); say(fill(T().cleaned, { n: num(n) })); return; }
       if (what === 'rates' || what === 'defaults') {
@@ -428,7 +428,7 @@ export function initProvide(ctx) {
     // live shares whose time is over (the rules let an admin list and delete only those)
     const sh = card(el('p', 'eyebrow', T().admin), el('h2', null, T().sharesTitle), el('p', 'muted', T().sharesText),
       pills(btn('btn', T().cleanShares, null, () => act('clean'))));
-    return [ov, ap, rc, sh];
+    return [ap, ov, rc, sh];
   }
 
   return {
