@@ -13,7 +13,7 @@ Targets in the plan are proposed targets, not achieved results (they need real d
 | 1. Second independent source, conflict goes to admin | Planned | needs a second source per contact |
 | 2. Situation list and guide steps | Done | SOS page, 6 situations |
 | 2. Guided escalation (999, situation helpline, police station, SMS, family) | Done | asks "Did the call connect?"; never automatic; the browser cannot know if a call connected |
-| 3A. Offline emergency pack (service worker) | Partial | app and data cached; IndexedDB store not built |
+| 3A. Offline emergency pack | Done | `src/js/offlinepack.js`: 999, helplines and the remembered area saved in IndexedDB with check dates; shown when data cannot load |
 | 3B. Online / slow / offline chip | Done | `src/js/netstatus.js` |
 | 3B. "Data sync pending" | Planned | needs an offline queue |
 | 3C. Background sync of pending reports | Planned | |

@@ -4,6 +4,7 @@
 // hospital, never an unofficial number), and the 19 national helplines grouped by need, each with its source.
 // Nothing here reads the location or sends anything. Built with createElement + textContent.
 import { icon } from './icons.js';
+import { buildPack, savePack, loadPack, clearPack } from './offlinepack.js';
 
 // which national helplines go together, by what the person needs
 const GROUPS = [
@@ -104,8 +105,8 @@ export function initEmergency(ctx) {
   }
 
   // the 19 national helplines, grouped by need, each with its call button and source
-  function helplines(box) {
-    const all = ctx.national();
+  function helplines(box, list = ctx.national(), note = '') {
+    const all = list;
     const h = el('h2', null, T().linesTitle); h.id = 'sosLinesTitle';
     if (!all) { box.replaceChildren(h, el('div', 'skeleton')); return; }
     // folded by default: the page stays short; the area's numbers above are what most people need
@@ -129,12 +130,37 @@ export function initEmergency(ctx) {
       kids.push(rows);
     }
     fold.replaceChildren(...kids);
-    box.replaceChildren(fold);
+    box.replaceChildren(...(note ? [el('p', 'muted', note)] : []), fold);
+  }
+
+  // Offline emergency pack (plan section 3A): keep the numbers on the phone; show them when the data cannot load.
+  async function keepPack(box, noteBox) {
+    const P = T().pack, nat = ctx.national();
+    let pack = null;
+    if (nat) {
+      const a = await ctx.near.area().catch(() => null);
+      const recs = a && ctx.remembers() && ctx.areaRecords ? ctx.areaRecords(a) : null;   // the area only if the phone may remember it
+      pack = buildPack({ national: nat, area: recs, areaLabel: a && recs ? ctx.near.label(a) : '' });
+      await savePack(pack);
+    } else {
+      pack = await loadPack();
+      if (pack && pack.national.length) helplines(box, pack.national, ctx.fill(P.copy, { date: ctx.fmtDate(pack.savedAt) }));
+    }
+    if (!pack) { noteBox.replaceChildren(); return; }
+    const n = pack.national.length + (pack.area ? pack.area.records.length : 0);
+    const kids = [el('p', 'small', ctx.fill(P.saved, { n: num(n), date: ctx.fmtDate(pack.savedAt) }))];
+    if (pack.area && pack.area.records.length) kids.push(el('p', 'small', ctx.fill(P.area, { area: pack.area.label })));
+    const rm = el('button', 'linkbtn', P.clear); rm.type = 'button';
+    rm.addEventListener('click', async () => { await clearPack(); noteBox.replaceChildren(el('p', 'small', P.cleared)); });
+    kids.push(rm);
+    noteBox.replaceChildren(...kids);
   }
 
   return {
     show({ call, sit, steps: stepsBox, area: areaBox, lines }) {
       call999(call); steps(stepsBox, sit); area(areaBox); helplines(lines);
+      const note = lines.nextElementSibling && lines.nextElementSibling.id === 'sosPack' ? lines.nextElementSibling : null;
+      if (note) keepPack(lines, note).catch(() => {});
     },
     steps,
     helplines,

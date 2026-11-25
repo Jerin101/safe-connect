@@ -1033,6 +1033,8 @@ function makeNear() {
     texts: () => LANG[lang].page.emergency,
     national: () => data?.national || null,
     situation: () => sos.situation,
+    remembers, fill, fmtDate,
+    areaRecords: (a) => { const p = pilotPlace(a); if (!p) return null; try { const g = areaContacts(data, p); return ['police', 'tourist_police', 'local', 'town', 'administration'].map((id) => pickContact(g, id)).filter(Boolean); } catch { return null; } },
     officialRows: (a) => { const p = pilotPlace(a); if (!p) return null; try { return firstRows(p, areaContacts(data, p)); } catch { return null; } },
   });
   provide = initProvide({
