@@ -207,3 +207,10 @@ body > main { flex: 1 0 auto; }
 .ready-list li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .ready-ok svg { color: var(--ok, #1B7F4B); }
 .ready-no svg { color: var(--warn, #B26A00); }
+
+/* Phones: the area chip must be allowed to shrink (its name is cut with "..."), so it never slides under the 999 button. */
+@media (max-width: 760px) {
+  .areachip { min-width: 0 !important; overflow: hidden; }
+  .areachip span, .areachip .chip-short { min-width: 0; max-width: 100%; }
+}
+.vfy .tag { margin-inline-end: 4px; }

@@ -81,8 +81,10 @@ export function initEmergency(ctx) {
     }
     const tools = el('div', 'pills');
     if (canSpeak()) {   // voice help: read the steps aloud (the phone's own voice; nothing is sent)
-      const rd = el('button', 'btn', T().speak.read); rd.type = 'button'; rd.classList.add('loud'); rd.addEventListener('click', () => speak([`${s.title}.`, ...s.do], ctx.lang()));
-      const sp = el('button', 'btn ghost', T().speak.stop); sp.type = 'button'; sp.addEventListener('click', stopSpeaking);
+      const rd = el('button', 'btn loud', T().speak.read); rd.type = 'button'; rd.setAttribute('aria-pressed', 'false');
+      const idle = () => { rd.textContent = T().speak.read; rd.setAttribute('aria-pressed', 'false'); };
+      rd.addEventListener('click', () => { if (speak([`${s.title}.`, ...s.do], ctx.lang(), idle)) { rd.textContent = T().speak.reading; rd.setAttribute('aria-pressed', 'true'); } });
+      const sp = el('button', 'btn ghost loud', T().speak.stop); sp.type = 'button'; sp.addEventListener('click', () => { stopSpeaking(); idle(); });
       tools.append(rd, sp);
     }
     box.replaceChildren(h, ol, ...(tools.children.length ? [tools] : []), near);
@@ -151,11 +153,12 @@ export function initEmergency(ctx) {
     const list = el('div', 'rows');
     for (const r of rows) {
       const row = el('div', 'r near-row');
+      const sq = el('span', 'cat-ic sm'); sq.append(icon('alert', { size: 'sm' }));
       const b = el('div'); b.append(el('div', 't', ctx.lang() === 'en' ? r.name_en || r.name_bn : r.name_bn || r.name_en));
       const acts = el('div', 'acts');
       const c = el('a', 'btn', num(r.phones[0])); c.href = `tel:${r.phones[0]}`; c.prepend(icon('phone', { size: 'sm' })); acts.append(c);
       if (/^https:\/\//.test(r.source_url || '')) { const s = el('a', 'btn ghost', T().source); s.href = r.source_url; s.target = '_blank'; s.rel = 'noopener noreferrer'; acts.append(s); }
-      row.append(b, acts); list.append(row);
+      row.append(sq, b, acts); list.append(row);
     }
     const sh = el('button', 'btn', D.shelters); sh.type = 'button'; sh.prepend(icon('pin', { size: 'sm' })); sh.addEventListener('click', () => ctx.go('c/shelter'));
     box.replaceChildren(h, el('p', 'muted', D.text), list, sh);
@@ -176,6 +179,7 @@ export function initEmergency(ctx) {
     const state = () => document.documentElement.dataset.quiet === '1';
     q.addEventListener('click', () => {
       if (state()) { quiet(false); q.textContent = X.silent; q.prepend(icon('msg', { size: 'sm' })); note.textContent = X.silentNote; return; }
+      if (!ctx.people().length) { ctx.sendHelp(); note.textContent = X.silentNoFamily; return; }   // no number to send to: the form opens, quiet mode stays off
       quiet(true); q.textContent = X.silentEnd; ctx.sendHelp(); note.textContent = X.silentOn;
     });
     const note = el('p', 'small muted', X.silentNote); note.setAttribute('role', 'status');
@@ -185,7 +189,10 @@ export function initEmergency(ctx) {
 
   // Emergency readiness check (guide section 6): are my family numbers and the offline pack ready BEFORE I need them?
   // It reads only what is already on this phone. Nothing is sent and the location is not read.
+  let readyBox = null;   // the box on the page, so it can be drawn again
+  addEventListener('sc-people', () => { if (readyBox && readyBox.isConnected) readiness(readyBox).catch(() => {}); });
   async function readiness(box) {
+    readyBox = box;
     const R = T().ready, n = ctx.people().length;
     let pack = null; try { pack = await loadPack(); } catch { pack = null; }
     const row = (ok, text, action) => {
@@ -223,6 +230,7 @@ export function initEmergency(ctx) {
       const recs = a && ctx.remembers() && ctx.areaRecords ? ctx.areaRecords(a) : null;   // the area only if the phone may remember it
       pack = buildPack({ national: nat, area: recs, areaLabel: a && recs ? ctx.near.label(a) : '', sms: ctx.smsTemplates ? ctx.smsTemplates() : [] });
       await savePack(pack);
+      if (readyBox && readyBox.isConnected) readiness(readyBox).catch(() => {});   // the card now sees the saved pack
     } else {
       pack = await loadPack();
       if (pack && pack.national.length) { helplines(box, pack.national, ctx.fill(P.copy, { date: ctx.fmtDate(pack.savedAt) })); smsTexts(box, pack); }

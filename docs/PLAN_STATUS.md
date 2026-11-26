@@ -49,3 +49,21 @@ These work today and can be shown. The use case diagram has exactly these.
 **Not in this release:** volunteer role (apply, verify contacts in the area, approval) and owner / admin confirmation of a community report. Both need new Firestore rules reviewed and deployed by the team lead, and real people to confirm volunteers. Second independent source for every contact is data work. Public analytics and a server-side rate limit are left out on purpose (privacy rule and zero budget).
 
 **Impact numbers** (admin overview): coverage and overdue percentages are measured from the data files. Speed, offline success and SOS failure rate are **not measured yet**; they need real phone and network tests.
+
+## Test record
+
+**2026-11-26, emulated phone (390 x 844, desktop Chromium, not a physical phone).** 0 console errors and 0 failed requests on `#/today`, `#/numbers`, `#/area/...`, `#/c/pharmacy`, `#/dakun` and `#/sos`.
+
+Passed: source link, check dates, verification method and due-soon warning on the numbers; six SOS situations with their steps and SMS text; offline pack saved (21 national numbers plus the chosen area); Easy mode (text, contrast, 56 px buttons, no horizontal scroll); siren button state; silent SOS hides the sound buttons.
+
+Found and fixed in `fix/338-mobile-test-fixes`:
+- header: the area chip slid under the 999 button at 390 px (it could not shrink);
+- disaster card: the helpline name was squeezed into the 40 px icon column of the row;
+- readiness card: did not update after the pack was saved or a family number was added;
+- silent SOS with no family number said "your messages app has the message" (it opened the form instead);
+- "Stop reading" stayed visible in silent mode; Read aloud showed no state while reading;
+- no space between the "due soon" tag and the verification line.
+
+Not a bug: the network chip is hidden while online (it shows only for "slow" and "offline"). "Did the call connect?" appears after tapping the 999 call; the test sandbox blocks `tel:` so it could not tap it (a page test now checks it).
+
+**Not tested on a physical phone yet:** siren and read-aloud sound (and whether the phone's silent mode blocks it), the real `tel:` / `sms:` / WhatsApp hand-off, airplane mode with the service worker, the offline pack and the offline queue.
