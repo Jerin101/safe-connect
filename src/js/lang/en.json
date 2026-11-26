@@ -685,11 +685,12 @@
     },
     "roles": {
       "eyebrow": "Account (optional)",
-      "t1": "Three roles, ",
+      "t1": "Four roles, ",
       "t2": "one goal: the right number at hand.",
       "text": "Signing in only adds extras. 999, sending your location and \"Find help near me\" work without signing in.",
       "signIn": "Sign in",
       "user": "Anyone can sign in. Getting your saved numbers on another phone is coming soon.",
+      "driver": "For rickshaw, CNG, ambulance drivers and repair people. Apply once; after approval you can accept calls.",
       "volunteer": "The part for local volunteers is still being built.",
       "volunteerTag": "Soon",
       "admin": "Only for the SafeConnect team, to keep the numbers correct.",
