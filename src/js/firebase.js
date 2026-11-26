@@ -219,7 +219,7 @@ export async function sendPlaceStatus(placeId, value, next) {
   const user = auth.currentUser;
   if (!user) throw Object.assign(new Error('signed-out'), { code: 'signed-out' });
   const batch = writeBatch(db);
-  batch.set(doc(db, 'placeStatus', placeId), { status: value, n: next.n, at: serverTimestamp() });
+  batch.set(doc(db, 'placeStatus', placeId), { status: value, n: next.n, at: serverTimestamp(), ...(next.prev ? { prev: next.prev } : {}) });
   batch.set(doc(db, 'placeStatus', placeId, 'by', user.uid), { status: value, at: serverTimestamp() });
   await batch.commit();
 }

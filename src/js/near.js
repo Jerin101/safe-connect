@@ -401,7 +401,7 @@ export function initNear(ctx) {
         if (cf.level === 'expired') { now.textContent = S.conf.expired; return; }   // older than 24 hours: not shown as current
         const nowMs = Date.now(), age = Math.max(1, Math.round((nowMs - cm.toMs(st.at)) / 60000));
         const ago = age < 60 ? fill(S.minAgo, { n: num(age) }) : age < 1440 ? fill(S.hourAgo, { n: num(Math.round(age / 60)) }) : fill(S.dayAgo, { n: num(Math.round(age / 1440)) });
-        now.textContent = `${fill(S.said, { n: num(st.n || 1), v: S.values[st.status || st.value] || '' })} · ${ago}${cm.isOutdated(st, nowMs) ? ` · ${S.outdated}` : ''} · ${S.conf[cf.level]}`;
+        now.textContent = `${fill(S.said, { n: num(st.n || 1), v: S.values[st.status || st.value] || '' })} · ${ago}${cm.isOutdated(st, nowMs) ? ` · ${S.outdated}` : ''} · ${cf.level === 'conflict' ? fill(S.conf.conflict, { v: S.values[st.prev] || '' }) : S.conf[cf.level]}`;
       } catch { now.textContent = navigator.onLine ? S.none : S.offline; }
     };
     const buttons = el('div', 'pills');

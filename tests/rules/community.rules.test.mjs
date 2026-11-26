@@ -22,9 +22,9 @@ beforeEach(async () => {
   await env.withSecurityRulesDisabled(async (ctx) => { await setDoc(doc(ctx.firestore(), 'admins', ADMIN), { since: new Date(), addedBy: 'console' }); });
 });
 
-async function vote(f, uid, placeId, value, n) {
+async function vote(f, uid, placeId, value, n, prev) {
   const b = writeBatch(f);
-  b.set(doc(f, 'placeStatus', placeId), { status: value, n, at: serverTimestamp() });
+  b.set(doc(f, 'placeStatus', placeId), { status: value, n, at: serverTimestamp(), ...(prev ? { prev } : {}) });
   b.set(doc(f, 'placeStatus', placeId, 'by', uid), { status: value, at: serverTimestamp() });
   return b.commit();
 }
@@ -39,6 +39,9 @@ describe('the page helpers (js/community.js)', () => {
     assert.equal(nextPlaceStatus({ status: 'open', n: 2, at: new Date(now - 60000) }, 'open', now).n, 3);
     assert.equal(nextPlaceStatus({ status: 'open', n: 2, at: new Date(now - 60000) }, 'closed', now).n, 1);
     assert.equal(nextPlaceStatus({ status: 'open', n: 2, at: new Date(now - 60000) }, 'closed', now).status, 'closed');
+    assert.equal(nextPlaceStatus({ status: 'open', n: 2, at: new Date(now - 60000) }, 'closed', now).prev, 'open');   // conflict flag
+    assert.equal(nextPlaceStatus({ status: 'open', n: 2, at: new Date(now - 7 * 3600000) }, 'closed', now).prev, undefined);   // old answer: no conflict
+    assert.equal(nextPlaceStatus({ status: 'open', n: 2, at: new Date(now - 60000) }, 'open', now).prev, undefined);
   });
 });
 
@@ -63,6 +66,21 @@ describe('place status ("এখন খোলা? তেল আছে?")', () => 
     await assertSucceeds(vote(db(KARIM), KARIM, 'osm-n123', 'open', 2));
     await assertFails(vote(db(ADMIN), ADMIN, 'osm-n123', 'closed', 3));
     await assertSucceeds(vote(db(ADMIN), ADMIN, 'osm-n123', 'closed', 1));
+  });
+  test('conflict flag: a different answer within 6 hours may carry "prev" = the earlier answer, and only that', async () => {
+    await vote(db(RINA), RINA, 'osm-n200', 'open', 1);
+    await assertFails(vote(db(KARIM), KARIM, 'osm-n200', 'closed', 1, 'fuel_no'));   // prev is not the earlier answer
+    await assertFails(vote(db(KARIM), KARIM, 'osm-n200', 'open', 2, 'open'));        // the same answer is no disagreement
+    await assertSucceeds(vote(db(KARIM), KARIM, 'osm-n200', 'closed', 1, 'open'));   // the honest conflict flag
+    const st = await getDoc(doc(db(null), 'placeStatus', 'osm-n200'));
+    assert.equal(st.data().prev, 'open');
+  });
+  test('"prev" is refused on a first answer, and with extra fields', async () => {
+    await assertFails(vote(db(RINA), RINA, 'osm-n201', 'open', 1, 'closed'));
+    const f = db(KARIM), b = writeBatch(f);
+    b.set(doc(f, 'placeStatus', 'osm-n202'), { status: 'open', n: 1, at: serverTimestamp(), who: KARIM });
+    b.set(doc(f, 'placeStatus', 'osm-n202', 'by', KARIM), { status: 'open', at: serverTimestamp() });
+    await assertFails(b.commit());
   });
   test('"Shelter Open" is a status; the old field name "value" is refused (ER diagram: status)', async () => {
     await assertSucceeds(vote(db(RINA), RINA, 'osm-n777', 'shelter_open', 1));

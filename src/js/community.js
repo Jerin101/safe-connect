@@ -15,7 +15,10 @@ export const districtKey = (name) => String(name || '').toLowerCase().replace(/[
 export function nextPlaceStatus(old, value, nowMs) {
   const prev = old && (old.status || old.value);
   const same = old && prev === value && nowMs - toMs(old.at) <= PLACE_FRESH_MS;
-  return { status: value, value, n: same ? old.n + 1 : 1 };
+  const fresh = old && nowMs - toMs(old.at) <= PLACE_FRESH_MS;
+  const out = { status: value, value, n: same ? old.n + 1 : 1 };
+  if (fresh && prev && prev !== value) out.prev = prev;   // a recent answer says something else: flag the disagreement
+  return out;
 }
 // An answer older than 6 hours is shown with the label "Outdated" (SRS FR05), not hidden.
 export const isOutdated = (st, nowMs) => !!st && nowMs - toMs(st.at) > PLACE_FRESH_MS;
@@ -34,7 +37,8 @@ export function placeStatusText(st, nowMs, bn = (x) => String(x)) {
 
 // Confidence in a community answer (plan section 5). Rule-based, no AI: more people saying the same thing raises it, and it
 // fades with time (it halves every 6 hours). After 24 hours the answer is treated as expired and is not shown as current.
-// A conflict (two different answers) is not stored yet: the current document keeps only the latest answer. Planned.
+// A conflict: when a new answer differs from one less than 6 hours old, the document also keeps that earlier answer as "prev"
+// (firestore.rules checks it), and the page says "people disagree". Owner / admin confirmation is not built yet.
 export const CONF_HALF_LIFE_MS = PLACE_FRESH_MS;
 export const CONF_EXPIRE_MS = 24 * 3600000;
 export function confidence(st, nowMs) {
@@ -43,5 +47,6 @@ export function confidence(st, nowMs) {
   const age = Math.max(0, nowMs - toMs(st.at));
   if (age > CONF_EXPIRE_MS) return { level: 'expired', score: 0 };
   const score = Math.max(1, Number(st.n) || 1) * Math.pow(0.5, age / CONF_HALF_LIFE_MS);
+  if (st.prev && age <= PLACE_FRESH_MS) return { level: 'conflict', score };   // people disagree: the page says so
   return { level: score >= 2.5 ? 'high' : score >= 1.2 ? 'medium' : 'low', score };
 }
