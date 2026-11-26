@@ -14,10 +14,10 @@ Targets in the plan are proposed targets, not achieved results (they need real d
 | 1. A second independent source for every contact | Planned | needs a second official page per contact |
 | 2. Situation list and guide steps | Done | SOS page, 6 situations |
 | 2. Guided escalation (999, situation helpline, police station, SMS, family) | Done | asks "Did the call connect?"; never automatic; the browser cannot know if a call connected |
-| 3A. Offline emergency pack | Done | `src/js/offlinepack.js`: 999, helplines and the remembered area saved in IndexedDB with check dates; shown when data cannot load |
+| 3A. Offline emergency pack | Done | `src/js/offlinepack.js`: 999, helplines, the remembered area and the ready SOS message texts (6 situations, Bangla and English) saved in IndexedDB with check dates; shown when data cannot load |
 | 3B. Online / slow / offline chip | Done | `src/js/netstatus.js` |
 | 3B. "Data sync pending" | Done | the network chip shows "N waiting to send" (`reportqueue.js`) |
-| 3C. Sync of reports written offline | Done | `src/js/reportqueue.js`, see BUILD_PLAN §9.2; no background sync in a browser: it sends while the page is open |
+| 3C. Sync of reports and "How is it now?" answers written offline | Done | `src/js/reportqueue.js`, see BUILD_PLAN §9.2; an answer is dropped after 1 hour (it would look fresh when sent late); no background sync in a browser: it sends while the page is open |
 | 4. Tracking link revocation | Done | stopping the share deletes it at once (`live.js`) |
 | 4. Self-approval prohibited, audit log | Done | `firestore.rules` |
 | 4. Rate limiting, malicious report filter | Partial | reports have limits and no phone numbers; no server-side rate limit |

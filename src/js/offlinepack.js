@@ -11,9 +11,12 @@ const slim = (r) => ({
   source_url: /^https:\/\//.test(r.source_url || '') ? r.source_url : null, checked_on: checkedOf(r),
 });
 // Pure: what is kept. Only records with a phone number.
-export function buildPack({ national, area = null, areaLabel = '', now = Date.now() }) {
+// sms: ready SOS message texts for each situation, [{ situation, label, bn, en }] (no place and no location: those are not known offline).
+const cleanSms = (list) => (Array.isArray(list) ? list : []).filter((x) => x && typeof x.situation === 'string' && typeof x.bn === 'string' && typeof x.en === 'string')
+  .slice(0, 10).map((x) => ({ situation: x.situation.slice(0, 20), label: String(x.label || '').slice(0, 60), bn: x.bn.slice(0, 600), en: x.en.slice(0, 600) }));
+export function buildPack({ national, area = null, areaLabel = '', sms = [], now = Date.now() }) {
   const keep = (list) => (list || []).filter((r) => r && r.phones && r.phones.length).map(slim).filter((r) => r.phones.length);
-  return { version: 1, savedAt: new Date(now).toISOString(), national: keep(national), area: area ? { label: String(areaLabel || '').slice(0, 120), records: keep(area).slice(0, 12) } : null };
+  return { version: 1, savedAt: new Date(now).toISOString(), national: keep(national), area: area ? { label: String(areaLabel || '').slice(0, 120), records: keep(area).slice(0, 12) } : null, sms: cleanSms(sms) };
 }
 function open() {
   return new Promise((resolve, reject) => {
