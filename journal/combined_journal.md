@@ -1,6 +1,6 @@
 # SafeConnect Capstone - Combined Team Development Journal
 
-*Auto-compiled from individual member logs. Total Logged Entries: 22*
+*Auto-compiled from individual member logs. Total Logged Entries: 28*
 
 ---
 
@@ -1265,6 +1265,271 @@
   - `f636fe3` — Merge pull request #284 from Jerin101/chore/git-contribution-tracker *(PR Merge)*
 - **Next Day's Plan:**
   - Continue next planned module and review progress
+
+---
+
+## 2026-11-23 - Israt Jerin Nafisa `[RETROSPECTIVE ENTRY - Logged on 2026-11-25]`
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Update README with Vercel mirror link
+- **Completed Tasks:**
+  - Update README with Vercel mirror link
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `ca49c4d` — Update README with Vercel mirror link
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-23 - Tasmin Jahan Toshi `[RETROSPECTIVE ENTRY - Logged on 2026-11-25]`
+- **Contributor:** Tasmin Jahan Toshi
+- **Today's Objective:** R5: জরুরি সাহায্য: big 999, what to do now, area numbers, helplines by need (#267)
+- **Completed Tasks:**
+  - R5: জরুরি সাহায্য: big 999, what to do now, area numbers, helplines by need (#267)
+  - PR-1 SRS backend: live sharing, fare_rates, reject, new ride types (SRS FR01-FR16)
+  - Merge pull request #287 from Jerin101/feature/srs-backend
+  - Service worker: VERSION v61 after PR-1 (#288)
+  - Merge pull request #289 from Jerin101/chore/288-version-v61
+  - Merge remote-tracking branch 'origin/main' into feature/267-r5-emergency
+  - Merge pull request #290 from Jerin101/feature/267-r5-emergency
+  - PR-2 live location sharing, Safe Commute, family view (SRS FR09-FR11)
+  - Merge pull request #291 from Jerin101/feature/srs-pr2-live
+  - PR-3 ডাকুন: new types, never stranded, link a ride to a family share (SRS FR12, FR14)
+  - Merge pull request #292 from Jerin101/feature/srs-pr3-dakun
+  - PR-4 সেবা দিন / admin: reject, district rates, expired-share cleanup (SRS FR13, FR16)
+  - Merge pull request #293 from Jerin101/feature/srs-pr4-admin
+  - PR-5 এখন কেমন? and ভুল জানান on the place page (SRS FR05, FR15)
+  - Merge pull request #294 from Jerin101/feature/srs-pr5-place
+  - PR-6 accounts, Profile & Settings, Home modules (SRS FR01, FR02, NFR05, NFR06)
+  - Merge pull request #295 from Jerin101/feature/srs-pr6-accounts
+  - PR-7 search, nearby, SOS situations, Government Directory (SRS FR03, FR04, FR06-FR08)
+  - Merge pull request #296 from Jerin101/feature/srs-pr7-search-sos-directory
+  - PR-8 NFR sweep, data slug check, user-manual screenshots, README (SRS NFR01, NFR08, NFR09)
+  - Merge pull request #297 from Jerin101/feature/srs-pr8-nfr
+  - Service worker: VERSION v62 after SRS PR-2 to PR-8 (#298)
+  - Merge pull request #299 from Jerin101/chore/298-version-v62
+  - Fix Notion link in README
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `7d9abd6` — R5: জরুরি সাহায্য: big 999, what to do now, area numbers, helplines by need (#267)
+  - `8c46e86` — PR-1 SRS backend: live sharing, fare_rates, reject, new ride types (SRS FR01-FR16)
+  - `4824511` — Merge pull request #287 from Jerin101/feature/srs-backend *(PR Merge)*
+  - `6c43461` — service worker: VERSION v61 after PR-1 (#288)
+  - `38de780` — Merge pull request #289 from Jerin101/chore/288-version-v61 *(PR Merge)*
+  - `aef47db` — Merge remote-tracking branch 'origin/main' into feature/267-r5-emergency *(PR Merge)*
+  - `988fc0d` — Merge pull request #290 from Jerin101/feature/267-r5-emergency *(PR Merge)*
+  - `9b6e357` — PR-2 live location sharing, Safe Commute, family view (SRS FR09-FR11)
+  - `3affed0` — Merge pull request #291 from Jerin101/feature/srs-pr2-live *(PR Merge)*
+  - `70f70b7` — PR-3 ডাকুন: new types, never stranded, link a ride to a family share (SRS FR12, FR14)
+  - `8cb9e49` — Merge pull request #292 from Jerin101/feature/srs-pr3-dakun *(PR Merge)*
+  - `aaf9fa2` — PR-4 সেবা দিন / admin: reject, district rates, expired-share cleanup (SRS FR13, FR16)
+  - `b1aee2c` — Merge pull request #293 from Jerin101/feature/srs-pr4-admin *(PR Merge)*
+  - `dfc1808` — PR-5 এখন কেমন? and ভুল জানান on the place page (SRS FR05, FR15)
+  - `daf249c` — Merge pull request #294 from Jerin101/feature/srs-pr5-place *(PR Merge)*
+  - `29bf97e` — PR-6 accounts, Profile & Settings, Home modules (SRS FR01, FR02, NFR05, NFR06)
+  - `8471ac4` — Merge pull request #295 from Jerin101/feature/srs-pr6-accounts *(PR Merge)*
+  - `64377e2` — PR-7 search, nearby, SOS situations, Government Directory (SRS FR03, FR04, FR06-FR08)
+  - `79963f9` — Merge pull request #296 from Jerin101/feature/srs-pr7-search-sos-directory *(PR Merge)*
+  - `2fd4e3a` — PR-8 NFR sweep, data slug check, user-manual screenshots, README (SRS NFR01, NFR08, NFR09)
+  - `a7f81de` — Merge pull request #297 from Jerin101/feature/srs-pr8-nfr *(PR Merge)*
+  - `5af9669` — service worker: VERSION v62 after SRS PR-2 to PR-8 (#298)
+  - `b80fd81` — Merge pull request #299 from Jerin101/chore/298-version-v62 *(PR Merge)*
+  - `fa8e7e0` — Fix Notion link in README
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-24 - Tasmin Jahan Toshi `[RETROSPECTIVE ENTRY - Logged on 2026-11-25]`
+- **Contributor:** Tasmin Jahan Toshi
+- **Today's Objective:** Admin rates: "সারা দেশ" says it is the nationwide rate; volunteer note uses the SRS name
+- **Completed Tasks:**
+  - Admin rates: "সারা দেশ" says it is the nationwide rate; volunteer note uses the SRS name
+  - SRS user manual: the six signed-in screenshots (profile, live location, Safe Commute, family view, provider, admin)
+  - Merge pull request #301 from Jerin101/fix/srs-admin-rate-label
+  - Merge pull request #302 from Jerin101/docs/srs-manual-screenshots
+  - Service worker: VERSION v63 (#303)
+  - Merge pull request #304 from Jerin101/chore/303-version-v63
+  - Merge remote-tracking branch 'origin/main'
+  - Phone location and live share; remove clutter; standard src/ folder layout; Docker
+  - Fire stations no longer listed as filling stations; live page times out cleanly; missing space on account note
+  - Merge pull request #305 from Jerin101/fix/phone-location-live-share-and-structure
+  - Live share page shows Loading and Retry instead of a blank box; show where you are after My location
+  - Root redirect pages so GitHub Pages (branch root) serves the site that now lives in src/
+  - Merge pull request #306 from Jerin101/fix/pages-root-redirect
+  - UI refresh (light theme, sleek navbar, fewer texts)
+  - Merge pull request #308 from Jerin101/feature/307-ui-refresh
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `bec88af` — Admin rates: "সারা দেশ" says it is the nationwide rate; volunteer note uses the SRS name
+  - `d895a9e` — SRS user manual: the six signed-in screenshots (profile, live location, Safe Commute, family view, provider, admin)
+  - `e35f27b` — Merge pull request #301 from Jerin101/fix/srs-admin-rate-label *(PR Merge)*
+  - `c2ef58c` — Merge pull request #302 from Jerin101/docs/srs-manual-screenshots *(PR Merge)*
+  - `dcdd1b0` — service worker: VERSION v63 (#303)
+  - `c94b7d2` — Merge pull request #304 from Jerin101/chore/303-version-v63 *(PR Merge)*
+  - `0b850cf` — Merge remote-tracking branch 'origin/main' *(PR Merge)*
+  - `d2d929b` — fix: phone location and live share; remove clutter; standard src/ folder layout; Docker
+  - `7b005d8` — fix: fire stations no longer listed as filling stations; live page times out cleanly; missing space on account note
+  - `a971576` — Merge pull request #305 from Jerin101/fix/phone-location-live-share-and-structure *(PR Merge)*
+  - `2d4a376` — fix: live share page shows Loading and Retry instead of a blank box; show where you are after My location
+  - `363fa05` — fix: root redirect pages so GitHub Pages (branch root) serves the site that now lives in src/
+  - `b94bb7b` — Merge pull request #306 from Jerin101/fix/pages-root-redirect *(PR Merge)*
+  - `8f0c53f` — feat: UI refresh (light theme, sleek navbar, fewer texts)
+  - `2a83a6d` — Merge pull request #308 from Jerin101/feature/307-ui-refresh *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-25 - Tasmin Jahan Toshi
+- **Contributor:** Tasmin Jahan Toshi
+- **Today's Objective:** Index on fix/pages-root-redirect: 363fa05 fix: root redirect pages so GitHub Pages (branch root) serves the site that now lives in src/
+- **Completed Tasks:**
+  - Index on fix/pages-root-redirect: 363fa05 fix: root redirect pages so GitHub Pages (branch root) serves the site that now lives in src/
+  - WIP on fix/pages-root-redirect: 363fa05 fix: root redirect pages so GitHub Pages (branch root) serves the site that now lives in src/
+  - Directions inside the site, live job map, ride simulation (#309)
+  - Align README with completed SRS (FR01-FR16, NFRs, architecture, diagrams)
+  - Merge pull request #310 from Jerin101/docs/srs-readme-update
+  - Admin live overview, driver call map, in-site directions (#309)
+  - In-site map and directions, place details, driver and admin dashboards, driver sign-in (#309)
+  - Merge pull request #311 from Jerin101/feature/309-in-site-map
+  - Admin overview shows waiting driver/provider applications (#312)
+  - Merge pull request #313 from Jerin101/fix/312-admin-waiting-applications
+  - Admin overview waiting applications; approvals first on driver page (#312)
+  - Merge pull request #314 from Jerin101/fix/312-admin-waiting-applications
+  - Trust and verification, guided escalation, network chip, simpler sign-in, community confidence (#315)
+  - Place details only for pilot districts; update page tests for new sign-in and src folder (#315)
+  - Merge pull request #315 from Jerin101/feature/315-trust-verification-login
+  - Bump service worker VERSION to v65 so phones load the new site (#316)
+  - Merge pull request #316 from Jerin101/fix/316-bump-version-v65
+  - Plan status now shows community confidence as done (#317)
+  - Offline emergency pack in IndexedDB with source and check dates (#318)
+  - Merge pull request #317 from Jerin101/feature/318-offline-emergency-pack
+  - Bump service worker VERSION to v66 so phones get the offline pack (#319)
+  - Merge pull request #318 from Jerin101/fix/319-bump-version-v66
+  - Sync queue for reports written offline; document in BUILD_PLAN (#320)
+  - Bump service worker VERSION to v67 so phones get the offline report queue (#321)
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `85825f1` — index on fix/pages-root-redirect: 363fa05 fix: root redirect pages so GitHub Pages (branch root) serves the site that now lives in src/
+  - `f65aef9` — WIP on fix/pages-root-redirect: 363fa05 fix: root redirect pages so GitHub Pages (branch root) serves the site that now lives in src/ *(PR Merge)*
+  - `dd1e114` — feat: directions inside the site, live job map, ride simulation (#309)
+  - `e4f7b20` — docs: align README with completed SRS (FR01-FR16, NFRs, architecture, diagrams)
+  - `b119394` — Merge pull request #310 from Jerin101/docs/srs-readme-update *(PR Merge)*
+  - `da47f17` — feat: admin live overview, driver call map, in-site directions (#309)
+  - `7212107` — feat: in-site map and directions, place details, driver and admin dashboards, driver sign-in (#309)
+  - `e765ecb` — Merge pull request #311 from Jerin101/feature/309-in-site-map *(PR Merge)*
+  - `f820456` — fix: admin overview shows waiting driver/provider applications (#312)
+  - `c4caf9e` — Merge pull request #313 from Jerin101/fix/312-admin-waiting-applications *(PR Merge)*
+  - `eb15290` — fix: admin overview waiting applications; approvals first on driver page (#312)
+  - `d3b62e7` — Merge pull request #314 from Jerin101/fix/312-admin-waiting-applications *(PR Merge)*
+  - `fa42419` — feat: trust and verification, guided escalation, network chip, simpler sign-in, community confidence (#315)
+  - `9c332ed` — fix: place details only for pilot districts; update page tests for new sign-in and src folder (#315)
+  - `7e6633d` — Merge pull request #315 from Jerin101/feature/315-trust-verification-login *(PR Merge)*
+  - `d6bdbe4` — chore: bump service worker VERSION to v65 so phones load the new site (#316)
+  - `893990d` — Merge pull request #316 from Jerin101/fix/316-bump-version-v65 *(PR Merge)*
+  - `31bce7a` — docs: plan status now shows community confidence as done (#317)
+  - `a7f9c07` — feat: offline emergency pack in IndexedDB with source and check dates (#318)
+  - `5e10c46` — Merge pull request #317 from Jerin101/feature/318-offline-emergency-pack *(PR Merge)*
+  - `79f95f5` — chore: bump service worker VERSION to v66 so phones get the offline pack (#319)
+  - `df0de1c` — Merge pull request #318 from Jerin101/fix/319-bump-version-v66 *(PR Merge)*
+  - `53bac6e` — feat: sync queue for reports written offline; document in BUILD_PLAN (#320)
+  - `8e16d58` — chore: bump service worker VERSION to v67 so phones get the offline report queue (#321)
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-26 - Israt Jerin Nafisa
+- **Contributor:** Israt Jerin Nafisa
+- **Today's Objective:** Merge pull request #326 from Jerin101/feature/327-community-conflict
+- **Completed Tasks:**
+  - Merge pull request #326 from Jerin101/feature/327-community-conflict
+  - Merge pull request #323 from Jerin101/feature/323-easy-mode
+  - Merge pull request #325 from Jerin101/feature/325-plan-rest
+- **Pending Tasks:**
+  - None
+- **Encountered Problems:**
+  - None
+- **Problem Resolutions:**
+  - N/A
+- **Linked Git Commits:**
+  - `b705b7b` — Merge pull request #326 from Jerin101/feature/327-community-conflict *(PR Merge)*
+  - `2ed5368` — Merge pull request #323 from Jerin101/feature/323-easy-mode *(PR Merge)*
+  - `330af06` — Merge pull request #325 from Jerin101/feature/325-plan-rest *(PR Merge)*
+- **Next Day's Plan:**
+  - Continue next planned module and review progress
+
+---
+
+## 2026-11-26 - Tasmin Jahan Toshi
+- **Contributor:** Tasmin Jahan Toshi
+- **Today's Objective:** Finish the teacher's plan items that work offline, ship the v70 and v71 releases, and cut the use cases to the 21 that are finished
+- **Completed Tasks:**
+  - Community conflict flag ("people disagree"): Firestore rule for the optional `prev` field, with 156 emulator tests passing (#327)
+  - Siren (stops after 1 minute), silent SOS (quiet mode, opens the SMS with the message ready) and the safe-arrival check after a live share (#330)
+  - Emergency readiness check on the SOS page: family number saved? offline pack saved? (#331)
+  - Account page shows four roles including Driver (#328)
+  - Footer label now comes from the language files; "volunteer" removed from the Book a service intro (#334)
+  - Reviewed the use case diagram against the code and reduced it from 25 to 21 use cases; wrote the release scope and an honest Done / Not-in-this-release table in docs/PLAN_STATUS.md (#333)
+  - Release: v70 and v71 service worker bumps merged; Deploy to GitHub Pages failed once (no artifact found), re-ran the failed job, it passed; live site checked at v71
+  - Tester agent release check: GO, no blockers (data 0 errors, live tests pass)
+- **Pending Tasks:**
+  - Jerin: deploy firestore.rules (the `prev` field) and add the Vercel address to Firebase authorized domains
+  - Real-phone test: siren volume, silent SOS, airplane mode, live share and arrival question, staying signed in
+  - Run autoloc-test with more free disk space on C: and re-run routes-test a few times (it failed once, then passed 3 times)
+  - Volunteer role and owner / admin confirmation of reports: future work (needs new Firestore rules and real confirmers)
+- **Encountered Problems:**
+  - Deploy to GitHub Pages failed on the v71 merge: "No artifacts named github-pages were found"
+  - routes-test is flaky (1 failure on a first run, then ALL OK)
+  - Rebase of the v70 bump conflicted in src/service-worker.js (main already had v69)
+  - The live site address changed: it is now served from the root, not /src/
+- **Problem Resolutions:**
+  - Re-ran only the failed job: it passed (a GitHub glitch, not a code problem)
+  - Kept the v70 version line and finished the rebase in the right folder (the worktree), then pushed
+  - Use the root address from now on and reinstall the app from it
+- **Linked Git Commits:**
+  - `bb7c3fb` — feat: disaster card, read-aloud help, source-conflict review list (#325)
+  - `864165e` — feat: community conflict flag (people disagree) with rules and emulator tests (#327)
+  - `52571cb` — fix: account page shows four roles including driver (#328)
+  - `4781a74` — chore: bump service worker VERSION to v69 so phones get the disaster card and read-aloud (#326)
+  - `74e4b81` — feat: siren, silent SOS (quiet mode) and safe-arrival check (#330)
+  - `9b45742` — feat: emergency readiness check on the SOS page (#331)
+  - `5898a1c` — fix: account page shows four roles including driver (#328)
+  - `9f7394f` — docs: release scope of 21 use cases and honest status (#333)
+  - `b219396` — Merge pull request #327 from Jerin101/fix/326-bump-version-v69 *(PR Merge)*
+  - `3ab0cea` — Merge pull request #328 from Jerin101/feature/331-readiness-check *(PR Merge)*
+  - `995134e` — Merge pull request #329 from Jerin101/fix/328-account-four-roles *(PR Merge)*
+  - `ce9d61f` — Merge pull request #330 from Jerin101/docs/333-release-scope *(PR Merge)*
+  - `cd5ebbd` — chore: bump service worker version to v70 for the release (#332)
+  - `948d4fd` — Merge pull request #331 from Jerin101/chore/332-bump-version-v70 *(PR Merge)*
+  - `5c1d5dc` — fix: footer nav label from the language files; remove volunteer from the Book a service intro (#334)
+  - `a2ae288` — chore: bump service worker version to v71 (#335)
+  - `b3fd2fa` — Merge pull request #332 from Jerin101/fix/334-small-wording *(PR Merge)*
+  - `89f9d2f` — Merge pull request #333 from Jerin101/chore/335-bump-version-v71 *(PR Merge)*
+- **Next Day's Plan:**
+  - Real-phone test, then fix anything it finds on a small fix/ branch
+  - Team lead deploys the Firestore rules; present the 21-use-case diagram with the status table
 
 ---
 
