@@ -192,6 +192,8 @@ function openModal(from, startMode = 'login') {
   const loading = navigator.onLine ? loadFirebase().catch(() => {}) : null;
   renderSignin();
   if (!dlg().open) dlg().showModal();
+  // The person chose to sign in, so Firebase starts loading now (while they type) instead of after the button: faster sign-in.
+  if (navigator.onLine) loadFirebase().catch(() => {});
   document.body.classList.add('modal-open');
   $('siTitle').focus();
   if (loading) loading.finally(() => { if (dlg().open) renderOnline(); });

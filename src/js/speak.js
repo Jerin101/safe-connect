@@ -3,14 +3,15 @@
 // not shown (the text stays on screen). Never starts by itself: only after a tap.
 export const canSpeak = () => typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined';
 export const stopSpeaking = () => { if (canSpeak()) speechSynthesis.cancel(); };
-// lines: array of short texts; lang: 'bn' or 'en'. Returns true if speaking started.
-export function speak(lines, lang) {
+// lines: array of short texts; lang: 'bn' or 'en'; onEnd runs when the last line ends or reading is stopped. Returns true if speaking started.
+export function speak(lines, lang, onEnd) {
   if (!canSpeak()) return false;
   speechSynthesis.cancel();
   const code = lang === 'en' ? 'en-GB' : 'bn-BD';
   for (const line of lines) {
     const u = new SpeechSynthesisUtterance(String(line));
     u.lang = code; u.rate = 0.95;
+    if (onEnd && line === lines[lines.length - 1]) { u.onend = onEnd; u.onerror = onEnd; }
     speechSynthesis.speak(u);
   }
   return true;
