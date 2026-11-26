@@ -21,12 +21,31 @@ Targets in the plan are proposed targets, not achieved results (they need real d
 | 4. Tracking link revocation | Done | stopping the share deletes it at once (`live.js`) |
 | 4. Self-approval prohibited, audit log | Done | `firestore.rules` |
 | 4. Rate limiting, malicious report filter | Partial | reports have limits and no phone numbers; no server-side rate limit |
-| 5. Community status with confidence logic | Partial | "How is it now?" exists; several confirmations, decay and conflicts are Planned |
+| 5. Community status with confidence logic | Partial | several confirmations, 6-hour decay, 24-hour expiry and the "people disagree" flag are done (`community.js`, `firestore.rules`); owner / admin confirmation is **not in this release** |
 | 6. Accessibility: easy mode | Done | "Aa" button in the header: bigger text and buttons, stronger contrast, clear focus; kept on the phone |
-| 6. Disaster mode, voice navigation, analytics | Partial | shelters exist; voice navigation and aggregate analytics Planned |
+| 6. Disaster mode, read aloud | Done | official warning and coast / river lines, then the nearest shelters; the SOS steps can be read aloud (phone voice, nothing sent) |
+| 6. Siren and silent SOS | Done | siren starts only after a tap and stops after 1 minute; silent mode hides every sound button and opens the SMS with the message ready (a browser cannot send an SMS silently) |
+| 6. Emergency readiness check | Done | SOS page: is a family number saved, is the offline pack saved; family numbers can be copied to the account (opt-in) |
+| 6. Safe arrival check | Done | when a live share ends without "I arrived" the page asks, now and on the next visit; no automatic arrival detection and no wake-up when the phone is closed |
+| 6. Public service analytics | Not in this release | it would collect usage data; CLAUDE.md rule 5 says nothing leaves the phone |
+| Volunteer role: apply, verify contacts, approval | Not in this release | needs new Firestore rules, review and deploy by the team lead, and real people to confirm each volunteer |
 | 7. Measurable NFR targets | Partial | coverage and overdue % are measured now in the admin overview; speed, offline success, SOS failure need real tests |
 | 8. Impact dashboard | Partial | only what can be measured today; the rest says "not measured yet" |
 | Rides (supporting feature) | Done | demo works; kept as a supporting feature, not the main pillar |
 
 Technical limits we state openly: no reliable background location in a browser, the Battery API is missing in some browsers,
 SMS opens the message app (it cannot send silently), GPS speed can be wrong, free tiers have quotas.
+
+## Release scope: 21 use cases
+
+These work today and can be shown. The use case diagram has exactly these.
+
+**No login needed (7):** 1 Get emergency help (SOS: situation guide, 999 and helplines, guided escalation, siren / silent SOS, read aloud) · 2 Use the offline emergency pack · 3 Find nearby services (map, source and check date, Bangla / English / Banglish words) · 4 View community status · 5 View disaster help and shelters · 6 Change display settings (language, theme, easy mode) · 7 View a live location (family link).
+
+**Login needed (7):** 8 Log in / out with email verification · 9 Share live location / safe journey (with stop, expiry and the arrival check) · 10 Set up emergency contacts (readiness check) · 11 Submit a community update · 12 Report wrong information (offline reports are sent later) · 13 Request a service (fare estimate, local emergency number when no provider) · 14 Save my numbers and areas (copy in the account, opt-in).
+
+**Roles (7):** 15 Driver: apply · 16 Driver: accept and complete a service (digital bill) · 17 Admin: approve providers · 18 Admin: review reports and source conflicts · 19 Admin: re-verify contacts · 20 Admin: manage contacts and fare rates · 21 Admin: view the audit log and the impact numbers.
+
+**Not in this release:** volunteer role (apply, verify contacts in the area, approval) and owner / admin confirmation of a community report. Both need new Firestore rules reviewed and deployed by the team lead, and real people to confirm volunteers. Second independent source for every contact is data work. Public analytics and a server-side rate limit are left out on purpose (privacy rule and zero budget).
+
+**Impact numbers** (admin overview): coverage and overdue percentages are measured from the data files. Speed, offline success and SOS failure rate are **not measured yet**; they need real phone and network tests.
