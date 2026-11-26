@@ -949,7 +949,7 @@ function renderMyArea() {
 let toastTimer = 0;
 // জরুরি সাহায্য (R5): the big 999, "এখন যা করবেন", this area's numbers and the helplines by need
 let sosAreaName = '';     // the chosen area's name for the SMS when there is no location
-function showEmergency() { near?.area().then((a) => { const n = a ? near.label(a) : ''; if (n !== sosAreaName) { sosAreaName = n; if (!$('sos').hidden) refreshMessage(); } }).catch(() => {}); emergency?.show({ call: $('sosCall'), sit: sos.situation, steps: $('sitSteps'), area: $('sosArea'), lines: $('sosLines'), extras: $('sosExtras') }); }
+function showEmergency() { near?.area().then((a) => { const n = a ? near.label(a) : ''; if (n !== sosAreaName) { sosAreaName = n; if (!$('sos').hidden) refreshMessage(); } }).catch(() => {}); emergency?.show({ call: $('sosCall'), sit: sos.situation, steps: $('sitSteps'), area: $('sosArea'), lines: $('sosLines'), extras: $('sosExtras'), ready: $('sosReady') }); }
 // The pilot place (district key, upazila) of an area from js/near.js, when we have official numbers for it; else null.
 function pilotPlace(a) {
   const key = String(a.district).toLowerCase().replace(/[^a-z]/g, '');
@@ -1035,6 +1035,8 @@ function makeNear() {
     situation: () => sos.situation,
     remembers, fill, fmtDate,
     sendHelp: () => $('bipodBtn').click(),
+    people: () => getPeople(),
+    openPeople: () => { $('peopleBox').open = true; $('peopleBox').scrollIntoView({ block: 'start' }); $('pName').focus({ preventScroll: true }); },
     areaRecords: (a) => { const p = pilotPlace(a); if (!p) return null; try { const g = areaContacts(data, p); return ['police', 'tourist_police', 'local', 'town', 'administration'].map((id) => pickContact(g, id)).filter(Boolean); } catch { return null; } },
     officialRows: (a) => { const p = pilotPlace(a); if (!p) return null; try { return firstRows(p, areaContacts(data, p)); } catch { return null; } },
   });

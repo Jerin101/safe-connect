@@ -183,6 +183,25 @@ export function initEmergency(ctx) {
     box.replaceChildren(el('h2', null, X.title), row, note, el('p', 'small muted', X.sirenNote));
   }
 
+  // Emergency readiness check (guide section 6): are my family numbers and the offline pack ready BEFORE I need them?
+  // It reads only what is already on this phone. Nothing is sent and the location is not read.
+  async function readiness(box) {
+    const R = T().ready, n = ctx.people().length;
+    let pack = null; try { pack = await loadPack(); } catch { pack = null; }
+    const row = (ok, text, action) => {
+      const r = el('li', ok ? 'ready-ok' : 'ready-no'); r.append(icon(ok ? 'check' : 'alert', { size: 'sm' }), el('span', null, text));
+      if (!ok && action) { const b = el('button', 'linkbtn', action.label); b.type = 'button'; b.addEventListener('click', action.run); r.append(b); }
+      return r;
+    };
+    const list = el('ul', 'ready-list');
+    list.append(
+      row(n > 0, n > 0 ? ctx.fill(R.family, { n: num(n) }) : R.noFamily, { label: R.addFamily, run: ctx.openPeople }),
+      row(!!pack, pack ? R.pack : R.noPack, null),
+    );
+    const done = n > 0 && !!pack;
+    box.replaceChildren(el('h2', null, R.title), el('p', 'small muted', done ? R.allGood : R.todo), list);
+  }
+
   // Offline emergency pack (plan section 3A): keep the numbers on the phone; show them when the data cannot load.
   async function keepPack(box, noteBox) {
     const P = T().pack, nat = ctx.national();
@@ -207,8 +226,9 @@ export function initEmergency(ctx) {
   }
 
   return {
-    show({ call, sit, steps: stepsBox, area: areaBox, lines, extras: extrasBox }) {
+    show({ call, sit, steps: stepsBox, area: areaBox, lines, extras: extrasBox, ready: readyBox }) {
       if (extrasBox) extras(extrasBox);
+      if (readyBox) readiness(readyBox).catch(() => {});
       call999(call); steps(stepsBox, sit); area(areaBox); helplines(lines);
       const dz = lines.previousElementSibling; if (dz && dz.id === 'sosDisaster') disaster(dz);
       const note = lines.nextElementSibling && lines.nextElementSibling.id === 'sosPack' ? lines.nextElementSibling : null;
