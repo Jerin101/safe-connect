@@ -1731,8 +1731,8 @@ function renderRail() {
   $('fTitle').textContent = r.fTitle; $('fDist').textContent = r.fDist; $('fNote').textContent = r.fNote; $('fReset').textContent = r.fReset;
   districtOptions($('railDist'), t().distAll);
 }
-// "Three roles, one goal" (from #66): one line each, honest about what is not built yet; signing in is never needed for help.
-const ROLES = ['user', 'volunteer', 'admin'];
+// "Four roles, one goal" (from #66): one line each, honest about what is not built yet; signing in is never needed for help.
+const ROLES = ['user', 'driver', 'volunteer', 'admin'];
 function renderRoles() {
   const r = P().roles, names = LANG[lang].auth.roles;
   $('rolesEyebrow').textContent = r.eyebrow; $('rolesT1').textContent = r.t1; $('rolesT2').textContent = r.t2; $('rolesText').textContent = r.text;
