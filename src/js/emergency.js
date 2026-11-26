@@ -6,6 +6,7 @@
 import { icon } from './icons.js';
 import { buildPack, savePack, loadPack, clearPack } from './offlinepack.js';
 import { canSpeak, speak, stopSpeaking } from './speak.js';
+import { canSiren, startSiren, stopSiren, isOn } from './siren.js';
 
 // which national helplines go together, by what the person needs
 const GROUPS = [
@@ -80,7 +81,7 @@ export function initEmergency(ctx) {
     }
     const tools = el('div', 'pills');
     if (canSpeak()) {   // voice help: read the steps aloud (the phone's own voice; nothing is sent)
-      const rd = el('button', 'btn', T().speak.read); rd.type = 'button'; rd.addEventListener('click', () => speak([`${s.title}.`, ...s.do], ctx.lang()));
+      const rd = el('button', 'btn', T().speak.read); rd.type = 'button'; rd.classList.add('loud'); rd.addEventListener('click', () => speak([`${s.title}.`, ...s.do], ctx.lang()));
       const sp = el('button', 'btn ghost', T().speak.stop); sp.type = 'button'; sp.addEventListener('click', stopSpeaking);
       tools.append(rd, sp);
     }
@@ -160,6 +161,47 @@ export function initEmergency(ctx) {
     box.replaceChildren(h, el('p', 'muted', D.text), list, sh);
   }
 
+  // Siren and silent SOS (guide section B). Both start only after a tap. "Quiet mode" hides every button that makes a sound
+  // (siren, read aloud) and opens the messages app with the help message ready; the person still taps send.
+  function quiet(on) { document.documentElement.dataset.quiet = on ? '1' : '0'; if (on) { stopSiren(); stopSpeaking(); } }
+  function extras(box) {
+    const X = T().extras, kids = [];
+    if (canSiren()) {
+      const b = el('button', 'btn loud siren-btn', X.siren); b.type = 'button'; b.prepend(icon('alert', { size: 'sm' }));
+      const paint = () => { b.textContent = isOn() ? X.sirenStop : X.siren; b.prepend(icon('alert', { size: 'sm' })); b.setAttribute('aria-pressed', String(isOn())); };
+      b.addEventListener('click', () => { if (isOn()) stopSiren(); else startSiren(paint); paint(); });
+      kids.push(b);
+    }
+    const q = el('button', 'btn ghost', X.silent); q.type = 'button'; q.prepend(icon('msg', { size: 'sm' }));
+    const state = () => document.documentElement.dataset.quiet === '1';
+    q.addEventListener('click', () => {
+      if (state()) { quiet(false); q.textContent = X.silent; q.prepend(icon('msg', { size: 'sm' })); note.textContent = X.silentNote; return; }
+      quiet(true); q.textContent = X.silentEnd; ctx.sendHelp(); note.textContent = X.silentOn;
+    });
+    const note = el('p', 'small muted', X.silentNote); note.setAttribute('role', 'status');
+    const row = el('div', 'pills'); row.append(...kids, q);
+    box.replaceChildren(el('h2', null, X.title), row, note, el('p', 'small muted', X.sirenNote));
+  }
+
+  // Emergency readiness check (guide section 6): are my family numbers and the offline pack ready BEFORE I need them?
+  // It reads only what is already on this phone. Nothing is sent and the location is not read.
+  async function readiness(box) {
+    const R = T().ready, n = ctx.people().length;
+    let pack = null; try { pack = await loadPack(); } catch { pack = null; }
+    const row = (ok, text, action) => {
+      const r = el('li', ok ? 'ready-ok' : 'ready-no'); r.append(icon(ok ? 'check' : 'alert', { size: 'sm' }), el('span', null, text));
+      if (!ok && action) { const b = el('button', 'linkbtn', action.label); b.type = 'button'; b.addEventListener('click', action.run); r.append(b); }
+      return r;
+    };
+    const list = el('ul', 'ready-list');
+    list.append(
+      row(n > 0, n > 0 ? ctx.fill(R.family, { n: num(n) }) : R.noFamily, { label: R.addFamily, run: ctx.openPeople }),
+      row(!!pack, pack ? R.pack : R.noPack, null),
+    );
+    const done = n > 0 && !!pack;
+    box.replaceChildren(el('h2', null, R.title), el('p', 'small muted', done ? R.allGood : R.todo), list);
+  }
+
   // Offline emergency pack (plan section 3A): keep the numbers on the phone; show them when the data cannot load.
   async function keepPack(box, noteBox) {
     const P = T().pack, nat = ctx.national();
@@ -184,7 +226,9 @@ export function initEmergency(ctx) {
   }
 
   return {
-    show({ call, sit, steps: stepsBox, area: areaBox, lines }) {
+    show({ call, sit, steps: stepsBox, area: areaBox, lines, extras: extrasBox, ready: readyBox }) {
+      if (extrasBox) extras(extrasBox);
+      if (readyBox) readiness(readyBox).catch(() => {});
       call999(call); steps(stepsBox, sit); area(areaBox); helplines(lines);
       const dz = lines.previousElementSibling; if (dz && dz.id === 'sosDisaster') disaster(dz);
       const note = lines.nextElementSibling && lines.nextElementSibling.id === 'sosPack' ? lines.nextElementSibling : null;
