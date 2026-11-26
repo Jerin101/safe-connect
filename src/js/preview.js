@@ -1615,7 +1615,7 @@ function renderFooter() {
     col(aT, ['hospital', 'pharmacy', 'police', 'fuel'].map((c, k) => textBtn(a[k], () => go(`c/${c}`)))),   // all 64 districts (R2)
     col(iT, [textBtn(i[0], () => go('about')), textBtn(i[1], () => go('faq')), textBtn(i[2], () => findArea('')), textBtn(i[3], () => openFaq('source'))]),
     help);
-  const nav = el('nav'); nav.setAttribute('aria-label', 'Footer');
+  const nav = el('nav'); nav.setAttribute('aria-label', f.navLabel);
   nav.append(textBtn(f.bottom[0], () => openFaq('privacy')), textBtn(f.bottom[1], () => openFaq('source')), extLink(f.bottom[2], SITE.repo));   // the search test is linked from README only (#108)
   // Phones: night / day lives here, so the header has room for the area name (#108); wide screens keep it in the header.
   const theme = el('button', 'btn foot-theme', P().head.themeLabel); theme.type = 'button'; theme.addEventListener('click', toggleTheme);
