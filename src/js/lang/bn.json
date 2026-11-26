@@ -529,7 +529,8 @@
       "home": "SafeConnect হোম",
       "navLabel": "প্রধান মেনু",
       "langLabel": "ভাষা বদলান: English / বাংলা",
-      "themeLabel": "রং বদলান: রাত / দিন"
+      "themeLabel": "রং বদলান: রাত / দিন",
+      "easyLabel": "সহজ মোড: বড় লেখা ও বোতাম, স্পষ্ট রং"
     },
     "nav": {
       "home": "হোম",

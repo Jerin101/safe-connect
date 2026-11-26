@@ -529,7 +529,8 @@
       "home": "SafeConnect home",
       "navLabel": "Main menu",
       "langLabel": "Change language: English / বাংলা",
-      "themeLabel": "Change colours: night / day"
+      "themeLabel": "Change colours: night / day",
+      "easyLabel": "Easy mode: bigger text and buttons, stronger contrast"
     },
     "nav": {
       "home": "Home",

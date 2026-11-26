@@ -187,3 +187,12 @@ body > main { flex: 1 0 auto; }
 .netchip { position: fixed; left: 12px; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 40; margin: 0 auto; max-width: 560px; padding: 8px 14px; border-radius: 999px; font-size: .85rem; text-align: center; background: var(--surface-2, #222); color: inherit; border: 1px solid var(--line, #888); }
 .netchip[data-state="offline"] { border-color: #B3261E; }
 .netchip[hidden] { display: none; }
+
+/* Easy mode (accessibility): bigger text and buttons, stronger contrast, clear focus. Set by the "Aa" button in the header. */
+#easyBtn b { font-size: .95rem; letter-spacing: -.02em; }
+#easyBtn[aria-pressed="true"] { background: var(--brand, #0B6E73); color: #fff; }
+:root[data-easy="1"] { --muted: var(--ink); }
+:root[data-easy="1"] body { font-size: 20px; line-height: 1.75; }
+:root[data-easy="1"] .btn, :root[data-easy="1"] button, :root[data-easy="1"] .call { min-height: 56px; font-size: 1.05rem; }
+:root[data-easy="1"] a { text-decoration: underline; text-underline-offset: 3px; }
+:root[data-easy="1"] :focus-visible { outline: 4px solid #F2B600; outline-offset: 3px; }

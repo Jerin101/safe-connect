@@ -1576,6 +1576,7 @@ function renderHead() {
   $('hSearch').setAttribute('aria-label', h.search);
   $('langBtn').setAttribute('aria-label', h.langLabel);
   $('themeBtn').setAttribute('aria-label', h.themeLabel);
+  $('easyBtn').setAttribute('aria-label', h.easyLabel);
   $('h999').setAttribute('aria-label', t().call999);
   $('ctaSend').textContent = h.cta;
   $('hFinderText').textContent = h.search;
@@ -1883,6 +1884,14 @@ function toggleTheme() {
   store.set('sc-theme', root.dataset.theme);   // remembered on this phone (SRS FR02, NFR06)
 }
 $('themeBtn').addEventListener('click', toggleTheme);
+// Easy mode (plan section 6, accessibility): bigger text and buttons and stronger contrast; kept on this phone only.
+function setEasy(on) {
+  document.documentElement.dataset.easy = on ? '1' : '0';
+  $('easyBtn').setAttribute('aria-pressed', String(on));
+  store.set('sc-easy', on ? '1' : '0');
+}
+$('easyBtn').addEventListener('click', () => setEasy(document.documentElement.dataset.easy !== '1'));
+setEasy(store.get('sc-easy') === '1');
 { const th = store.get('sc-theme'); if (th === 'dark' || th === 'light') document.documentElement.dataset.theme = th; }
 
 setText();
