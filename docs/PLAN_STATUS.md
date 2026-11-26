@@ -10,7 +10,8 @@ Targets in the plan are proposed targets, not achieved results (they need real d
 | 1. Review periods (30 days local, 90 days national helplines) | Done | initial team policy, not an official standard |
 | 1. Stale warning: no "verified" after the review time, shows last checked date | Done | row says "Check overdue"; emergency numbers point to 999 |
 | 1. Admin re-verification task | Done | admin overview: "Numbers to check again" (counts from the data files) |
-| 1. Second independent source, conflict goes to admin | Planned | needs a second source per contact |
+| 1. Source conflicts go to a human review list | Done | `tools/find_conflicts.py` writes `docs/SOURCE_CONFLICTS.md` (same number for different people; same person with different numbers) |
+| 1. A second independent source for every contact | Planned | needs a second official page per contact |
 | 2. Situation list and guide steps | Done | SOS page, 6 situations |
 | 2. Guided escalation (999, situation helpline, police station, SMS, family) | Done | asks "Did the call connect?"; never automatic; the browser cannot know if a call connected |
 | 3A. Offline emergency pack | Done | `src/js/offlinepack.js`: 999, helplines and the remembered area saved in IndexedDB with check dates; shown when data cannot load |

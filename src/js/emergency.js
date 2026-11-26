@@ -5,6 +5,7 @@
 // Nothing here reads the location or sends anything. Built with createElement + textContent.
 import { icon } from './icons.js';
 import { buildPack, savePack, loadPack, clearPack } from './offlinepack.js';
+import { canSpeak, speak, stopSpeaking } from './speak.js';
 
 // which national helplines go together, by what the person needs
 const GROUPS = [
@@ -77,7 +78,13 @@ export function initEmergency(ctx) {
       b.addEventListener('click', () => ctx.go(`c/${c}`));
       near.append(b);
     }
-    box.replaceChildren(h, ol, near);
+    const tools = el('div', 'pills');
+    if (canSpeak()) {   // voice help: read the steps aloud (the phone's own voice; nothing is sent)
+      const rd = el('button', 'btn', T().speak.read); rd.type = 'button'; rd.addEventListener('click', () => speak([`${s.title}.`, ...s.do], ctx.lang()));
+      const sp = el('button', 'btn ghost', T().speak.stop); sp.type = 'button'; sp.addEventListener('click', stopSpeaking);
+      tools.append(rd, sp);
+    }
+    box.replaceChildren(h, ol, ...(tools.children.length ? [tools] : []), near);
     box.hidden = false;
   }
 
@@ -133,6 +140,26 @@ export function initEmergency(ctx) {
     box.replaceChildren(...(note ? [el('p', 'muted', note)] : []), fold);
   }
 
+  // Disaster mode (plan section 6): cyclone / flood / river danger. Only the official national lines already in
+  // data/national_hotlines.json (with their source), then the nearest shelters. No instruction is written here that is not official.
+  function disaster(box) {
+    const D = T().disaster, all = ctx.national();
+    const h = el('h2', null, D.title); h.id = 'sosDisasterTitle';
+    if (!all) { box.replaceChildren(h, el('p', 'muted', D.none)); return; }
+    const rows = all.filter((r) => ['disaster', 'coast_river'].includes(r.category) && r.phones && r.phones.length);
+    const list = el('div', 'rows');
+    for (const r of rows) {
+      const row = el('div', 'r near-row');
+      const b = el('div'); b.append(el('div', 't', ctx.lang() === 'en' ? r.name_en || r.name_bn : r.name_bn || r.name_en));
+      const acts = el('div', 'acts');
+      const c = el('a', 'btn', num(r.phones[0])); c.href = `tel:${r.phones[0]}`; c.prepend(icon('phone', { size: 'sm' })); acts.append(c);
+      if (/^https:\/\//.test(r.source_url || '')) { const s = el('a', 'btn ghost', T().source); s.href = r.source_url; s.target = '_blank'; s.rel = 'noopener noreferrer'; acts.append(s); }
+      row.append(b, acts); list.append(row);
+    }
+    const sh = el('button', 'btn', D.shelters); sh.type = 'button'; sh.prepend(icon('pin', { size: 'sm' })); sh.addEventListener('click', () => ctx.go('c/shelter'));
+    box.replaceChildren(h, el('p', 'muted', D.text), list, sh);
+  }
+
   // Offline emergency pack (plan section 3A): keep the numbers on the phone; show them when the data cannot load.
   async function keepPack(box, noteBox) {
     const P = T().pack, nat = ctx.national();
@@ -159,6 +186,7 @@ export function initEmergency(ctx) {
   return {
     show({ call, sit, steps: stepsBox, area: areaBox, lines }) {
       call999(call); steps(stepsBox, sit); area(areaBox); helplines(lines);
+      const dz = lines.previousElementSibling; if (dz && dz.id === 'sosDisaster') disaster(dz);
       const note = lines.nextElementSibling && lines.nextElementSibling.id === 'sosPack' ? lines.nextElementSibling : null;
       if (note) keepPack(lines, note).catch(() => {});
     },
