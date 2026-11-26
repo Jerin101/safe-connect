@@ -9,6 +9,7 @@ import { icon } from './icons.js';
 import { locate } from './geo.js';
 
 const SITE = 'https://jerin101.github.io/safe-connect/';
+const ARRIVE = 'sc-arrive';                     // time (ms) when a share ended without "I arrived": the next visit asks once
 const KEY = 'sc-live';                         // { id, expiresAt } of this phone's active share (no position)
 
 export function initLive(ctx) {
@@ -63,7 +64,20 @@ export function initLive(ctx) {
     const start = btn('btn solid big', T().start, 'locate', startShare);
     const commute = btn('btn', T().safeCommute, 'car', () => say(T().startFirst));   // UC-11 5.2
     const ride = pendingCommute ? note(fill(T().fromRide, { v: [pendingCommute.vehicleNo, pendingCommute.destination].filter(Boolean).join(' → ') })) : null;
-    view.replaceChildren(head, card(el('h2', null, T().howLong), ride, opts, start, msg(), pendingCommute ? null : pills(commute)));
+    view.replaceChildren(head, arrivalCard(), card(el('h2', null, T().howLong), ride, opts, start, msg(), pendingCommute ? null : pills(commute)));
+  }
+  // Safe Arrival check (guide section 6). A browser cannot wake itself when closed, so the question is asked when the time
+  // ends (page open) and, if that was missed, the next time the person opens this page. Nothing is sent without a tap.
+  const pendingArrive = () => { try { const t = Number(store.get(ARRIVE)); return t && Date.now() - t < 24 * 3600000 ? t : 0; } catch { return 0; } };
+  function clearArrive() { try { localStorage.removeItem(ARRIVE); } catch { /* fine */ } }
+  function arrivalCard() {
+    if (!pendingArrive()) return null;
+    const A = T().arrive, box = el('section', 'card'); box.setAttribute('role', 'status');
+    const yes = btn('btn solid', A.yes, 'check', () => { clearArrive(); box.replaceChildren(el('h2', null, A.glad), pills(...sendButtons(T().reachedText))); });
+    const no = el('a', 'btn', A.no); no.href = '#/sos'; no.prepend(icon('alert', { size: 'sm' })); no.addEventListener('click', clearArrive);
+    const later = btn('linkbtn', A.dismiss, null, () => { clearArrive(); box.remove(); });
+    box.append(el('h2', null, A.q), el('p', 'muted', A.note), pills(yes, no), later);
+    return box;
   }
   async function startShare() {
     const [fb, tr] = await load();
@@ -120,14 +134,15 @@ export function initLive(ctx) {
   }
   async function finish(reached) {
     const id = share?.id; stopWatch(); share = null;
-    try { localStorage.removeItem(KEY); } catch { /* fine */ }
+    try { localStorage.removeItem(KEY); if (reached) clearArrive(); else store.set(ARRIVE, String(Date.now())); } catch { /* fine */ }
     if (id) { try { await (await load())[0].endShare(id); } catch { /* the rules let it expire anyway */ } }
     if (!view?.isConnected) { ctx.toast(reached ? T().endedReached : T().endedTime); return; }
     const h = el('h1', 'page-title', T().title); h.id = 'liveTitle'; h.tabIndex = -1;
     const kids = [card(h, el('p', 'muted', reached ? T().endedReached : T().endedTime))];
     if (reached) kids.push(card(el('h2', null, T().tellReached), pills(...sendButtons(T().reachedText))));
+    if (!reached) kids.push(arrivalCard());
     kids.push(pills(btn('btn solid', T().again, 'locate', () => show(view))));
-    view.replaceChildren(...kids);
+    view.replaceChildren(...kids.filter(Boolean));
   }
   // the link: SMS to the saved family numbers (or any number), WhatsApp, the share sheet, copy
   function sendButtons(text) {

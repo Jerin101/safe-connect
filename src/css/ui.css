@@ -196,3 +196,8 @@ body > main { flex: 1 0 auto; }
 :root[data-easy="1"] .btn, :root[data-easy="1"] button, :root[data-easy="1"] .call { min-height: 56px; font-size: 1.05rem; }
 :root[data-easy="1"] a { text-decoration: underline; text-underline-offset: 3px; }
 :root[data-easy="1"] :focus-visible { outline: 4px solid #F2B600; outline-offset: 3px; }
+
+/* Quiet mode (silent SOS): every button that makes a sound is hidden; the page stays calm and dark. */
+:root[data-quiet="1"] .loud { display: none !important; }
+:root[data-quiet="1"] #sos { filter: brightness(.82); }
+.siren-btn[aria-pressed="true"] { background: #B3261E; color: #fff; }
