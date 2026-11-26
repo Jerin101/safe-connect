@@ -9,4 +9,6 @@ ok(confidence({ status: 'open', n: 2, at: now - 0.1 * H }, now).level === 'mediu
 ok(confidence({ status: 'open', n: 3, at: now - 0.1 * H }, now).level === 'high', 'three fresh reports: high');
 ok(confidence({ status: 'open', n: 3, at: now - 12 * H }, now).level === 'low', 'three reports 12 hours old: faded to low');
 ok(confidence({ status: 'open', n: 9, at: now - 25 * H }, now).level === 'expired', 'older than 24 hours: expired');
+ok(confidence({ status: 'closed', n: 1, prev: 'open', at: now - 1 * H }, now).level === 'conflict', 'a fresh answer that disagrees with the one before: conflict');
+ok(confidence({ status: 'closed', n: 1, prev: 'open', at: now - 8 * H }, now).level === 'low', 'an old conflict fades: no longer flagged');
 console.log(bad ? 'FAILED' : 'ALL OK'); process.exit(bad ? 1 : 0);

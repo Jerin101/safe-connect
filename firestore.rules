@@ -194,9 +194,15 @@ service cloud.firestore {
       allow read: if true;
       allow create, update: if signedIn() && verified()
         && placeId.matches('^[a-z0-9-]{3,80}$')
-        && incoming().keys().hasOnly(['status', 'n', 'at'])
+        && incoming().keys().hasOnly(['status', 'n', 'at', 'prev'])
         && incoming().status in placeValues()
         && incoming().at == request.time
+        // "prev" (conflict flag): only when this answer differs from the one before it and that one is under 6 hours old;
+        // it must be exactly that earlier answer. Without a disagreement, "prev" is not allowed.
+        && (!('prev' in incoming()) || (resource != null
+            && resource.data.get('status', '') != incoming().status
+            && request.time <= resource.data.at + duration.value(6, 'h')
+            && incoming().prev == resource.data.get('status', '')))
         && getAfter(/databases/$(database)/documents/placeStatus/$(placeId)/by/$(request.auth.uid)).data.at == request.time
         && getAfter(/databases/$(database)/documents/placeStatus/$(placeId)/by/$(request.auth.uid)).data.status == incoming().status
         && (resource == null || resource.data.get('status', '') != incoming().status || request.time > resource.data.at + duration.value(6, 'h')
