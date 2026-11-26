@@ -409,6 +409,12 @@ export function initNear(ctx) {
       const b = el('button', 'pill', S.values[v]); b.type = 'button';
       b.addEventListener('click', async () => {
         msg.textContent = '';
+        const saveLater = async () => {   // no internet: keep the answer on this phone (1 hour) and send it when online and signed in
+          const { enqueue } = await import('./reportqueue.js');
+          const res = await enqueue('vote', { placeId, value: v });
+          msg.textContent = res === 'saved' ? S.queued : S.offline; window.dispatchEvent(new Event('sc-queue'));
+        };
+        if (!navigator.onLine) { await saveLater(); return; }
         try {
           const fb = await import('./firebase.js'), cm = await import('./community.js');
           const user = await fb.currentUser();
@@ -417,7 +423,10 @@ export function initNear(ctx) {
           const old = await fb.readPlaceStatus(placeId);
           await fb.sendPlaceStatus(placeId, v, cm.nextPlaceStatus(old, v, Date.now()));
           msg.textContent = S.thanks; show();
-        } catch (e) { msg.textContent = e && e.code === 'permission-denied' ? S.wait30 : navigator.onLine ? S.failed : S.offline; }   // UC-06 5.1
+        } catch (e) {   // UC-06 5.1
+          if (!navigator.onLine) { await saveLater(); return; }
+          msg.textContent = e && e.code === 'permission-denied' ? S.wait30 : S.failed;
+        }
       });
       buttons.append(b);
     }

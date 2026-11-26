@@ -223,13 +223,15 @@ old data visible. Both are plain ES modules with no build step and no server.
 | Part | File | What it does |
 |---|---|---|
 | Review times | `src/js/verify.js` | Each contact shows who checked it, how, and when the next check is due. Local numbers: 30 days. National helplines: 90 days. After that the number is **not shown as verified** (the row says "Check overdue" and, for emergency numbers, points to 999). These times are the team's own starting rule, **not an official standard**. Dates come from the data (`script_check.on`, `checked_on`, `retrieved_on`); `status: verified` means a person checked it. Nothing is invented. |
-| Offline emergency pack | `src/js/offlinepack.js` | 999, the national helplines and (only if the phone may remember the area) this area's key numbers are saved in IndexedDB database `safeconnect`, store `pack`, with source link and check date. The SOS page shows this copy, labelled "saved copy", when the data files cannot load. The person can remove it. |
+| Offline emergency pack | `src/js/offlinepack.js` | 999, the national helplines, the ready SOS message texts (6 situations, Bangla and English, no place or location) and (only if the phone may remember the area) this area's key numbers are saved in IndexedDB database `safeconnect`, store `pack`, with source link and check date. The SOS page shows this copy, labelled "saved copy", when the data files cannot load. The person can remove it. |
 | Network chip | `src/js/netstatus.js` | Says Slow connection or Offline (hidden while online). It reads only the browser's online flag and connection speed. |
 | Guided escalation | `src/js/emergency.js` | After the 999 tap the page asks "Did the call connect?" (a browser cannot know). If not, it lists the next steps one at a time: 999 again, the situation's helpline, the nearest police station, SMS, family. Nothing is dialled or sent automatically. |
 
 ### 9.2 Sync queue for reports written offline (`src/js/reportqueue.js`)
 
-A wrong-number report or a "missing place" request written with **no internet** is saved on the phone and sent later.
+A wrong-number report, a "missing place" request or a "How is it now?" answer (open / closed / fuel) given with **no internet** is saved on the phone and sent later.
+
+An answer is only true for a short time and the server stamps it with the time it arrives, so a queued answer is **dropped after 1 hour** and the newest answer for a place replaces the older one. When it is sent, the community rules apply as always (verified email, 30 minutes per place); an answer the rules refuse is dropped.
 
 **How it works**
 1. Offline, the report form's button changes to "Save to send later". The report goes into IndexedDB database `safeconnect-queue`, store `items`.

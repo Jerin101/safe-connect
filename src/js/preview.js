@@ -7,7 +7,7 @@ import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS, hasPhone } from './reports.js';
 import { review, isEmergency } from './verify.js';
 import { initNetStatus } from './netstatus.js';
-import { helpLink, parseHelp, buildSms, smsParts, minutesAgo, pickPolice } from './bipod.js';
+import { helpLink, parseHelp, buildSms, smsParts, minutesAgo, pickPolice, SITUATIONS } from './bipod.js';
 import { BRANDS, LIVE, CHECKED } from './prepare.js';
 import { icon as lineIcon } from './icons.js';
 import { initNear } from './near.js';
@@ -1036,6 +1036,11 @@ function makeNear() {
     remembers, fill, fmtDate,
     sendHelp: () => $('bipodBtn').click(),
     people: () => getPeople(),
+    // the SOS message for each situation, in Bangla and English, without place or location (kept in the offline pack)
+    smsTemplates: () => SITUATIONS.map((sit) => {
+      const text = (l) => { const s = LANG[l].ui; return buildSms({ texts: { ...s.bipod.sms, noLoc: s.noLoc }, situation: s.sits[sit][1] }); };
+      return { situation: sit, label: LANG[lang].ui.sits[sit][1], bn: text('bn'), en: text('en') };
+    }),
     openPeople: () => { $('peopleBox').open = true; $('peopleBox').scrollIntoView({ block: 'start' }); $('pName').focus({ preventScroll: true }); },
     areaRecords: (a) => { const p = pilotPlace(a); if (!p) return null; try { const g = areaContacts(data, p); return ['police', 'tourist_police', 'local', 'town', 'administration'].map((id) => pickContact(g, id)).filter(Boolean); } catch { return null; } },
     officialRows: (a) => { const p = pilotPlace(a); if (!p) return null; try { return firstRows(p, areaContacts(data, p)); } catch { return null; } },

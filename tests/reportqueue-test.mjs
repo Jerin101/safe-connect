@@ -1,5 +1,5 @@
 // Plan section 3C: the offline report queue keeps only the report, never the person (js/reportqueue.js, the pure part).
-import { makeItem, itemFields, MAX_ITEMS } from '../src/js/reportqueue.js';
+import { makeItem, itemFields, MAX_ITEMS, VOTE_MAX_AGE_MS } from '../src/js/reportqueue.js';
 let bad = 0;
 const ok = (c, m) => { console.log((c ? 'PASS  ' : 'FAIL  ') + m); if (!c) bad++; };
 const draft = { recordId: 'abc123', district: 'noakhali', area: 'সোনাইমুড়ী', problem: 'changed', note: 'number changed last week' };
@@ -15,5 +15,11 @@ ok(itemFields(it, '') === null, 'without a signed-in user nothing can be sent');
 const m = makeItem('missing', { district: 'noakhali', place: 'Rahim Pharmacy', upazila: 'Begumganj' }, 2000);
 ok(m && itemFields(m, 'u2').problem === 'missing_place', 'a missing-place request is queued the same way');
 ok(makeItem('other', draft) === null, 'an unknown kind is refused');
+const v = makeItem('vote', { placeId: 'noakhali-rahim-pharmacy', value: 'open' }, 5000);
+ok(v && v.kind === 'vote' && v.data.value === 'open' && v.queuedAt === 5000 && !JSON.stringify(v).includes('uid'), 'an offline "How is it now?" answer keeps only the place and the answer');
+ok(makeItem('vote', { placeId: 'Bad Place!', value: 'open' }) === null, 'a bad place id is refused (same pattern as the rules)');
+ok(makeItem('vote', { placeId: 'noakhali-rahim-pharmacy', value: 'maybe' }) === null, 'an unknown answer is refused');
+ok(makeItem('vote', null) === null, 'an empty answer is refused');
+ok(VOTE_MAX_AGE_MS === 3600000, 'a queued answer is valid for 1 hour only');
 ok(MAX_ITEMS === 10, 'the queue is short (10 items)');
 console.log(bad ? 'FAILED' : 'ALL OK'); process.exit(bad ? 1 : 0);

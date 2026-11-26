@@ -203,17 +203,29 @@ export function initEmergency(ctx) {
   }
 
   // Offline emergency pack (plan section 3A): keep the numbers on the phone; show them when the data cannot load.
+  // The saved SOS message texts (shown with the saved copy when the data files cannot load): one tap opens the messages app.
+  function smsTexts(box, pack) {
+    if (!pack.sms || !pack.sms.length) return;
+    const P = T().pack, to = ctx.people().map((p) => p.phone).join(',');
+    const d = el('details', 'sms-pack'); d.append(el('summary', null, P.smsTitle), el('p', 'small muted', P.smsNote));
+    for (const x of pack.sms) {
+      const text = ctx.lang() === 'en' ? x.en : x.bn;
+      const a = el('a', 'btn ghost', `${x.label}: ${P.smsOpen}`); a.href = `sms:${to}?&body=${encodeURIComponent(text)}`;
+      d.append(a);
+    }
+    box.append(d);
+  }
   async function keepPack(box, noteBox) {
     const P = T().pack, nat = ctx.national();
     let pack = null;
     if (nat) {
       const a = await ctx.near.area().catch(() => null);
       const recs = a && ctx.remembers() && ctx.areaRecords ? ctx.areaRecords(a) : null;   // the area only if the phone may remember it
-      pack = buildPack({ national: nat, area: recs, areaLabel: a && recs ? ctx.near.label(a) : '' });
+      pack = buildPack({ national: nat, area: recs, areaLabel: a && recs ? ctx.near.label(a) : '', sms: ctx.smsTemplates ? ctx.smsTemplates() : [] });
       await savePack(pack);
     } else {
       pack = await loadPack();
-      if (pack && pack.national.length) helplines(box, pack.national, ctx.fill(P.copy, { date: ctx.fmtDate(pack.savedAt) }));
+      if (pack && pack.national.length) { helplines(box, pack.national, ctx.fill(P.copy, { date: ctx.fmtDate(pack.savedAt) })); smsTexts(box, pack); }
     }
     if (!pack) { noteBox.replaceChildren(); return; }
     const n = pack.national.length + (pack.area ? pack.area.records.length : 0);
