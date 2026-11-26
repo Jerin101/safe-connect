@@ -79,3 +79,20 @@
 
 ---
 
+## 2026 - Week 48 (2026-11-23 to 2026-11-26)
+
+- **Total Journal Entries:** 6
+- **Israt Jerin Nafisa:** 2 logged day(s), 4 linked commit(s)
+- **Tasmin Jahan Toshi:** 4 logged day(s), 81 linked commit(s)
+
+### Highlights & Daily Objectives
+
+- **2026-11-23 (Israt Jerin Nafisa):** Update README with Vercel mirror link
+- **2026-11-23 (Tasmin Jahan Toshi):** R5: জরুরি সাহায্য: big 999, what to do now, area numbers, helplines by need (#267)
+- **2026-11-24 (Tasmin Jahan Toshi):** Admin rates: "সারা দেশ" says it is the nationwide rate; volunteer note uses the SRS name
+- **2026-11-25 (Tasmin Jahan Toshi):** Index on fix/pages-root-redirect: 363fa05 fix: root redirect pages so GitHub Pages (branch root) serves the site that now lives in src/
+- **2026-11-26 (Israt Jerin Nafisa):** Merge pull request #326 from Jerin101/feature/327-community-conflict
+- **2026-11-26 (Tasmin Jahan Toshi):** Finish the teacher's plan items that work offline, ship the v70 and v71 releases, and cut the use cases to the 21 that are finished
+
+---
+
