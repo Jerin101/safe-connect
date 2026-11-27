@@ -286,7 +286,7 @@
       "mapLoading": "Loading map…",
       "mapLabel": "Shared location map",
       "mapPin": "Shared location point",
-      "accuracyText": "The phone reports an approximate location accuracy of ±{m} metres.",
+      "accuracyText": "The phone's estimated accuracy radius is ±{m} m (about 68% confidence, not a guarantee).",
       "accuracyUnknown": "The phone did not provide an accuracy estimate.",
       "limitationsTitle": "Important limits of this shared location",
       "limitSnapshot": "This is a one-time location captured when the SOS message was created. It does not update as the person moves. Live Tracking is a separate feature; this link does not start it.",
