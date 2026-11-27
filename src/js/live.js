@@ -7,10 +7,16 @@
 // Only the share id is kept on this phone (to end it after a reload), never a position. createElement + textContent.
 import { icon } from './icons.js';
 import { locate } from './geo.js';
+import { loadUpazilaCentres, nearestUpazilaCentre } from './location.js';
 
 const SITE = 'https://jerin101.github.io/safe-connect/';
 const ARRIVE = 'sc-arrive';                     // time (ms) when a share ended without "I arrived": the next visit asks once
 const KEY = 'sc-live';                         // { id, expiresAt } of this phone's active share (no position)
+let centreDataPromise = null;
+async function approximateUpazila(pos) {
+  if (!centreDataPromise) centreDataPromise = loadUpazilaCentres().catch(() => []);
+  return nearestUpazilaCentre(await centreDataPromise, pos);
+}
 
 export function initLive(ctx) {
   const { el, store } = ctx;
@@ -212,6 +218,13 @@ export function initLive(ctx) {
     mapBox.hidden = false;
     const row = (label, value, cls) => { const d = el('div', cls); d.append(el('span', null, label), el('b', null, value)); return d; };
     const bill = el('div', 'bill');
+    const estimate = await approximateUpazila({ lat: Number(s.lat), lon: Number(s.lon) });
+    if (!view?.isConnected) return closeTrack();
+    if (estimate) bill.append(el('p', 'small muted', fill(T().nearCentre, {
+      u: ctx.lang() === 'bn' ? estimate.upazilaBn : estimate.upazila,
+      d: estimate.district,
+      km: estimate.distanceKm.toFixed(1),
+    })));
     if (s.vehicleNo || s.vehicleType) bill.append(row(T().vehicle, [s.vehicleType ? T().vehicles[s.vehicleType] : '', s.vehicleNo || ''].filter(Boolean).join(' · ')));
     if (s.destination) bill.append(row(T().destination, s.destination));
     const sp = TR.kmh(s.speed);
