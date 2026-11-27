@@ -7,21 +7,24 @@ import { helpPath, helpLink, parseHelp, buildSms, smsParts, minutesAgo, inBangla
 
 const LANG = { bn: JSON.parse(readFileSync('src/js/lang/bn.json', 'utf8')).ui, en: JSON.parse(readFileSync('src/js/lang/en.json', 'utf8')).ui };
 const texts = (l) => ({ ...LANG[l].bipod.sms, noLoc: LANG[l].noLoc });
-const HATIYA = { lat: 22.36123456, lon: 91.12987654 };
+const HATIYA = { lat: 22.36123456, lon: 91.12987654, accuracy: 23.7 };
 const AT = Date.UTC(2026, 10, 2, 13, 0, 0);
 const NOW = AT + 5 * 60000;
 const SEC = AT / 1000;
 
-test('help path: 5 decimals, unix seconds, known situation only', () => {
-  assert.equal(helpPath(HATIYA, AT, 'followed'), `help/22.36123,91.12988,${SEC},followed`);
-  assert.equal(helpPath(HATIYA, AT, 'nonsense'), `help/22.36123,91.12988,${SEC}`);
-  assert.equal(helpLink(HATIYA, AT), `${SITE_URL}#/help/22.36123,91.12988,${SEC}`);
+test('help path: keeps the GPS point, time, optional situation and reported accuracy', () => {
+  assert.equal(helpPath(HATIYA, AT, 'followed'), `help/22.36123,91.12988,${SEC},followed,a24`);
+  assert.equal(helpPath(HATIYA, AT, 'nonsense'), `help/22.36123,91.12988,${SEC},a24`);
+  assert.equal(helpLink(HATIYA, AT), `${SITE_URL}#/help/22.36123,91.12988,${SEC},a24`);
+  assert.equal(helpPath({ lat: HATIYA.lat, lon: HATIYA.lon }, AT), `help/22.36123,91.12988,${SEC}`);
 });
 
-test('parser: a good link round-trips', () => {
+test('parser: new accuracy links and old family links both round-trip', () => {
   const h = parseHelp(helpPath(HATIYA, AT, 'lost').slice(5), NOW);
-  assert.deepEqual(h, { ok: true, lat: 22.36123, lon: 91.12988, at: AT, situation: 'lost' });
-  assert.equal(parseHelp(`22.36123,91.12988,${SEC}`, NOW).situation, null);
+  assert.deepEqual(h, { ok: true, lat: 22.36123, lon: 91.12988, at: AT, situation: 'lost', accuracy: 24 });
+  assert.deepEqual(parseHelp(`22.36123,91.12988,${SEC}`, NOW), {
+    ok: true, lat: 22.36123, lon: 91.12988, at: AT, situation: null, accuracy: null
+  });
   assert.equal(parseHelp(`22.36123,91.12988,${SEC},xyz`, NOW).situation, null);
 });
 
