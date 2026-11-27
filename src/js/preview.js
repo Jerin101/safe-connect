@@ -1466,7 +1466,7 @@ function showHelp(arg) {
   $('helpPlace').textContent = place.outside
     ? (place.estimate ? centreEstimateText(place.estimate, lang) : b.outsideData)
     : `${placeTitle(place)}, ${placeSub(place)}`;
-  $('helpCoords').replaceChildren(svg(ICONS.pin), el('span', null, fill(b.coords, { lat: digits(h.lat.toFixed(5)), lon: digits(h.lon.toFixed(5)) })));
+  $('helpCoords').replaceChildren(svg(ICONS.pin), el('span', null, fill(b.coords, { lat: digits(h.lat.toFixed(6)), lon: digits(h.lon.toFixed(6)) })));
   $('helpAccuracy').textContent = Number.isFinite(h.accuracy) && h.accuracy > 0
     ? fill(b.accuracyText, { m: digits(h.accuracy) }) : b.accuracyUnknown;
   helpMapPosition = pos;
