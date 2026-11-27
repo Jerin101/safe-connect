@@ -705,8 +705,22 @@ export function initNear(ctx) {
     }
     return out;
   }
+  // The named places around ANY point (the family page: where the person is), nearest first, from our own OpenStreetMap
+  // data in data/places/. Nothing is sent anywhere. A place without a name of its own does not help a parent, so it is left out.
+  async function around(point, districtEn, { radiusKm = 2, max = 10 } = {}) {
+    try { await loadBase(); } catch { return []; }
+    let all; try { all = await placesOf(districtEn); } catch { return []; }
+    const out = [];
+    for (const p of all) {
+      if (p.lat == null || p.lon == null || p.name_hidden || !(p.name_bn || p.name_en)) continue;
+      const k = km(point, p); if (k > radiusKm) continue;
+      const c = CATS.find((x) => x.match(p)); if (!c) continue;
+      out.push({ id: p.id, cat: c.id, catLabel: T().cats[c.id], ic: c.ic, name: nameOf(p), lat: p.lat, lon: p.lon, km: k });
+    }
+    return out.sort((a, b) => a.km - b.km).slice(0, max);
+  }
   const area = async () => { try { await loadBase(); } catch { return null; } return getArea(); };
   // the 64 districts with their keys (for the admin's district rates); empty until the base data is loaded
   const districts = () => (base ? base.districts.map((d) => ({ key: slug(d.en), en: d.en, bn: d.bn })).sort((a, b) => a.en.localeCompare(b.en)) : []);
-  return { show, close: closeMap, home, homeNums, sameUpazila, forget, label, openPicker, here, nearby, loadLeaflet, area, districts };
+  return { show, close: closeMap, home, homeNums, sameUpazila, forget, label, openPicker, here, nearby, around, loadLeaflet, area, districts };
 }
