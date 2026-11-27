@@ -376,7 +376,12 @@ export function initDakun(ctx) {
     const [fb] = await load();
     stopRide();
     if (noRates()) { try { rates = await fb.readRates(ride?.district); } catch { rates = {}; } }
-    rideUnsub = fb.watchRide(id, onRide, (e) => { const m = view?.querySelector('.dk-ridemsg'); if (m) m.textContent = errText(e); });
+    rideUnsub = fb.watchRide(id, onRide, (e) => {
+      // A ride this account may not read (it was made by another account on this phone) or that cannot be found: forget it
+      // and show the form. Before, this left the grey loading box for ever.
+      if (e && e.code === 'permission-denied') { stopRide(); ride = null; store.set('sc-ride', ''); if (view?.isConnected) show(view); return; }
+      const m = view?.querySelector('.dk-ridemsg'); if (m) m.textContent = errText(e);
+    });
   }
   async function onRide(r) {
     const [fb] = await load();

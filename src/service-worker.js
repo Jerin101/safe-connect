@@ -34,6 +34,7 @@ const FILES = [
   'js/geo.js',               // one two-step way to read the phone position (network first or GPS first)
   'js/autoloc.js',
   'js/auth.js',
+  'js/owner.js',
   'js/workspace.js',
   'js/reports.js',
   'js/admin.js',
