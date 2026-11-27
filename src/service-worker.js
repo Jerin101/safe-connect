@@ -1,7 +1,7 @@
 // SafeConnect offline app (P34). After one visit with internet, the site opens with no internet.
 // Change VERSION whenever a file in FILES changes in a way that must reach every phone at once
 // (new data, a new page or script): the old cache is then deleted and everything is saved again.
-const VERSION = 'v80-2026-11-27';
+const VERSION = 'v81-2026-11-27';
 const CACHE = `safeconnect-${VERSION}`;
 
 // Every page, script, data file, font and icon the site needs (paths relative to this file).
@@ -17,6 +17,9 @@ const FILES = [
   'js/preview.js',
   'js/icons.js',             // line icons (A1)
   'js/near.js',              // categories near the person (R1)
+  'js/areapoly.js',            // M1.2: which upazila boundary a position is inside (data/polygons)
+  'js/unioncentre.js',         // M1.2: nearest union centre (never an exact union)
+  'js/whereami.js',            // M1.2: the "where the map puts you" card on the area page
   'js/routemap.js', 'js/verify.js', 'js/netstatus.js', 'js/offlinepack.js', 'js/reportqueue.js', 'js/speak.js', 'js/siren.js',          // directions inside the site: road route and live route map (#309)
   'js/dakun.js',             // সেবা ডাকুন (R3)
   'js/provide.js',           // সেবা দিন (R4)
@@ -45,6 +48,72 @@ const FILES = [
   'js/lang/en.json',
   'data/national_hotlines.json',
   'data/upazila_centres.json',   // the area picker and "my location" (R1)
+  // M1.2: official BBS upazila boundaries (simplified 100 m, CC BY-IGO) and union centre points, one file per district (about 1.3 MB)
+  'data/polygons/index.json',
+  'data/polygons/BD1004.json',
+  'data/polygons/BD1006.json',
+  'data/polygons/BD1009.json',
+  'data/polygons/BD1042.json',
+  'data/polygons/BD1078.json',
+  'data/polygons/BD1079.json',
+  'data/polygons/BD2003.json',
+  'data/polygons/BD2012.json',
+  'data/polygons/BD2013.json',
+  'data/polygons/BD2015.json',
+  'data/polygons/BD2019.json',
+  'data/polygons/BD2022.json',
+  'data/polygons/BD2030.json',
+  'data/polygons/BD2046.json',
+  'data/polygons/BD2051.json',
+  'data/polygons/BD2075.json',
+  'data/polygons/BD2084.json',
+  'data/polygons/BD3026.json',
+  'data/polygons/BD3029.json',
+  'data/polygons/BD3033.json',
+  'data/polygons/BD3035.json',
+  'data/polygons/BD3048.json',
+  'data/polygons/BD3054.json',
+  'data/polygons/BD3056.json',
+  'data/polygons/BD3059.json',
+  'data/polygons/BD3067.json',
+  'data/polygons/BD3068.json',
+  'data/polygons/BD3082.json',
+  'data/polygons/BD3086.json',
+  'data/polygons/BD3093.json',
+  'data/polygons/BD4001.json',
+  'data/polygons/BD4018.json',
+  'data/polygons/BD4041.json',
+  'data/polygons/BD4044.json',
+  'data/polygons/BD4047.json',
+  'data/polygons/BD4050.json',
+  'data/polygons/BD4055.json',
+  'data/polygons/BD4057.json',
+  'data/polygons/BD4065.json',
+  'data/polygons/BD4087.json',
+  'data/polygons/BD4539.json',
+  'data/polygons/BD4561.json',
+  'data/polygons/BD4572.json',
+  'data/polygons/BD4589.json',
+  'data/polygons/BD5010.json',
+  'data/polygons/BD5038.json',
+  'data/polygons/BD5064.json',
+  'data/polygons/BD5069.json',
+  'data/polygons/BD5070.json',
+  'data/polygons/BD5076.json',
+  'data/polygons/BD5081.json',
+  'data/polygons/BD5088.json',
+  'data/polygons/BD5527.json',
+  'data/polygons/BD5532.json',
+  'data/polygons/BD5549.json',
+  'data/polygons/BD5552.json',
+  'data/polygons/BD5573.json',
+  'data/polygons/BD5577.json',
+  'data/polygons/BD5585.json',
+  'data/polygons/BD5594.json',
+  'data/polygons/BD6036.json',
+  'data/polygons/BD6058.json',
+  'data/polygons/BD6090.json',
+  'data/polygons/BD6091.json',
   'data/places/index.json',      // which places file each district uses (R1)
   'data/manual_additions.json',
   'data/villages.json',

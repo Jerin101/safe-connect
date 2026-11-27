@@ -3,6 +3,8 @@
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
 import { loadLocations, loadUpazilaCentres, nearestUpazilaCentre, getPosition, getSosPosition, SOS_TARGET_ACCURACY_M, nearestPlace } from './location.js';
 import { createAutoLoc } from './autoloc.js';
+import { createAreaPolygons } from './areapoly.js';
+import { whereAmI, renderWhere } from './whereami.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS, hasPhone } from './reports.js';
 import { review, isEmergency } from './verify.js';
@@ -391,6 +393,7 @@ function renderArea() {
   helpMapPosition = null; areaMapPosition = null;
   const p = current.place;
   const groups = p.outside ? null : areaContacts(data, p);
+  const nat = (id) => data.national.find((n) => n.id === id);   // the national hotlines of the "more help" list (an outside position used to stop here: nat was only defined in firstRows)
   $('youAreIn').textContent = p.outside ? t().outsideTitle : t().youAreIn;
   $('placeName').textContent = p.outside ? `${digits(current.pos.lat.toFixed(4))}, ${digits(current.pos.lon.toFixed(4))}` : placeTitle(p);
   $('placeSub').textContent = p.outside ? '' : placeSub(p);
@@ -401,6 +404,7 @@ function renderArea() {
   $('placeNote').hidden = !note;
   if (note) $('placeNote').textContent = note.how_to_report_bn;
   renderAutoNote();
+  showWhere();
 
   // share
   $('share').hidden = !current.pos;
@@ -804,6 +808,20 @@ $('noArea').addEventListener('change', () => {
   }
   renderRecent();
 });
+
+/* ---------- where the map puts you (M1.2) ---------- */
+// Upazila boundary + nearest union centre for a real phone position. Loads the district file on demand (it is in the offline
+// list); a failure or a missing file only shows a plain message and never touches the contacts or the emergency flow.
+const areaPoly = createAreaPolygons();
+let whereToken = 0;
+function showWhere() {
+  const box = $('where'), pos = current && current.pos, mine = ++whereToken;
+  if (!pos || pos.demo) { box.hidden = true; box.replaceChildren(); return; }
+  const contact = current.place && !current.place.outside ? { district: current.place.district, upazila: current.place.upazila } : null;
+  whereAmI(pos, areaPoly, contact).then((m) => {
+    if (mine === whereToken && current && current.pos === pos) renderWhere(box, m, t().where, { lang, num: digits, fill });
+  }).catch(() => { if (mine === whereToken) { box.hidden = true; box.replaceChildren(); } });
+}
 
 /* ---------- location ---------- */
 function msg(text) { $('locMsg').textContent = text; $('locMsg').hidden = !text; }
