@@ -264,6 +264,16 @@
   .here .label { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
   .here h1 { font-size: clamp(1.45rem, 5vw, 1.95rem); }
   .here .sub { color: var(--muted); }
+  .where { border-radius: var(--r); padding: 16px 18px; display: grid; gap: 8px; box-shadow: var(--shadow); }
+  .where h2 { font-size: 1.05rem; }
+  .where h3 { font-size: 0.95rem; margin-top: 6px; }
+  .where-list { display: grid; gap: 4px; margin: 0; }
+  .where-row { display: flex; gap: 10px; justify-content: space-between; }
+  .where-row dt { color: var(--muted); }
+  .where-row dd { margin: 0; font-weight: 600; text-align: right; }
+  .where-centre { font-weight: 600; }
+  .where-warn { border-inline-start: 3px solid var(--warn, currentColor); padding-inline-start: 8px; }
+  .where-source { color: var(--muted); font-size: 0.8rem; }
   .here-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
   .share { border-radius: var(--r); padding: 16px 18px; display: grid; gap: 8px; }
   .share h2 { font-size: 1.12rem; }
