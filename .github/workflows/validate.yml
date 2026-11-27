@@ -24,5 +24,7 @@ jobs:
         run: python -m unittest discover -s tests/places_data
       - name: GPS -> upazila shapes test
         run: node --test tests/locations/upazila-shapes-test.mjs
+      - name: Nationwide approximate location test
+        run: node --test tests/location-estimate-test.mjs
       - name: Colour contrast and icons (A1)
         run: node --test tests/design/contrast-test.mjs
