@@ -485,7 +485,7 @@
 .help-sit { color: var(--red-ink); font-weight: 700; margin: 0; }
 .help-coords { display: flex; align-items: center; gap: 6px; margin: 4px 0 12px; overflow-wrap: anywhere; }
 .help-coords svg { width: 20px; height: 20px; flex: none; color: var(--red-ink); }
-.help-map { margin-top: 12px; }
+.help-map { margin-top: 12px; height: 52vh; min-height: 300px; max-height: 560px; width: 100%; border-radius: 12px; overflow: hidden; isolation: isolate; }
 .help-steps { display: grid; gap: 10px; }
 .help-steps > .btn { justify-self: start; min-height: 44px; }
 .help-bad { font-size: 1.1rem; font-weight: 600; }
