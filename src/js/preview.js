@@ -1,7 +1,7 @@
 // Logic for the site (index.html; it was preview.html until #141): the portal design (issues #38, #42; rules in docs/DESIGN.md).
 // Location is read only after a tap, or when the person turned on auto location (CLAUDE.md rule 5, issue #105). The area search lives in data.js (issue #36).
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
-import { loadLocations, getPosition, nearestPlace, mapsLink } from './location.js';
+import { loadLocations, loadUpazilaCentres, nearestUpazilaCentre, getPosition, nearestPlace, mapsLink } from './location.js';
 import { createAutoLoc } from './autoloc.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS, hasPhone } from './reports.js';
@@ -32,7 +32,7 @@ const VISIBLE = 6;
 const $ = (id) => document.getElementById(id);
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
 let lang = store.get('sc-lang') || 'bn';
-let data = null, locations = null, current = null, areaIndex = [];
+let data = null, locations = null, upazilaCentres = [], current = null, areaIndex = [];
 let near = null;          // categories near the person (js/near.js), created by makeNear() at start-up
 let dakun = null;         // সেবা ডাকুন (js/dakun.js, R3), created by makeNear() too
 let provide = null;       // সেবা দিন (js/provide.js, R4): providers, and approvals and rates for an admin
@@ -755,7 +755,7 @@ $('noArea').addEventListener('change', () => {
 function msg(text) { $('locMsg').textContent = text; $('locMsg').hidden = !text; }
 function resolvePlace(pos) {
   const found = locations && nearestPlace(locations, pos);
-  if (!found) return { outside: true };
+  if (!found) return { outside: true, estimate: nearestUpazilaCentre(upazilaCentres, pos) };
   const place = { district: found.district, upazila: found.upazila, area: found.area };
   const doc = data.docs[found.district];
   const named = found.area && (doc.places || []).find((x) => norm(x.union_bn) === found.area.bn);
@@ -1088,8 +1088,24 @@ function renderHomeSos() {
 // বিপদ বার্তা (#134): situation, area, the area's police number, "call 999 first" and the help link.
 // The short English version (Bangla mode only) fits in fewer SMS.
 const smsLang = () => (sos.short && lang === 'bn' ? 'en' : lang);
+function centreEstimateText(estimate, l = lang) {
+  return fill(LANG[l].ui.bipod.nearCentre, {
+    u: l === 'bn' ? estimate.upazilaBn : estimate.upazila,
+    d: estimate.district,
+    km: estimate.distanceKm.toFixed(1),
+  });
+}
 function areaText(place, l) {
-  if (!place || place.outside) return '';
+  if (!place) return '';
+  if (place.outside) {
+    const estimate = place.estimate;
+    if (!estimate) return '';
+    return fill(LANG[l].ui.bipod.areaApprox, {
+      u: l === 'bn' ? estimate.upazilaBn : estimate.upazila,
+      d: estimate.district,
+      km: estimate.distanceKm.toFixed(1),
+    });
+  }
   const d = districtOf(place.district);
   // A Sadar upazila already names its district: "এলাকা: নোয়াখালী সদর", not "নোয়াখালী সদর, নোয়াখালী" (keeps the SMS in 3 parts).
   const up = l === 'bn' ? upazilaName(place.district, place.upazila) : place.upazila, dn = l === 'bn' ? d.bn : d.en;
@@ -1135,6 +1151,9 @@ function renderLoc() {
     const acc = sos.pos.accuracy ? digits(Math.round(sos.pos.accuracy)) : '';
     const place = `${placeTitle(sos.place)}, ${placeSub(sos.place)}`;
     line.textContent = acc ? fill(t().gotLocAcc, { place, m: acc }) : fill(t().gotLoc, { place });
+  } else if (sos.pos && sos.place?.estimate) {
+    line.classList.add('ok');
+    line.textContent = centreEstimateText(sos.place.estimate, lang);
   } else if (sos.pos) { line.classList.add('ok'); line.textContent = t().outsideLoc; }
   else { line.classList.add('bad'); line.textContent = `${sos.error === 'denied' ? t().sosDenied : t().sosNoLoc} ${t().noLocYet}`; }
 }
@@ -1276,7 +1295,16 @@ function sayText(place, pos, kind) {
   const b = t().bipod;
   if (!pos) return b.sayNoLoc;
   const lat = digits(pos.lat.toFixed(5)), lon = digits(pos.lon.toFixed(5));
-  if (!place || place.outside) return fill(kind === 'say' ? b.sayOutside : b.addrOutside, { lat, lon });
+  if (!place || place.outside) {
+    if (place?.estimate) {
+      const e = place.estimate;
+      return fill(kind === 'say' ? b.sayApprox : b.addrApprox, {
+        u: lang === 'bn' ? e.upazilaBn : e.upazila, d: e.district,
+        km: e.distanceKm.toFixed(1), lat, lon,
+      });
+    }
+    return fill(kind === 'say' ? b.sayOutside : b.addrOutside, { lat, lon });
+  }
   const d = districtOf(place.district);
   return fill(b[kind], { d: lang === 'bn' ? d.bn : d.en, u: upazilaName(place.district, place.upazila), lat, lon });
 }
@@ -1362,7 +1390,7 @@ function showHelp(arg) {
     return;
   }
   const pos = { lat: h.lat, lon: h.lon };
-  const place = data ? resolvePlace(pos) : { outside: true };   // no data: coordinates and 999 still show
+  const place = data ? resolvePlace(pos) : { outside: true, estimate: nearestUpazilaCentre(upazilaCentres, pos) };   // no contact data: estimate only, coordinates and 999 still show
   const n = minutesAgo(h.at);
   $('helpAge').textContent = n < 1 ? b.ageNow : n < 60 ? fill(b.age, { n: digits(n) }) : fill(b.ageHours, { h: digits(Math.floor(n / 60)) });
   $('helpAge').classList.toggle('old', n >= 60);
@@ -1371,7 +1399,9 @@ function showHelp(arg) {
   $('helpFollowed').textContent = b.followedWarn;
   $('helpSit').hidden = !h.situation;
   $('helpSit').textContent = h.situation ? fill(b.sitLine, { s: t().sits[h.situation][0] }) : '';
-  $('helpPlace').textContent = place.outside ? b.outsideData : `${placeTitle(place)}, ${placeSub(place)}`;
+  $('helpPlace').textContent = place.outside
+    ? (place.estimate ? centreEstimateText(place.estimate, lang) : b.outsideData)
+    : `${placeTitle(place)}, ${placeSub(place)}`;
   $('helpCoords').replaceChildren(svg(ICONS.pin), el('span', null, fill(b.coords, { lat: digits(h.lat.toFixed(5)), lon: digits(h.lon.toFixed(5)) })));
   const map = $('helpMap'); map.href = mapsLink(pos); map.textContent = `${b.map} ↗`;
   $('helpReadTitle').textContent = b.readTitle; $('helpRead').textContent = sayText(place, pos, 'addr');
@@ -1940,7 +1970,11 @@ window.addEventListener('hashchange', () => route());
 const isPlace = () => ['area', 'help'].includes(readHash()[0]) && readHash().length > 1;   // these wait for the data
 if (!isPlace()) route();
 try {
-  [data, locations] = await Promise.all([loadAll('data/'), loadLocations('data/').catch(() => null)]);
+  [data, locations, upazilaCentres] = await Promise.all([
+    loadAll('data/'),
+    loadLocations('data/').catch(() => null),
+    loadUpazilaCentres('data/').catch(() => []),
+  ]);
   areaIndex = buildAreaIndex(data);
   renderRecent(); renderStats(); renderPlaces(); renderIconRow(); renderGuides(); renderMyArea();
   if ($('main').dataset.page === 'home') renderHome(); else syncArea();   // the pilot numbers need the data
