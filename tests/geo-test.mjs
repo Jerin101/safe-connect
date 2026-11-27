@@ -3,7 +3,7 @@
 // Run: node --test tests/geo-test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { locate, geoCode } from '../src/js/geo.js';
+import { locate, locateBest, geoCode } from '../src/js/geo.js';
 
 const setNav = (v) => Object.defineProperty(globalThis, 'navigator', { value: v, configurable: true, writable: true });
 // A fake navigator.geolocation: `script` lists what each call does, in order: 'ok' or an error code (1, 2, 3).
@@ -70,4 +70,44 @@ test('a browser without location support', async () => {
 
 test('geoCode names', () => {
   assert.deepEqual([1, 2, 3].map((c) => geoCode({ code: c })), ['denied', 'unavailable', 'timeout']);
+});
+
+
+const rawFix = (accuracy, latitude = 22.9, longitude = 91.1) => ({
+  coords: { latitude, longitude, accuracy }, timestamp: 123456
+});
+function fakeWatch(onStart) {
+  const calls = [];
+  const cleared = [];
+  setNav({ geolocation: {
+    watchPosition(ok, bad, options) {
+      calls.push(options);
+      onStart({ ok, bad });
+      return 17;
+    },
+    clearWatch(id) { cleared.push(id); }
+  } });
+  return { calls, cleared };
+}
+const bestRun = (options) => new Promise((resolve, reject) => locateBest(resolve, reject, options));
+
+test('SOS best-fix watch requests high accuracy and stops as soon as it gets the target', async () => {
+  const watch = fakeWatch(({ ok }) => { ok(rawFix(500)); ok(rawFix(110)); ok(rawFix(35)); });
+  const position = await bestRun({ timeout: 1000, targetAccuracy: 50, maximumAge: 0 });
+  assert.equal(position.coords.accuracy, 35);
+  assert.equal(watch.calls[0].enableHighAccuracy, true);
+  assert.equal(watch.calls[0].maximumAge, 0);
+  assert.deepEqual(watch.cleared, [17]);
+});
+
+test('SOS best-fix watch returns the best coarse estimate at timeout, not the first one', async () => {
+  const watch = fakeWatch(({ ok }) => { ok(rawFix(500)); ok(rawFix(180)); ok(rawFix(260)); });
+  const position = await bestRun({ timeout: 15, targetAccuracy: 50, maximumAge: 0 });
+  assert.equal(position.coords.accuracy, 180);
+  assert.deepEqual(watch.cleared, [17]);
+});
+
+test('SOS best-fix watch never reuses a coarse point after permission is denied', async () => {
+  fakeWatch(({ ok, bad }) => { ok(rawFix(500)); bad({ code: 1 }); });
+  await assert.rejects(bestRun({ timeout: 1000, targetAccuracy: 50 }), (error) => error.code === 1);
 });
