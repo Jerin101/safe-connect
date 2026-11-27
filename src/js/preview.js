@@ -1,7 +1,7 @@
 // Logic for the site (index.html; it was preview.html until #141): the portal design (issues #38, #42; rules in docs/DESIGN.md).
 // Location is read only after a tap, or when the person turned on auto location (CLAUDE.md rule 5, issue #105). The area search lives in data.js (issue #36).
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
-import { loadLocations, loadUpazilaCentres, nearestUpazilaCentre, getPosition, nearestPlace, mapsLink } from './location.js';
+import { loadLocations, loadUpazilaCentres, nearestUpazilaCentre, getPosition, nearestPlace } from './location.js';
 import { createAutoLoc } from './autoloc.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS, hasPhone } from './reports.js';
@@ -34,6 +34,7 @@ const store = { get(k) { try { return localStorage.getItem(k); } catch { return 
 let lang = store.get('sc-lang') || 'bn';
 let data = null, locations = null, upazilaCentres = [], current = null, areaIndex = [];
 let near = null;          // categories near the person (js/near.js), created by makeNear() at start-up
+let helpMapInstance = null, helpMapPosition = null, areaMapPosition = null;
 let dakun = null;         // সেবা ডাকুন (js/dakun.js, R3), created by makeNear() too
 let provide = null;       // সেবা দিন (js/provide.js, R4): providers, and approvals and rates for an admin
 let emergency = null;     // জরুরি সাহায্য additions (js/emergency.js, R5)
@@ -386,6 +387,8 @@ function firstRows(p, groups) {
 }
 
 function renderArea() {
+  closeInlineMaps();
+  helpMapPosition = null; areaMapPosition = null;
   const p = current.place;
   const groups = p.outside ? null : areaContacts(data, p);
   $('youAreIn').textContent = p.outside ? t().outsideTitle : t().youAreIn;
@@ -402,11 +405,16 @@ function renderArea() {
   // share
   $('share').hidden = !current.pos;
   if (current.pos) {
-    const link = mapsLink(current.pos);
+    const link = helpLink(current.pos, current.pos.at || Date.now());
     const msg = fill(t().shareMsg, { link });
     const wa = el('a', 'btn', t().wa); wa.href = `https://wa.me/?text=${encodeURIComponent(msg)}`; wa.target = '_blank'; wa.rel = 'noopener';
     const sms = el('a', 'btn', t().smsShort); sms.href = `sms:?&body=${encodeURIComponent(msg)}`;
-    const map = el('a', 'btn', t().map); map.href = link; map.target = '_blank'; map.rel = 'noopener';
+    const map = el('button', 'btn', t().bipod.map); map.type = 'button'; map.id = 'shareMap';
+    map.dataset.label = t().bipod.map; map.dataset.hideLabel = t().bipod.hideMap;
+    map.setAttribute('aria-expanded', 'false'); map.setAttribute('aria-controls', 'shareMapView');
+    areaMapPosition = current.pos;
+    map.addEventListener('click', () => toggleInlineMap(map, $('shareMapView'), areaMapPosition));
+    $('shareMapView').setAttribute('aria-label', t().bipod.mapLabel);
     const copy = el('button', 'btn', t().copy); copy.type = 'button';
     copy.addEventListener('click', () => navigator.clipboard?.writeText(msg).then(() => { copy.textContent = t().copied; }, () => {}));
     const fam = el('button', 'btn violet', t().sendFamily); fam.type = 'button';
@@ -446,8 +454,54 @@ function renderArea() {
 }
 
 /* ---------- views ---------- */
+// Both location-result and family SOS maps use the same in-page GPS point.
+function closeInlineMaps() {
+  if (helpMapInstance) { helpMapInstance.remove(); helpMapInstance = null; }
+  for (const [buttonId, boxId] of [['helpMap', 'helpMapView'], ['shareMap', 'shareMapView']]) {
+    const box = $(boxId);
+    if (box) { box.hidden = true; box.replaceChildren(); }
+    const button = $(buttonId);
+    if (button) {
+      button.disabled = false;
+      button.setAttribute('aria-expanded', 'false');
+      button.textContent = button.dataset.label || t().bipod.map;
+    }
+  }
+}
+async function toggleInlineMap(button, box, pos) {
+  if (!box.hidden) { closeInlineMaps(); return; }
+  closeInlineMaps();
+  if (!pos) return;
+  box.hidden = false;
+  box.replaceChildren(el('p', 'note', t().bipod.mapLoading));
+  button.disabled = true;
+  button.textContent = button.dataset.hideLabel || t().bipod.hideMap;
+  button.setAttribute('aria-expanded', 'true');
+  try {
+    if (!navigator.onLine) { box.replaceChildren(el('p', 'note', t().live.mapOffline)); return; }
+    const L = await near.loadLeaflet();
+    if (box.hidden || box.closest('.page')?.hidden) return;
+    box.replaceChildren();
+    const map = L.map(box, { zoomControl: true, tap: true }).setView([pos.lat, pos.lon], 16);
+    helpMapInstance = map;
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
+    const accuracy = Number(pos.accuracy);
+    if (Number.isFinite(accuracy) && accuracy > 0) {
+      const ring = L.circle([pos.lat, pos.lon], { radius: accuracy, weight: 2, fillOpacity: 0.12 }).addTo(map);
+      map.fitBounds(ring.getBounds(), { padding: [24, 24], maxZoom: 17 });
+    }
+    const pin = el('span', 'mk-me');
+    L.marker([pos.lat, pos.lon], { icon: L.divIcon({ className: 'mk-wrap', html: pin, iconSize: [22, 22], iconAnchor: [11, 11] }), title: t().bipod.mapPin })
+      .addTo(map).bindTooltip(el('span', null, t().bipod.mapPin), { permanent: true, direction: 'top', className: 'mk-tip', offset: [0, -12] });
+    requestAnimationFrame(() => { if (helpMapInstance === map) map.invalidateSize(); });
+  } catch {
+    if (!box.hidden && !box.closest('.page')?.hidden) box.replaceChildren(el('p', 'note', t().live.mapFailed));
+  } finally { button.disabled = false; }
+}
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see index.html).
 function showView(name) {
+  closeInlineMaps();
+  helpMapPosition = null; areaMapPosition = null;
   for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat', 'dakun', 'provide', 'live']) $(view).hidden = name !== view;
   if (name !== 'cat') near?.close();   // the category map is closed when another page opens
   if (name !== 'dakun') dakun?.close();
@@ -783,7 +837,7 @@ function fillDemo(box, textEl, chipsEl, onPick) {
   textEl.textContent = t().demo;
   chipsEl.replaceChildren(...demoPicks().map(([p, name]) => {
     const b = el('button', 'chip', t().demoPlaces[name]); b.type = 'button';
-    b.addEventListener('click', () => onPick({ lat: p.lat + 0.004, lon: p.lon - 0.003, accuracy: 20 }));
+    b.addEventListener('click', () => onPick({ lat: p.lat + 0.004, lon: p.lon - 0.003, accuracy: 20, demo: true }));
     return b;
   }));
   box.hidden = false;
@@ -1120,13 +1174,13 @@ function policeOf(place) {
 function sosMessage() {
   const s = LANG[smsLang()].ui;
   if (sos.safe) return s.bipod.safeMsg;
-  const place = sos.place && !sos.place.outside ? sos.place : null;
+  const place = sos.pos?.demo ? null : (sos.place && !sos.place.outside ? sos.place : null);
   const police = policeOf(place);
   const texts = { ...s.bipod.sms, noLoc: s.noLoc };
   if (police && !police.thana) texts.police = texts.policeDistrict;   // "পুলিশ:" unless it is the thana's OC
   // UC-08 3.1: no location → the SMS still says the chosen area
   return buildSms({ texts, situation: s.sits[sos.situation][1], area: areaText(place, smsLang()) || (sos.pos ? '' : sosAreaName), police: police?.phone || '',
-    link: sos.pos ? helpLink(sos.pos, sos.at, sos.situation) : '' });
+    link: sos.pos && !sos.pos.demo ? helpLink(sos.pos, sos.at, sos.situation) : '' });
 }
 function refreshMessage() { if (!sos.edited) $('sosMsg').value = sosMessage(); renderSend(); }
 
@@ -1144,7 +1198,8 @@ function renderLoc() {
   const btn = $('sosLocBtn');
   btn.textContent = t().locBtn;
   btn.hidden = !(sos.state === 'idle' || sos.state === 'failed');
-  if (sos.state === 'idle') line.textContent = t().locIdle;
+  if (sos.pos?.demo) { line.classList.add('bad'); line.textContent = t().bipod.demoLocOnly; }
+  else if (sos.state === 'idle') line.textContent = t().locIdle;
   else if (sos.state === 'getting') line.textContent = t().gettingLoc;
   else if (sos.pos && sos.place && !sos.place.outside) {
     line.classList.add('ok');
@@ -1159,7 +1214,7 @@ function renderLoc() {
 }
 function setSosPos(pos, at = Date.now()) {
   sos.pos = pos; sos.at = at; sos.place = resolvePlace(pos); sos.state = 'done';
-  lastFix = { pos, at };
+  if (!pos.demo) lastFix = { pos, at };
   $('sosDemo').hidden = true;
   renderLoc(); refreshMessage();
 }
@@ -1221,7 +1276,7 @@ function renderSend() {
     list.append(el('p', 'msg plain', t().noPeople));
     $('peopleBox').open = true;
   }
-  const map = sos.pos ? mapsLink(sos.pos) : null;
+  const map = sos.pos && !sos.pos.demo ? helpLink(sos.pos, sos.at, sos.situation) : null;
   const msgr = isPhone();
   for (const p of people) {
     const row = el('div', 'contact');
@@ -1294,19 +1349,26 @@ function renderBipod() {
 function sayText(place, pos, kind) {
   const b = t().bipod;
   if (!pos) return b.sayNoLoc;
-  const lat = digits(pos.lat.toFixed(5)), lon = digits(pos.lon.toFixed(5));
+  if (pos.demo) return b.demoLocOnly;
+  const lat = digits(pos.lat.toFixed(6)), lon = digits(pos.lon.toFixed(6));
+  let address;
   if (!place || place.outside) {
     if (place?.estimate) {
       const e = place.estimate;
-      return fill(kind === 'say' ? b.sayApprox : b.addrApprox, {
+      address = fill(kind === 'say' ? b.sayApprox : b.addrApprox, {
         u: lang === 'bn' ? e.upazilaBn : e.upazila, d: e.district,
         km: e.distanceKm.toFixed(1), lat, lon,
       });
-    }
-    return fill(kind === 'say' ? b.sayOutside : b.addrOutside, { lat, lon });
+    } else address = fill(kind === 'say' ? b.sayOutside : b.addrOutside, { lat, lon });
+  } else {
+    const d = districtOf(place.district);
+    address = fill(b[kind], { d: lang === 'bn' ? d.bn : d.en, u: upazilaName(place.district, place.upazila), lat, lon });
   }
-  const d = districtOf(place.district);
-  return fill(b[kind], { d: lang === 'bn' ? d.bn : d.en, u: upazilaName(place.district, place.upazila), lat, lon });
+  const metres = Number(pos.accuracy);
+  const accuracy = Number.isFinite(metres) && metres > 0
+    ? fill(b.accuracyText, { m: digits(Math.round(metres)) })
+    : b.accuracyUnknown;
+  return `${address} ${accuracy}`;
 }
 // After a tap: when the messages app was last opened (we never know whether the SMS was sent).
 function markOpened() { sos.openedAt = Date.now(); renderOpened(); }
@@ -1377,6 +1439,8 @@ $('smsEn').addEventListener('change', () => { sos.short = $('smsEn').checked; so
 /* ---------- help page for the family (#/help/..., #134): read from the address only; nothing is stored or sent ---------- */
 function showHelp(arg) {
   const b = t().bipod, h = parseHelp(arg);
+  closeInlineMaps();
+  helpMapPosition = null;
   showView('help');
   $('helpBack').textContent = t().back; $('helpPageTitle').textContent = b.helpTitle;
   $('helpPrivacy').textContent = b.helpPrivacy;
@@ -1389,7 +1453,7 @@ function showHelp(arg) {
     $('helpBadLinks').replaceChildren(call999(), more);
     return;
   }
-  const pos = { lat: h.lat, lon: h.lon };
+  const pos = { lat: h.lat, lon: h.lon, accuracy: h.accuracy };
   const place = data ? resolvePlace(pos) : { outside: true, estimate: nearestUpazilaCentre(upazilaCentres, pos) };   // no contact data: estimate only, coordinates and 999 still show
   const n = minutesAgo(h.at);
   $('helpAge').textContent = n < 1 ? b.ageNow : n < 60 ? fill(b.age, { n: digits(n) }) : fill(b.ageHours, { h: digits(Math.floor(n / 60)) });
@@ -1402,8 +1466,14 @@ function showHelp(arg) {
   $('helpPlace').textContent = place.outside
     ? (place.estimate ? centreEstimateText(place.estimate, lang) : b.outsideData)
     : `${placeTitle(place)}, ${placeSub(place)}`;
-  $('helpCoords').replaceChildren(svg(ICONS.pin), el('span', null, fill(b.coords, { lat: digits(h.lat.toFixed(5)), lon: digits(h.lon.toFixed(5)) })));
-  const map = $('helpMap'); map.href = mapsLink(pos); map.textContent = `${b.map} ↗`;
+  $('helpCoords').replaceChildren(svg(ICONS.pin), el('span', null, fill(b.coords, { lat: digits(h.lat.toFixed(6)), lon: digits(h.lon.toFixed(6)) })));
+  $('helpAccuracy').textContent = Number.isFinite(h.accuracy) && h.accuracy > 0
+    ? fill(b.accuracyText, { m: digits(h.accuracy) }) : b.accuracyUnknown;
+  helpMapPosition = pos;
+  const map = $('helpMap'); map.textContent = b.map; map.disabled = false;
+  map.dataset.label = b.map; map.dataset.hideLabel = b.hideMap;
+  map.setAttribute('aria-expanded', 'false');
+  const mapBox = $('helpMapView'); mapBox.hidden = true; mapBox.replaceChildren(); mapBox.setAttribute('aria-label', b.mapLabel);
   $('helpReadTitle').textContent = b.readTitle; $('helpRead').textContent = sayText(place, pos, 'addr');
   $('helpStepsTitle').textContent = b.steps;
   const groups = place.outside ? [] : areaContacts(data, place);
@@ -1420,6 +1490,7 @@ function showHelp(arg) {
   }));
   if (place.outside) { const more = el('a', 'btn', b.national); more.href = '#/numbers'; $('helpSteps').append(more); }
 }
+$('helpMap').addEventListener('click', () => toggleInlineMap($('helpMap'), $('helpMapView'), helpMapPosition));
 $('helpBack').addEventListener('click', goHome);
 
 /* ---------- আগে থেকে প্রস্তুতি (#/prepare, #161): official help pages only, never a guessed menu ---------- */

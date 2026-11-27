@@ -246,6 +246,7 @@
       <h2 id="shareTitle"></h2>
       <p id="shareText"></p>
       <div class="chips" id="shareBtns"></div>
+      <div class="near-map help-map" id="shareMapView" role="region" hidden></div>
     </section>
     <p class="msg plain" id="outside" hidden></p>
     <p class="note" id="placeNote" hidden></p>
@@ -353,7 +354,9 @@
         <p class="help-sit" id="helpSit"></p>
         <p class="help-place" id="helpPlace"></p>
         <p class="help-coords" id="helpCoords"></p>
-        <a class="btn violet" id="helpMap" target="_blank" rel="noopener"></a>
+        <p class="help-coords small muted" id="helpAccuracy"></p>
+        <button class="btn violet" id="helpMap" type="button" aria-expanded="false" aria-controls="helpMapView"></button>
+        <div class="near-map help-map" id="helpMapView" role="region" hidden></div>
       </section>
       <section class="panel glass say999" aria-labelledby="helpReadTitle">
         <h2 id="helpReadTitle"></h2>

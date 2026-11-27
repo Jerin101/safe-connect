@@ -26,5 +26,9 @@ jobs:
         run: node --test tests/locations/upazila-shapes-test.mjs
       - name: Nationwide approximate location test
         run: node --test tests/location-estimate-test.mjs
+      - name: SOS location link and accuracy tests
+        run: node --test tests/bipod-test.mjs
+      - name: Check main browser script syntax
+        run: node --check src/js/preview.js
       - name: Colour contrast and icons (A1)
         run: node --test tests/design/contrast-test.mjs
