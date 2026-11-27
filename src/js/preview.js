@@ -1444,6 +1444,10 @@ function showHelp(arg) {
   showView('help');
   $('helpBack').textContent = t().back; $('helpPageTitle').textContent = b.helpTitle;
   $('helpPrivacy').textContent = b.helpPrivacy;
+  $('helpLimitationsTitle').textContent = b.limitationsTitle;
+  $('helpLimitSnapshot').textContent = b.limitSnapshot;
+  $('helpLimitAccuracy').textContent = b.limitAccuracy;
+  $('helpLimitPrivacy').textContent = b.limitPrivacy;
   $('helpOk').hidden = !h.ok; $('helpBad').hidden = h.ok;
   const nat999 = data?.national.find((n) => n.id === 'national-emergency-999');
   const call999 = () => (nat999 ? firstRow(b.call999, nat999, true) : callLink('999', b.call999, true));
