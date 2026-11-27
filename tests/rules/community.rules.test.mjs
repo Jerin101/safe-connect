@@ -75,6 +75,18 @@ describe('place status ("এখন খোলা? তেল আছে?")', () => 
     const st = await getDoc(doc(db(null), 'placeStatus', 'osm-n200'));
     assert.equal(st.data().prev, 'open');
   });
+  test('"prev" is optional: a different answer within 6 hours without it is still accepted (older phones never send it)', async () => {
+    await vote(db(RINA), RINA, 'osm-n210', 'open', 1);
+    await assertSucceeds(vote(db(KARIM), KARIM, 'osm-n210', 'closed', 1));
+    const st = await getDoc(doc(db(null), 'placeStatus', 'osm-n210'));
+    assert.equal(st.data().status, 'closed');
+    assert.equal(st.data().prev, undefined);
+  });
+  test('"prev" is refused when the earlier answer is older than 6 hours, but the plain answer is accepted', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => { await setDoc(doc(ctx.firestore(), 'placeStatus', 'osm-n211'), { status: 'open', n: 1, at: new Date(Date.now() - 7 * 3600000) }); });
+    await assertFails(vote(db(KARIM), KARIM, 'osm-n211', 'closed', 1, 'open'));   // too old for a conflict flag
+    await assertSucceeds(vote(db(KARIM), KARIM, 'osm-n211', 'closed', 1));        // the answer itself is fine, so the failure above was about "prev"
+  });
   test('"prev" is refused on a first answer, and with extra fields', async () => {
     await assertFails(vote(db(RINA), RINA, 'osm-n201', 'open', 1, 'closed'));
     const f = db(KARIM), b = writeBatch(f);

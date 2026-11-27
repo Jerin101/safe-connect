@@ -197,7 +197,7 @@ service cloud.firestore {
         && incoming().keys().hasOnly(['status', 'n', 'at', 'prev'])
         && incoming().status in placeValues()
         && incoming().at == request.time
-        // "prev" (conflict flag): only when this answer differs from the one before it and that one is under 6 hours old;
+        // "prev" (conflict flag): only when this answer differs from the one before it and that one is within 6 hours (request.time <= its time + 6 h);
         // it must be exactly that earlier answer. Without a disagreement, "prev" is not allowed.
         && (!('prev' in incoming()) || (resource != null
             && resource.data.get('status', '') != incoming().status
