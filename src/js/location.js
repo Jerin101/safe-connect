@@ -15,6 +15,23 @@ export async function loadLocations(base = 'data/') {
   return res.json();
 }
 
+// Nationwide centre points are a rough reference, not administrative boundaries.
+// The app already precaches this small file for offline use.
+const centreLoads = new Map();
+export function loadUpazilaCentres(base = 'data/') {
+  if (!centreLoads.has(base)) {
+    const request = fetch(`${base}upazila_centres.json`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`Could not load upazila_centres.json (${res.status})`);
+        const data = await res.json();
+        return Array.isArray(data.centres) ? data.centres : [];
+      })
+      .catch((err) => { centreLoads.delete(base); throw err; });
+    centreLoads.set(base, request);
+  }
+  return centreLoads.get(base);
+}
+
 // 'granted' | 'prompt' | 'denied' | 'unknown' – lets the app locate automatically on open
 // when the person already allowed it before, without showing a prompt.
 export async function permissionState() {
@@ -46,6 +63,31 @@ export function distanceKm(a, b) {
   const dLon = rad(b.lon - a.lon);
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
   return 6371 * 2 * Math.asin(Math.sqrt(h));
+}
+// The 471 mapped centres cover most, but not all, upazilas. This deliberately says
+// "near the centre" and never claims the GPS point is inside that upazila.
+// Keep the same 60 km guard used by the nationwide area picker in near.js.
+export function nearestUpazilaCentre(centres, pos, maxDistanceKm = 60) {
+  const lat = Number(pos?.lat), lon = Number(pos?.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)
+    || lat < 20.5 || lat > 26.7 || lon < 88 || lon > 92.7
+    || !Array.isArray(centres) || !centres.length) return null;
+
+  let best = null, bestKm = Infinity;
+  for (const centre of centres) {
+    const cLat = Number(centre?.lat), cLon = Number(centre?.lon);
+    if (!Number.isFinite(cLat) || !Number.isFinite(cLon)
+      || !centre?.district || !centre?.upazila_en) continue;
+    const km = distanceKm({ lat, lon }, { lat: cLat, lon: cLon });
+    if (km < bestKm) { best = centre; bestKm = km; }
+  }
+  if (!best || bestKm > maxDistanceKm) return null;
+  return {
+    district: best.district,
+    upazila: best.upazila_en,
+    upazilaBn: best.upazila_bn || best.upazila_en,
+    distanceKm: bestKm,
+  };
 }
 
 const districtKey = (name) => (DISTRICTS.find((d) => d.en === name) || {}).key;
