@@ -409,7 +409,7 @@ function renderArea() {
     const msg = fill(t().shareMsg, { link });
     const wa = el('a', 'btn', t().wa); wa.href = `https://wa.me/?text=${encodeURIComponent(msg)}`; wa.target = '_blank'; wa.rel = 'noopener';
     const sms = el('a', 'btn', t().smsShort); sms.href = `sms:?&body=${encodeURIComponent(msg)}`;
-    const map = el('button', 'btn', t().bipod.map); map.type = 'button';
+    const map = el('button', 'btn', t().bipod.map); map.type = 'button'; map.id = 'shareMap';
     map.dataset.label = t().bipod.map; map.dataset.hideLabel = t().bipod.hideMap;
     map.setAttribute('aria-expanded', 'false'); map.setAttribute('aria-controls', 'shareMapView');
     areaMapPosition = current.pos;
@@ -1437,7 +1437,7 @@ $('smsEn').addEventListener('change', () => { sos.short = $('smsEn').checked; so
 /* ---------- help page for the family (#/help/..., #134): read from the address only; nothing is stored or sent ---------- */
 function showHelp(arg) {
   const b = t().bipod, h = parseHelp(arg);
-  closeHelpMap();
+  closeInlineMaps();
   helpMapPosition = null;
   showView('help');
   $('helpBack').textContent = t().back; $('helpPageTitle').textContent = b.helpTitle;
