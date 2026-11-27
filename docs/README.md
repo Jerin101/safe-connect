@@ -12,6 +12,8 @@
 | `DESIGN.md` | Design guide (colours, buttons, text) |
 | `FIREBASE_SETUP.md` | Firebase setup, step by step |
 | `DATA_GAPS.md`, `DATA_REPORT.md`, `COVERAGE.md`, `SOURCE_CONFLICTS.md` | Data quality: gaps, report, coverage, numbers to review |
+| `PROJECT_COMPLETION_STATUS.md` | Verified project state, unfinished work, file ownership and the A–F workstream plan |
+| `workstreams/` | One instruction file per workstream (B to F) and the shared rules |
 | `plans/` | Smaller plans (demo to real site, danger message, search, coverage fix, nationwide) |
 | `reports/` | OpenStreetMap coverage reports |
 | `security/` | Security audit |
