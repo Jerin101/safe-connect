@@ -214,3 +214,11 @@ body > main { flex: 1 0 auto; }
   .areachip span, .areachip .chip-short { min-width: 0; max-width: 100%; }
 }
 .vfy .tag { margin-inline-end: 4px; }
+
+/* Phones: "Aa" opens a small Display menu (night / day and bigger text) because the night button has no room in the header. */
+.top-actions { position: relative; }
+.disp-menu { position: absolute; z-index: 30; inset-block-start: calc(100% + 8px); inset-inline-end: 0; display: grid; gap: 6px; min-width: 210px; padding: 8px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.disp-menu[hidden] { display: none; }
+.disp-menu .btn { justify-content: flex-start; }
+.disp-menu .btn[aria-pressed="true"]::after { content: "¹3"; margin-inline-start: auto; font-weight: 700; }
+@media (min-width: 431px) { .disp-menu { display: none; } }

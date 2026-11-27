@@ -530,7 +530,7 @@
       "navLabel": "Main menu",
       "langLabel": "Change language: English / বাংলা",
       "themeLabel": "Change colours: night / day",
-      "easyLabel": "Easy mode: bigger text and buttons, stronger contrast"
+      "easyLabel": "Easy mode: bigger text and buttons, stronger contrast", "displayMenu": "Display", "night": "Night mode", "easy": "Bigger text and buttons"
     },
     "nav": {
       "home": "Home",

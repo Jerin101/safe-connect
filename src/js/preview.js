@@ -1585,6 +1585,7 @@ function renderHead() {
   $('langBtn').setAttribute('aria-label', h.langLabel);
   $('themeBtn').setAttribute('aria-label', h.themeLabel);
   $('easyBtn').setAttribute('aria-label', h.easyLabel);
+  $('dispMenu').setAttribute('aria-label', h.displayMenu); $('dispTheme').textContent = h.night; $('dispEasy').textContent = h.easy; syncDisplay();
   $('h999').setAttribute('aria-label', t().call999);
   $('ctaSend').textContent = h.cta;
   $('hFinderText').textContent = h.search;
@@ -1890,6 +1891,7 @@ function toggleTheme() {
   const dark = root.dataset.theme === 'dark';   // light unless night was picked (UI refresh)
   root.dataset.theme = dark ? 'light' : 'dark';
   store.set('sc-theme', root.dataset.theme);   // remembered on this phone (SRS FR02, NFR06)
+  syncDisplay();
 }
 $('themeBtn').addEventListener('click', toggleTheme);
 // Easy mode (plan section 6, accessibility): bigger text and buttons and stronger contrast; kept on this phone only.
@@ -1897,8 +1899,21 @@ function setEasy(on) {
   document.documentElement.dataset.easy = on ? '1' : '0';
   $('easyBtn').setAttribute('aria-pressed', String(on));
   store.set('sc-easy', on ? '1' : '0');
+  syncDisplay();
 }
-$('easyBtn').addEventListener('click', () => setEasy(document.documentElement.dataset.easy !== '1'));
+// Phones (max 430 px): the night / day button has no room in the header, so "Aa" opens a small Display menu with both switches.
+const phoneHeader = matchMedia('(max-width: 430px)');
+function syncDisplay() {
+  $('dispTheme').setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark'));
+  $('dispEasy').setAttribute('aria-pressed', String(document.documentElement.dataset.easy === '1'));
+}
+function showDisplayMenu(on) { $('dispMenu').hidden = !on; $('easyBtn').setAttribute('aria-expanded', String(on)); }
+$('easyBtn').addEventListener('click', () => { if (phoneHeader.matches) showDisplayMenu($('dispMenu').hidden); else setEasy(document.documentElement.dataset.easy !== '1'); });
+$('dispTheme').addEventListener('click', toggleTheme);
+$('dispEasy').addEventListener('click', () => setEasy(document.documentElement.dataset.easy !== '1'));
+document.addEventListener('click', (e) => { if (!$('dispMenu').hidden && !e.target.closest('#dispMenu, #easyBtn')) showDisplayMenu(false); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('dispMenu').hidden) { showDisplayMenu(false); $('easyBtn').focus(); } });
+phoneHeader.addEventListener('change', () => showDisplayMenu(false));
 setEasy(store.get('sc-easy') === '1');
 { const th = store.get('sc-theme'); if (th === 'dark' || th === 'light') document.documentElement.dataset.theme = th; }
 
