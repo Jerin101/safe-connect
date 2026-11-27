@@ -12,6 +12,36 @@ const AT = Date.UTC(2026, 10, 2, 13, 0, 0);
 const NOW = AT + 5 * 60000;
 const SEC = AT / 1000;
 
+test('SOS page keeps coarse location opt-in and explains how to improve it in both languages', () => {
+  for (const language of ['bn', 'en']) {
+    const copy = LANG[language];
+    for (const key of ['locTryAgain', 'locUseApprox', 'locRough', 'locRoughUnknown']) {
+      assert.ok(typeof copy[key] === 'string' && copy[key].trim(), language + ' missing ' + key);
+    }
+  }
+  const html = readFileSync('src/index.html', 'utf8');
+  const script = readFileSync('src/js/preview.js', 'utf8');
+  assert.ok(html.includes('id="sosUseApproxBtn"'), 'missing explicit approximate-location button');
+  assert.ok(script.includes('getSosPosition()'), 'SOS should use the best-fix location watcher');
+  assert.ok(script.includes('SOS_TARGET_ACCURACY_M'), 'SOS should apply the stated accuracy threshold');
+  assert.ok(script.includes("sosUseApproxBtn"), 'SOS should wire the explicit approximate-location choice');
+});
+
+test('family SOS page explains snapshot, location-quality and link-privacy limits in both languages', () => {
+  for (const language of ['bn', 'en']) {
+    const copy = LANG[language].bipod;
+    for (const key of ['limitationsTitle', 'limitSnapshot', 'limitAccuracy', 'limitPrivacy']) {
+      assert.ok(typeof copy[key] === 'string' && copy[key].trim(), language + ' missing ' + key);
+    }
+  }
+  const html = readFileSync('src/index.html', 'utf8');
+  const script = readFileSync('src/js/preview.js', 'utf8');
+  for (const id of ['helpLimitationsTitle', 'helpLimitSnapshot', 'helpLimitAccuracy', 'helpLimitPrivacy']) {
+    assert.ok(html.includes('id="' + id + '"'), 'missing #' + id + ' in family SOS page');
+    assert.ok(script.includes("$('" + id + "')"), 'missing #' + id + ' script binding');
+  }
+});
+
 test('help path: keeps the GPS point, time, optional situation and reported accuracy', () => {
   assert.equal(helpPath(HATIYA, AT, 'followed'), `help/22.361235,91.129877,${SEC},followed,a24`);
   assert.equal(helpPath(HATIYA, AT, 'nonsense'), `help/22.361235,91.129877,${SEC},a24`);

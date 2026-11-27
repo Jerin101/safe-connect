@@ -297,6 +297,7 @@
       <h2 id="locTitle"></h2>
       <p class="locline" id="sosLoc" role="status"></p>
       <button class="btn violet locbtn" id="sosLocBtn" type="button" hidden></button>
+      <button class="btn loc-approx" id="sosUseApproxBtn" type="button" hidden></button>
       <div class="demo" id="sosDemo" hidden><p id="sosDemoText"></p><div class="chips" id="sosDemoChips"></div></div>
     </section>
     <section class="panel glass say999" aria-labelledby="say999Title">
@@ -357,6 +358,14 @@
         <p class="help-coords small muted" id="helpAccuracy"></p>
         <button class="btn violet" id="helpMap" type="button" aria-expanded="false" aria-controls="helpMapView"></button>
         <div class="near-map help-map" id="helpMapView" role="region" hidden></div>
+      </section>
+      <section class="panel glass help-limits" aria-labelledby="helpLimitationsTitle" role="note">
+        <h2 id="helpLimitationsTitle"></h2>
+        <ul class="help-limit-list">
+          <li id="helpLimitSnapshot"></li>
+          <li id="helpLimitAccuracy"></li>
+          <li id="helpLimitPrivacy"></li>
+        </ul>
       </section>
       <section class="panel glass say999" aria-labelledby="helpReadTitle">
         <h2 id="helpReadTitle"></h2>

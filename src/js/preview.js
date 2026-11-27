@@ -1,7 +1,7 @@
 // Logic for the site (index.html; it was preview.html until #141): the portal design (issues #38, #42; rules in docs/DESIGN.md).
 // Location is read only after a tap, or when the person turned on auto location (CLAUDE.md rule 5, issue #105). The area search lives in data.js (issue #36).
 import { DISTRICTS, loadAll, upazilas, localAreas, areaContacts, norm, areaIndex as buildAreaIndex, findAreas } from './data.js';
-import { loadLocations, loadUpazilaCentres, nearestUpazilaCentre, getPosition, nearestPlace } from './location.js';
+import { loadLocations, loadUpazilaCentres, nearestUpazilaCentre, getPosition, getSosPosition, SOS_TARGET_ACCURACY_M, nearestPlace } from './location.js';
 import { createAutoLoc } from './autoloc.js';
 import { initAuth, ICON as ROLE_ICON } from './auth.js';
 import { REPORT_DISTRICTS, hasPhone } from './reports.js';
@@ -1192,16 +1192,31 @@ function renderSituations() {
     return b;
   }));
 }
+function locationAccuracy(pos) {
+  const accuracy = Number(pos?.accuracy);
+  return Number.isFinite(accuracy) && accuracy > 0 ? accuracy : Infinity;
+}
+function isSosAccurate(pos) { return locationAccuracy(pos) <= SOS_TARGET_ACCURACY_M; }
+function betterSosPosition(a, b) { return locationAccuracy(b) < locationAccuracy(a) ? b : a; }
 function renderLoc() {
   const line = $('sosLoc');
   line.className = 'locline';
   const btn = $('sosLocBtn');
-  btn.textContent = t().locBtn;
-  btn.hidden = !(sos.state === 'idle' || sos.state === 'failed');
+  const useApprox = $('sosUseApproxBtn');
+  btn.textContent = sos.state === 'rough' ? t().locTryAgain : t().locBtn;
+  btn.hidden = !(sos.state === 'idle' || sos.state === 'failed' || sos.state === 'rough');
+  useApprox.textContent = t().locUseApprox;
+  useApprox.hidden = sos.state !== 'rough';
   if (sos.pos?.demo) { line.classList.add('bad'); line.textContent = t().bipod.demoLocOnly; }
   else if (sos.state === 'idle') line.textContent = t().locIdle;
   else if (sos.state === 'getting') line.textContent = t().gettingLoc;
-  else if (sos.pos && sos.place && !sos.place.outside) {
+  else if (sos.state === 'rough') {
+    line.classList.add('bad');
+    const metres = locationAccuracy(sos.candidate);
+    line.textContent = Number.isFinite(metres)
+      ? fill(t().locRough, { m: digits(Math.round(metres)) })
+      : t().locRoughUnknown;
+  } else if (sos.pos && sos.place && !sos.place.outside) {
     line.classList.add('ok');
     const acc = sos.pos.accuracy ? digits(Math.round(sos.pos.accuracy)) : '';
     const place = `${placeTitle(sos.place)}, ${placeSub(sos.place)}`;
@@ -1213,6 +1228,7 @@ function renderLoc() {
   else { line.classList.add('bad'); line.textContent = `${sos.error === 'denied' ? t().sosDenied : t().sosNoLoc} ${t().noLocYet}`; }
 }
 function setSosPos(pos, at = Date.now()) {
+  sos.candidate = null;
   sos.pos = pos; sos.at = at; sos.place = resolvePlace(pos); sos.state = 'done';
   if (!pos.demo) lastFix = { pos, at };
   $('sosDemo').hidden = true;
@@ -1401,29 +1417,49 @@ function renderPeople() {
 // Opening #/send by Back, reload or a link never asks for location: only a tap does.
 function openSos(pos, askLocation = true, after = null) { go('send', { pos, ask: askLocation, after }); }
 function showSos(pos, askLocation) {
-  sos = { situation: sos.situation || 'danger', pos: null, at: 0, place: null, state: 'idle', edited: false, error: null,
+  sos = { situation: sos.situation || 'danger', pos: null, at: 0, place: null, candidate: null, state: 'idle', edited: false, error: null,
     safe: false, short: sos.short, openedAt: sos.openedAt };
   renderSituations(); renderPeople();
   showView('sos');
   showEmergency();
   const fresh = pos || (lastFix && Date.now() - lastFix.at < 120000 ? lastFix.pos : null);
-  if (fresh) { setSosPos(fresh, lastFix && lastFix.pos === fresh ? lastFix.at : Date.now()); return; }
+  if (fresh?.demo) { setSosPos(fresh, lastFix && lastFix.pos === fresh ? lastFix.at : Date.now()); return; }
+  if (fresh && isSosAccurate(fresh)) { setSosPos(fresh, lastFix && lastFix.pos === fresh ? lastFix.at : Date.now()); return; }
+  if (fresh) sos.candidate = fresh;
   if (askLocation) { requestSosLocation(); return; }
+  if (sos.candidate) sos.state = 'rough';
   renderLoc(); refreshMessage();
 }
-// fresh = true ("Send new location", #134): a new fix, never one the phone kept from earlier.
+// fresh = true ("Send new location", #134): discard old positions and request a new high-accuracy fix.
 async function requestSosLocation(fresh = false) {
+  if (fresh) { sos.pos = null; sos.at = 0; sos.place = null; sos.candidate = null; }
+  const previous = fresh ? null : sos.candidate;
   sos.state = 'getting'; sos.error = null;
   $('sosDemo').hidden = true;
   renderLoc(); refreshMessage();
-  try { const pos = await getPosition(fresh ? { maximumAge: 0 } : {}); setSosPos(pos, pos.at || Date.now()); }
-  catch (err) {
-    sos.state = 'failed'; sos.error = err.code;
+  try {
+    const pos = await getSosPosition();
+    const best = betterSosPosition(previous, pos);
+    if (isSosAccurate(best)) setSosPos(best, best.at || Date.now());
+    else {
+      sos.candidate = best; sos.pos = null; sos.at = 0; sos.place = null; sos.state = 'rough';
+      renderLoc(); refreshMessage();
+    }
+  } catch (err) {
+    if (previous) {
+      sos.candidate = previous; sos.state = 'rough'; sos.error = err.code;
+    } else {
+      sos.state = 'failed'; sos.error = err.code;
+      fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos);
+    }
     renderLoc(); refreshMessage();
-    fillDemo($('sosDemo'), $('sosDemoText'), $('sosDemoChips'), setSosPos);
   }
 }
 $('sosLocBtn').addEventListener('click', () => requestSosLocation());
+$('sosUseApproxBtn').addEventListener('click', () => {
+  const candidate = sos.candidate;
+  if (candidate) setSosPos(candidate, candidate.at || Date.now());
+});
 $('sosBtn').addEventListener('click', () => openSos(null));
 $('sosBack').addEventListener('click', goHome);
 $('sosMsg').addEventListener('input', () => { sos.edited = true; renderSend(); });
@@ -1444,6 +1480,10 @@ function showHelp(arg) {
   showView('help');
   $('helpBack').textContent = t().back; $('helpPageTitle').textContent = b.helpTitle;
   $('helpPrivacy').textContent = b.helpPrivacy;
+  $('helpLimitationsTitle').textContent = b.limitationsTitle;
+  $('helpLimitSnapshot').textContent = b.limitSnapshot;
+  $('helpLimitAccuracy').textContent = b.limitAccuracy;
+  $('helpLimitPrivacy').textContent = b.limitPrivacy;
   $('helpOk').hidden = !h.ok; $('helpBad').hidden = h.ok;
   const nat999 = data?.national.find((n) => n.id === 'national-emergency-999');
   const call999 = () => (nat999 ? firstRow(b.call999, nat999, true) : callLink('999', b.call999, true));
