@@ -1350,7 +1350,7 @@ function sayText(place, pos, kind) {
   const b = t().bipod;
   if (!pos) return b.sayNoLoc;
   if (pos.demo) return b.demoLocOnly;
-  const lat = digits(pos.lat.toFixed(5)), lon = digits(pos.lon.toFixed(5));
+  const lat = digits(pos.lat.toFixed(6)), lon = digits(pos.lon.toFixed(6));
   let address;
   if (!place || place.outside) {
     if (place?.estimate) {
