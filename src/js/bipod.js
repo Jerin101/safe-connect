@@ -10,12 +10,13 @@ const BD = { south: 20.5, north: 26.7, west: 88.0, east: 92.7 };
 export const inBangladesh = (lat, lon) => lat >= BD.south && lat <= BD.north && lon >= BD.west && lon <= BD.east;
 
 // help/<lat>,<lng>,<unix seconds>[,<situation>][,a<accuracy metres>].
+// Keep six decimal places; the separate accuracy value communicates real-world uncertainty.
 // The accuracy suffix is optional so older family links keep working.
 export function helpPath(pos, at, situation = '') {
   const sit = SITUATIONS.includes(situation) ? `,${situation}` : '';
   const metres = Number(pos?.accuracy);
-  const acc = Number.isFinite(metres) && metres > 0 && metres < 10000000 ? `,a${Math.round(metres)}` : '';
-  return `help/${pos.lat.toFixed(5)},${pos.lon.toFixed(5)},${Math.floor(at / 1000)}${sit}${acc}`;
+  const acc = Number.isFinite(metres) && metres > 0 && metres < 10000000 ? `,a${Math.min(9999999, Math.round(metres))}` : '';
+  return `help/${pos.lat.toFixed(6)},${pos.lon.toFixed(6)},${Math.floor(at / 1000)}${sit}${acc}`;
 }
 export const helpLink = (pos, at, situation) => `${SITE_URL}#/${helpPath(pos, at, situation)}`;
 
