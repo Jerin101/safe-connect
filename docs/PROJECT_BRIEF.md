@@ -39,7 +39,7 @@ Live: https://jerin101.github.io/safe-connect/ (VERSION v53) · new design and f
 - Ride states: requested → accepted → arrived → on_trip → completed → paid, or cancelled.
 - Key files: `firestore.rules`, `js/firebase.js`, `js/ride.js` (fare and status logic), `js/community.js`,
   `demo/demo.js`, `demo/README.md` (full feature notes).
-- Tests: 136 security-rule tests in the Firestore emulator (`npm run test:rules`, required on every PR); browser
+- Tests: 158 security-rule tests in the Firestore emulator (`npm run test:rules`, required on every PR); browser
   end-to-end tests with Playwright; data validator (`tools/validate_data.py`); width checks at 320/390/1280 px.
 
 ## Privacy and safety rules (from CLAUDE.md)
