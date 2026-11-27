@@ -22,6 +22,8 @@ jobs:
         run: python tools/validate_data.py src/data
       - name: Places tests (rules, manual import, validator)
         run: python -m unittest discover -s tests/places_data
+      - name: Master area list (T1, both directions)
+        run: python -m unittest discover -s tests/master_areas
       - name: GPS -> upazila shapes test
         run: node --test tests/locations/upazila-shapes-test.mjs
       - name: GPS best-fix acquisition tests
