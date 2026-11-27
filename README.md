@@ -5,7 +5,23 @@
 🌐 **Live site:** https://jerin101.github.io/safe-connect/ (everything below is on the live site)
 
 > B1 Capstone Project · Team: Israt Jerin (lead: planning, data and backend) and Tasmin Toshi (frontend and testing)  
-> Documents: [SRS Specification (PDF)](docs/srs/SafeConnect_SRS.pdf) ([SRS Markdown](docs/srs/SafeConnect_SRS.md) · [Screenshots](docs/srs/screenshots/README.md)) · [Development Journal](JOURNAL.md) · [Project Brief](docs/PROJECT_BRIEF.md) · [From Demo to the Real Site: The Plan](docs/plans/DEMO_TO_REAL_PLAN.md) · [Notion Workspace](https://app.notion.com/p/421039f69acf80cd9fc5c42e309e6fdf?v=93206128c6504033a32d3dfc1d983eab&source=copy_link)
+> Documents: [SRS Specification (PDF)](docs/srs/SafeConnect_SRS.pdf) ([SRS Markdown](docs/srs/SafeConnect_SRS.md) · [Screenshots](docs/srs/screenshots/README.md)) · [Development Journal](journal/) · [Project Brief](docs/PROJECT_BRIEF.md) · [From Demo to the Real Site: The Plan](docs/plans/DEMO_TO_REAL_PLAN.md) · [Notion Workspace](https://app.notion.com/p/421039f69acf80cd9fc5c42e309e6fdf?v=93206128c6504033a32d3dfc1d983eab&source=copy_link)
+
+---
+
+## Where things are
+
+| Folder or file | What it is |
+|---|---|
+| `src/` | The website (this is what gets deployed) |
+| `tools/` | Python data scripts (standard library only) |
+| `tests/` | All automated tests |
+| `docs/` | Documents; start with [`docs/README.md`](docs/README.md) |
+| `journal/` | Team work journal (auto-made) |
+| `project_management/` | Journal generator and Git tracker scripts |
+| `submission_reports/` | Generated contribution reports for submission |
+| `firebase.json`, `firestore.rules` | Firebase files (stay at the top level) |
+| `index.html`, `preview.html`, `reset.html`, `root-redirect.js`, `demo/` | Old redirect pages, kept so old links still work |
 
 ---
 
@@ -143,7 +159,7 @@ project_management/  journal and Git contribution tracker
 | Israt Jerin | [@jerin101](https://github.com/jerin101) | Lead: planning, data, backend, Firebase/Firestore, reviews and merges | Plans and system design (#64, #187, #240); data pipeline and places for 64 districts (#217, #220, #224); official fuel lists (#227, #232); Firestore rules and ডাকুন (#236, #243, #250); map and design (#244, #246) |
 | Tasmin Toshi | [@tasmintoshi](https://github.com/tasmintoshi) | Frontend, testing, UI/UX | Reviewed and merged #166, #187, #240 and #250; frontend pull requests of the real site: home and tabs, categories, ডাকুন, সেবা দিন, জরুরি সাহায্য (#269–#296); SRS pull requests PR-1 to PR-8 (#287–#296); testing reports; SRS diagrams and user manual |
 
-- **Day-by-day work log:** [`JOURNAL.md`](JOURNAL.md)
+- **Day-by-day work log:** [`journal/`](journal/)
 - **Shared Workspace:** [Notion Workspace](https://app.notion.com/p/421039f69acf80cd9fc5c42e309e6fdf?v=93206128c6504033a32d3dfc1d983eab&source=copy_link)
 
 ### Tools and AI Use
