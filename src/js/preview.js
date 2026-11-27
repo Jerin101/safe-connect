@@ -837,7 +837,7 @@ function fillDemo(box, textEl, chipsEl, onPick) {
   textEl.textContent = t().demo;
   chipsEl.replaceChildren(...demoPicks().map(([p, name]) => {
     const b = el('button', 'chip', t().demoPlaces[name]); b.type = 'button';
-    b.addEventListener('click', () => onPick({ lat: p.lat + 0.004, lon: p.lon - 0.003, accuracy: 20 }));
+    b.addEventListener('click', () => onPick({ lat: p.lat + 0.004, lon: p.lon - 0.003, accuracy: 20, demo: true }));
     return b;
   }));
   box.hidden = false;
@@ -1174,13 +1174,13 @@ function policeOf(place) {
 function sosMessage() {
   const s = LANG[smsLang()].ui;
   if (sos.safe) return s.bipod.safeMsg;
-  const place = sos.place && !sos.place.outside ? sos.place : null;
+  const place = sos.pos?.demo ? null : (sos.place && !sos.place.outside ? sos.place : null);
   const police = policeOf(place);
   const texts = { ...s.bipod.sms, noLoc: s.noLoc };
   if (police && !police.thana) texts.police = texts.policeDistrict;   // "পুলিশ:" unless it is the thana's OC
   // UC-08 3.1: no location → the SMS still says the chosen area
   return buildSms({ texts, situation: s.sits[sos.situation][1], area: areaText(place, smsLang()) || (sos.pos ? '' : sosAreaName), police: police?.phone || '',
-    link: sos.pos ? helpLink(sos.pos, sos.at, sos.situation) : '' });
+    link: sos.pos && !sos.pos.demo ? helpLink(sos.pos, sos.at, sos.situation) : '' });
 }
 function refreshMessage() { if (!sos.edited) $('sosMsg').value = sosMessage(); renderSend(); }
 
@@ -1198,7 +1198,8 @@ function renderLoc() {
   const btn = $('sosLocBtn');
   btn.textContent = t().locBtn;
   btn.hidden = !(sos.state === 'idle' || sos.state === 'failed');
-  if (sos.state === 'idle') line.textContent = t().locIdle;
+  if (sos.pos?.demo) { line.classList.add('bad'); line.textContent = t().bipod.demoLocOnly; }
+  else if (sos.state === 'idle') line.textContent = t().locIdle;
   else if (sos.state === 'getting') line.textContent = t().gettingLoc;
   else if (sos.pos && sos.place && !sos.place.outside) {
     line.classList.add('ok');
@@ -1213,7 +1214,7 @@ function renderLoc() {
 }
 function setSosPos(pos, at = Date.now()) {
   sos.pos = pos; sos.at = at; sos.place = resolvePlace(pos); sos.state = 'done';
-  lastFix = { pos, at };
+  if (!pos.demo) lastFix = { pos, at };
   $('sosDemo').hidden = true;
   renderLoc(); refreshMessage();
 }
@@ -1275,7 +1276,7 @@ function renderSend() {
     list.append(el('p', 'msg plain', t().noPeople));
     $('peopleBox').open = true;
   }
-  const map = sos.pos ? helpLink(sos.pos, sos.at, sos.situation) : null;
+  const map = sos.pos && !sos.pos.demo ? helpLink(sos.pos, sos.at, sos.situation) : null;
   const msgr = isPhone();
   for (const p of people) {
     const row = el('div', 'contact');
@@ -1348,6 +1349,7 @@ function renderBipod() {
 function sayText(place, pos, kind) {
   const b = t().bipod;
   if (!pos) return b.sayNoLoc;
+  if (pos.demo) return b.demoLocOnly;
   const lat = digits(pos.lat.toFixed(5)), lon = digits(pos.lon.toFixed(5));
   let address;
   if (!place || place.outside) {
