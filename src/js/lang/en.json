@@ -284,6 +284,7 @@
       "mapPin": "Shared location point",
       "accuracyText": "The phone reports an approximate location accuracy of ±{m} metres.",
       "accuracyUnknown": "The phone did not provide an accuracy estimate.",
+      "demoLocOnly": "Sample location for preview only. It is not your real location and will not be shared. Get a fresh location before sending an SOS.",
       "outsideData": "This place is outside our list. 999 works everywhere in the country.",
       "readTitle": "Read this address to 999",
       "steps": "What to do now",
