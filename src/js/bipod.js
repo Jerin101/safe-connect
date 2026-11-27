@@ -9,23 +9,28 @@ export const SITUATIONS = ['danger', 'followed', 'accident', 'sick', 'lost', 'ha
 const BD = { south: 20.5, north: 26.7, west: 88.0, east: 92.7 };
 export const inBangladesh = (lat, lon) => lat >= BD.south && lat <= BD.north && lon >= BD.west && lon <= BD.east;
 
-// help/<lat>,<lng>,<unix seconds>[,<situation>] with 5 decimals (about 1 m).
+// help/<lat>,<lng>,<unix seconds>[,<situation>][,a<accuracy metres>].
+// The accuracy suffix is optional so older family links keep working.
 export function helpPath(pos, at, situation = '') {
   const sit = SITUATIONS.includes(situation) ? `,${situation}` : '';
-  return `help/${pos.lat.toFixed(5)},${pos.lon.toFixed(5)},${Math.floor(at / 1000)}${sit}`;
+  const metres = Number(pos?.accuracy);
+  const acc = Number.isFinite(metres) && metres > 0 && metres < 10000000 ? `,a${Math.round(metres)}` : '';
+  return `help/${pos.lat.toFixed(5)},${pos.lon.toFixed(5)},${Math.floor(at / 1000)}${sit}${acc}`;
 }
 export const helpLink = (pos, at, situation) => `${SITE_URL}#/${helpPath(pos, at, situation)}`;
 
-// The part after "#/help/". Returns { ok: true, lat, lon, at, situation } or { ok: false, reason }.
-// reason: 'broken' (not a help link, or a time far in the future) or 'outside' (not in Bangladesh).
-const LINK = /^(-?\d{1,2}\.\d{1,6}),(-?\d{1,3}\.\d{1,6}),(\d{9,11})(?:,([a-z]{1,12}))?$/;
+// The part after "#/help/". Returns the GPS point and optional device accuracy, or an error.
+// Older links without an accuracy suffix remain valid.
+const LINK = /^(-?\d{1,2}\.\d{1,6}),(-?\d{1,3}\.\d{1,6}),(\d{9,11})(?:,([a-z]{1,12}))?(?:,a(\d{1,7}))?$/;
 export function parseHelp(text, now = Date.now()) {
   const m = LINK.exec(String(text || '').trim());
   if (!m) return { ok: false, reason: 'broken' };
   const lat = Number(m[1]), lon = Number(m[2]), at = Number(m[3]) * 1000;
+  const accuracy = m[5] ? Number(m[5]) : null;
+  if (m[5] && (!Number.isSafeInteger(accuracy) || accuracy < 1 || accuracy > 9999999)) return { ok: false, reason: 'broken' };
   if (at > now + 10 * 60000) return { ok: false, reason: 'broken' };   // a phone clock a few minutes off is fine
   if (!inBangladesh(lat, lon)) return { ok: false, reason: 'outside' };
-  return { ok: true, lat, lon, at, situation: SITUATIONS.includes(m[4]) ? m[4] : null };
+  return { ok: true, lat, lon, at, situation: SITUATIONS.includes(m[4]) ? m[4] : null, accuracy };
 }
 
 // The police number for the SMS (#143): the thana's officer-in-charge when the upazila has one (office with
