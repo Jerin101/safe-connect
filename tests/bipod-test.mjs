@@ -12,6 +12,21 @@ const AT = Date.UTC(2026, 10, 2, 13, 0, 0);
 const NOW = AT + 5 * 60000;
 const SEC = AT / 1000;
 
+test('SOS page keeps coarse location opt-in and explains how to improve it in both languages', () => {
+  for (const language of ['bn', 'en']) {
+    const copy = LANG[language].ui;
+    for (const key of ['locTryAgain', 'locUseApprox', 'locRough', 'locRoughUnknown']) {
+      assert.ok(typeof copy[key] === 'string' && copy[key].trim(), language + ' missing ' + key);
+    }
+  }
+  const html = readFileSync('src/index.html', 'utf8');
+  const script = readFileSync('src/js/preview.js', 'utf8');
+  assert.ok(html.includes('id="sosUseApproxBtn"'), 'missing explicit approximate-location button');
+  assert.ok(script.includes('getSosPosition()'), 'SOS should use the best-fix location watcher');
+  assert.ok(script.includes('SOS_TARGET_ACCURACY_M'), 'SOS should apply the stated accuracy threshold');
+  assert.ok(script.includes("sosUseApproxBtn"), 'SOS should wire the explicit approximate-location choice');
+});
+
 test('family SOS page explains snapshot, location-quality and link-privacy limits in both languages', () => {
   for (const language of ['bn', 'en']) {
     const copy = LANG[language].bipod;
