@@ -353,7 +353,7 @@ export async function clearLive(id) {
 // Live location sharing and Safe Commute (SRS FR09–FR11). js/track.js has the ids, durations and checks; firestore.rules
 // (live_shares, shareLimits) decide. A share and shareLimits/{uid} are one batch (20 a day, 60 s apart).
 export const SHARE_LIMIT = { perDay: 20, gapMs: 60000 };
-export async function startShare(id, minutes, point, commute = {}) {
+export async function startShare(id, minutes, point, commute = {}, skewMs = 0) {   // skewMs: real time minus the phone clock (js/track.js clockOffset)
   const user = me(), limRef = doc(db, 'shareLimits', user.uid);
   const snap = await getDoc(limRef);
   const old = snap.exists() ? snap.data() : null, nowMs = Date.now(), today = dayNumber(nowMs);
@@ -362,7 +362,7 @@ export async function startShare(id, minutes, point, commute = {}) {
   const mins = Math.min(480, Math.max(1, Math.round(minutes)));
   const batch = writeBatch(db);
   batch.set(doc(db, 'live_shares', id), { uid: user.uid, ...point, ...commute, status: 'active', startedAt: serverTimestamp(),
-    updatedAt: serverTimestamp(), expiresAt: new Date(nowMs + mins * 60000) });
+    updatedAt: serverTimestamp(), expiresAt: new Date(nowMs + skewMs + mins * 60000) });
   batch.set(limRef, { day: today, count: old && old.day === today ? old.count + 1 : 1, lastAt: serverTimestamp(), lastShare: id });
   await batch.commit();
 }

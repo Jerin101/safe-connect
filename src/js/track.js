@@ -41,5 +41,20 @@ export function pointFrom(coords, batteryLevel) {
 }
 export const lowBattery = (b) => typeof b === 'number' && b < LOW_BATTERY;
 export const kmh = (speed) => (typeof speed === 'number' ? Math.round(speed * 3.6) : null);
+// A phone clock can be minutes wrong. The "Date" header of our own site gives the real time; add the result to Date.now().
+// null when the header cannot be read. sentAt/receivedAt = the phone's clock before and after the request.
+export const CLOCK_WARN_MS = 120000;              // more than 2 minutes off: tell the person
+export function clockOffset(dateHeader, sentAt, receivedAt) {
+  const d = Date.parse(dateHeader);
+  return Number.isFinite(d) ? d - Math.round((sentAt + receivedAt) / 2) : null;
+}
+// Should a new GPS reading replace the kept one? prev / next = { accuracy (metres), at (ms) } or null. A reading that is
+// clearly worse (8 m, then 900 m: a mobile-tower guess) does not replace a fresh good one, but an old one is replaced.
+export function replaceFix(prev, next, now = Date.now()) {
+  const acc = (f) => (f && Number.isFinite(f.accuracy) && f.accuracy > 0 ? f.accuracy : Infinity);
+  if (!prev) return true;
+  if (acc(next) <= 30 || acc(next) <= acc(prev) * 2) return true;
+  return now - prev.at > 20000;
+}
 // Minutes left (0 when over); expiresAt in ms.
 export const minutesLeft = (expiresAt, nowMs) => Math.max(0, Math.ceil((expiresAt - nowMs) / 60000));

@@ -50,6 +50,8 @@ const FILES = [
   'data/villages_bbs.json',
   'data/aliases.json',
   'data/thanas.json',
+  'vendor/leaflet/leaflet.js',    // the live map and the near-me map
+  'vendor/leaflet/leaflet.css',
   'data/landmarks/noakhali.json',
   'data/landmarks/coxsbazar.json',
   'data/contacts_noakhali.json',

@@ -6,7 +6,7 @@
 // the vehicle, destination, battery, speed, last update and minutes left; ended or expired → a clear message.
 // Only the share id is kept on this phone (to end it after a reload), never a position. createElement + textContent.
 import { icon } from './icons.js';
-import { locate } from './geo.js';
+import { locate, locateBest } from './geo.js';
 import { loadUpazilaCentres, nearestUpazilaCentre } from './location.js';
 
 const SITE = 'https://jerin101.github.io/safe-connect/';
@@ -26,12 +26,24 @@ export function initLive(ctx) {
   let TR = null, FB = null;
   // the active share on this phone
   let share = null, watchId = null, last = null, lastSent = 0, sendTimer = null, endTimer = null, battery = null, minutes = 60;
+  let fixInfo = null, sending = false, denied = 0;   // the kept reading's accuracy/time; a send in progress; refused sends in a row
   // the family view
   let trackUnsub = null, map = null, marker = null, tickTimer = null;
   let view = null;
   let pendingCommute = null;                   // from সেবা ডাকুন: the ride's vehicle and destination
 
   const load = async () => { if (!TR) TR = await import('./track.js'); if (!FB) FB = await import('./firebase.js'); return [FB, TR]; };
+  // Real time minus this phone's clock (a wrong phone clock made links "expire" at once). Read from our own site's Date header.
+  let clock = null, clockAt = 0;
+  async function realTimeOffset() {
+    if (clock !== null && Date.now() - clockAt < 600000) return clock;
+    try {
+      const t0 = Date.now(), r = await fetch('index.html', { method: 'HEAD', cache: 'no-store' });
+      const off = TR.clockOffset(r.headers.get('date'), t0, Date.now());
+      if (off !== null) { clock = off; clockAt = Date.now(); }
+    } catch { /* offline: keep the last value, or trust the phone clock */ }
+    return clock || 0;
+  }
   const btn = (cls, text, ic, onClick) => { const b = el('button', cls, text); b.type = 'button'; if (ic) b.prepend(icon(ic, { size: 'sm' })); if (onClick) b.addEventListener('click', onClick); return b; };
   const card = (...kids) => { const c = el('section', 'card'); c.append(...kids.filter(Boolean)); return c; };
   const pills = (...kids) => { const p = el('div', 'pills'); p.append(...kids.filter(Boolean)); return p; };
@@ -90,25 +102,32 @@ export function initLive(ctx) {
     if (!navigator.geolocation) return say(T().noGps);
     say(T().finding);
     try { const b = await navigator.getBattery?.(); battery = b ? b : null; } catch { battery = null; }
-    locate(async (pos) => {
+    const skew = await realTimeOffset();
+    if (Math.abs(skew) > TR.CLOCK_WARN_MS) ctx.toast(fill(T().clockOff, { m: num(Math.round(Math.abs(skew) / 60000)) }));
+    // GPS first and never an old reading; if GPS cannot fix in 20 s (indoors), the network position is the last resort.
+    const getFix = (ok, bad) => locateBest(ok, (e) => { if (e && e.code === 1) bad(e); else locate(ok, bad, { precise: false, timeout: 10000, maximumAge: 0 }); }, { timeout: 20000, targetAccuracy: 30, maximumAge: 0 });
+    getFix(async (pos) => {
       const id = tr.newShareId();
       try {
         const commute = pendingCommute && tr.plateOk(pendingCommute.vehicleNo) ? pendingCommute : pendingCommute ? { vehicleType: pendingCommute.vehicleType, ...(pendingCommute.destination ? { destination: pendingCommute.destination } : {}) } : {};
         if (commute.destination && !tr.destinationOk(commute.destination)) delete commute.destination;
-        await fb.startShare(id, minutes, tr.pointFrom(pos.coords, battery?.level), commute);
+        await fb.startShare(id, minutes, tr.pointFrom(pos.coords, battery?.level), commute, skew);
         pendingCommute = null;
         share = { id, expiresAt: Date.now() + minutes * 60000 };
         store.set(KEY, JSON.stringify({ id, expiresAt: share.expiresAt }));
-        last = pos.coords; lastSent = Date.now();
+        last = pos.coords; fixInfo = { accuracy: pos.coords.accuracy, at: Date.now() }; lastSent = Date.now(); denied = 0;
         startWatch();
         paintActive();
       } catch (e) { say(errText(e)); }
-    }, (e) => say(e && e.code === 1 ? T().allowLocation : T().noFix), { precise: true, timeout: 20000, maximumAge: 30000 });   // UC-10 5.2
+    }, (e) => say(e && e.code === 1 ? T().allowLocation : T().noFix));   // UC-10 5.2
   }
   function startWatch() {
     if (watchId != null || !navigator.geolocation) return;
     // A slow GPS fix (timeout) is not an error here: the last good point keeps being sent. Only "denied" is reported.
-    watchId = navigator.geolocation.watchPosition((p) => { last = p.coords; }, (e) => { if (e && e.code === 1) say(T().allowLocation); }, { enableHighAccuracy: true, maximumAge: 4000 });
+    watchId = navigator.geolocation.watchPosition((p) => {
+      const f = { accuracy: p.coords.accuracy, at: Date.now() };
+      if (TR.replaceFix(fixInfo, f)) { last = p.coords; fixInfo = f; showAccuracy(); }   // a much worse reading does not replace a fresh good one
+    }, (e) => { if (e && e.code === 1) say(T().allowLocation); }, { enableHighAccuracy: true, maximumAge: 0 });
     clearInterval(sendTimer);
     keepAwake();
     sendTimer = setInterval(sendPoint, TR.SEND_EVERY_MS);
@@ -116,11 +135,22 @@ export function initLive(ctx) {
     endTimer = setTimeout(() => finish(false), Math.max(0, share.expiresAt - Date.now()));   // TRK-05: the time is over
     addEventListener('beforeunload', warnLeave);
   }
+  // One send at a time: on a weak network the old code queued several points, and when the network came back they all
+  // arrived together; the rules refuse points closer than 4 s, so the whole share was ended after a few seconds.
+  // Now a refused point is tried again with the next one; only 3 refusals in a row end the share, and the person is told why.
   async function sendPoint() {
-    if (!share || !last) return;
+    if (!share || !last || sending) return;
     if (Date.now() >= share.expiresAt) return finish(false);
-    try { await FB.updateShare(share.id, TR.pointFrom(last, battery?.level)); lastSent = Date.now(); const s = view?.querySelector('.live-sent'); if (s) s.textContent = fill(T().lastSent, { t: time(lastSent) }); }
-    catch (e) { if (e && e.code === 'permission-denied') finish(false); }
+    sending = true;
+    try { await FB.updateShare(share.id, TR.pointFrom(last, battery?.level)); denied = 0; lastSent = Date.now(); const s = view?.querySelector('.live-sent'); if (s) s.textContent = fill(T().lastSent, { t: time(lastSent) }); }
+    catch (e) { if (e && e.code === 'permission-denied' && ++denied >= 3) finish(false, true); }
+    finally { sending = false; }
+  }
+  function showAccuracy() {
+    const p = view?.querySelector('.live-acc'); if (!p || !fixInfo || !Number.isFinite(fixInfo.accuracy)) return;
+    const m = Math.round(fixInfo.accuracy);
+    p.textContent = fill(m > 100 ? T().accuracyRough : T().accuracy, { m: num(m) });
+    p.classList.toggle('warn', m > 100);
   }
   function warnLeave(e) { if (share) { e.preventDefault(); e.returnValue = T().leaveWarn; return T().leaveWarn; } return undefined; }
   // Keep the screen on while sharing: a phone that sleeps stops the GPS and the timer, and the family sees a frozen point.
@@ -138,13 +168,13 @@ export function initLive(ctx) {
     clearInterval(sendTimer); clearTimeout(endTimer); sendTimer = endTimer = null;
     removeEventListener('beforeunload', warnLeave);
   }
-  async function finish(reached) {
+  async function finish(reached, problem = false) {
     const id = share?.id; stopWatch(); share = null;
     try { localStorage.removeItem(KEY); if (reached) clearArrive(); else store.set(ARRIVE, String(Date.now())); } catch { /* fine */ }
     if (id) { try { await (await load())[0].endShare(id); } catch { /* the rules let it expire anyway */ } }
-    if (!view?.isConnected) { ctx.toast(reached ? T().endedReached : T().endedTime); return; }
+    if (!view?.isConnected) { ctx.toast(reached ? T().endedReached : problem ? T().endedProblem : T().endedTime); return; }
     const h = el('h1', 'page-title', T().title); h.id = 'liveTitle'; h.tabIndex = -1;
-    const kids = [card(h, el('p', 'muted', reached ? T().endedReached : T().endedTime))];
+    const kids = [card(h, el('p', 'muted', reached ? T().endedReached : problem ? T().endedProblem : T().endedTime))];
     if (reached) kids.push(card(el('h2', null, T().tellReached), pills(...sendButtons(T().reachedText))));
     if (!reached) kids.push(arrivalCard());
     kids.push(pills(btn('btn solid', T().again, 'locate', () => show(view))));
@@ -165,12 +195,13 @@ export function initLive(ctx) {
     head = head || (() => { const h = el('h1', 'page-title', T().title); h.id = 'liveTitle'; h.tabIndex = -1; return card(h); })();
     const left = TR.minutesLeft(share.expiresAt, Date.now());
     const status = card(el('p', 'live-on', T().sharingNow), el('p', 'muted', fill(T().endsIn, { m: num(left) })),
-      el('p', 'small live-sent', lastSent ? fill(T().lastSent, { t: time(lastSent) }) : T().waitingFix),
+      el('p', 'small live-sent', lastSent ? fill(T().lastSent, { t: time(lastSent) }) : T().waitingFix), el('p', 'small live-acc'),
       btn('btn solid big live-reached', T().reached, 'check', () => finish(true)));
     const text = fill(T().linkText, { link: linkOf(share.id) });
     const link = card(el('h2', null, T().sendLink), el('p', 'small live-link', linkOf(share.id)), pills(...sendButtons(text)),
       ctx.people().length ? null : el('p', 'small', T().noFamily));
     view.replaceChildren(head, status, link, commuteCard(), msg());
+    showAccuracy();
   }
   // Safe Commute (UC-11): number plate, vehicle type, destination; missing fields are marked (5.1)
   function commuteCard() {
@@ -211,7 +242,8 @@ export function initLive(ctx) {
   }
   async function paintTrack(s, info, mapBox) {
     if (!view?.isConnected) return closeTrack();
-    if (!s || s.expiresAt <= Date.now()) {   // UC-12 3.1
+    const off = await realTimeOffset();   // the family phone's clock may be wrong too: compare with the real time
+    if (!s || s.expiresAt <= Date.now() + off) {   // UC-12 3.1
       clearInterval(tickTimer); if (map) { map.remove(); map = null; marker = null; }
       info.replaceChildren(note(T().ended, 'alert')); mapBox.replaceChildren(); mapBox.hidden = true; return;
     }
@@ -231,17 +263,17 @@ export function initLive(ctx) {
     bill.append(row(T().speed, sp == null ? T().unknown : `${num(sp)} ${T().kmh}`));
     bill.append(row(T().battery, s.battery == null ? T().batteryUnknown : `${num(s.battery)}%`, TR.lowBattery(s.battery) ? 'warn' : ''));
     bill.append(row(T().updated, time(s.updatedAt)));
-    const leftRow = row(T().left, fill(T().minutes, { m: num(TR.minutesLeft(s.expiresAt, Date.now())) }));
+    const leftRow = row(T().left, fill(T().minutes, { m: num(TR.minutesLeft(s.expiresAt, Date.now() + off)) }));
     bill.append(leftRow);
     clearInterval(tickTimer);
-    tickTimer = setInterval(() => { leftRow.lastChild.textContent = fill(T().minutes, { m: num(TR.minutesLeft(s.expiresAt, Date.now())) }); if (s.expiresAt <= Date.now()) paintTrack(null, info, mapBox); }, 30000);
+    tickTimer = setInterval(() => { leftRow.lastChild.textContent = fill(T().minutes, { m: num(TR.minutesLeft(s.expiresAt, Date.now() + off)) }); if (s.expiresAt <= Date.now() + off) paintTrack(null, info, mapBox); }, 30000);
     const kids = [el('p', 'live-on', T().liveNow), bill];
     if (TR.lowBattery(s.battery)) kids.splice(1, 0, note(T().lowBattery, 'alert'));
     const g = el('a', 'btn', T().openMaps); g.href = `https://www.google.com/maps/search/?api=1&query=${Number(s.lat)},${Number(s.lon)}`; g.target = '_blank'; g.rel = 'noopener noreferrer'; g.prepend(icon('nav', { size: 'sm' }));
     kids.push(pills(g));
     info.replaceChildren(...kids);
     if (!navigator.onLine) { mapBox.replaceChildren(el('p', 'note', T().mapOffline)); return; }
-    let L; try { L = await ctx.near.loadLeaflet(); } catch { mapBox.replaceChildren(el('p', 'note', T().mapFailed)); return; }
+    let L; try { L = await ctx.near.loadLeaflet(); } catch { mapBox.replaceChildren(el('p', 'note', T().mapFailed), btn('btn', T().mapRetry, null, () => { mapBox.replaceChildren(); paintTrack(s, info, mapBox); })); return; }
     if (!map) {
       map = L.map(mapBox).setView([s.lat, s.lon], 16);
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
