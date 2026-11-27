@@ -79,11 +79,11 @@
 
 ---
 
-## 2026 - Week 48 (2026-11-23 to 2026-11-26)
+## 2026 - Week 48 (2026-11-23 to 2026-11-27)
 
-- **Total Journal Entries:** 6
+- **Total Journal Entries:** 7
 - **Israt Jerin Nafisa:** 2 logged day(s), 4 linked commit(s)
-- **Tasmin Jahan Toshi:** 4 logged day(s), 81 linked commit(s)
+- **Tasmin Jahan Toshi:** 5 logged day(s), 83 linked commit(s)
 
 ### Highlights & Daily Objectives
 
@@ -93,6 +93,7 @@
 - **2026-11-25 (Tasmin Jahan Toshi):** Index on fix/pages-root-redirect: 363fa05 fix: root redirect pages so GitHub Pages (branch root) serves the site that now lives in src/
 - **2026-11-26 (Israt Jerin Nafisa):** Merge pull request #326 from Jerin101/feature/327-community-conflict
 - **2026-11-26 (Tasmin Jahan Toshi):** Finish the teacher's plan items that work offline, ship the v70 and v71 releases, and cut the use cases to the 21 that are finished
+- **2026-11-27 (Tasmin Jahan Toshi):** Clean the repository and the local folders so the project is readable before the presentation
 
 ---
 

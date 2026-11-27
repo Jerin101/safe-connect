@@ -1,6 +1,6 @@
 # SafeConnect Capstone - Combined Team Development Journal
 
-*Auto-compiled from individual member logs. Total Logged Entries: 28*
+*Auto-compiled from individual member logs. Total Logged Entries: 29*
 
 ---
 
@@ -1530,6 +1530,35 @@
 - **Next Day's Plan:**
   - Real-phone test, then fix anything it finds on a small fix/ branch
   - Team lead deploys the Firestore rules; present the 21-use-case diagram with the status table
+
+---
+
+## 2026-11-27 - Tasmin Jahan Toshi
+- **Contributor:** Tasmin Jahan Toshi
+- **Today's Objective:** Clean the repository and the local folders so the project is readable before the presentation
+- **Completed Tasks:**
+  - Checked all tracked files (464 files, about 31 MB) and decided with the team lead's rules what to keep, remove or leave for later
+  - Removed `docs/AUTOPILOT_LOG.md`, the old root `PROJECT_BRIEF.md` (kept the newer `docs/PROJECT_BRIEF.md`) and 81 old test screenshots in `docs/testing/` (archived as a zip outside the repository first)
+  - `JOURNAL.md` is now a one-line pointer to `journal/`; README has a "Where things are" table and `docs/README.md` lists every document (#340)
+  - Deleted 103 merged local branches with `git branch -d`, then 2 more (already in main, checked with `git cherry`); 110 local branches became 7
+  - Removed 54 old worktrees that were clean (about 2.2 GB); GitHub had 8 merged branches left to delete
+- **Pending Tasks:**
+  - Restart the PC and delete the 17 empty folders left in `safe-connect-wt` (Windows says they are in use)
+  - Keep 3 local branches until reviewed: docs/317-plan-status-update, chore/pages-version, fix/phone-location-live-share-and-structure
+  - Check the old `safe-connect-ag` folder, then remove it; ask the team lead about `rules-review.txt`
+  - Delete the 8 merged branches on GitHub; check the test count in docs/PROJECT_BRIEF.md (says 136)
+- **Encountered Problems:**
+  - Removing old worktrees failed with "Deletion of directory failed" (files in use)
+  - `git add -A` could have staged the untracked `rules-review.txt`
+- **Problem Resolutions:**
+  - Windows removed the files but kept the empty folders; Git no longer lists them, so they only need a restart to delete
+  - Staged files by name instead of `git add -A`
+- **Linked Git Commits:**
+  - `b248577` — docs: clean repository, add folder guide and docs index (#340)
+  - `bff1600` — Merge pull request #338 from Jerin101/docs/340-clean-repository *(PR Merge)*
+- **Next Day's Plan:**
+  - Real-phone test on v72, then fix anything it finds on a small fix/ branch
+  - Team lead deploys the Firestore rules and switches the Pages source to GitHub Actions
 
 ---
 
