@@ -274,7 +274,7 @@
       "ageHours": "Location from {h} h ago; they may be somewhere else now",
       "where": "Where they are",
       "nearCentre": "Nearest mapped upazila centre: {u}, {d} — about {km} km away (approximate)",
-      "areaApprox": "Approximate reference: near {u}, {d} (about {km} km from the upazila centre)"
+      "areaApprox": "Approximate reference: near {u}, {d} (about {km} km from the upazila centre)",
       "sitLine": "Situation: {s}",
       "coords": "Coordinates: {lat}, {lon}",
       "map": "Open in Google Maps",
