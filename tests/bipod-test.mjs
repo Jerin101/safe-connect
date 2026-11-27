@@ -14,7 +14,7 @@ const SEC = AT / 1000;
 
 test('SOS page keeps coarse location opt-in and explains how to improve it in both languages', () => {
   for (const language of ['bn', 'en']) {
-    const copy = LANG[language].ui;
+    const copy = LANG[language];
     for (const key of ['locTryAgain', 'locUseApprox', 'locRough', 'locRoughUnknown']) {
       assert.ok(typeof copy[key] === 'string' && copy[key].trim(), language + ' missing ' + key);
     }
