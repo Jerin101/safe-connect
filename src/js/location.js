@@ -59,7 +59,7 @@ export function getPosition({ timeout = 15000, maximumAge = 60000 } = {}) {
 
 // SOS prefers a reported accuracy of 50 m or better. If the phone cannot reach that,
 // return its best estimate after 20 s so the UI can ask before sharing a coarse point.
-export const SOS_TARGET_ACCURACY_M = 50;
+export const SOS_TARGET_ACCURACY_M = 25;
 export function getSosPosition({ timeout = 20000, targetAccuracy = SOS_TARGET_ACCURACY_M } = {}) {
   return new Promise((resolve, reject) => {
     const fail = (err) => { const code = geoCode(err); const e = new Error(code); e.code = code; reject(e); };
