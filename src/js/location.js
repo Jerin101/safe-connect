@@ -3,7 +3,7 @@
 // boundaries and union / town centre points (Bangladesh Bureau of Statistics, via OCHA HDX).
 
 import { DISTRICTS, norm } from './data.js';
-import { locate, geoCode } from './geo.js';
+import { locate, locateBest, geoCode } from './geo.js';
 
 const TOWN_RADIUS_KM = 2.5;   // closer than this to a town centre -> use the town
 const UNION_MAX_KM = 6;       // farther than this from every union centre in the upazila -> show the whole upazila
@@ -53,6 +53,21 @@ export function getPosition({ timeout = 15000, maximumAge = 60000 } = {}) {
       (p) => resolve({ lat: p.coords.latitude, lon: p.coords.longitude, accuracy: Math.round(p.coords.accuracy), at: p.timestamp }),
       (err) => fail(geoCode(err)),
       { precise: true, timeout, maximumAge },
+    );
+  });
+}
+
+// SOS prefers a reported accuracy of 50 m or better. If the phone cannot reach that,
+// return its best estimate after 20 s so the UI can ask before sharing a coarse point.
+export const SOS_TARGET_ACCURACY_M = 50;
+export function getSosPosition({ timeout = 20000, targetAccuracy = SOS_TARGET_ACCURACY_M } = {}) {
+  return new Promise((resolve, reject) => {
+    const fail = (err) => { const code = geoCode(err); const e = new Error(code); e.code = code; reject(e); };
+    if (!('geolocation' in navigator)) return fail({ code: 0 });
+    locateBest(
+      (p) => resolve({ lat: p.coords.latitude, lon: p.coords.longitude, accuracy: Math.round(p.coords.accuracy), at: p.timestamp || Date.now() }),
+      fail,
+      { timeout, targetAccuracy, maximumAge: 0 },
     );
   });
 }
