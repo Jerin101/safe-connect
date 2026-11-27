@@ -64,5 +64,16 @@ export function liveAge(updatedAt, nowMs) {
   const unit = seconds < 90 ? 's' : seconds < 5400 ? 'm' : 'h';
   return { seconds, stale: seconds > STALE_AFTER_S, unit, n: unit === 's' ? seconds : unit === 'm' ? Math.round(seconds / 60) : Math.round(seconds / 3600) };
 }
+// Which way is `to` from `from`? 0 north, 1 north-east, 2 east ... 7 north-west.
+export function compassIndex(from, to) {
+  const rad = Math.PI / 180, dLon = (to.lon - from.lon) * rad;
+  const y = Math.sin(dLon) * Math.cos(to.lat * rad);
+  const x = Math.cos(from.lat * rad) * Math.sin(to.lat * rad) - Math.sin(from.lat * rad) * Math.cos(to.lat * rad) * Math.cos(dLon);
+  return Math.round(((Math.atan2(y, x) / rad + 360) % 360) / 45) % 8;
+}
+// A distance for people: under 1 km in metres rounded to 10 (never "0 m"), above that in km with one decimal.
+export function distanceParts(km) {
+  return km < 1 ? { value: Math.max(10, Math.round(km * 100) * 10), unit: 'm' } : { value: Number(km.toFixed(1)), unit: 'km' };
+}
 // Minutes left (0 when over); expiresAt in ms.
 export const minutesLeft = (expiresAt, nowMs) => Math.max(0, Math.ceil((expiresAt - nowMs) / 60000));

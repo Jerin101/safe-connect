@@ -1,6 +1,6 @@
 // Live share helpers (src/js/track.js): the clock check and the choice between GPS readings. Run: node tests/track-test.mjs
 import assert from 'node:assert/strict';
-import { clockOffset, replaceFix, liveAge, STALE_AFTER_S, CLOCK_WARN_MS } from '../src/js/track.js';
+import { clockOffset, replaceFix, liveAge, STALE_AFTER_S, CLOCK_WARN_MS, compassIndex, distanceParts } from '../src/js/track.js';
 
 // ---- the phone clock: "real time minus the phone clock"
 const real = Date.parse('Fri, 27 Nov 2026 06:00:00 GMT');
@@ -37,5 +37,20 @@ assert.deepEqual(liveAge(U, U + 120000), { seconds: 120, stale: true, unit: 'm',
 assert.deepEqual(liveAge(U, U + 3 * 3600000), { seconds: 10800, stale: true, unit: 'h', n: 3 }, '3 hours');
 assert.equal(liveAge(U, U - 5000).seconds, 0, 'a point "from the future" (clock difference) counts as 0 s, never negative');
 assert.equal(STALE_AFTER_S, 60);
+
+// ---- which way, how far (the family page's "what is around here")
+const here = { lat: 23.97, lon: 90.27 };
+assert.equal(compassIndex(here, { lat: 23.98, lon: 90.27 }), 0, 'north');
+assert.equal(compassIndex(here, { lat: 23.98, lon: 90.28 }), 1, 'north-east');
+assert.equal(compassIndex(here, { lat: 23.97, lon: 90.28 }), 2, 'east');
+assert.equal(compassIndex(here, { lat: 23.96, lon: 90.28 }), 3, 'south-east');
+assert.equal(compassIndex(here, { lat: 23.96, lon: 90.27 }), 4, 'south');
+assert.equal(compassIndex(here, { lat: 23.96, lon: 90.26 }), 5, 'south-west');
+assert.equal(compassIndex(here, { lat: 23.97, lon: 90.26 }), 6, 'west');
+assert.equal(compassIndex(here, { lat: 23.98, lon: 90.26 }), 7, 'north-west');
+assert.deepEqual(distanceParts(0.004), { value: 10, unit: 'm' }, 'never "0 m"');
+assert.deepEqual(distanceParts(0.254), { value: 250, unit: 'm' }, 'metres rounded to 10');
+assert.deepEqual(distanceParts(1.26), { value: 1.3, unit: 'km' }, 'one decimal above 1 km');
+assert.deepEqual(distanceParts(0.999), { value: 1000, unit: 'm' });
 
 console.log('track-test: ok');

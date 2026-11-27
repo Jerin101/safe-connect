@@ -230,3 +230,10 @@ body > main { flex: 1 0 auto; }
 .live-age.bad { color: var(--danger); font-weight: 700; }
 .live-foot { display: grid; gap: 8px; margin-top: 10px; }
 .live-coords { margin: 0; font-size: 0.88rem; color: var(--muted); overflow-wrap: anywhere; }
+
+/* Family live map: what is around the person (named places from our own data) and the route on our map. */
+.live-around { display: grid; gap: 6px; }
+.live-around h2 { margin: 6px 0 0; font-size: 1.05rem; }
+.live-near { display: grid; gap: 1px; padding: 6px 0; border-top: 1px solid var(--line); }
+.live-route { margin: 0; color: var(--muted); }
+.linkbtn.small { justify-self: start; min-height: 36px; }

@@ -29,6 +29,7 @@ export function initLive(ctx) {
   let fixInfo = null, sending = false, denied = 0;   // the kept reading's accuracy/time; a send in progress; refused sends in a row
   // the family view
   let trackUnsub = null, map = null, marker = null, tickTimer = null;
+  let aroundKey = '', aroundItems = [], pinLayer = null, routeLayer = null, meMarker = null, routeNote = '', lastS = null;   // the family map's extras
   let view = null;
   let pendingCommute = null;                   // from সেবা ডাকুন: the ride's vehicle and destination
 
@@ -45,6 +46,7 @@ export function initLive(ctx) {
     return clock || 0;
   }
   const btn = (cls, text, ic, onClick) => { const b = el('button', cls, text); b.type = 'button'; if (ic) b.prepend(icon(ic, { size: 'sm' })); if (onClick) b.addEventListener('click', onClick); return b; };
+  const dist = (km) => { const d = TR.distanceParts(km); return `${num(d.value)} ${d.unit === 'm' ? T().unitM : T().unitKm}`; };
   const card = (...kids) => { const c = el('section', 'card'); c.append(...kids.filter(Boolean)); return c; };
   const pills = (...kids) => { const p = el('div', 'pills'); p.append(...kids.filter(Boolean)); return p; };
   const note = (text, ic = 'info') => { const n = el('div', 'note dk-note'); n.append(icon(ic, { size: 'sm' }), el('p', null, text)); return n; };
@@ -246,7 +248,7 @@ export function initLive(ctx) {
     if (!view?.isConnected) return closeTrack();
     const off = await realTimeOffset();   // the family phone's clock may be wrong too: compare with the real time
     if (!s || s.expiresAt <= Date.now() + off) {   // UC-12 3.1
-      clearInterval(tickTimer); if (map) { map.remove(); map = null; marker = null; }
+      clearInterval(tickTimer); if (map) { map.remove(); map = null; marker = null; pinLayer = null; routeLayer = null; meMarker = null; }
       info.replaceChildren(note(T().ended, 'alert')); mapBox.replaceChildren(); mapBox.hidden = true; if (mapBox.parts) mapBox.parts.card.hidden = true; return;   // no empty grey card
     }
     mapBox.hidden = false; mapBox.parts.card.hidden = false;
@@ -256,11 +258,26 @@ export function initLive(ctx) {
     if (!view?.isConnected) return closeTrack();
     // Above the map, so it is seen with it: where this is ("near ..."), and how old the point is. Over 60 s old = "not live".
     const parts = mapBox.parts;
-    const place = el('p', 'live-place', estimate ? fill(T().nearCentre, {
+    lastS = s;
+    const refText = estimate ? fill(T().nearCentre, {
       u: ctx.lang() === 'bn' ? estimate.upazilaBn : estimate.upazila,
       d: estimate.district,
       km: num(estimate.distanceKm.toFixed(1)),
-    }) : T().placeUnknown);
+    }) : T().placeUnknown;
+    // The first line is the nearest NAMED place from our own data when there is one within 1.5 km ("Near X, about 250 m");
+    // the upazila-centre reference stays below it, small, because that centre can be many km away.
+    const point = { lat: Number(s.lat), lon: Number(s.lon) };
+    const first = aroundItems[0] && aroundItems[0].km <= 1.5 ? aroundItems[0] : null;
+    const place = el('p', 'live-place', first ? fill(T().nearPlace, { name: first.name, d: dist(first.km) }) : refText);
+    const refLine = first ? el('p', 'small muted', refText) : null;
+    if (aroundKey === '' || aroundKey !== `${point.lat.toFixed(3)},${point.lon.toFixed(3)}`) {
+      aroundKey = `${point.lat.toFixed(3)},${point.lon.toFixed(3)}`;   // about 100 m: a small move needs no new search
+      const mine = aroundKey;
+      (async () => {
+        try { aroundItems = estimate && typeof ctx.near.around === 'function' ? await ctx.near.around(point, estimate.district) : []; } catch { aroundItems = []; }
+        if (view?.isConnected && lastS === s && aroundKey === mine) paintTrack(s, info, mapBox);
+      })();
+    }
     const age = el('p', 'live-age'); age.setAttribute('role', 'status');
     const showAge = () => {
       const a = TR.liveAge(s.updatedAt, Date.now() + off);
@@ -269,14 +286,42 @@ export function initLive(ctx) {
       age.classList.toggle('bad', a.stale);
     };
     showAge();
-    parts.cap.replaceChildren(place, age);
+    parts.cap.replaceChildren(place, ...(refLine ? [refLine] : []), age);
     // Below the map: the numbers to read out, and Google Maps for the place names and the way there.
     const here = `${Number(s.lat)},${Number(s.lon)}`;
-    const link = (cls, text, href) => { const a = el('a', cls, text); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.prepend(icon('nav', { size: 'sm' })); return a; };
+    const around = el('div', 'live-around');
+    around.append(el('h2', null, T().aroundTitle));
+    if (aroundItems.length) {
+      for (const it of aroundItems.slice(0, 8)) {
+        const row = el('div', 'live-near'); const b = el('b', null, it.name);
+        row.append(b, el('span', 'small muted', `${it.catLabel} · ${dist(it.km)} ${T().dirs[TR.compassIndex(point, it)]}`));
+        around.append(row);
+      }
+      around.append(el('p', 'small muted', T().aroundNote));
+    } else around.append(el('p', 'small muted', T().aroundNone));
+    // The road route is drawn on OUR map (OpenStreetMap routing). Only when the person taps: their own position is asked
+    // for and the two points go to the free routing server then. Google Maps stays as a small second choice.
+    const routeInfo = el('p', 'small live-route'); routeInfo.textContent = routeNote;
+    const routeBtn = btn('btn solid', T().routeBtn, 'nav', async () => {
+      routeInfo.textContent = T().routeWait;
+      const me = await new Promise((ok) => locate((p) => ok({ lat: p.coords.latitude, lon: p.coords.longitude }), () => ok(null), { precise: false, timeout: 10000, maximumAge: 60000 }));
+      if (!me) { routeNote = routeInfo.textContent = T().routeNoGps; return; }
+      let L = window.L; try { L = L || await ctx.near.loadLeaflet(); } catch { L = null; }
+      const RM = await import('./routemap.js');
+      const r = await RM.roadRoute(me, point);
+      if (!r || !map || !L) { routeNote = routeInfo.textContent = T().routeFail; return; }
+      if (routeLayer) routeLayer.remove();
+      routeLayer = RM.drawRoad(L, map, r);
+      if (meMarker) meMarker.remove();
+      meMarker = L.circleMarker([me.lat, me.lon], { radius: 7, color: '#fff', weight: 2, fillColor: '#2563EB', fillOpacity: 1 }).addTo(map);
+      routeNote = routeInfo.textContent = fill(T().routeInfo, { d: dist(r.metres / 1000), m: num(Math.max(1, Math.round(r.secs / 60))) });
+    });
+    const google = el('a', 'linkbtn small', T().otherApp); google.href = `https://www.google.com/maps/search/?api=1&query=${here}`; google.target = '_blank'; google.rel = 'noopener noreferrer';
     parts.foot.replaceChildren(
       el('p', 'live-coords', fill(T().coords, { lat: num(Number(s.lat).toFixed(5)), lon: num(Number(s.lon).toFixed(5)) })),
-      pills(link('btn solid', T().openMaps, `https://www.google.com/maps/search/?api=1&query=${here}`), link('btn', T().directions, `https://www.google.com/maps/dir/?api=1&destination=${here}`)),
-      el('p', 'small muted', T().mapHint));
+      around,
+      pills(routeBtn), routeInfo, el('p', 'small muted', T().routeAsk),
+      el('p', 'small muted', T().mapHint), google);
     if (s.vehicleNo || s.vehicleType) bill.append(row(T().vehicle, [s.vehicleType ? T().vehicles[s.vehicleType] : '', s.vehicleNo || ''].filter(Boolean).join(' · ')));
     if (s.destination) bill.append(row(T().destination, s.destination));
     const sp = TR.kmh(s.speed);
@@ -300,8 +345,16 @@ export function initLive(ctx) {
       marker = L.marker([s.lat, s.lon], { icon: L.divIcon({ className: 'mme', html: w, iconSize: [22, 22], iconAnchor: [11, 11] }), keyboard: false }).addTo(map)
         .bindTooltip(el('span', null, T().here), { permanent: true, direction: 'top', className: 'mtip', offset: [0, -12] });
     } else { marker.setLatLng([s.lat, s.lon]); if (!map.getBounds().pad(-0.2).contains([s.lat, s.lon])) map.panTo([s.lat, s.lon]); }
+    // the named places around her, as pins with their names
+    if (!pinLayer) pinLayer = L.layerGroup().addTo(map);
+    pinLayer.clearLayers();
+    for (const it of aroundItems.slice(0, 8)) {
+      const pin = el('span', 'mk-pin'); pin.append(icon(it.ic, { size: 'sm' }));
+      L.marker([it.lat, it.lon], { icon: L.divIcon({ className: 'mk-wrap', html: pin, iconSize: [34, 40], iconAnchor: [17, 38] }), keyboard: false })
+        .bindTooltip(el('span', null, `${it.name} · ${dist(it.km)}`), { direction: 'top', offset: [0, -34] }).addTo(pinLayer);
+    }
   }
-  function closeTrack() { if (trackUnsub) trackUnsub(); trackUnsub = null; clearInterval(tickTimer); if (map) { map.remove(); map = null; marker = null; } }
+  function closeTrack() { if (trackUnsub) trackUnsub(); trackUnsub = null; clearInterval(tickTimer); if (map) { map.remove(); map = null; marker = null; pinLayer = null; routeLayer = null; meMarker = null; } aroundKey = ''; aroundItems = []; routeNote = ''; lastS = null; }
 
   return {
     show, track, close: closeTrack,
