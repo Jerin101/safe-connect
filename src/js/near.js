@@ -216,11 +216,15 @@ export function initNear(ctx) {
   function loadLeaflet() {
     if (window.L) return Promise.resolve(window.L);
     if (leaflet) return leaflet;
-    leaflet = new Promise((ok, fail) => {
+    if (!document.querySelector('link[href="vendor/leaflet/leaflet.css"]')) {
       const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'vendor/leaflet/leaflet.css'; document.head.append(css);
-      const s = document.createElement('script'); s.src = 'vendor/leaflet/leaflet.js'; s.onload = () => ok(window.L); s.onerror = () => { leaflet = null; fail(new Error('leaflet')); };
+    }
+    // One short mobile-network failure must not leave "the map could not open": try the script a second time.
+    const once = () => new Promise((ok, fail) => {
+      const s = document.createElement('script'); s.src = 'vendor/leaflet/leaflet.js'; s.onload = () => ok(window.L); s.onerror = () => { s.remove(); fail(new Error('leaflet')); };
       document.head.append(s);
     });
+    leaflet = once().catch(() => once()).catch((e) => { leaflet = null; throw e; });
     return leaflet;
   }
   function closeMap() { if (mapObj) { mapObj.stop(); mapObj.remove(); mapObj = null; } markers = []; }
