@@ -951,7 +951,7 @@
     "outNo": "Cancel",
     "outRemove": "Also remove my family's numbers and saved areas from this phone",
     "outSync": "The copy of your numbers in your account stays. To delete it, turn off \"Keep a copy in my account\" before you sign out.",
-    "outRemoved": "Signed out. Your family's numbers and saved areas were removed from this phone. \"Call 999\", \"Send location\" and \"Find help near me\" still work as before.",
+    "switched": "Another account signed in on this phone. The family numbers and saved areas of the previous account are hidden here; they come back when that account signs in again.", "switchedBack": "Welcome back. Your family numbers and saved areas on this phone are back.", "outRemoved": "Signed out. Your family's numbers and saved areas were removed from this phone. \"Call 999\", \"Send location\" and \"Find help near me\" still work as before.",
     "outDone": "Signed out. \"Call 999\", \"Send location\" and \"Find help near me\" still work as before.",
     "reset": {
       "pageTitle": "New password",

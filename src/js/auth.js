@@ -6,6 +6,7 @@
 // ticks "also remove from this phone" (issue #78). The workspace itself is js/workspace.js.
 import { initWorkspace, LOCAL_KEYS, SYNC, syncOn } from './workspace.js';
 import { initReports } from './reports.js';
+import { switchOwner, forgetOwner } from './owner.js';
 
 const ROLES = ['user', 'driver', 'volunteer', 'admin'];
 const FLAG = 'sc-signed-in';
@@ -78,8 +79,10 @@ function loadFirebase() {
       fb = mod;
       fb.setLang(ctx.lang());
       user = await fb.currentUser();
+      adopt(user);
       fb.watchUser((u) => {
         user = u;
+        adopt(u);
         if (u) ctx.store.set(FLAG, '1'); else clearFlag();
         renderButton();
         if (!$('acct').hidden) renderGate();
@@ -211,8 +214,17 @@ function onModalClosed() {
 }
 
 /* ---------- after sign-in ---------- */
+// The numbers, areas and open ride kept on this phone belong to the account that saved them (js/owner.js): another account
+// that signs in sees its own, and the first one's are put away until that account signs in again.
+function adopt(u) {
+  if (!u || !u.uid) return;
+  let r = null;
+  try { r = switchOwner(localStorage, u.uid); } catch { /* no storage: nothing to switch */ }
+  if (r && r.changed) { ctx.people.changed(); toast(r.restored ? A().switchedBack : A().switched); }
+}
 async function enter(u) {
   // Do not wait for watchUser: it may come a moment later than the sign-in answer.
+  adopt(u);
   user = u; ctx.store.set(FLAG, '1'); renderButton();
   const role = await fb.roleOf(u, ctx.lang());
   const ok = pick === 'user' || pick === 'driver' || pick === role;   // a driver signs in as a normal user, then applies on the driver page
@@ -337,10 +349,12 @@ function askSignOut() {
 // removeLocal: the person ticked "also remove from this phone". Otherwise their numbers and areas stay.
 // The copy in the account (if it was on) stays in the account; this phone stops updating it.
 async function signOut(removeLocal) {
+  const uid = user && user.uid;
   try { if (fb) await fb.signOutNow(); } catch {}
   user = null; wsRole = null; mismatch = null;
   clearFlag();
   for (const key of removeLocal ? LOCAL_KEYS : [SYNC]) { try { localStorage.removeItem(key); } catch {} }
+  if (removeLocal) { try { forgetOwner(localStorage, uid); } catch { /* fine */ } }   // also the open ride and the put-away copy
   ws.close();
   ctx.people.changed();
   renderButton();
