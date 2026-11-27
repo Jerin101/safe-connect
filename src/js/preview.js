@@ -34,6 +34,7 @@ const store = { get(k) { try { return localStorage.getItem(k); } catch { return 
 let lang = store.get('sc-lang') || 'bn';
 let data = null, locations = null, upazilaCentres = [], current = null, areaIndex = [];
 let near = null;          // categories near the person (js/near.js), created by makeNear() at start-up
+let helpMapInstance = null, helpMapPosition = null;
 let dakun = null;         // সেবা ডাকুন (js/dakun.js, R3), created by makeNear() too
 let provide = null;       // সেবা দিন (js/provide.js, R4): providers, and approvals and rates for an admin
 let emergency = null;     // জরুরি সাহায্য additions (js/emergency.js, R5)
@@ -446,8 +447,17 @@ function renderArea() {
 }
 
 /* ---------- views ---------- */
+// The family SOS page can show the shared GPS point on an in-page OpenStreetMap map.
+function closeHelpMap() {
+  if (helpMapInstance) { helpMapInstance.remove(); helpMapInstance = null; }
+  const box = $('helpMapView');
+  if (box) { box.hidden = true; box.replaceChildren(); }
+  const button = $('helpMap');
+  if (button) { button.disabled = false; button.setAttribute('aria-expanded', 'false'); button.textContent = t().bipod.map; }
+}
 // Every view opens at the top with a short fade (no fade under prefers-reduced-motion, see index.html).
 function showView(name) {
+  if (name !== 'help') { closeHelpMap(); helpMapPosition = null; }
   for (const view of ['home', 'area', 'sos', 'help', 'prepare', 'acct', 'ws', 'cat', 'dakun', 'provide', 'live']) $(view).hidden = name !== view;
   if (name !== 'cat') near?.close();   // the category map is closed when another page opens
   if (name !== 'dakun') dakun?.close();
@@ -1377,6 +1387,8 @@ $('smsEn').addEventListener('change', () => { sos.short = $('smsEn').checked; so
 /* ---------- help page for the family (#/help/..., #134): read from the address only; nothing is stored or sent ---------- */
 function showHelp(arg) {
   const b = t().bipod, h = parseHelp(arg);
+  closeHelpMap();
+  helpMapPosition = null;
   showView('help');
   $('helpBack').textContent = t().back; $('helpPageTitle').textContent = b.helpTitle;
   $('helpPrivacy').textContent = b.helpPrivacy;
@@ -1403,7 +1415,9 @@ function showHelp(arg) {
     ? (place.estimate ? centreEstimateText(place.estimate, lang) : b.outsideData)
     : `${placeTitle(place)}, ${placeSub(place)}`;
   $('helpCoords').replaceChildren(svg(ICONS.pin), el('span', null, fill(b.coords, { lat: digits(h.lat.toFixed(5)), lon: digits(h.lon.toFixed(5)) })));
-  const map = $('helpMap'); map.href = mapsLink(pos); map.textContent = `${b.map} ↗`;
+  helpMapPosition = pos;
+  const map = $('helpMap'); map.textContent = b.map; map.disabled = false; map.setAttribute('aria-expanded', 'false');
+  const mapBox = $('helpMapView'); mapBox.hidden = true; mapBox.replaceChildren(); mapBox.setAttribute('aria-label', b.mapLabel);
   $('helpReadTitle').textContent = b.readTitle; $('helpRead').textContent = sayText(place, pos, 'addr');
   $('helpStepsTitle').textContent = b.steps;
   const groups = place.outside ? [] : areaContacts(data, place);
@@ -1420,6 +1434,32 @@ function showHelp(arg) {
   }));
   if (place.outside) { const more = el('a', 'btn', b.national); more.href = '#/numbers'; $('helpSteps').append(more); }
 }
+$('helpMap').addEventListener('click', async () => {
+  const box = $('helpMapView'), button = $('helpMap');
+  if (!box.hidden) { closeHelpMap(); return; }
+  const pos = helpMapPosition;
+  if (!pos) return;
+  box.hidden = false;
+  box.replaceChildren(el('p', 'note', t().bipod.mapLoading));
+  button.disabled = true;
+  button.textContent = t().bipod.hideMap;
+  button.setAttribute('aria-expanded', 'true');
+  try {
+    if (!navigator.onLine) { box.replaceChildren(el('p', 'note', t().live.mapOffline)); return; }
+    const L = await near.loadLeaflet();
+    if (box.hidden || $('help').hidden || helpMapPosition !== pos) return;
+    box.replaceChildren();
+    const map = L.map(box, { zoomControl: true, tap: true }).setView([pos.lat, pos.lon], 16);
+    helpMapInstance = map;
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
+    const pin = el('span', 'mk-me');
+    L.marker([pos.lat, pos.lon], { icon: L.divIcon({ className: 'mk-wrap', html: pin, iconSize: [22, 22], iconAnchor: [11, 11] }), title: t().bipod.mapPin })
+      .addTo(map).bindTooltip(el('span', null, t().bipod.mapPin), { permanent: true, direction: 'top', className: 'mk-tip', offset: [0, -12] });
+    requestAnimationFrame(() => { if (helpMapInstance === map) map.invalidateSize(); });
+  } catch {
+    if (!box.hidden && !$('help').hidden) box.replaceChildren(el('p', 'note', t().live.mapFailed));
+  } finally { button.disabled = false; }
+});
 $('helpBack').addEventListener('click', goHome);
 
 /* ---------- আগে থেকে প্রস্তুতি (#/prepare, #161): official help pages only, never a guessed menu ---------- */
