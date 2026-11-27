@@ -1,6 +1,6 @@
 // Live share helpers (src/js/track.js): the clock check and the choice between GPS readings. Run: node tests/track-test.mjs
 import assert from 'node:assert/strict';
-import { clockOffset, replaceFix, CLOCK_WARN_MS } from '../src/js/track.js';
+import { clockOffset, replaceFix, liveAge, STALE_AFTER_S, CLOCK_WARN_MS } from '../src/js/track.js';
 
 // ---- the phone clock: "real time minus the phone clock"
 const real = Date.parse('Fri, 27 Nov 2026 06:00:00 GMT');
@@ -27,5 +27,15 @@ assert.equal(replaceFix({ accuracy: 40, at: T0 }, { accuracy: 60, at: T0 + 2000 
 assert.equal(replaceFix({ accuracy: 200, at: T0 }, { accuracy: 20, at: T0 + 2000 }, T0 + 2000), true, 'a better reading always wins');
 assert.equal(replaceFix({ accuracy: 8, at: T0 }, { accuracy: 25, at: T0 + 2000 }, T0 + 2000), true, '30 m or better is always accepted');
 assert.equal(replaceFix({ accuracy: 8, at: T0 }, { accuracy: NaN, at: T0 + 2000 }, T0 + 2000), false, 'a reading with no accuracy does not replace a fresh good one');
+
+// ---- how old is the point (the family page must not pretend an old point is live)
+const U = 5_000_000;
+assert.deepEqual(liveAge(U, U + 8000), { seconds: 8, stale: false, unit: 's', n: 8 }, '8 s old: live');
+assert.equal(liveAge(U, U + 60000).stale, false, 'exactly 60 s is still live');
+assert.equal(liveAge(U, U + 61000).stale, true, 'over 60 s is "not live"');
+assert.deepEqual(liveAge(U, U + 120000), { seconds: 120, stale: true, unit: 'm', n: 2 }, '2 minutes');
+assert.deepEqual(liveAge(U, U + 3 * 3600000), { seconds: 10800, stale: true, unit: 'h', n: 3 }, '3 hours');
+assert.equal(liveAge(U, U - 5000).seconds, 0, 'a point "from the future" (clock difference) counts as 0 s, never negative');
+assert.equal(STALE_AFTER_S, 60);
 
 console.log('track-test: ok');

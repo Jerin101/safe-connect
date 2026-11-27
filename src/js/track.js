@@ -56,5 +56,13 @@ export function replaceFix(prev, next, now = Date.now()) {
   if (acc(next) <= 30 || acc(next) <= acc(prev) * 2) return true;
   return now - prev.at > 20000;
 }
+// How old is the last point? seconds, stale (over 60 s: the page must say "not live"), unit 's' | 'm' | 'h' and the number n to show.
+// updatedAt / nowMs in ms; nowMs must be the real time (js/live.js adds the clock offset).
+export const STALE_AFTER_S = 60;
+export function liveAge(updatedAt, nowMs) {
+  const seconds = Math.max(0, Math.round((nowMs - updatedAt) / 1000));
+  const unit = seconds < 90 ? 's' : seconds < 5400 ? 'm' : 'h';
+  return { seconds, stale: seconds > STALE_AFTER_S, unit, n: unit === 's' ? seconds : unit === 'm' ? Math.round(seconds / 60) : Math.round(seconds / 3600) };
+}
 // Minutes left (0 when over); expiresAt in ms.
 export const minutesLeft = (expiresAt, nowMs) => Math.max(0, Math.ceil((expiresAt - nowMs) / 60000));

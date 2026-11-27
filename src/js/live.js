@@ -232,7 +232,9 @@ export function initLive(ctx) {
     if (!tr.SHARE_ID.test(id || '')) { v.replaceChildren(card(h, note(T().ended, 'alert')), helpCard()); return; }
     const info = el('div', 'live-info'); info.append(el('div', 'skeleton'));
     const mapBox = el('div', 'dk-map live-map'); mapBox.setAttribute('role', 'region'); mapBox.setAttribute('aria-label', T().mapLabel);
-    v.replaceChildren(card(h, info), card(mapBox), helpCard());
+    const cap = el('div', 'live-cap'), foot = el('div', 'live-foot'), mapCard = card(cap, mapBox, foot);
+    mapBox.parts = { cap, foot, card: mapCard };   // the place line and age above the map, the position and buttons below
+    v.replaceChildren(card(h, info), mapCard, helpCard());
     trackUnsub = fb.watchShare(id, (s) => paintTrack(s, info, mapBox), () => { info.replaceChildren(note(errText({ code: 'offline' }))); });
   }
   function helpCard() {
@@ -245,18 +247,36 @@ export function initLive(ctx) {
     const off = await realTimeOffset();   // the family phone's clock may be wrong too: compare with the real time
     if (!s || s.expiresAt <= Date.now() + off) {   // UC-12 3.1
       clearInterval(tickTimer); if (map) { map.remove(); map = null; marker = null; }
-      info.replaceChildren(note(T().ended, 'alert')); mapBox.replaceChildren(); mapBox.hidden = true; return;
+      info.replaceChildren(note(T().ended, 'alert')); mapBox.replaceChildren(); mapBox.hidden = true; if (mapBox.parts) mapBox.parts.card.hidden = true; return;   // no empty grey card
     }
-    mapBox.hidden = false;
+    mapBox.hidden = false; mapBox.parts.card.hidden = false;
     const row = (label, value, cls) => { const d = el('div', cls); d.append(el('span', null, label), el('b', null, value)); return d; };
     const bill = el('div', 'bill');
     const estimate = await approximateUpazila({ lat: Number(s.lat), lon: Number(s.lon) });
     if (!view?.isConnected) return closeTrack();
-    if (estimate) bill.append(el('p', 'small muted', fill(T().nearCentre, {
+    // Above the map, so it is seen with it: where this is ("near ..."), and how old the point is. Over 60 s old = "not live".
+    const parts = mapBox.parts;
+    const place = el('p', 'live-place', estimate ? fill(T().nearCentre, {
       u: ctx.lang() === 'bn' ? estimate.upazilaBn : estimate.upazila,
       d: estimate.district,
-      km: estimate.distanceKm.toFixed(1),
-    })));
+      km: num(estimate.distanceKm.toFixed(1)),
+    }) : T().placeUnknown);
+    const age = el('p', 'live-age'); age.setAttribute('role', 'status');
+    const showAge = () => {
+      const a = TR.liveAge(s.updatedAt, Date.now() + off);
+      const when = fill(T()[a.unit === 's' ? 'agoS' : a.unit === 'm' ? 'agoM' : 'agoH'], { n: num(a.n) });
+      age.textContent = fill(a.stale ? T().notLive : T().updatedAgo, { when });
+      age.classList.toggle('bad', a.stale);
+    };
+    showAge();
+    parts.cap.replaceChildren(place, age);
+    // Below the map: the numbers to read out, and Google Maps for the place names and the way there.
+    const here = `${Number(s.lat)},${Number(s.lon)}`;
+    const link = (cls, text, href) => { const a = el('a', cls, text); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.prepend(icon('nav', { size: 'sm' })); return a; };
+    parts.foot.replaceChildren(
+      el('p', 'live-coords', fill(T().coords, { lat: num(Number(s.lat).toFixed(5)), lon: num(Number(s.lon).toFixed(5)) })),
+      pills(link('btn solid', T().openMaps, `https://www.google.com/maps/search/?api=1&query=${here}`), link('btn', T().directions, `https://www.google.com/maps/dir/?api=1&destination=${here}`)),
+      el('p', 'small muted', T().mapHint));
     if (s.vehicleNo || s.vehicleType) bill.append(row(T().vehicle, [s.vehicleType ? T().vehicles[s.vehicleType] : '', s.vehicleNo || ''].filter(Boolean).join(' · ')));
     if (s.destination) bill.append(row(T().destination, s.destination));
     const sp = TR.kmh(s.speed);
@@ -266,16 +286,15 @@ export function initLive(ctx) {
     const leftRow = row(T().left, fill(T().minutes, { m: num(TR.minutesLeft(s.expiresAt, Date.now() + off)) }));
     bill.append(leftRow);
     clearInterval(tickTimer);
-    tickTimer = setInterval(() => { leftRow.lastChild.textContent = fill(T().minutes, { m: num(TR.minutesLeft(s.expiresAt, Date.now() + off)) }); if (s.expiresAt <= Date.now() + off) paintTrack(null, info, mapBox); }, 30000);
+    tickTimer = setInterval(() => { leftRow.lastChild.textContent = fill(T().minutes, { m: num(TR.minutesLeft(s.expiresAt, Date.now() + off)) }); showAge(); if (s.expiresAt <= Date.now() + off) paintTrack(null, info, mapBox); }, 5000);
     const kids = [el('p', 'live-on', T().liveNow), bill];
     if (TR.lowBattery(s.battery)) kids.splice(1, 0, note(T().lowBattery, 'alert'));
-    const g = el('a', 'btn', T().openMaps); g.href = `https://www.google.com/maps/search/?api=1&query=${Number(s.lat)},${Number(s.lon)}`; g.target = '_blank'; g.rel = 'noopener noreferrer'; g.prepend(icon('nav', { size: 'sm' }));
-    kids.push(pills(g));
     info.replaceChildren(...kids);
     if (!navigator.onLine) { mapBox.replaceChildren(el('p', 'note', T().mapOffline)); return; }
     let L; try { L = await ctx.near.loadLeaflet(); } catch { mapBox.replaceChildren(el('p', 'note', T().mapFailed), btn('btn', T().mapRetry, null, () => { mapBox.replaceChildren(); paintTrack(s, info, mapBox); })); return; }
     if (!map) {
-      map = L.map(mapBox).setView([s.lat, s.lon], 16);
+      map = L.map(mapBox).setView([s.lat, s.lon], 15);   // roads and towns around are visible; the family can zoom in
+      L.control.scale({ imperial: false }).addTo(map);
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
       const w = el('span'); w.append(el('span', 'mme-pulse'), el('span', 'mme-dot'));
       marker = L.marker([s.lat, s.lon], { icon: L.divIcon({ className: 'mme', html: w, iconSize: [22, 22], iconAnchor: [11, 11] }), keyboard: false }).addTo(map)

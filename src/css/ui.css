@@ -222,3 +222,11 @@ body > main { flex: 1 0 auto; }
 .disp-menu .btn { justify-content: flex-start; }
 .disp-menu .btn[aria-pressed="true"]::after { content: "¹3"; margin-inline-start: auto; font-weight: 700; }
 @media (min-width: 431px) { .disp-menu { display: none; } }
+
+/* Family live map: the place and the age of the point sit with the map; "not live" is shown in the danger colour. */
+.live-cap { display: grid; gap: 4px; margin-bottom: 10px; }
+.live-place { margin: 0; font-weight: 700; font-size: 1.05rem; }
+.live-age { margin: 0; font-size: 0.92rem; color: var(--muted); }
+.live-age.bad { color: var(--danger); font-weight: 700; }
+.live-foot { display: grid; gap: 8px; margin-top: 10px; }
+.live-coords { margin: 0; font-size: 0.88rem; color: var(--muted); overflow-wrap: anywhere; }
