@@ -21,6 +21,7 @@ export function initProvide(ctx) {
   let view = null, here = null, user = null, prov, isAdm = false, pend = null, rates = null;
   let ovUnsub = null, allRides = [], ovMap = null, reqMap = null;
   let reqs = [], reqUnsub = null, myJobs = null, online = false, onlineTimer = null;
+  const ONLINE_KEY = 'sc-driver-online';               // this phone's driver was working: kept across reloads (a convenience; the real state is in Firestore)
   const alerts = createCallAlert();                     // new-call sound / vibration / message while online and the page is open (#365)
   let alertNote = '';                                   // what the browser allowed after "go online": shown under the button
   let privOk = null, privDraft = null;                  // does this applicant already have NID + family details saved? (#365)
@@ -78,6 +79,10 @@ export function initProvide(ctx) {
       if (isAdm) { try { pend = await fb.pendingProviders(); } catch { pend = []; } try { rateTable = await fb.readRateTable(); } catch { rateTable = []; } }
       if (prov?.approved) {
         if (!reqUnsub) reqUnsub = fb.watchRequests(prov, (list) => { reqs = list; alerts.check(list, { title: T().newCallTitle, body: (r) => fill(T().newCallBody, { s: name(r.type), p: r.pickup.label }) }); paintReqs(); }, (e) => { const b = view?.querySelector('.pv-reqs'); if (b) b.replaceChildren(el('p', 'note', errText(e))); });
+        if (!online && ctx.store.get(ONLINE_KEY) === '1') {      // a reload must not turn a working driver into an offline one (#369)
+          online = true; keepOnline(); fb.goOnline(prov).catch(() => {});
+          alerts.arm().then((st) => { alertNote = st.sound ? T().alertSoundOnly : T().alertScreenOnly; });
+        }
         myJobs = await fb.myRides('provider');
         const act = myJobs.find((r) => ['accepted', 'arrived', 'on_trip', 'completed'].includes(r.status));
         if (act && (!job || job.id !== act.id)) { job = act; follow(act.id); }
@@ -340,8 +345,8 @@ export function initProvide(ctx) {
       if (what === 'savepriv') { const pv = readPriv(); if (pv.error) return say(pv.error); await fb.saveProviderPrivate(pv.data); privOk = true; ctx.toast(T().privSaved); return show(view); }
       if (what === 'withdraw') { await fb.withdrawProvider(); prov = null; privOk = null; return paint(); }
       if (what === 'online') {
-        if (online) { await fb.goOffline(); online = false; alerts.disarm(); alertNote = ''; keepOnline(); return paint(); }
-        await fb.goOnline(prov); online = true; ctx.toast(T().nowOnline); keepOnline();
+        if (online) { await fb.goOffline(); online = false; ctx.store.set(ONLINE_KEY, '0'); alerts.disarm(); alertNote = ''; keepOnline(); return paint(); }
+        await fb.goOnline(prov); online = true; ctx.store.set(ONLINE_KEY, '1'); ctx.toast(T().nowOnline); keepOnline();
         const st = await alerts.arm();                        // this tap lets the browser play sound and ask about notifications
         alertNote = st.notifications && st.sound ? T().alertFull : st.sound ? T().alertSoundOnly : T().alertScreenOnly;
         return paint();

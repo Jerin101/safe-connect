@@ -124,3 +124,14 @@ test('service worker lists the new script and the version is above production', 
   assert.ok(sw.includes("'js/driveralert.js'"));
   assert.ok(Number(sw.match(/VERSION = 'v(\d+)-/)[1]) >= 82);
 });
+
+test('#369: silent check remembers requests without sounding; driverwatch is listed offline and has Bangla strings', async () => {
+  const { env, log } = fakeEnv();
+  const a = createCallAlert(env); await a.arm(); a.check([]);
+  assert.equal(a.check([req('s1')], { silent: true }).length, 1);
+  assert.equal(log.vibrate.length, 0); assert.equal(log.osc, 0);
+  assert.equal(a.check([req('s1')]).length, 0, 'not announced again when the driver leaves the provide page');
+  assert.ok(readFileSync('src/service-worker.js', 'utf8').includes("'js/driverwatch.js'"));
+  const bn = JSON.parse(readFileSync('src/js/lang/bn.json', 'utf8')).page.provide;
+  for (const k of ['watchCalls', 'watchIdle', 'watchOpen', 'watchSound']) assert.match(bn[k], /[ঀ-৿]/, k);
+});
