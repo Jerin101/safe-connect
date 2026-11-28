@@ -672,3 +672,11 @@ main[data-page="home"] .feed { max-width: 900px; width: 100%; margin-inline: aut
 .dir-area h2 { margin: 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+
+/* #369: the form's tick box must not be stretched like a text field; the new-call bar for an online driver on every page */
+#provide input[type="checkbox"], #dakun input[type="checkbox"] { width: 22px; height: 22px; min-height: 0; padding: 0; flex: none; accent-color: var(--accent); }
+#provide .check { align-items: flex-start; min-width: 0; line-height: 1.4; }
+.drv-bar { position: fixed; left: 12px; right: 12px; top: 8px; z-index: 8; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 520px; margin: 0 auto;
+  padding: 10px 12px; border-radius: 14px; background: var(--surface); color: var(--ink); border: 2px solid var(--accent); box-shadow: 0 6px 22px rgba(0,0,0,.25); font-weight: 700; }
+.drv-bar[hidden] { display: none; }
+.drv-bar span { flex: 1 1 160px; }

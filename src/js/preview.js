@@ -15,6 +15,7 @@ import { icon as lineIcon } from './icons.js';
 import { initNear } from './near.js';
 import { initDakun } from './dakun.js';
 import { initProvide } from './provide.js';
+import { initDriverWatch } from './driverwatch.js';
 import { initEmergency } from './emergency.js';
 import { initLive } from './live.js';
 
@@ -2095,6 +2096,7 @@ const auth = initAuth({
 // Pages: show the page in the address now; an area address waits for the data it needs.
 history.scrollRestoration = 'manual';
 makeNear();
+initDriverWatch({ el, store, go, toast: showToast, texts: () => LANG[lang].page.provide, onProvidePage: () => !$('provide').hidden });   // new-call alert on every page for an online driver (#369)
 window.addEventListener('hashchange', () => route());
 const isPlace = () => ['area', 'help'].includes(readHash()[0]) && readHash().length > 1;   // these wait for the data
 if (!isPlace()) route();

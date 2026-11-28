@@ -44,7 +44,7 @@ export function createCallAlert(env = {}) {
 
   // list = the open requests for this driver (ride objects); returns the NEW ones. The first list after arm() is the baseline
   // and is not announced as new (the page already shows them), unless announceFirst is set.
-  function check(list, { announceFirst = false, title = '', body = (r) => '' } = {}) {
+  function check(list, { announceFirst = false, silent = false, title = '', body = (r) => '' } = {}) {
     const fresh = [];
     for (const r of list || []) {
       if (!r || !r.id) continue;
@@ -52,7 +52,7 @@ export function createCallAlert(env = {}) {
     }
     first = false;
     for (const id of [...seen]) if (!(list || []).some((r) => r && r.id === id)) seen.delete(id);   // answered or cancelled
-    if (armed && fresh.length) {
+    if (armed && fresh.length && !silent) {
       beep();
       try { nav.vibrate?.(VIBRATE); } catch { /* not supported */ }
       if (doc) { if (baseTitle === null) baseTitle = doc.title; doc.title = `(${fresh.length}) ${title || baseTitle}`; }
