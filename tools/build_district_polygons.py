@@ -7,13 +7,14 @@ src/data/polygons/index.json, plus docs/reports/m1_2_district_layers.json (sizes
 Nothing is invented: a unit without a polygon in the source gets NO polygon (see "not_in_source" in index.json) and the
 site must use the district fallback. A union point inside an upazila polygon says "probably in this upazila"; it is not a union boundary.
 
-Run: python tools/build_district_polygons.py --zip PATH/bgd_admin_boundaries.geojson.zip [--tolerance 100]
+Run: python tools/build_district_polygons.py --zip PATH/bgd_admin_boundaries.geojson.zip [--tolerance 110]
 """
 import argparse, gzip, hashlib, json, os, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import m12_polygon_pilot as P  # geometry helpers: prepare, simplify_polys, encode, bbox, sizes ...
+import m12_topology as TOPO     # shared borders are simplified once, so neighbours leave no gaps or overlaps (M1.2 T2)
 
 ROOT = P.ROOT
 # Reported by news only (see docs/reports/M1_2_POLYGON_PILOT.md): NOT in the 2023 source, no polygon, district fallback.
@@ -26,6 +27,26 @@ NOT_IN_SOURCE = [
 KIND = {'union': 'u', 'pourashava': 'p', 'ward': 'w'}
 
 
+def round_polys(polys):
+    """Round to the file precision. Both sides of a shared border hold identical points, so they still match."""
+    out = []
+    for poly in polys:
+        rings = []
+        for k, ring in enumerate(poly):
+            q = [(round(x, P.PRECISION), round(y, P.PRECISION)) for x, y in ring[:-1]]
+            q = [p for i, p in enumerate(q) if i == 0 or p != q[i - 1]]
+            if len(q) > 1 and q[0] == q[-1]:
+                q.pop()
+            q.append(q[0])
+            if len(q) >= 4 and abs(P.ring_area(q)) > 0:
+                rings.append(q)
+            elif k == 0:
+                rings = []; break
+        if rings:
+            out.append(rings)
+    return out
+
+
 def r6(v):
     return round(float(v), 5)  # about 1 m
 
@@ -33,7 +54,7 @@ def r6(v):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--zip', required=True)
-    ap.add_argument('--tolerance', type=float, default=100)
+    ap.add_argument('--tolerance', type=float, default=110)
     ap.add_argument('--out', default=os.path.join(ROOT, 'src', 'data', 'polygons'))
     ap.add_argument('--report', default=os.path.join(ROOT, 'docs', 'reports', 'm1_2_district_layers.json'))
     a = ap.parse_args()
@@ -77,14 +98,16 @@ def main():
 
     index, rep = [], {}
     tot = {'raw': 0, 'gzip': 0, 'unions': 0, 'union_no_coord': 0, 'retried': 0}
+    prepared = {c: P.prepare(f['geometry'])[0] for c, f in feats.items()}
+    shared, topo = TOPO.simplify_shared(prepared, a.tolerance)
+    print('shared-border simplification:', topo)
     for dcode in sorted(dis):
         d = dis[dcode]
         codes = sorted(by_dis.get(dcode, []))
         uf, dbox, problems = [], [], []
         for c in codes:
-            polys, notes = P.prepare(feats[c]['geometry'])
-            simp, retried = P.simplify_polys(polys, a.tolerance)
-            tot['retried'] += retried
+            simp = round_polys(shared[c])
+            tot['retried'] = topo['retried_rings']
             flat = [r for poly in simp for r in poly]
             if P.self_intersections(flat) or not flat:
                 problems.append(f'{c}: invalid after simplification')
@@ -136,7 +159,7 @@ def main():
     out = {'zip_sha256': zip_sha, 'tolerance_m': a.tolerance, 'source_polygons': len(feats), 'master_units': len(upz),
            'master_units_without_polygon': missing_in_source, 'polygons_without_master_unit': extra_in_source,
            'districts': len(index), 'index_raw_bytes': iraw, 'index_gzip_bytes': igz, 'total_layers_raw_bytes': tot['raw'], 'total_layers_gzip_bytes': tot['gzip'],
-           'total_union_points': tot['unions'], 'union_points_without_coordinates': tot['union_no_coord'], 'rings_retried': tot['retried'],
+           'total_union_points': tot['unions'], 'union_points_without_coordinates': tot['union_no_coord'], 'rings_retried': tot['retried'], 'shared_border_arcs': topo['arcs'], 'arcs_shared_by_two_units': topo['shared_arcs'],
            'largest_raw': max(rep.items(), key=lambda kv: kv[1]['raw_bytes'])[0], 'largest_gzip': max(rep.items(), key=lambda kv: kv[1]['gzip_bytes'])[0], 'per_district': rep}
     json.dump(out, open(a.report, 'w', encoding='utf-8', newline='\n'), indent=1, ensure_ascii=False)
     bad = [c for c, r in rep.items() if r['problems']]

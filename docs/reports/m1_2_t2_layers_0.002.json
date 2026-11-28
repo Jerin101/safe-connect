@@ -1,0 +1,79 @@
+{
+ "step_deg": 0.002,
+ "units": 507,
+ "covered_km2": 145742.0,
+ "overlap_cells": 2,
+ "overlap_km2": 0.09,
+ "overlap_pairs": 1,
+ "worst_overlaps": [
+  {
+   "a": "Paba (Rajshahi)",
+   "b": "Rajshahi City Corporation (Rajshahi)",
+   "km2": 0.09
+  }
+ ],
+ "gap_components": 32,
+ "gap_km2": 5.82,
+ "worst_gaps": [
+  {
+   "cells": 67,
+   "km2": 3.02,
+   "lon": 89.6454,
+   "lat": 26.1738
+  },
+  {
+   "cells": 19,
+   "km2": 0.86,
+   "lon": 89.7957,
+   "lat": 26.0275
+  },
+  {
+   "cells": 8,
+   "km2": 0.36,
+   "lon": 91.606,
+   "lat": 22.9588
+  },
+  {
+   "cells": 3,
+   "km2": 0.14,
+   "lon": 89.6083,
+   "lat": 26.1557
+  },
+  {
+   "cells": 2,
+   "km2": 0.09,
+   "lon": 91.328,
+   "lat": 22.517
+  },
+  {
+   "cells": 2,
+   "km2": 0.09,
+   "lon": 88.575,
+   "lat": 23.736
+  },
+  {
+   "cells": 2,
+   "km2": 0.09,
+   "lon": 88.194,
+   "lat": 26.153
+  },
+  {
+   "cells": 2,
+   "km2": 0.09,
+   "lon": 89.616,
+   "lat": 26.167
+  },
+  {
+   "cells": 1,
+   "km2": 0.05,
+   "lon": 89.481,
+   "lat": 25.989
+  },
+  {
+   "cells": 1,
+   "km2": 0.05,
+   "lon": 89.535,
+   "lat": 26.003
+  }
+ ]
+}

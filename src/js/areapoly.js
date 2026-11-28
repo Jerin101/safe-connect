@@ -1,5 +1,5 @@
 // M1.2: which UPAZILA boundary is a position inside? Per-district layers made from BBS COD-AB v03 (OCHA HDX, CC BY-IGO,
-// simplified 100 m; see data/polygons/index.json for the source and the modification notice).
+// simplified 110 m; see data/polygons/index.json for the source and the modification notice).
 // Only upazila (and city corporation) boundaries exist in the official data. There is NO union boundary, so this file
 // never says "exact union"; see unioncentre.js for "nearest union centre". Nothing leaves the phone (CLAUDE.md rule 5):
 // the position is only compared with files that were downloaded to the phone.
@@ -56,7 +56,7 @@ function prepareDistrict(doc) {
 }
 
 // Distance in metres from a position to the nearest edge of the polygon it is inside (outer ring and holes).
-// The boundaries are simplified (100 m), so any answer closer to an edge than that is uncertain.
+// The boundaries are simplified (110 m), so any answer closer to an edge than that is uncertain.
 export function edgeDistanceM(lat, lon, poly) {
   const mx = 111320 * Math.cos((lat * Math.PI) / 180), my = 110574;
   let best = Infinity;
