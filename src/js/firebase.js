@@ -229,7 +229,7 @@ export async function sendPlaceStatus(placeId, value, next) {
 const err = (code) => Object.assign(new Error(code), { code });
 const me = () => { const u = auth.currentUser; if (!u) throw err('signed-out'); return u; };
 const asRide = (d) => { const x = d.data(); const out = { id: d.id, ...x };
-  for (const k of ['createdAt', 'updatedAt', 'acceptedAt', 'arrivedAt', 'startedAt', 'endedAt', 'paidAt']) out[k] = millis(x[k]);
+  for (const k of ['createdAt', 'updatedAt', 'acceptedAt', 'arrivedAt', 'startedAt', 'endedAt', 'paidAt', 'riderSeenAt']) out[k] = millis(x[k]);
   return out; };
 
 // The person's own provider entry (or null), and applying to be one (an admin approves it).
@@ -239,7 +239,26 @@ export async function myProvider() {
 }
 export const applyProvider = ({ name, type, vehicle, district }) => setDoc(doc(db, 'providers', me().uid),
   { name, type, vehicle, district, approved: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-export const withdrawProvider = () => deleteDoc(doc(db, 'providers', me().uid));
+// NID and one family contact, for the admin who approves (#365). Private: only this person and admins can read it (firestore.rules);
+// it is deleted on withdraw and on reject. Never logged, never put in a link.
+export const saveProviderPrivate = ({ nid, familyName, familyRelation, familyPhone }) => setDoc(doc(db, 'providerPrivate', me().uid),
+  { nid, familyName, familyRelation, familyPhone, consent: true, createdAt: serverTimestamp() });
+export async function hasProviderPrivate(uid = me().uid) {
+  try { return (await getDoc(doc(db, 'providerPrivate', uid))).exists(); } catch { return false; }
+}
+// Admins only: what the applicant gave, to check before approving (null if nothing was given).
+export async function readProviderPrivate(uid) {
+  const snap = await getDoc(doc(db, 'providerPrivate', uid));
+  return snap.exists() ? snap.data() : null;
+}
+// The record goes first, then the application (the rules only let the application be deleted while it is not approved).
+export async function withdrawProvider() {
+  const uid = me().uid;
+  try { await deleteDoc(doc(db, 'providerPrivate', uid)); } catch { /* none, or already gone */ }
+  await deleteDoc(doc(db, 'providers', uid));
+}
+// The rider's page says "still here" while a request or trip is open; the driver sees how long ago (#365).
+export const riderBeat = (id) => updateDoc(doc(db, 'rides', id), { riderSeenAt: serverTimestamp() });
 // Admins only: providers waiting for approval, and approving one (with its audit entry, in one batch).
 export async function pendingProviders() {
   const snap = await getDocs(query(collection(db, 'providers'), where('approved', '==', false), limit(50)));
@@ -258,6 +277,7 @@ export async function rejectProvider(uid) {
   batch.set(auditRef, { actorUid: me().uid, action: 'PROVIDER_REJECTED', entity: 'providers', entityId: uid,
     meta: { from: 'pending', to: 'rejected' }, at: serverTimestamp() });
   batch.update(doc(db, 'providers', uid), { approved: false, rejected: true, updatedAt: serverTimestamp(), lastAuditId: auditRef.id });
+  batch.delete(doc(db, 'providerPrivate', uid));          // a rejected applicant's NID and family details are not kept (#365)
   await batch.commit();
 }
 

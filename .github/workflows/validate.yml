@@ -32,6 +32,8 @@ jobs:
         run: node --test tests/areapoly-test.mjs
       - name: Where the map puts you, model and card (M1.2)
         run: node --test tests/whereami-test.mjs
+      - name: Driver new-call alert and rider state (#365)
+        run: node --test tests/driveralert-test.mjs
       - name: GPS -> upazila shapes test
         run: node --test tests/locations/upazila-shapes-test.mjs
       - name: GPS best-fix acquisition tests

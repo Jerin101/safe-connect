@@ -5,6 +5,7 @@
 // position at all: riders only see how many providers work in the district. Built with createElement + textContent.
 import { icon } from './icons.js';
 import { createLiveMap, roadRoute } from './routemap.js';
+import { createCallAlert } from './driveralert.js';
 
 const TYPE_IC = { ambulance: 'amb', cng: 'car', bike: 'bike', technician: 'wrench', help: 'hands', errand: 'basket', pickup: 'bag', towing: 'car' };
 const r5 = (x) => Math.round(x * 1e5) / 1e5;
@@ -20,6 +21,9 @@ export function initProvide(ctx) {
   let view = null, here = null, user = null, prov, isAdm = false, pend = null, rates = null;
   let ovUnsub = null, allRides = [], ovMap = null, reqMap = null;
   let reqs = [], reqUnsub = null, myJobs = null, online = false, onlineTimer = null;
+  const alerts = createCallAlert();                     // new-call sound / vibration / message while online and the page is open (#365)
+  let alertNote = '';                                   // what the browser allowed after "go online": shown under the button
+  let privOk = null, privDraft = null;                  // does this applicant already have NID + family details saved? (#365)
   let job = null, jobUnsub = null, liveUnsub = null, other = null, mine = null, geoId = null, lastSent = null, track = null, itemsDraft = '';
 
   const tk = (n) => fill(D().taka, { n: num(n) });
@@ -67,12 +71,13 @@ export function initProvide(ctx) {
       }
       if (!(await fb.isVerified())) { v.replaceChildren(head, card(note(D().err.unverified))); return; }
       prov = await fb.myProvider();
+      if (prov && !prov.approved && !prov.rejected) privOk = await fb.hasProviderPrivate(); else privOk = null;
       if (!rates) { try { rates = await fb.readRates(prov?.district); } catch { rates = {}; } }
       isAdm = (await fb.roleOf(user, ctx.lang())) === 'admin';
       if (isAdm && !ovUnsub) ovUnsub = fb.watchAllRides((l) => { allRides = l; paintOverview(); }, () => {});
       if (isAdm) { try { pend = await fb.pendingProviders(); } catch { pend = []; } try { rateTable = await fb.readRateTable(); } catch { rateTable = []; } }
       if (prov?.approved) {
-        if (!reqUnsub) reqUnsub = fb.watchRequests(prov, (list) => { reqs = list; paintReqs(); }, (e) => { const b = view?.querySelector('.pv-reqs'); if (b) b.replaceChildren(el('p', 'note', errText(e))); });
+        if (!reqUnsub) reqUnsub = fb.watchRequests(prov, (list) => { reqs = list; alerts.check(list, { title: T().newCallTitle, body: (r) => fill(T().newCallBody, { s: name(r.type), p: r.pickup.label }) }); paintReqs(); }, (e) => { const b = view?.querySelector('.pv-reqs'); if (b) b.replaceChildren(el('p', 'note', errText(e))); });
         myJobs = await fb.myRides('provider');
         const act = myJobs.find((r) => ['accepted', 'arrived', 'on_trip', 'completed'].includes(r.status));
         if (act && (!job || job.id !== act.id)) { job = act; follow(act.id); }
@@ -89,13 +94,14 @@ export function initProvide(ctx) {
     else if (prov && !prov.approved && prov.rejected) parts.push(card(el('h2', null, T().rejectedTitle), el('p', 'muted', `${prov.name} · ${name(prov.type)} · ${prov.vehicle}`),
       el('p', 'muted', T().rejectedText), pills(btn('btn solid', T().withdraw, null, () => act('withdraw'))), msgBox()));
     else if (prov && !prov.approved) parts.push(card(el('h2', null, T().pendingTitle), el('p', 'muted', `${prov.name} · ${name(prov.type)} · ${prov.vehicle}`),
-      el('p', 'muted', T().pendingText), pills(btn('btn solid', T().checkAgain, null, () => show(view)), btn('btn ghost', T().withdraw, null, () => act('withdraw'))), msgBox()));
+      el('p', 'muted', T().pendingText), ...(privOk === false ? [note(T().privMissing, 'shield'), ...privForm(), pills(btn('btn solid', T().privSave, null, () => act('savepriv')))] : []),
+      pills(btn('btn solid', T().checkAgain, null, () => show(view)), btn('btn ghost', T().withdraw, null, () => act('withdraw'))), msgBox()));
     else if (prov) {
       const status = card();
       const sh = el('div', 'sec-head'); sh.append(el('h2', null, prov.name), el('span', 'badge b-ok', T().approved));
       status.append(sh, el('p', 'muted', `${name(prov.type)} · ${prov.vehicle} · ${prov.district}`),
         pills(btn(online ? 'btn' : 'btn solid', online ? T().goOffline : T().goOnline, null, () => act('online'))),
-        el('p', 'small', online ? T().onlineNote : T().offlineNote));
+        el('p', 'small', online ? T().onlineNote : T().offlineNote), online ? el('p', 'small pv-alertnote', `${alertNote || T().alertScreenOnly} ${T().alertLimit}`) : null);
       parts.push(status);
       if (job && ['accepted', 'arrived', 'on_trip', 'completed'].includes(job.status)) {
         const jp = el('div', 'pv-job'); jp.append(...jobPanel());
@@ -115,6 +121,30 @@ export function initProvide(ctx) {
     if (rb2) setTimeout(() => mountMap(rb2, (m) => { reqMap = m; paintReqs(); }), 0);
   }
 
+  /* ---------- NID and family details, for the admin who approves (#365) ---------- */
+  const latin = (x) => String(x).trim().replace(/[০-৯]/g, (c) => '০১২৩৪৫৬৭৮৯'.indexOf(c)).replace(/[\s-]/g, '');
+  const RELATIONS = ['father', 'mother', 'spouse', 'brother', 'sister', 'son', 'daughter', 'other'];
+  // -> { data } or { error: text }. The same checks as firestore.rules, so a wrong entry is explained before it is sent.
+  function readPriv() {
+    const nid = latin(val('pvNid')), phone = latin(val('pvFamPhone')), famName = val('pvFamName').trim(), rel = val('pvFamRel') || 'other';
+    if (!/^([0-9]{10}|[0-9]{13}|[0-9]{17})$/.test(nid)) return { error: T().nidBad };
+    if (famName.length < 2 || HP(famName)) return { error: T().famNameBad };
+    if (!RELATIONS.includes(rel)) return { error: T().famNameBad };
+    if (!/^01[3-9][0-9]{8}$/.test(phone)) return { error: T().famPhoneBad };
+    if (!view.querySelector('#pvConsent')?.checked) return { error: T().consentNeed };
+    return { data: { nid, familyName: famName, familyRelation: rel, familyPhone: phone } };
+  }
+  function privForm() {
+    const rel = el('select'); rel.id = 'pvFamRel';
+    for (const r of RELATIONS) { const o = el('option', null, T().relations[r]); o.value = r; rel.append(o); }
+    const rl = el('label', null, T().famRel); rl.htmlFor = 'pvFamRel';
+    const nid = field('pvNid', T().nidLabel, '', { ph: T().nidPh, max: 20, tel: true });
+    const ph = field('pvFamPhone', T().famPhone, '', { ph: '01XXXXXXXXX', max: 14, tel: true });
+    const cb = el('input'); cb.type = 'checkbox'; cb.id = 'pvConsent';
+    const cl = el('label', 'check'); cl.htmlFor = 'pvConsent'; cl.append(cb, ' ', T().consentLabel);
+    return [el('h3', null, T().privTitle), note(T().privIntro, 'shield'), ...nid, ...field('pvFamName', T().famName, '', { max: 60 }), rl, rel, ...ph, cl];
+  }
+
   /* ---------- apply ---------- */
   function applyCard() {
     const sel = el('select'); sel.id = 'pvType';
@@ -123,7 +153,7 @@ export function initProvide(ctx) {
     const district = here ? here.label : T().noArea;
     return card(el('h2', null, T().applyTitle), el('p', 'muted', fill(T().applyText, { area: district })), l, sel,
       ...field('pvName', T().yourName, '', { ph: T().namePh }), ...field('pvVeh', T().vehicle, '', { ph: T().vehiclePh, max: 40 }),
-      pills(btn('btn solid', T().apply, null, () => act('apply'))), msgBox());
+      ...privForm(), pills(btn('btn solid', T().apply, null, () => act('apply'))), msgBox());
   }
 
   /* ---------- open calls ---------- */
@@ -141,10 +171,19 @@ export function initProvide(ctx) {
       b.append(el('div', 't', `${r.pickup.label}${r.drop ? ' → ' + r.drop.label : ''}`),
         el('div', 'm', [from ? fill(T().away, { d: dist(RM.metres(from, r.pickup)) }) : '', r.drop ? dist(r.estM) : '', r.type === 'help' ? D().free : `${D().estShort} ${tk(r.estFare)}`].filter(Boolean).join(' · ')));
       if (r.items) b.append(el('div', 'm', `${r.items} · ${r.type === 'errand' ? fill(D().maxLine, { t: tk(r.maxItems || 0) }) : D().itemsPaid}`));
+      b.append(presenceLine(r));
       const acts = el('div', 'acts'); acts.append(btn('btn solid', T().accept, null, () => act('accept', r)));
       row.append(sq, b, acts); rows.append(row);
     }
     box.replaceChildren(rows);
+  }
+
+  // Is the person who asked still on their page? From what their phone reported (riderSeenAt), never a guess (#365).
+  function presenceLine(r) {
+    const pr = RM.riderPresence(r.riderSeenAt);
+    const text = pr.state === 'online' ? T().riderOnline : pr.state === 'recent' ? fill(T().riderRecent, { m: num(pr.minutes) })
+      : pr.state === 'away' ? fill(T().riderGone, { m: num(pr.minutes) }) : T().riderUnknown;
+    return el('div', `small pv-presence pv-${pr.state}`, text);
   }
 
   /* ---------- the job ---------- */
@@ -293,13 +332,19 @@ export function initProvide(ctx) {
         if (!here) return say(T().noArea);
         if (nm.length < 2 || veh.length < 2) return say(T().needNameVehicle);
         if (HP(nm) || HP(veh)) return say(D().check.noPhone);
+        const pv = readPriv(); if (pv.error) return say(pv.error);
         await fb.applyProvider({ name: nm, type, vehicle: veh, district: cm.districtKey(here.district) });
-        ctx.toast(T().applied); return show(view);
+        try { await fb.saveProviderPrivate(pv.data); } catch { ctx.toast(T().applied); privOk = false; return show(view); }   // the pending card asks again
+        ctx.toast(T().applied); privOk = true; return show(view);
       }
-      if (what === 'withdraw') { await fb.withdrawProvider(); prov = null; return paint(); }
+      if (what === 'savepriv') { const pv = readPriv(); if (pv.error) return say(pv.error); await fb.saveProviderPrivate(pv.data); privOk = true; ctx.toast(T().privSaved); return show(view); }
+      if (what === 'withdraw') { await fb.withdrawProvider(); prov = null; privOk = null; return paint(); }
       if (what === 'online') {
-        if (online) { await fb.goOffline(); online = false; keepOnline(); return paint(); }
-        await fb.goOnline(prov); online = true; ctx.toast(T().nowOnline); keepOnline(); return paint();
+        if (online) { await fb.goOffline(); online = false; alerts.disarm(); alertNote = ''; keepOnline(); return paint(); }
+        await fb.goOnline(prov); online = true; ctx.toast(T().nowOnline); keepOnline();
+        const st = await alerts.arm();                        // this tap lets the browser play sound and ask about notifications
+        alertNote = st.notifications && st.sound ? T().alertFull : st.sound ? T().alertSoundOnly : T().alertScreenOnly;
+        return paint();
       }
       if (what === 'accept') {
         try { await fb.acceptRide(arg.id, prov); } catch (e) { if (e.code === 'permission-denied') throw { code: 'taken' }; throw e; }
@@ -323,7 +368,10 @@ export function initProvide(ctx) {
       }
       if (what === 'paid') { await fb.markPaid(job.id); ctx.toast(T().paidDone); return; }
       if (what === 'cancel') { await fb.cancelRide(job.id, 'provider', 0); await fb.clearLive(job.id); stopJob(); ctx.toast(D().cancelled); return paint(); }
-      if (what === 'approve') { await fb.approveProvider(arg, true); pend = await fb.pendingProviders(); ctx.toast(T().approvedDone); if (arg === user?.uid) return show(view); return paint(); }
+      if (what === 'approve') {
+        if (!view.querySelector(`#chk-${arg}`)?.checked) return say(T().needChecked);
+        await fb.approveProvider(arg, true); pend = await fb.pendingProviders(); ctx.toast(T().approvedDone); if (arg === user?.uid) return show(view); return paint();
+      }
       if (what === 'reject') { await fb.rejectProvider(arg); pend = await fb.pendingProviders(); ctx.toast(T().rejectedDone); return paint(); }
       if (what === 'clean') { const n = await fb.cleanExpiredShares(); ctx.toast(fill(T().cleaned, { n: num(n) })); say(fill(T().cleaned, { n: num(n) })); return; }
       if (what === 'rates' || what === 'defaults') {
@@ -382,7 +430,19 @@ export function initProvide(ctx) {
         const b = el('div'); b.append(el('div', 't', `${p.name} · ${name(p.type)}`), el('div', 'm', `${p.vehicle} · ${p.district}`));
         const acts = el('div', 'acts');
         if (p.id === user?.uid) b.append(el('div', 'small', T().selfNote));   // the rules do not let an admin approve their own application
-        else acts.append(btn('btn solid', T().approve, 'check', () => act('approve', p.id)), btn('btn ghost', T().reject, null, () => act('reject', p.id)));
+        else {
+          const det = el('div', 'small pv-priv'); det.hidden = true;
+          b.append(btn('btn ghost', T().showPriv, 'shield', async (e) => {
+            try {
+              const [fb2] = await load(); const d = await fb2.readProviderPrivate(p.id);
+              det.replaceChildren(...(d ? [el('div', null, `${T().nidLabel}: ${d.nid}`), el('div', null, `${T().famName}: ${d.familyName} (${T().relations[d.familyRelation] || d.familyRelation})`), el('div', null, `${T().famPhone}: ${d.familyPhone}`)] : [el('div', null, T().noPriv)]));
+              det.hidden = false; e.currentTarget.hidden = true;
+            } catch (err) { say(errText(err)); }
+          }), det);
+          const cb = el('input'); cb.type = 'checkbox'; cb.id = `chk-${p.id}`;
+          const cl = el('label', 'check small'); cl.htmlFor = cb.id; cl.append(cb, ' ', T().checkedLabel); b.append(cl);
+          acts.append(btn('btn solid', T().approve, 'check', () => act('approve', p.id)), btn('btn ghost', T().reject, null, () => act('reject', p.id)));
+        }
         row.append(sq, b, acts); rows.append(row);
       }
       ap.append(rows);

@@ -26,7 +26,7 @@ export function initDakun(ctx) {
   let here = null;                                      // { district, label, lat, lon } from js/near.js
   const form = { type: 'cng', pick: null, drop: null, pickLabel: '', dropLabel: '', picking: 'drop', online: null, items: '', maxItems: '', area: '' };
   let quick = [];
-  let ride = null, rideUnsub = null, liveUnsub = null, other = null, mine = null, geoId = null, lastSent = null;
+  let ride = null, rideUnsub = null, liveUnsub = null, other = null, mine = null, geoId = null, lastSent = null, beatTimer = null;
   let view = null, map = null, mk = {}, lines = null, lastFit = null;
 
   /* ---------- small helpers ---------- */
@@ -389,6 +389,7 @@ export function initDakun(ctx) {
     ride = r;
     if (!r) { stopRide(); store.set('sc-ride', ''); if (view?.isConnected) show(view); return; }
     const live = RM.LIVE.includes(r.status);
+    keepBeat(r);
     if (live && !liveUnsub) liveUnsub = fb.watchLive(r.id, 'provider', (p) => { other = p; paint(); }, () => {});
     if (live) startGeo(); else { stopGeo(); if (liveUnsub) { liveUnsub(); liveUnsub = null; } other = null; }
     if (['completed', 'paid', 'cancelled'].includes(r.status) && was && RM.LIVE.includes(was)) fb.clearLive(r.id).catch(() => {});
@@ -403,7 +404,16 @@ export function initDakun(ctx) {
     paintMarkers();
   }
   function stopGeo() { if (geoId != null) navigator.geolocation.clearWatch(geoId); geoId = null; }
-  function stopRide() { stopGeo(); if (rideUnsub) rideUnsub(); if (liveUnsub) liveUnsub(); rideUnsub = liveUnsub = null; other = mine = null; lastSent = null; }
+  // While the request (or the trip to the pickup) is open, tell the driver every 30 s that this page is still here (#365).
+  // Only the time is sent (riderSeenAt, server time); nothing about where the person is. Not sent while the page is hidden.
+  function keepBeat(r) {
+    const open = ['requested', 'accepted', 'arrived'].includes(r.status);
+    if (!open) { clearInterval(beatTimer); beatTimer = null; return; }
+    if (beatTimer) return;
+    const beat = () => { if (document.visibilityState === 'hidden' || !ride) return; load().then(([fb]) => fb.riderBeat(ride.id)).catch(() => {}); };
+    beat(); beatTimer = setInterval(beat, 30000);
+  }
+  function stopRide() { clearInterval(beatTimer); beatTimer = null; stopGeo(); if (rideUnsub) rideUnsub(); if (liveUnsub) liveUnsub(); rideUnsub = liveUnsub = null; other = mine = null; lastSent = null; }
   // our own position while the ride is live: sent at most every 8 s and only after 25 m, or once a minute
   function startGeo() {
     if (geoId != null || !navigator.geolocation) return;

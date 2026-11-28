@@ -274,12 +274,30 @@ service cloud.firestore {
         || (isAdmin() && uid != request.auth.uid
           && changed().hasOnly(['approved', 'rejected', 'updatedAt', 'lastAuditId']) && now('updatedAt')
           && ((incoming().approved == true && incoming().get('rejected', false) == false && resource.data.approved == false
+              && exists(/databases/$(database)/documents/providerPrivate/$(uid))      // the admin has the NID and family details to check (#365)
               && audited('providers', uid, 'PROVIDER_APPROVED'))
             || (incoming().approved == false && incoming().get('rejected', false) == true && resource.data.get('rejected', false) == false
               && audited('providers', uid, 'PROVIDER_REJECTED'))
             || (incoming().approved == false && incoming().get('rejected', false) == false && resource.data.approved == true
               && audited('providers', uid, 'PROVIDER_APPROVED'))));
       allow delete: if isMe(uid) && resource.data.approved == false;
+    }
+
+    // providerPrivate/{uid} (#365): the NID number and one family contact an applicant gives so an admin can approve them.
+    // Read ONLY by that person and by admins, one document at a time (no listing); never shown to riders or anyone else. The person
+    // writes it while not yet approved; it is deleted when they withdraw or when an admin rejects them. Nobody else can write it.
+    match /providerPrivate/{uid} {
+      allow get: if isMe(uid) || isAdmin();
+      allow create, update: if isMe(uid) && verified()
+        && exists(provPath(uid)) && get(provPath(uid)).data.approved == false
+        && incoming().keys().hasOnly(['nid', 'familyName', 'familyRelation', 'familyPhone', 'consent', 'createdAt'])
+        && incoming().nid is string && incoming().nid.matches('^([0-9]{10}|[0-9]{13}|[0-9]{17})$')
+        && placeText(incoming().familyName, 2, 60)
+        && incoming().familyRelation in ['father', 'mother', 'spouse', 'brother', 'sister', 'son', 'daughter', 'other']
+        && incoming().familyPhone is string && incoming().familyPhone.matches('^01[3-9][0-9]{8}$')
+        && incoming().consent == true
+        && incoming().createdAt == request.time;
+      allow delete: if isMe(uid) || isAdmin();
     }
 
     match /fare_rates/{rateId} {
@@ -392,6 +410,10 @@ service cloud.firestore {
           || (resource.data.status == 'paid' && !('rating' in resource.data)
             && changed().hasOnly(['rating', 'updatedAt']) && incoming().rating is int && incoming().rating >= 1 && incoming().rating <= 5)))
       );
+      // The rider's page tells the driver it is still there (#365): only riderSeenAt, only while the request or trip is open.
+      allow update: if signedIn() && resource.data.riderUid == request.auth.uid
+        && resource.data.status in ['requested', 'accepted', 'arrived']
+        && changed().hasOnly(['riderSeenAt']) && incoming().get('riderSeenAt', null) == request.time;
       allow delete: if false;
 
       match /live/{who} {
