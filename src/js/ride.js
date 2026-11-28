@@ -102,3 +102,15 @@ export function receiptText(r, bn = (x) => String(x)) {
     `${r.type === 'errand' ? 'মোট' : 'ভাড়া'}: ${bn(billTotal(r))} টাকা (নগদ) · ${r.payStatus === 'paid' ? 'পরিশোধিত' : 'বাকি'}`];
   return lines.join('\n');
 }
+
+// How recently the rider's page said "still here" (riderSeenAt, set by the rider's page every 30 s while the request is open, #365).
+// -> { state: 'online' | 'recent' | 'away' | 'unknown', minutes }. Only what the phone reported: never a guess about where the rider is.
+export const PRESENCE_ONLINE_MS = 75000;     // two missed beats still count as online
+export const PRESENCE_AWAY_MS = 3 * 60000;
+export function riderPresence(seenAt, now = Date.now()) {
+  if (!Number.isFinite(seenAt) || seenAt <= 0) return { state: 'unknown', minutes: 0 };
+  const age = Math.max(0, now - seenAt);
+  if (age <= PRESENCE_ONLINE_MS) return { state: 'online', minutes: 0 };
+  const minutes = Math.max(1, Math.round(age / 60000));
+  return { state: age <= PRESENCE_AWAY_MS ? 'recent' : 'away', minutes };
+}

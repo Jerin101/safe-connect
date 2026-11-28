@@ -14,6 +14,7 @@ let env;
 const db = (uid) => (uid ? env.authenticatedContext(uid, { email: `${uid}@example.com`, email_verified: true }) : env.unauthenticatedContext()).firestore();
 const dbUnverified = (uid) => env.authenticatedContext(uid, { email: `${uid}@example.com`, email_verified: false }).firestore();
 const today = () => Math.floor(Date.now() / 86400000);
+const PRIV = (extra = {}) => ({ nid: '1234567890123', familyName: 'করিম উদ্দিন', familyRelation: 'father', familyPhone: '01712345678', consent: true, createdAt: serverTimestamp(), ...extra });
 const MAIJDEE = { lat: 22.87, lon: 91.099, label: 'মাইজদী বাজার' };
 const HOSPITAL = { lat: 22.86, lon: 91.095, label: 'জেনারেল হাসপাতাল' };
 const prov = (type, district, approved, name = 'রহিম', vehicle = 'নোয়াখালী-থ-১২৩৪') => ({ name, type, vehicle, district, approved, createdAt: new Date(), updatedAt: new Date() });
@@ -171,8 +172,12 @@ describe('providers', () => {
     await assertFails(setDoc(doc(db('y-uid'), 'providers', 'y-uid'), { ...app, approved: true }));
     await assertFails(setDoc(doc(db('z-uid'), 'providers', 'z-uid'), { ...app, vehicle: 'ফোন 01711223344' }));
   });
-  test('an admin approves with an audit entry; nobody else reads a provider', async () => {
+  test('an admin approves with an audit entry (after the NID and family details exist); nobody else reads a provider', async () => {
     const fa = db(ADMIN);
+    const first = await audited(fa, ADMIN, 'providers', PENDING, 'PROVIDER_APPROVED', { from: 'false', to: 'true' });
+    first.b.update(doc(fa, 'providers', PENDING), { approved: true, updatedAt: serverTimestamp(), lastAuditId: first.a.id });
+    await assertFails(first.b.commit());            // no NID / family record yet (#365)
+    await assertSucceeds(setDoc(doc(db(PENDING), 'providerPrivate', PENDING), PRIV()));
     const { b, a } = await audited(fa, ADMIN, 'providers', PENDING, 'PROVIDER_APPROVED', { from: 'false', to: 'true' });
     b.update(doc(fa, 'providers', PENDING), { approved: true, updatedAt: serverTimestamp(), lastAuditId: a.id });
     await assertSucceeds(b.commit());
@@ -480,5 +485,65 @@ describe('তৈরি অর্ডার তুলে আনুন (pickup poin
     const done = (f) => step(db(TOWER), id, { status: 'completed', endedAt: serverTimestamp(), distM: 4000, waitMin: 0, fare: f, payStatus: 'pending' });
     await assertFails(done(fare(DEFAULT_RATES.cng, 4000, 0)));
     await assertSucceeds(done(fare(DEFAULT_RATES.towing, 4000, 0)));
+  });
+});
+
+describe('NID and family details for approval, and the rider presence heartbeat (#365)', () => {
+  const priv = (uid) => doc(db(uid), 'providerPrivate', uid);
+  test('the applicant writes their own record while not approved; format is checked', async () => {
+    await assertSucceeds(setDoc(priv(PENDING), PRIV()));
+    await assertSucceeds(setDoc(priv(PENDING), PRIV({ familyName: 'রহিমা বেগম', familyRelation: 'mother' })));   // may correct it
+    for (const bad of [{ nid: '12345' }, { nid: 'abcdefghij' }, { nid: 1234567890 }, { familyPhone: '12345' }, { familyPhone: '01212345678' }, { familyRelation: 'friend' },
+      { consent: false }, { consent: undefined }, { familyName: 'ক' }, { familyName: 'করিম 01712345678' }, { extra: 'x' }, { createdAt: new Date(0) }]) {
+      const d = PRIV(bad); if (d.consent === undefined) delete d.consent;
+      await assertFails(setDoc(priv(PENDING), d));
+    }
+  });
+  test('only the applicant and admins can read it, one document at a time; nobody lists them', async () => {
+    await assertSucceeds(setDoc(priv(PENDING), PRIV()));
+    await assertSucceeds(getDoc(doc(db(PENDING), 'providerPrivate', PENDING)));
+    await assertSucceeds(getDoc(doc(db(ADMIN), 'providerPrivate', PENDING)));
+    for (const who of [RINA, DRIVER, KARIM, null]) await assertFails(getDoc(doc(db(who), 'providerPrivate', PENDING)));
+    await assertFails(getDocs(collection(db(ADMIN), 'providerPrivate')));
+    await assertFails(getDocs(collection(db(PENDING), 'providerPrivate')));
+  });
+  test('nobody writes it for someone else; an approved provider cannot change it; an unverified email cannot write it', async () => {
+    await assertFails(setDoc(doc(db(ADMIN), 'providerPrivate', PENDING), PRIV()));
+    await assertFails(setDoc(doc(db(RINA), 'providerPrivate', PENDING), PRIV()));
+    await assertFails(setDoc(doc(db(DRIVER), 'providerPrivate', DRIVER), PRIV()));             // DRIVER is already approved
+    await assertFails(setDoc(doc(dbUnverified(PENDING), 'providerPrivate', PENDING), PRIV()));
+    await assertFails(setDoc(doc(db(KARIM), 'providerPrivate', KARIM), PRIV()));                // KARIM has no provider application? (seeded approved)
+    await assertFails(setDoc(doc(db(RINA), 'providerPrivate', RINA), PRIV()));                  // no application at all
+  });
+  test('delete: the applicant (withdraw) and an admin (reject) can; nobody else', async () => {
+    await assertSucceeds(setDoc(priv(PENDING), PRIV()));
+    await assertFails(deleteDoc(doc(db(RINA), 'providerPrivate', PENDING)));
+    await assertSucceeds(deleteDoc(doc(db(ADMIN), 'providerPrivate', PENDING)));
+    await assertSucceeds(setDoc(priv(PENDING), PRIV()));
+    await assertSucceeds(deleteDoc(doc(db(PENDING), 'providerPrivate', PENDING)));
+    assert.equal(await readAs('providerPrivate', PENDING), null);
+  });
+  test('rider heartbeat: only the rider, only riderSeenAt, only while the request or trip is open; updatedAt is untouched', async () => {
+    const id = await rideTo('requested');
+    const ride = (uid) => doc(db(uid), 'rides', id);
+    await assertSucceeds(updateDoc(ride(RINA), { riderSeenAt: serverTimestamp() }));
+    await assertFails(updateDoc(ride(RINA), { riderSeenAt: new Date() }));                          // must be the server time
+    await assertFails(updateDoc(ride(RINA), { riderSeenAt: serverTimestamp(), status: 'cancelled' }));
+    await assertFails(updateDoc(ride(RINA), { riderSeenAt: serverTimestamp(), estFare: 1 }));
+    await assertFails(updateDoc(ride(DRIVER), { riderSeenAt: serverTimestamp() }));                   // a driver cannot fake the rider's presence
+    await assertFails(updateDoc(ride(KARIM), { riderSeenAt: serverTimestamp() }));
+    await assertFails(updateDoc(ride(ADMIN), { riderSeenAt: serverTimestamp() }));
+    const after = await readAs('rides', id);
+    assert.ok(after.riderSeenAt, 'heartbeat saved');
+    const accepted = await rideTo('accepted');
+    await assertSucceeds(updateDoc(doc(db(RINA), 'rides', accepted), { riderSeenAt: serverTimestamp() }));
+    const done = await rideTo('completed');
+    await assertFails(updateDoc(doc(db(RINA), 'rides', done), { riderSeenAt: serverTimestamp() }));  // closed rides are not touched
+  });
+  test('a driver of the same type and district sees the heartbeat on the open request', async () => {
+    const id = await rideTo('requested');
+    await updateDoc(doc(db(RINA), 'rides', id), { riderSeenAt: serverTimestamp() });
+    const d = await assertSucceeds(getDoc(doc(db(DRIVER), 'rides', id)));
+    assert.ok(d.data().riderSeenAt);
   });
 });
