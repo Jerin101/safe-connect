@@ -61,7 +61,7 @@ class Metadata(unittest.TestCase):
             m = l['meta']
             for k in ('source', 'source_url', 'licence', 'attribution', 'modification_notice', 'boundaries_valid_on', 'zip_sha256', 'scale'):
                 self.assertTrue(m.get(k), f'{code} {k}')
-            self.assertIn('CC BY-IGO', m['licence']); self.assertIn('Simplified', m['modification_notice']); self.assertIn('100', m['modification_notice'])
+            self.assertIn('CC BY-IGO', m['licence']); self.assertIn('Simplified', m['modification_notice']); self.assertIn('110', m['modification_notice'])
         for k in ('licence_url', 'union_points', 'use'):
             self.assertTrue(INDEX['meta'].get(k), k)
         self.assertIn('Never "exact union"', INDEX['meta']['use'])

@@ -2,12 +2,12 @@
 // CENTRE. Shown on the area page when the position comes from the phone. Rules:
 //  - Names appear only when a boundary supports them. No boundary -> a plain message, never a guess.
 //  - A union is never named as "your union": only "nearest union centre", with a distance and a warning.
-//  - Near a boundary (the boundaries are simplified 100 m, and GPS has its own error) -> a boundary warning.
+//  - Near a boundary (the boundaries are simplified 110 m, and GPS has its own error) -> a boundary warning.
 //  - Everything runs on the phone against files saved on the phone; the position is never stored or sent (CLAUDE.md rule 5).
 //  - All words come from lang/*.json (ui.where); this file only chooses which words and fills numbers.
 import { nearestUnionCentre } from './unioncentre.js';
 
-export const BOUNDARY_MIN_M = 150;     // simplified 100 m + a margin; the GPS accuracy is used when it is larger
+export const BOUNDARY_MIN_M = 150;     // simplified 110 m + a margin; the GPS accuracy is used when it is larger
 export const ROUGH_M = 2000;           // a position this rough does not name an upazila
 
 const plain = (s) => String(s || '').toLowerCase().replace(/\(.*?\)|upazila|sadar|city corporation|[^a-z]/g, '');

@@ -1,7 +1,7 @@
 // SafeConnect offline app (P34). After one visit with internet, the site opens with no internet.
 // Change VERSION whenever a file in FILES changes in a way that must reach every phone at once
 // (new data, a new page or script): the old cache is then deleted and everything is saved again.
-const VERSION = 'v81-2026-11-27';
+const VERSION = 'v82-2026-11-28';
 const CACHE = `safeconnect-${VERSION}`;
 
 // Every page, script, data file, font and icon the site needs (paths relative to this file).
@@ -20,6 +20,7 @@ const FILES = [
   'js/areapoly.js',            // M1.2: which upazila boundary a position is inside (data/polygons)
   'js/unioncentre.js',         // M1.2: nearest union centre (never an exact union)
   'js/whereami.js',            // M1.2: the "where the map puts you" card on the area page
+  'js/locate.js',              // M1.3: the five location rules on the official boundaries
   'js/routemap.js', 'js/verify.js', 'js/netstatus.js', 'js/offlinepack.js', 'js/reportqueue.js', 'js/speak.js', 'js/siren.js',          // directions inside the site: road route and live route map (#309)
   'js/dakun.js',             // সেবা ডাকুন (R3)
   'js/provide.js',           // সেবা দিন (R4)
